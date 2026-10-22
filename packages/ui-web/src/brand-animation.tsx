@@ -1,3 +1,4 @@
+/// <reference path="./assets.d.ts" />
 import { brand } from "@nurlings/brand";
 import introUrl from "@nurlings/brand/assets/logo/nurlings-intro.svg";
 import loaderUrl from "@nurlings/brand/assets/logo/nurlings-loader.svg";
