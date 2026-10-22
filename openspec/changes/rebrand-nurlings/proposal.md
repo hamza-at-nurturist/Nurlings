@@ -152,7 +152,10 @@ Android passkey `assetlinks.json`); iOS passkey association comes from the
    which this change rebrands in code.
 6. **Still says Rakazo after this change** (out of scope): model prompts, bot User-Agent, internal
    error messages that only logs/operators see (e.g. secrets-guard, `throw new Error(…)` strings),
-   README/docs/issue templates, `apps/www`.
+   README/docs/issue templates, `apps/www`. Also present but unreachable: `@rakazo/core`'s
+   `OFFICIAL_REPO_URL` string ships inside the mobile bundle (Metro does not tree-shake the
+   package barrel) although no app code calls the self-update helpers; the final guard allows
+   exactly that one string.
 
 ## Placeholder assets and the sizes each platform needs
 

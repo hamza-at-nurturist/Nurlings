@@ -1,10 +1,5 @@
-import {
-  ANDROID_APK_URL,
-  buildIdAt,
-  CLIENT_BUILD_HEADER,
-  formatClientBuild,
-  IOS_APP_STORE_URL,
-} from "@rakazo/contracts";
+import { brand } from "@nurlings/brand";
+import { buildIdAt, CLIENT_BUILD_HEADER, formatClientBuild } from "@rakazo/contracts";
 import * as Updates from "expo-updates";
 import type { AppStateStatus } from "react-native";
 import { Alert, AppState, Linking, Platform } from "react-native";
@@ -42,7 +37,15 @@ async function downloadUpdate(): Promise<boolean> {
   return true;
 }
 
-/** Apply an over-the-air update now if one exists; otherwise send the user to the store. */
+/** This platform's store page, or null while no listing is configured for the brand. */
+export function storeUpdateUrl(
+  os: string,
+  urls: Pick<typeof brand.urls, "iosApp" | "androidApp"> = brand.urls,
+) {
+  return (os === "ios" ? urls.iosApp : urls.androidApp) ?? null;
+}
+
+/** Apply an over-the-air update now if one exists; otherwise send the user to the store, if any. */
 export async function applyRequiredUpdate(): Promise<void> {
   try {
     if (await downloadUpdate()) {
@@ -52,9 +55,8 @@ export async function applyRequiredUpdate(): Promise<void> {
   } catch {
     // An unreachable update server falls through to the store.
   }
-  await Linking.openURL(Platform.OS === "ios" ? IOS_APP_STORE_URL : ANDROID_APK_URL).catch(
-    () => undefined,
-  );
+  const storeUrl = storeUpdateUrl(Platform.OS);
+  if (storeUrl) await Linking.openURL(storeUrl).catch(() => undefined);
 }
 
 let prompting = false;

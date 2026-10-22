@@ -1,5 +1,6 @@
+import { brand } from "@nurlings/brand";
 import type { AiConsentStatus } from "@rakazo/contracts";
-import { AI_DATA_DISCLOSURES, AI_PRIVACY_URL } from "@rakazo/contracts";
+import { AI_DATA_DISCLOSURES } from "@rakazo/contracts";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Linking, ScrollView, StyleSheet } from "react-native";
 import {
@@ -136,7 +137,7 @@ export default function AiDataSharing() {
               title={t("Rakazo")}
               accessibilityRole="link"
               chevron="right"
-              onPress={() => void Linking.openURL(status.privacyUrl ?? AI_PRIVACY_URL)}
+              onPress={() => void Linking.openURL(status.privacyUrl ?? brand.urls.site)}
             />
           </SettingsGroup>
           <SettingsGroup>

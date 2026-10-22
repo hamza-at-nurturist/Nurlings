@@ -100,6 +100,15 @@ describe("mobile AI consent prompt", () => {
     await expect(pending).resolves.toBe(false);
   });
 
+  it("opens the product site as the privacy link unless one is given", async () => {
+    const pending = promptAiConsent(recipient);
+    const privacy = currentAlert().buttons.find((button) => /privacy/i.test(button.text ?? ""));
+    privacy?.onPress?.();
+    expect(native.openURL).toHaveBeenCalledWith(brand.urls.site);
+    currentAlert().buttons[0]?.onPress?.();
+    await expect(pending).resolves.toBe(false);
+  });
+
   it("settles refusal once and does not reopen when Android dismisses the alert", async () => {
     const pending = promptAiConsent(recipient, "https://example.com/privacy");
     const first = currentAlert();

@@ -95,7 +95,7 @@ package); env-var-driven branding (identity is a build-time property; avoids new
 | Mobile identity | `app.config.ts` calls `brandExpoConfig` (new `lib/brand-expo-config.ts`) to overlay display name, permission prompts, splash colours, the iOS icon bundle, **bundle id/package** and OTA off, and rejects `REPLACE_WITH_…` owner/project ids in release profiles. Expo evaluates `app.config.ts` by transpiling it to CJS with no TypeScript resolution for what it imports, so the helper is imported by explicit `.ts` extension (Node type stripping, one `@ts-expect-error TS5097`) and reads the brand through the self-contained subpaths `brand.json`, `schema`, `text`. `app.json` is edited on 5 lines only: `owner`, `projectId`, the two bundle-id literals, and the `updates` block (D5) | `app.config.ts`, `app.json` |
 | Desktop identity | layered electron-builder config supplies `productName`, mic text, icon; verify empirically which mechanism electron-builder 26 honours (`--config` file / CLI `-c.*`), fallback: 3 guarded `package.json` lines. `appId`, `executableName`, `extraMetadata.name` untouched | 0–1 |
 | Desktop runtime text | `setup.html` becomes a template; `setup.js`/`main.ts`/`local-stack.ts`/`browser-auth.ts`/`auto-update.ts` read the config; About via `app.setAboutPanelOptions` | ≈6 |
-| Shared constants | **`contracts` is left byte-identical.** Its Rakazo URLs (`AI_PRIVACY_URL`, store/APK) are read only by UI/API call sites, which now read `brand` instead; the unused exports are tree-shaken, and `brand:check` scans built output for upstream hosts so a future upstream use cannot slip in. `openai-compatible-ui.ts` text is a catalog key (rebranded by the seam). `client-build.ts` is also loaded by plain Node from `vite.config.ts`, so it cannot import the brand entry point | 0 |
+| Shared constants | `contracts` loses three Rakazo URL constants (`AI_PRIVACY_URL`, `IOS_APP_STORE_URL`, `ANDROID_APK_URL`; replaced by a comment). Their only consumers (web footer, mobile update prompt, mobile consent, API consent default) now read `brand`. Removing them, rather than leaving them unused, is deliberate: Metro does not tree-shake (the Android bundle still shipped all three URLs as dead strings), and a future upstream use then fails to compile instead of linking to the upstream's store. `client-build.ts` is also loaded by plain Node from `vite.config.ts`, so it could not import the brand entry point anyway. `openai-compatible-ui.ts` text is a catalog key (rebranded by the seam) | 2 files, 3 lines |
 | Server text (D9) | `import { brand } from "@nurlings/brand"` in `packages/auth`, `apps/api`, `packages/adapters`, `packages/core` | ≈9 |
 | Self-update (D4) | `updaterConfig()` in `apps/api/src/router.ts` reads the flag | 1 line |
 | Images/installer (D8) | compose defaults, `.env.images.example`, `install-images.sh`, new workflow + doc | ≈8 |
@@ -228,6 +228,10 @@ Provider-console names are a manual list (proposal).
 
 ## Risks / Trade-offs
 
+- **Metro does not tree-shake**: whole workspace packages end up in the mobile bundle, so an
+  unused upstream string still ships (hence the contracts constants were removed, not just
+  unreferenced). Server-only code bundled via `@rakazo/core` (for example `OFFICIAL_REPO_URL`) is
+  unreachable from the app and is allow-listed by the mobile bundle scan.
 - **Hardcoded strings added later by upstream** are not caught by the catalog seam. Mitigation:
   `inventory.py` at merge time and the Playwright walk-through assertion.
 - **Lingui compiled-message shapes** (plural/select/rich text): tested against real catalogs.
