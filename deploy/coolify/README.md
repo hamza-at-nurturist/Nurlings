@@ -83,7 +83,8 @@ SSL mode to Full (strict).
 5. **Deploy**. The first start takes a few minutes: it pulls three images and runs migrations.
    All services should reach healthy; `computer` and `data-init` run once and exit.
 6. Open the URL and register the first account straight away: the first registered user becomes the
-   deployment owner. Then set `SIGNUPS_ENABLED=false` (or `SIGNUP_ALLOWLIST`) and redeploy.
+   deployment owner. Then set `SIGNUPS_ENABLED` to `false` (it is `true` until you do) or limit
+   registration with `SIGNUP_ALLOWLIST`, and redeploy.
 
 ## 6. Variables
 
@@ -106,7 +107,7 @@ Only `NURLINGS_VERSION` is mandatory. Everything else works empty.
 | `COMPOSIO_API_KEY` | optional | yes | Third-party app integrations. |
 | `SMTP_URL` | optional | yes | Outgoing mail for password recovery, for example `smtps://user:pass@smtp.example.com:465`. |
 | `EMAIL_FROM` | optional | no | Sender address for that mail. |
-| `SIGNUPS_ENABLED` | optional | no | `true` (default) or `false`. |
+| `SIGNUPS_ENABLED` | optional | no | `true` by default. **Set it to `false` and redeploy right after the first account is created.** |
 | `SIGNUP_ALLOWLIST` | optional | no | Comma-separated addresses allowed to register. |
 | `MAX_UPLOAD_SIZE_MB` | optional | no | Per-file upload limit, default `10`. |
 | `CONTENT_ENCRYPTION` | optional | no | `on` (default) or `off`. |
