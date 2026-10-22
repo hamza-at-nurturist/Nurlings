@@ -131,6 +131,7 @@ describe("serverTextCheck", () => {
       "const repo = OFFICIAL_REPO_URL; // Rakazo",
       "const text = `Open Rakazo for details.`;",
       'const ok = "Open Nurlings for details.";',
+      "return `Rakazo-owned compacted context through message sequence ${n}.`;",
     ].join("\n");
     expect(upstreamNameInServerText(source)).toEqual([6]);
   });

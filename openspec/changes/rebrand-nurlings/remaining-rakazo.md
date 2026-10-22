@@ -9,7 +9,7 @@ its reason. `pnpm brand:check` and the vitest guards fail if the in-scope ones c
 
 | Where | What a person sees | Reason |
 |---|---|---|
-| Model prompts, e.g. `packages/adapters/src/pi-runtime.ts` ("You are a Rakazo bot…", "…from Rakazo, not from the user") | A model may call itself a Rakazo bot or mention Rakazo | Model prompts were excluded from this change. This is the most visible leftover; changing it needs an eval pass, so it is a follow-up. |
+| `AUTOMATED_MESSAGE_LABEL` ("[Automated message from Rakazo, not from the user]") in `automated-messages.ts`, and the `Rakazo-owned compacted context…` prefix in `history-compaction.ts` | Seen by a model inside the messages that carry them; not in any system prompt | These are written into conversations and matched by code (`runtime-context.ts`), so changing them would break existing threads. The system prompts themselves are rebranded and tested. |
 | `User-Agent: Rakazo/0.1 (+https://github.com/elie222/rakazo; web tools)` in the web tools | Visible only to the sites a bot fetches | Excluded: bot User-Agent. |
 | `README.md`, `docs/*`, `SETUP_PROMPT.md`, `CONTRIBUTING.md`, `SECURITY.md`, `VISION.md`, `CHANGELOG.md`, `.github/ISSUE_TEMPLATE/*`, `infra/railway`, `infra/systemd` | Operator and contributor documents | Decided: left as-is. `docs/nurlings-deployment.md` is the Nurlings guide. `SETUP_PROMPT.md` still points at the upstream installer, so do not hand it to a client. |
 | `apps/www` (marketing site) | The upstream marketing pages | Out of scope. |

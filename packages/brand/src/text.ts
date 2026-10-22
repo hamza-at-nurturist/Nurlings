@@ -72,3 +72,8 @@ export function brandMessages<T extends Record<string, CompiledMessage>>(
     Object.entries(catalog).map(([id, message]) => [id, brandMessage(message, brand)]),
   ) as T;
 }
+
+/** The indefinite article for a noun, for prompts that name the configured bot term ("a Nurling"). */
+export function brandArticle(word: string): "a" | "an" {
+  return /^[aeiou]/i.test(word.trim()) ? "an" : "a";
+}

@@ -14,7 +14,7 @@ upstream ships it so we can keep merging Rakazo updates.
 | In scope | Out of scope |
 |---|---|
 | **Web app**: every visible "Rakazo", page titles, sign-in headings, sidebar, favicon, logo/wordmark, "Powered by Nurturist AI" line | API/server code beyond the items on the left, auth origins (`rakazo://` is kept) |
-| **Desktop (Electron)**: visible text, app display name, window title, icons, About screen (upstream has no tray; none added) | Model-facing prompts ("You are a Rakazo bot…") |
+| **Desktop (Electron)**: visible text, app display name, window title, icons, About screen (upstream has no tray; none added) | The bot User-Agent, internal error strings |
 | **Mobile (Expo)**: visible text, display name, icons, splash; **bundle id / Android package → `com.nurturistai.nurlings`** | Bot User-Agent |
 | **Visible links** in those UIs → https://nurlings.nurturistai.com; Rakazo Discord/GitHub/cloud links removed | `apps/www` marketing site |
 | **Desktop setup**: remove the option to sign in to Rakazo's hosted cloud | Telemetry (already env-gated; left alone) |
@@ -102,7 +102,8 @@ None — `openspec/specs/` is empty; these specs are created by archiving this c
 | **`rakazo://` URL scheme**, Expo `slug`, desktop `appId` `dev.rakazo.desktop`, Linux `executableName` | Not needed for the bundle-id change (see below); keeps auth origins untouched |
 | `@rakazo/*` packages (≈2,300 references), `RAKAZO_*` env vars (incl. `RAKAZO_IMAGE`, `RAKAZO_DOWNLOAD_BASE`), `x-rakazo-*` headers, DB/Docker/systemd names, storage keys (`rakazo.*`), native module names, TS identifiers | Internal; renaming makes every upstream merge huge |
 | `OFFICIAL_REPO_URL`, `PUBLISHED_IMAGE_REPO`, updater sidecar logic | Self-update is disabled, not re-pointed; the code is unreachable |
-| Model prompts, bot User-Agent, internal error messages (`throw new Error(…)`), `apps/www`, README/docs, telemetry wiring | Out of scope |
+| Bot User-Agent, internal error messages (`throw new Error(…)`), `apps/www`, README/docs, telemetry wiring | Out of scope |
+| Model-facing prompts ("You are a Rakazo bot…"): the fallback system prompts, the helper prompt, the approval-resume text and the summarizer prompt | In scope (added later); the stored-message markers stay |
 
 Rule of thumb: **if a client or their users can read it in an app, an email, a chat message or a
 settings screen, it is branded; if only code or an operator log can, it stays.**
@@ -147,7 +148,7 @@ Android passkey `assetlinks.json`); iOS passkey association comes from the
    product/checkout branding, if billing is enabled. Subscription sign-ins for ChatGPT/Copilot/xAI
    use those providers' own client names (not ours). MCP servers see the name sent at registration,
    which this change rebrands in code.
-6. **Still says Rakazo after this change** (out of scope): model prompts, bot User-Agent, internal
+6. **Still says Rakazo after this change** (out of scope): bot User-Agent, internal
    error messages that only logs/operators see (e.g. secrets-guard, `throw new Error(…)` strings),
    README/docs/issue templates, `apps/www`. Also present but unreachable: `@rakazo/core`'s
    `OFFICIAL_REPO_URL` string ships inside the mobile bundle (Metro does not tree-shake the

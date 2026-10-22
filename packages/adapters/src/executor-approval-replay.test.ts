@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type { ConnectorTool } from "@rakazo/adapter-kit";
 import { approvalEffectKey } from "@rakazo/core/node/approval-effect-key";
 import { describe, expect, it } from "vitest";
@@ -52,6 +53,10 @@ describe("executor approval replay", () => {
     ];
 
     const continuation = buildApprovalContinuation(effects, JSON.stringify);
+    expect(continuation).toContain(
+      `${brand.name} is resuming after the user approved the exact tool request(s) below.`,
+    );
+    expect(continuation).not.toMatch(/rakazo/i);
     expect(continuation).toContain(
       "Call each listed approved request exactly once, in the listed order",
     );

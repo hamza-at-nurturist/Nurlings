@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { CompiledMessage } from "./index.js";
-import { brand, brandMessage, brandMessages, brandProduct, brandText } from "./index.js";
+import {
+  brand,
+  brandArticle,
+  brandMessage,
+  brandMessages,
+  brandProduct,
+  brandText,
+} from "./index.js";
 
 const t = (input: string) => brandText(input, brand);
 
@@ -171,5 +178,14 @@ describe("brandProduct (the name rule alone)", () => {
     expect(brandProduct("rakazo-shared RAKAZO_X RakazoDesktop", brand)).toBe(
       "rakazo-shared RAKAZO_X RakazoDesktop",
     );
+  });
+});
+
+describe("brandArticle", () => {
+  it("picks the article by the first letter", () => {
+    expect(brandArticle("Nurling")).toBe("a");
+    expect(brandArticle("agent")).toBe("an");
+    expect(brandArticle("Owl")).toBe("an");
+    expect(brandArticle("  helper")).toBe("a");
   });
 });

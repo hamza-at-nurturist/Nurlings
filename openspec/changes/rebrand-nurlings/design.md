@@ -41,7 +41,7 @@ Facts that shape the design (verified in the repo):
 - Images built from this repo, pulled from our private registry by client servers.
 
 **Non-Goals**
-- Model prompts, bot User-Agent, internal error strings, `apps/www`, telemetry wiring,
+- Bot User-Agent, internal error strings, `apps/www`, telemetry wiring,
   README/docs/templates/`SECURITY.md`, and all internal identifiers.
 - Changing the `rakazo://` scheme, Expo `slug`, desktop `appId`, Linux `executableName`.
 - Re-pointing any updater (they are disabled).
@@ -227,7 +227,18 @@ change. In scope: the four emails (subject, text and HTML) and Better Auth `appN
 `rpName`; chat-channel messages (`messaging-inbound.ts` ×2, `team-chat-bridge.ts` ×2 user-visible
 lines); update messages in `core/self-update.ts`; model/billing blurbs in `pi-models.ts` and
 `pi-oauth.ts`; MCP OAuth dynamic-registration `client_name` in `mcp-oauth.ts`. Installer echo text is
-covered by D8. Not changed: `throw new Error(…)` strings, prompts, User-Agent, secrets-guard.
+covered by D8. Not changed: `throw new Error(…)` strings, User-Agent, secrets-guard, and the two markers stored in conversations (`AUTOMATED_MESSAGE_LABEL`, the `Rakazo-owned compacted context` prefix) because other code matches on them.
+
+### D9 — Model prompts
+
+The prompts built in code now read the brand config: the two fallback system prompts in
+`pi-runtime.ts` ("You are a Nurling with…", via `brand.bot.singular` and `brandArticle`), the helper
+prompt ("You are a Nurlings subagent…", "…come from Nurlings…"), the approval-resume text in
+`executor.ts` and the previous-summary label in `history-compaction.ts`. Bot-written or user-written
+instructions are never touched. `pi-system-prompts.test.ts` builds every `PiAgentRuntime` system
+prompt (computer, sandbox-only, helper) and fails on "Rakazo"; `brand:check` also scans the prompt
+files for string literals naming it. Residual: the stored automated-message label still reads "from
+Rakazo" inside the messages that carry it, so a model can still see that word there.
 Provider-console names are a manual list (proposal).
 
 ## Risks / Trade-offs

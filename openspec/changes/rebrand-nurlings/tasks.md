@@ -75,6 +75,10 @@
 - [x] 10.4 Final grep: `git grep -nIi rakazo` classified with `inventory.py`; every remaining occurrence is listed with its reason in `remaining-rakazo.md` and the PR. Verify: zero in-scope user-facing, identity or link occurrences remain outside `LICENSE`/`NOTICE`.
 - [x] 10.5 Check off every task in this file. Verify: `openspec validate rebrand-nurlings --strict` passes and `openspec status --change rebrand-nurlings` shows all tasks complete.
 
+## 11. Model prompts (added after review)
+
+- [x] 11.1 Rebrand the prompts built in code: the two fallback system prompts and the helper prompt in `pi-runtime.ts` (via `brand.bot.singular` and a new `brandArticle`), the approval-resume text in `executor.ts` and the previous-summary label in `history-compaction.ts`; keep `AUTOMATED_MESSAGE_LABEL` and the compaction prefix unchanged. Verify: `pi-system-prompts.test.ts` builds every `PiAgentRuntime` system prompt (computer, sandbox-only, helper) and fails on "Rakazo"; `pi-runtime-helper-framing.test.ts` and `executor-approval-replay.test.ts` follow the brand; `brand:check` scans the prompt files; `pnpm --filter @rakazo/adapters test` passes except the two pre-existing host-computer tests.
+
 ## Workflow follow-up
 
 - Open the PR "Rebrand Rakazo to Nurlings (Powered by Nurturist AI)" with: summary, link to this OpenSpec change, what was left internal / out of scope, and the manual steps **as a checklist in the PR description**: final artwork; Expo project (fill `owner`/`projectId`); Apple App ID + App Store Connect app and Google Play app for `com.nurturistai.nurlings`; `PASSKEY_APPLE_APP_IDS` / `PASSKEY_ANDROID_CERT_SHA256` and `google-services.json` per server; create the machine user + read-only PAT per client; names set outside the repo (`EMAIL_FROM` display name, Slack app, Telegram bot, WhatsApp Business display name, Pipedream/Composio app names, client OIDC app, Stripe branding).
