@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import { displayIdentityResult, displayMessageBlock } from "@rakazo/core";
 import { beforeEach, expect, it, vi } from "vitest";
 import type { MobileMe, MobileSnapshot, MobileSpaceNavigation } from "./api";
@@ -283,7 +284,8 @@ it("guards legacy names restored while offline", () => {
   legacy.current.bots[0]!.name = "__TestTok1__";
   legacy.current.groups[0]!.name = "c123456789012345678901234";
   writeSavedInbox(scope, legacy, me);
-  expect(readSavedInbox(scope)?.bots[0]?.name).toBe("Bot");
+  // The fallback label for an unreadable name is the brand's agent noun.
+  expect(readSavedInbox(scope)?.bots[0]?.name).toBe(brand.bot.singular);
   expect(readSavedInbox(scope)?.groups[0]?.name).toBe("Group");
 });
 

@@ -1,0 +1,338 @@
+<!-- generated: line-level occurrences IN SCOPE for the three groups that change. Internal and out-of-scope occurrences are summarised in the proposal appendix. -->
+
+## User-facing (UI text, page titles, sign-in headings, onboarding, errors, docs shown to users)
+
+- `apps/api/src/messaging-inbound.ts:579` `Rakazo` — body: "Hi. This line hosts Rakazo personal agents. Some people in this group haven't messaged it yet; send any message to this line first
+- `apps/api/src/messaging-inbound.ts:670` `Rakazo` — body: `"${name}" was linked to your Rakazo agent. Reply YES to let your agent join the conversation there, or NO to stay out.`,
+- `apps/api/src/team-chat-bridge.ts:482` `Rakazo` — throw new Error("Team chat conversation belongs to a different Rakazo target");
+- `apps/api/src/team-chat-bridge.ts:670` `Rakazo` — …(!conversation.thread) throw new Error("Team chat conversation has no Rakazo thread");
+- `apps/api/src/team-chat-bridge.ts:980` `Rakazo` — ? `${target.name} could not complete the delegated request. Open Rakazo for details.`
+- `apps/api/src/team-chat-bridge.ts:1231` `Rakazo` — if (!thread) throw new Error("Team chat conversation has no Rakazo thread");
+- `apps/api/src/team-chat-bridge.ts:1450` `Rakazo` — …is.target?.name ?? "The agent"} could not complete that request. Open Rakazo for details.`,
+- `apps/desktop/e2e/local-stack.spec.ts:9` `Rakazo` — const APP_MARKER = "Local Rakazo stack ready";
+- `apps/desktop/e2e/local-stack.spec.ts:65` `Rakazo` — `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Rakazo</title></head><body><main>${APP_MARKER}</main></body></html>`,
+- `apps/desktop/e2e/local-stack.spec.ts:182` `Rakazo` — await expect(setup.locator("#stack-phase")).toHaveText("Downloading Rakazo…");
+- `apps/desktop/e2e/local-stack.spec.ts:256` `Rakazo` — await expect(setup.locator("#stack-phase")).toHaveText("Downloading Rakazo…");
+- `apps/desktop/e2e/setup.spec.ts:9` `Rakazo` — const APP_MARKER = "Existing Rakazo instance ready";
+- `apps/desktop/e2e/setup.spec.ts:42` `Rakazo` — `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Rakazo</title></head><body><main>${APP_MARKER}</main></body></html>`,
+- `apps/desktop/e2e/setup.spec.ts:81` `Rakazo` — test("first run offers Rakazo Cloud first, with local and existing instances", async () => {
+- `apps/desktop/e2e/setup.spec.ts:88` `Rakazo` — await expect(setup.getByRole("heading", { name: "Welcome to Rakazo" })).toBeVisible();
+- `apps/desktop/e2e/setup.spec.ts:90` `Rakazo` — await expect(setup.getByText("Rakazo Cloud")).toBeVisible();
+- `apps/desktop/e2e/setup.spec.ts:96` `/Rakazo` — await expect(setup.getByRole("radio", { name: /Rakazo Cloud/ })).toBeChecked();
+- `apps/desktop/e2e/setup.spec.ts:146` `Rakazo` — test("Rakazo Cloud saves the hosted address and is reselected when saved", async () => {
+- `apps/desktop/e2e/setup.spec.ts:149` `/Rakazo` — await expect(setup.getByRole("radio", { name: /Rakazo Cloud/ })).toBeChecked();
+- `apps/desktop/e2e/setup.spec.ts:187` `/Rakazo` — await expect(setup.getByRole("radio", { name: /Rakazo Cloud/ })).toBeChecked();
+- `apps/desktop/e2e/setup.spec.ts:200` `Rakazo` — await expect(setup.locator("#status")).toHaveText(`Rakazo answered at ${serverUrl}.`);
+- `apps/desktop/e2e/setup.spec.ts:311` `Rakazo` — … = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Rakazo</title></head>
+- `apps/desktop/e2e/setup.spec.ts:362` `Rakazo` — … = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Rakazo</title>
+- `apps/desktop/e2e/setup.spec.ts:412` `Rakazo` — … = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Rakazo</title></head>
+- `apps/desktop/e2e/setup.spec.ts:450` `Rakazo` — … = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Rakazo</title></head>
+- `apps/desktop/e2e/setup.spec.ts:500` `Rakazo` — test("a generic web page is not accepted as a Rakazo server", async () => {
+- `apps/desktop/e2e/setup.spec.ts:503` `Rakazo` — response.end("<!doctype html><p>not Rakazo</p>");
+- `apps/desktop/e2e/setup.spec.ts:517` `Rakazo` — "That address did not respond like a Rakazo server.",
+- `apps/desktop/e2e/setup.spec.ts:570` `Rakazo` — await expect(setup.getByRole("heading", { name: "Welcome to Rakazo" })).toBeVisible();
+- `apps/desktop/e2e/setup.spec.ts:592` `Rakazo` — await expect(setup.getByRole("heading", { name: "Welcome to Rakazo" })).toBeVisible();
+- `apps/desktop/e2e/smoke.spec.ts:7` `Rakazo` — <head><meta charset="utf-8"><title>Rakazo desktop smoke</title></head>
+- `apps/desktop/e2e/smoke.spec.ts:24` `Rakazo` — await expect(page).toHaveTitle("Rakazo desktop smoke");
+- `apps/desktop/e2e/window-drag.spec.ts:8` `Rakazo` — <head><meta charset="utf-8"><title>Rakazo window drag</title><style>${styles}</style></head>
+- `apps/desktop/package.json:71` `Rakazo` — "NSMicrophoneUsageDescription": "Rakazo uses the microphone for dictation and voice calls with your bots."
+- `apps/desktop/src/auto-update.ts:76` `Rakazo` — message: "This update could not be verified. Reinstall Rakazo from a trusted download.",
+- `apps/desktop/src/browser-auth.ts:86` `Rakazo` — response.writeHead(400).end("Sign-in callback rejected. Return to Rakazo to retry.");
+- `apps/desktop/src/browser-auth.ts:90` `Rakazo` — response.end("You can close this tab and return to Rakazo.", close);
+- `apps/desktop/src/local-stack.ts:284` `Rakazo` — ? "Downloading Rakazo images failed. Check the output below, then retry."
+- `apps/desktop/src/local-stack.ts:285` `Rakazo` — : "Rakazo services did not start. Check the output below, then retry.";
+- `apps/desktop/src/main.ts:691` `Rakazo` — label: "Change Rakazo Server…",
+- `apps/desktop/src/main.ts:803` `Rakazo` — error: "That address redirects elsewhere. Enter the final Rakazo server address.",
+- `apps/desktop/src/main.ts:820` `Rakazo` — error: "That address did not respond like a Rakazo server.",
+- `apps/desktop/src/main.ts:1293` `Rakazo` — error: "The app-managed Rakazo services are not ready. Retry setup.",
+- `apps/desktop/src/package-metadata.test.ts:14` `Rakazo` — expect(packageJson.productName).toBe("Rakazo");
+- `apps/desktop/src/setup-config.test.ts:60` `Rakazo` — "rejects an address that cannot reach a Rakazo server (%s)",
+- `apps/desktop/src/setup-config.test.ts:134` `Rakazo` — it("saves Rakazo Cloud as an existing server under the exact origin setup matches", () => {
+- `apps/desktop/src/setup-config.test.ts:228` `Rakazo` — describe("Rakazo health response", () => {
+- `apps/desktop/src/setup.js:26` `Rakazo` — pulling: "Downloading Rakazo…",
+- `apps/desktop/src/setup.js:27` `Rakazo` — starting: "Starting Rakazo…",
+- `apps/desktop/src/setup.js:29` `Rakazo` — ready: "Rakazo is ready.",
+- `apps/desktop/src/setup.js:270` `Rakazo` — setStatus(`Rakazo answered at ${result.url}.`, "ok");
+- `apps/desktop/src/setup.js:374` `Rakazo` — setStatus("Setup could not start. Quit Rakazo and try again.", "error");
+- `apps/mobile/.maestro/keyboard-lifecycle.yaml:13` `Rakazo` — visible: "Sign up for Rakazo|Pixel Launcher isn't responding"
+- `apps/mobile/.maestro/keyboard-lifecycle.yaml:21` `Rakazo` — visible: "Sign up for Rakazo"
+- `apps/mobile/.maestro/keyboard-lifecycle.yaml:30` `Rakazo` — - assertVisible: "Sign in to Rakazo"
+- `apps/mobile/.maestro/keyboard-lifecycle.yaml:94` `Rakazo` — visible: "Sign in to Rakazo"
+- `apps/mobile/.maestro/notification-demo.yaml:10` `Rakazo` — visible: "Sign up for Rakazo|Pixel Launcher isn't responding"
+- `apps/mobile/.maestro/notification-demo.yaml:18` `Rakazo` — visible: "Sign up for Rakazo"
+- `apps/mobile/.maestro/screenshots.yaml:2` `Rakazo` — name: Rakazo mobile screenshots
+- `apps/mobile/.maestro/screenshots.yaml:13` `Rakazo` — visible: "Sign up for Rakazo|Pixel Launcher isn't responding"
+- `apps/mobile/.maestro/screenshots.yaml:21` `Rakazo` — visible: "Sign up for Rakazo"
+- `apps/mobile/.maestro/screenshots.yaml:30` `Rakazo` — - assertVisible: "Sign in to Rakazo"
+- `apps/mobile/.maestro/smoke.yaml:2` `Rakazo` — name: Rakazo mobile smoke
+- `apps/mobile/.maestro/smoke.yaml:7` `Rakazo` — - assertVisible: "Sign up for Rakazo"
+- `apps/mobile/.maestro/smoke.yaml:14` `Rakazo` — - assertVisible: "Sign in to Rakazo"
+- `apps/mobile/.maestro/split-view.yaml:2` `Rakazo` — name: Rakazo split view on a wide window
+- `apps/mobile/.maestro/split-view.yaml:12` `Rakazo` — visible: "Sign up for Rakazo|Pixel Launcher isn't responding"
+- `apps/mobile/.maestro/split-view.yaml:20` `Rakazo` — visible: "Sign up for Rakazo"
+- `apps/mobile/app.json:29` `Rakazo` — "microphonePermission": "Rakazo uses the microphone for voice calls with your bots."
+- `apps/mobile/app.json:35` `Rakazo` — "speechRecognitionPermission": "Rakazo turns your speech into messages during voice calls.",
+- `apps/mobile/app.json:36` `Rakazo` — "microphonePermission": "Rakazo uses the microphone for voice calls with your bots."
+- `apps/mobile/app.json:51` `Rakazo` — "photosPermission": "Rakazo uses your photo library so you can attach images to a bot message.",
+- `apps/mobile/app.json:52` `Rakazo` — "cameraPermission": "Rakazo uses the camera so you can attach photos to a bot message.",
+- `apps/mobile/app.json:53` `Rakazo` — "microphonePermission": "Rakazo uses the microphone for voice calls with your bots."
+- `apps/mobile/app.json:70` `Rakazo` — "NSCameraUsageDescription": "Rakazo uses the camera so you can attach photos to a bot message.",
+- `apps/mobile/app.json:71` `Rakazo` — "NSPhotoLibraryUsageDescription": "Rakazo uses your photo library so you can attach images to a bot message.",
+- `apps/mobile/app.json:72` `Rakazo` — "NSLocalNetworkUsageDescription": "Rakazo connects to a self-hosted Rakazo server on your local network.",
+- `apps/mobile/app.json:72` `Rakazo` — "NSLocalNetworkUsageDescription": "Rakazo connects to a self-hosted Rakazo server on your local network.",
+- `apps/mobile/app/(settings)/ai-data-sharing.tsx:136` `Rakazo` — title={t("Rakazo")}
+- `apps/mobile/app/(settings)/models.tsx:1459` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.",
+- `apps/mobile/app/_layout.tsx:339` `Rakazo` — options={{ headerShown: false, title: "Rakazo" }}
+- `apps/mobile/app/sign-in.tsx:243` `Rakazo` — ? t("Sign in to Rakazo")
+- `apps/mobile/app/sign-in.tsx:245` `Rakazo` — ? t("Sign up for Rakazo")
+- `apps/mobile/e2e/README.md:5` `Rakazo` — expects a running Rakazo stack and deliberately stays out of ordinary pull-request CI.
+- `apps/mobile/e2e/README.md:10` `Rakazo` — 2. Start Rakazo's database, API, worker, and sandbox supervisor. The computer portion requires a
+- `apps/mobile/e2e/ios-screenshots/README.md:3` `Rakazo` — Local, agent-run capture of the Rakazo iOS app. It is not part of CI.
+- `apps/mobile/e2e/ios-screenshots/flows/auth.yaml:7` `Rakazo` — visible: "Sign in to Rakazo"
+- `apps/mobile/e2e/ios-screenshots/flows/auth.yaml:11` `Rakazo` — visible: "Sign up for Rakazo"
+- `apps/mobile/e2e/ios-screenshots/flows/auth.yaml:16` `Rakazo` — visible: "Sign in to Rakazo"
+- `apps/mobile/e2e/ios-screenshots/flows/auth.yaml:44` `Rakazo` — …k like a URL|Could not reach that server|That URL did not look like a Rakazo server|Enter a server URL"
+- `apps/mobile/e2e/ios-screenshots/subflows/launch-app.yaml:7` `Rakazo` — visible: "Account|Sign up for Rakazo|Sign in to Rakazo"
+- `apps/mobile/e2e/ios-screenshots/subflows/launch-app.yaml:7` `Rakazo` — visible: "Account|Sign up for Rakazo|Sign in to Rakazo"
+- `apps/mobile/e2e/ios-screenshots/subflows/launch-app.yaml:20` `Rakazo` — visible: "Sign up for Rakazo|Sign in to Rakazo"
+- `apps/mobile/e2e/ios-screenshots/subflows/launch-app.yaml:20` `Rakazo` — visible: "Sign up for Rakazo|Sign in to Rakazo"
+- `apps/mobile/e2e/ios-screenshots/subflows/sign-in.yaml:6` `Rakazo` — visible: "Sign up for Rakazo"
+- `apps/mobile/e2e/ios-screenshots/subflows/sign-in.yaml:10` `Rakazo` — visible: "Sign in to Rakazo"
+- `apps/mobile/lib/endpoint.test.ts:95` `Rakazo` — it("accepts a Rakazo /rpc/health response", async () => {
+- `apps/mobile/lib/endpoint.test.ts:110` `Rakazo` — it("rejects a host that is up but is not Rakazo", async () => {
+- `apps/mobile/lib/endpoint.ts:82` `Rakazo` — return { ok: false, error: t("That URL did not look like a Rakazo server") };
+- `apps/mobile/lib/endpoint.ts:96` `Rakazo` — return { ok: false, error: t("That URL did not look like a Rakazo server") };
+- `apps/mobile/lib/i18n.test.ts:64` `Rakazo` — expect(t("Sign in to Rakazo")).toBe("登录 Rakazo");
+- `apps/mobile/lib/i18n.test.ts:64` `Rakazo` — expect(t("Sign in to Rakazo")).toBe("登录 Rakazo");
+- `apps/mobile/lib/i18n.test.ts:73` `Rakazo` — expect(t("Sign in to Rakazo")).toBe("Войти в Rakazo");
+- `apps/mobile/lib/i18n.test.ts:73` `Rakazo` — expect(t("Sign in to Rakazo")).toBe("Войти в Rakazo");
+- `apps/mobile/lib/i18n.test.ts:82` `Rakazo` — expect(t("Sign in to Rakazo")).toBe("Aanmelden bij Rakazo");
+- `apps/mobile/lib/i18n.test.ts:82` `Rakazo` — expect(t("Sign in to Rakazo")).toBe("Aanmelden bij Rakazo");
+- `apps/mobile/lib/i18n.test.ts:91` `Rakazo` — expect(t("Sign in to Rakazo")).toBe("Bei Rakazo anmelden");
+- `apps/mobile/lib/i18n.test.ts:91` `Rakazo` — expect(t("Sign in to Rakazo")).toBe("Bei Rakazo anmelden");
+- `apps/mobile/lib/locales/de.ts:106` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.":
+- `apps/mobile/lib/locales/de.ts:107` `Rakazo` — "Füge die OpenAI-kompatible Adresse deines Servers ein. Rakazo ergänzt /v1 bei Bedarf.",
+- `apps/mobile/lib/locales/de.ts:151` `Rakazo` — "Sign in to Rakazo": "Bei Rakazo anmelden",
+- `apps/mobile/lib/locales/de.ts:151` `Rakazo` — "Sign in to Rakazo": "Bei Rakazo anmelden",
+- `apps/mobile/lib/locales/de.ts:153` `Rakazo` — "Sign up for Rakazo": "Bei Rakazo registrieren",
+- `apps/mobile/lib/locales/de.ts:153` `Rakazo` — "Sign up for Rakazo": "Bei Rakazo registrieren",
+- `apps/mobile/lib/locales/de.ts:473` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.":
+- `apps/mobile/lib/locales/de.ts:474` `Rakazo` — "Diese Abonnementanmeldung ist in Rakazo noch nicht verfügbar. Verwende Zugangsdaten der Bereitstellung oder wähle einen anderen Anbieter.",
+- `apps/mobile/lib/locales/de.ts:774` `Rakazo` — "That URL did not look like a Rakazo server":
+- `apps/mobile/lib/locales/de.ts:775` `Rakazo-Server` — "Diese URL sieht nicht nach einem Rakazo-Server aus",
+- `apps/mobile/lib/locales/de.ts:852` `Rakazo` — Rakazo: "Rakazo",
+- `apps/mobile/lib/locales/de.ts:852` `Rakazo` — Rakazo: "Rakazo",
+- `apps/web/e2e/auth-lifecycle.spec.ts:66` `Rakazo` — await expect(page.getByRole("heading", { name: "Sign in to Rakazo" })).toBeVisible();
+- `apps/web/e2e/auth-lifecycle.spec.ts:79` `Rakazo` — await expect(main.getByRole("heading", { name: "Rakazo", level: 1 })).toBeVisible();
+- `apps/web/e2e/auth-lifecycle.spec.ts:85` `Rakazo` — await expect(page.getByRole("heading", { name: "Sign in to Rakazo" })).toBeVisible();
+- `apps/web/e2e/auth-lifecycle.spec.ts:155` `Rakazo` — await expect(page.getByRole("heading", { name: "Sign in to Rakazo" })).toBeVisible();
+- `apps/web/e2e/auth-lifecycle.spec.ts:165` `Rakazo` — await expect(page.getByRole("heading", { name: "Create your Rakazo" })).toBeVisible();
+- `apps/web/e2e/auth-lifecycle.spec.ts:171` `Rakazo` — await expect(page.getByRole("heading", { name: "Sign in to Rakazo" })).toBeVisible();
+- `apps/web/e2e/fixtures/marketing-shots.tsx:261` `Rakazo` — "Sign in with ChatGPT Plus or Pro. Uses your OpenAI subscription. Rakazo does not pay.",
+- `apps/web/e2e/fixtures/marketing-shots.tsx:275` `Rakazo` — …lling: "Sign in with SuperGrok or X Premium, or paste an xAI API key. Rakazo does not pay.",
+- `apps/web/e2e/helpers.ts:88` `Rakazo` — await expect(page.getByRole("heading", { name: "Create your Rakazo" })).toBeVisible();
+- `apps/web/e2e/model-settings.spec.ts:693` `Rakazo` — "Uses your Amazon Bedrock API key. Rakazo does not pay for model usage.",
+- `apps/web/e2e/settings-shell.spec.ts:205` `Rakazo` — memory.getByText("rakazo-shared and IDs starting with bot- are reserved for Rakazo."),
+- `apps/web/scripts/translations-de.json:221` `Rakazo` — "Create your Rakazo": "Dein Rakazo erstellen",
+- `apps/web/scripts/translations-de.json:221` `Rakazo` — "Create your Rakazo": "Dein Rakazo erstellen",
+- `apps/web/scripts/translations-de.json:413` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Füge die OpenAI-kompatible Adresse deines Servers ein. Rakazo ergänzt /v1 bei Be
+- `apps/web/scripts/translations-de.json:413` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Füge die OpenAI-kompatible Adresse deines Servers ein. Rakazo ergänzt /v1 bei Be
+- `apps/web/scripts/translations-de.json:445` `Rakazo` — "Return to Rakazo": "Zurück zu Rakazo",
+- `apps/web/scripts/translations-de.json:445` `Rakazo` — "Return to Rakazo": "Zurück zu Rakazo",
+- `apps/web/scripts/translations-de.json:484` `Rakazo` — "Sign in to Rakazo": "Bei Rakazo anmelden",
+- `apps/web/scripts/translations-de.json:484` `Rakazo` — "Sign in to Rakazo": "Bei Rakazo anmelden",
+- `apps/web/scripts/translations-de.json:531` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "Diese Abonnementanmeldung ist in Rakazo
+- `apps/web/scripts/translations-de.json:531` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "Diese Abonnementanmeldung ist in Rakazo
+- `apps/web/scripts/translations-es.json:264` `Rakazo` — "Create your Rakazo": "Crea tu Rakazo",
+- `apps/web/scripts/translations-es.json:264` `Rakazo` — "Create your Rakazo": "Crea tu Rakazo",
+- `apps/web/scripts/translations-es.json:499` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Pega la dirección compatible con OpenAI de tu servidor. Rakazo agrega /v1 si es 
+- `apps/web/scripts/translations-es.json:499` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Pega la dirección compatible con OpenAI de tu servidor. Rakazo agrega /v1 si es 
+- `apps/web/scripts/translations-es.json:549` `Rakazo` — "Return to Rakazo": "Volver a Rakazo",
+- `apps/web/scripts/translations-es.json:549` `Rakazo` — "Return to Rakazo": "Volver a Rakazo",
+- `apps/web/scripts/translations-es.json:599` `Rakazo` — "Sign in to Rakazo": "Inicia sesión en Rakazo",
+- `apps/web/scripts/translations-es.json:599` `Rakazo` — "Sign in to Rakazo": "Inicia sesión en Rakazo",
+- `apps/web/scripts/translations-es.json:654` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "Este inicio de sesión por suscripción a
+- `apps/web/scripts/translations-es.json:654` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "Este inicio de sesión por suscripción a
+- `apps/web/scripts/translations-hi.json:216` `Rakazo` — "Create your Rakazo": "अपना Rakazo बनाएं",
+- `apps/web/scripts/translations-hi.json:216` `Rakazo` — "Create your Rakazo": "अपना Rakazo बनाएं",
+- `apps/web/scripts/translations-hi.json:408` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "अपने सर्वर से OpenAI-संगत पता पेस्ट करें। ज़रूरत होने पर Rakazo /v1 जोड़ देता है
+- `apps/web/scripts/translations-hi.json:408` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "अपने सर्वर से OpenAI-संगत पता पेस्ट करें। ज़रूरत होने पर Rakazo /v1 जोड़ देता है
+- `apps/web/scripts/translations-hi.json:448` `Rakazo` — "Return to Rakazo": "Rakazo पर लौटें",
+- `apps/web/scripts/translations-hi.json:448` `Rakazo` — "Return to Rakazo": "Rakazo पर लौटें",
+- `apps/web/scripts/translations-hi.json:485` `Rakazo` — "Sign in to Rakazo": "Rakazo में साइन इन करें",
+- `apps/web/scripts/translations-hi.json:485` `Rakazo` — "Sign in to Rakazo": "Rakazo में साइन इन करें",
+- `apps/web/scripts/translations-hi.json:532` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "यह सब्सक्रिप्शन साइन-इन अभी Rakazo में 
+- `apps/web/scripts/translations-hi.json:532` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "यह सब्सक्रिप्शन साइन-इन अभी Rakazo में 
+- `apps/web/scripts/translations-ko.json:221` `Rakazo` — "Create your Rakazo": "Rakazo 계정 만들기",
+- `apps/web/scripts/translations-ko.json:221` `Rakazo` — "Create your Rakazo": "Rakazo 계정 만들기",
+- `apps/web/scripts/translations-ko.json:413` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "서버의 OpenAI 호환 주소를 붙여넣으세요. 필요하면 Rakazo가 /v1을 추가합니다.",
+- `apps/web/scripts/translations-ko.json:445` `Rakazo` — "Return to Rakazo": "Rakazo로 돌아가기",
+- `apps/web/scripts/translations-ko.json:484` `Rakazo` — "Sign in to Rakazo": "Rakazo 로그인",
+- `apps/web/scripts/translations-ko.json:484` `Rakazo` — "Sign in to Rakazo": "Rakazo 로그인",
+- `apps/web/scripts/translations-ko.json:531` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "이 구독 로그인 방식은 아직 Rakazo에서 지원되지 않습니다. 서버에
+- `apps/web/scripts/translations-pt-BR.json:216` `Rakazo` — "Create your Rakazo": "Crie o seu Rakazo",
+- `apps/web/scripts/translations-pt-BR.json:216` `Rakazo` — "Create your Rakazo": "Crie o seu Rakazo",
+- `apps/web/scripts/translations-pt-BR.json:408` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Cole o endereço compatível com OpenAI do seu servidor. Rakazo adiciona /v1 se ne
+- `apps/web/scripts/translations-pt-BR.json:408` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Cole o endereço compatível com OpenAI do seu servidor. Rakazo adiciona /v1 se ne
+- `apps/web/scripts/translations-pt-BR.json:448` `Rakazo` — "Return to Rakazo": "Retorno a Rakazo",
+- `apps/web/scripts/translations-pt-BR.json:448` `Rakazo` — "Return to Rakazo": "Retorno a Rakazo",
+- `apps/web/scripts/translations-pt-BR.json:485` `Rakazo` — "Sign in to Rakazo": "Entrar no Rakazo",
+- `apps/web/scripts/translations-pt-BR.json:485` `Rakazo` — "Sign in to Rakazo": "Entrar no Rakazo",
+- `apps/web/scripts/translations-pt-BR.json:532` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "Este login de assinatura ainda não está
+- `apps/web/scripts/translations-pt-BR.json:532` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "Este login de assinatura ainda não está
+- `apps/web/scripts/translations-tr.json:217` `Rakazo` — "Create your Rakazo": "Rakazo hesabını oluştur",
+- `apps/web/scripts/translations-tr.json:217` `Rakazo` — "Create your Rakazo": "Rakazo hesabını oluştur",
+- `apps/web/scripts/translations-tr.json:411` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Sunucundaki OpenAI uyumlu adresi yapıştır. Gerekirse Rakazo /v1 ekler.",
+- `apps/web/scripts/translations-tr.json:411` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Sunucundaki OpenAI uyumlu adresi yapıştır. Gerekirse Rakazo /v1 ekler.",
+- `apps/web/scripts/translations-tr.json:443` `Rakazo` — "Return to Rakazo": "Rakazo'ya dön",
+- `apps/web/scripts/translations-tr.json:443` `Rakazo` — "Return to Rakazo": "Rakazo'ya dön",
+- `apps/web/scripts/translations-tr.json:482` `Rakazo` — "Sign in to Rakazo": "Rakazo'da oturum aç",
+- `apps/web/scripts/translations-tr.json:482` `Rakazo` — "Sign in to Rakazo": "Rakazo'da oturum aç",
+- `apps/web/scripts/translations-tr.json:529` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "Bu abonelik girişi Rakazo'da henüz kull
+- `apps/web/scripts/translations-tr.json:529` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "Bu abonelik girişi Rakazo'da henüz kull
+- `apps/web/scripts/translations-zh-CN.json:221` `Rakazo` — "Create your Rakazo": "创建你的 Rakazo",
+- `apps/web/scripts/translations-zh-CN.json:221` `Rakazo` — "Create your Rakazo": "创建你的 Rakazo",
+- `apps/web/scripts/translations-zh-CN.json:412` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "粘贴服务器的 OpenAI 兼容地址。需要时 Rakazo 会补上 /v1。",
+- `apps/web/scripts/translations-zh-CN.json:412` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "粘贴服务器的 OpenAI 兼容地址。需要时 Rakazo 会补上 /v1。",
+- `apps/web/scripts/translations-zh-CN.json:444` `Rakazo` — "Return to Rakazo": "返回 Rakazo",
+- `apps/web/scripts/translations-zh-CN.json:444` `Rakazo` — "Return to Rakazo": "返回 Rakazo",
+- `apps/web/scripts/translations-zh-CN.json:483` `Rakazo` — "Sign in to Rakazo": "登录 Rakazo",
+- `apps/web/scripts/translations-zh-CN.json:483` `Rakazo` — "Sign in to Rakazo": "登录 Rakazo",
+- `apps/web/scripts/translations-zh-CN.json:530` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "此订阅登录在 Rakazo 中尚不可用。请使用部署凭据或选择其他提供方。",
+- `apps/web/scripts/translations-zh-CN.json:530` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "此订阅登录在 Rakazo 中尚不可用。请使用部署凭据或选择其他提供方。",
+- `apps/web/src/locales/en/messages.po:615` `Rakazo` — msgid "An existing Honcho peer to read from. Rakazo never writes to it."
+- `apps/web/src/locales/en/messages.po:616` `Rakazo` — msgstr "An existing Honcho peer to read from. Rakazo never writes to it."
+- `apps/web/src/locales/en/messages.po:1946` `Rakazo` — msgid "Create your Rakazo"
+- `apps/web/src/locales/en/messages.po:1947` `Rakazo` — msgstr "Create your Rakazo"
+- `apps/web/src/locales/en/messages.po:3701` `Rakazo` — msgid "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed."
+- `apps/web/src/locales/en/messages.po:3702` `Rakazo` — msgstr "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed."
+- `apps/web/src/locales/en/messages.po:3825` `Rakazo` — msgid "rakazo-shared and IDs starting with bot- are reserved for Rakazo."
+- `apps/web/src/locales/en/messages.po:3826` `Rakazo` — msgstr "rakazo-shared and IDs starting with bot- are reserved for Rakazo."
+- `apps/web/src/locales/en/messages.po:4174` `Rakazo` — msgid "Return to Rakazo"
+- `apps/web/src/locales/en/messages.po:4175` `Rakazo` — msgstr "Return to Rakazo"
+- `apps/web/src/locales/en/messages.po:4540` `Rakazo` — msgid "Sign in to Rakazo"
+- `apps/web/src/locales/en/messages.po:4541` `Rakazo` — msgstr "Sign in to Rakazo"
+- `apps/web/src/locales/en/messages.po:4921` `Rakazo` — msgid "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider."
+- `apps/web/src/locales/en/messages.po:4922` `Rakazo` — msgstr "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider."
+- `apps/web/src/novnc-html.test.ts:294` `Rakazo` — it("treats a Rakazo embed page that built its viewer as connecting", () => {
+- `apps/web/src/pages/Auth.tsx:55` `Rakazo` — <Trans>Sign in to Rakazo</Trans>
+- `apps/web/src/pages/Auth.tsx:57` `Rakazo` — <Trans>Create your Rakazo</Trans>
+- `apps/web/src/pages/McpOAuthCallback.tsx:61` `Rakazo` — <Trans>Return to Rakazo</Trans>
+- `apps/web/src/pages/ModelSettingsOverlay.test.tsx:499` `Rakazo` — …ew.container.textContent).not.toContain("Choose which connected model Rakazo uses.");
+- `apps/web/src/pages/Welcome.tsx:19` `Rakazo` — Rakazo
+- `apps/web/src/pages/memory-providers/HonchoSettingsForm.tsx:118` `Rakazo` — <Trans>An existing Honcho peer to read from. Rakazo never writes to it.</Trans>
+- `apps/web/src/pages/memory-providers/HonchoSettingsForm.tsx:123` `Rakazo` — <Trans>rakazo-shared and IDs starting with bot- are reserved for Rakazo.</Trans>
+- `apps/web/src/pages/model-settings/compatible-model-fields.tsx:106` `Rakazo` — {t`Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.`}
+- `apps/web/src/pages/model-settings/connection-controls.tsx:349` `Rakazo` — This subscription sign-in is not available in Rakazo yet. Use a deployment credential or
+- `infra/compose/install-images.sh:12` `Rakazo` — echo "Rakazo setup failed: RAKAZO_DOWNLOAD_BASE must use https." >&2
+- `infra/compose/install-images.sh:67` `Rakazo` — echo "Rakazo setup failed: $*" >&2
+- `infra/compose/install-images.sh:382` `Rakazo` — echo "Rakazo files are ready. Edit .env, then run: bash install-images.sh"
+- `infra/compose/install-images.sh:415` `Rakazo` — echo "Rakazo is starting at http://127.0.0.1:5173"
+- `packages/adapters/src/mcp-oauth.test.ts:851` `Rakazo` — expect(registration).toMatchObject({ client_name: "Rakazo", application_type: "native" });
+- `packages/adapters/src/mcp-oauth.ts:350` `Rakazo` — client_name: "Rakazo",
+- `packages/adapters/src/pi-models.test.ts:33` `Rakazo` — billing: "Uses your OpenAI API key. Rakazo does not pay for model usage.",
+- `packages/adapters/src/pi-models.test.ts:46` `Rakazo` — billing: "Uses your Azure OpenAI API key. Rakazo does not pay for model usage.",
+- `packages/adapters/src/pi-models.ts:223` `Rakazo` — …rastructure configured by the deployment owner. No model charges from Rakazo.";
+- `packages/adapters/src/pi-models.ts:226` `Rakazo` — return "Runs on a URL you control. Rakazo does not pay for model usage.";
+- `packages/adapters/src/pi-models.ts:229` `Rakazo` — return `${name} subscription login is not in the Rakazo UI yet. Skip if this deployment already has credentials.`;
+- `packages/adapters/src/pi-models.ts:232` `Rakazo` — return `Uses your ${name} API key. Rakazo does not pay for model usage.`;
+- `packages/adapters/src/pi-models.ts:234` `Rakazo` — return `Uses your ${name} key. Rakazo does not pay for model usage.`;
+- `packages/adapters/src/pi-oauth.ts:50` `Rakazo` — "Sign in with ChatGPT Plus or Pro. Uses your OpenAI subscription. Rakazo does not pay.",
+- `packages/adapters/src/pi-oauth.ts:56` `Rakazo` — …illing: "Sign in with GitHub Copilot. Uses your Copilot subscription. Rakazo does not pay.",
+- `packages/adapters/src/pi-oauth.ts:62` `Rakazo` — …lling: "Sign in with SuperGrok or X Premium, or paste an xAI API key. Rakazo does not pay.",
+- `packages/auth/src/account-security.ts:80` `Rakazo` — subject: "Confirm Rakazo account deletion",
+- `packages/auth/src/account-security.ts:81` `Rakazo` — text: `Enter this code in Rakazo to delete your account:\n\n${token}\n\nThis code expires in ten minutes. If you did not request deletio
+- `packages/auth/src/account-security.ts:82` `Rakazo` — html: `<p>Enter this code in Rakazo to delete your account:</p><p>${token}</p><p>This code expires in ten minutes. If you did not request d
+- `packages/auth/src/index.test.ts:155` `Rakazo` — subject: "Reset your Rakazo password",
+- `packages/auth/src/index.test.ts:167` `Rakazo` — …xpect(message).toMatchObject({ to: "ada@example.test", subject: "Your Rakazo sign-in code" });
+- `packages/auth/src/index.ts:326` `Rakazo` — appName: "Rakazo",
+- `packages/auth/src/index.ts:488` `Rakazo` — rpName: "Rakazo",
+- `packages/auth/src/index.ts:837` `Rakazo` — subject: "Verify your Rakazo email",
+- `packages/auth/src/index.ts:838` `Rakazo` — text: `Verify your email, then return to Rakazo to sign in:\n\n${url}\n\nThis link expires in one hour. If you did not register, ignore this email.`,
+- `packages/auth/src/index.ts:839` `Rakazo` — …ml: `<p><a href="${escapeHtml(url)}">Verify email</a>, then return to Rakazo to sign in.</p><p>This link expires in one hour. If you did not register, ignore this email.</p>`,
+- `packages/auth/src/index.ts:846` `Rakazo` — subject: "Your Rakazo sign-in code",
+- `packages/auth/src/index.ts:847` `Rakazo` — text: `Enter this code to sign in to Rakazo:\n\n${code}\n\nThis code expires in ten minutes. If you did not request it, ignore this email.`,
+- `packages/auth/src/index.ts:848` `Rakazo` — html: `<p>Enter this code to sign in to Rakazo:</p><p><strong>${escapeHtml(code)}</strong></p><p>This code expires in ten minutes. If you did not requ
+- `packages/auth/src/index.ts:861` `Rakazo` — subject: "Reset your Rakazo password",
+- `packages/auth/src/index.ts:865` `Rakazo` — "Reset your Rakazo password using this link:",
+- `packages/auth/src/index.ts:870` `Rakazo` — html: `<p>Hi ${safeName},</p><p>Reset your Rakazo password:</p><p><a href="${safeUrl}">Reset password</a></p><p>This link expires in one hour. If you did
+- `packages/contracts/src/openai-compatible-ui.ts:2` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.";
+- `packages/core/src/self-update.ts:259` `Rakazo` — return `Rakazo will exit after updating and ${supervisor.label} will start it on the new code.`;
+- `packages/core/src/self-update.ts:261` `Rakazo` — return `No process supervisor was detected, so Rakazo will not exit on its own. Restart the API, worker, and web processes yourself, or set ${RESTART_SUPERVI
+- `packages/ui-web/src/bot-avatar.tsx:542` `Rakazo` — Rakazo
+
+## App identity (Electron/Expo display names, icons, splash, favicons, manifests)
+
+- `apps/desktop/assets/README.md:6` `Rakazo.icon` — Mac packaging requires Xcode 26 or newer. Electron builder compiles `Rakazo.icon`
+- `apps/desktop/package.json:3` `Rakazo` — "productName": "Rakazo",
+- `apps/desktop/package.json:6` `Rakazo` — "name": "Rakazo"
+- `apps/desktop/package.json:37` `dev.rakazo.desktop` — "appId": "dev.rakazo.desktop",
+- `apps/desktop/package.json:61` `rakazo` — "name": "rakazo",
+- `apps/desktop/package.json:65` `../../packages/ui-tokens/assets/Rakazo.icon` — "icon": "../../packages/ui-tokens/assets/Rakazo.icon",
+- `apps/desktop/package.json:108` `rakazo` — "executableName": "rakazo",
+- `apps/desktop/package.json:118` `rakazo` — "repo": "rakazo"
+- `apps/desktop/src/setup.html:9` `Rakazo` — <title>Set up Rakazo</title>
+- `apps/desktop/src/setup.html:15` `Rakazo` — <span class="titlebar-name">Rakazo</span>
+- `apps/desktop/src/setup.html:16` `Rakazo` — <button id="quit" class="titlebar-quit" type="button" title="Quit Rakazo">Quit</button>
+- `apps/desktop/src/setup.html:20` `Rakazo` — <h1 class="heading">Welcome to Rakazo</h1>
+- `apps/desktop/src/setup.html:29` `Rakazo` — <span class="choice-title">Rakazo Cloud</span>
+- `apps/mobile/app.json:3` `Rakazo` — "name": "Rakazo",
+- `apps/mobile/app.json:4` `rakazo` — "slug": "rakazo",
+- `apps/mobile/app.json:6` `rakazo` — "scheme": "rakazo",
+- `apps/mobile/app.json:62` `com.rakazo.app` — "bundleIdentifier": "com.rakazo.app",
+- `apps/mobile/app.json:65` `../../packages/ui-tokens/assets/Rakazo.icon` — "icon": "../../packages/ui-tokens/assets/Rakazo.icon",
+- `apps/mobile/app.json:79` `com.rakazo.app` — "package": "com.rakazo.app",
+- `apps/web/index.html:8` `Rakazo` — <meta name="apple-mobile-web-app-title" content="Rakazo" />
+- `apps/web/index.html:13` `Rakazo` — <title>Rakazo</title>
+- `apps/web/public/site.webmanifest:2` `Rakazo` — "name": "Rakazo",
+- `apps/web/public/site.webmanifest:3` `Rakazo` — "short_name": "Rakazo",
+- `packages/ui-tokens/assets/README.md:3` `Rakazo.icon` — `Rakazo.icon` is the shared editable source for macOS and iOS. Open it in Apple's
+- `packages/ui-tokens/scripts/export-brand.ts:8` `packages/ui-tokens/assets/Rakazo.icon/Assets/orange-bot.png` — const source = path("packages/ui-tokens/assets/Rakazo.icon/Assets/orange-bot.png");
+- `packages/ui-tokens/scripts/export-brand.ts:65` `apps/www/public/brand/rakazo-mark.png` — await png(rounded, "apps/www/public/brand/rakazo-mark.png", 256);
+
+## External links (rakazo.com, GitHub, Discord, Cloud/waitlist, store/APK, registries, update feeds)
+
+- `apps/desktop/src/local-stack.test.ts:83` `ghcr.io/elie222/rakazo/app` — expect(lines).toContain("RAKAZO_IMAGE=ghcr.io/elie222/rakazo/app");
+- `apps/desktop/src/setup-config.ts:8` `https://app.rakazo.com` — export const RAKAZO_CLOUD_URL = "https://app.rakazo.com";
+- `apps/desktop/src/window-open.test.ts:13` `https://github.com/elie222/rakazo/pull/395` — shouldOpenInAppPopup(appOrigin, "https://github.com/elie222/rakazo/pull/395", "_blank"),
+- `apps/web/src/components/SidebarFooter.test.tsx:169` `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` — "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk",
+- `apps/web/src/components/SidebarFooter.test.tsx:169` `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` — "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk",
+- `apps/web/src/components/SidebarFooter.tsx:164` `https://github.com/elie222/rakazo/blob/main/docs/self-host.md` — href="https://github.com/elie222/rakazo/blob/main/docs/self-host.md"
+- `infra/compose/.env.images.example:58` `ghcr.io/elie222/rakazo/app` — RAKAZO_IMAGE=ghcr.io/elie222/rakazo/app
+- `infra/compose/.env.images.example:60` `ghcr.io/elie222/rakazo/computer` — RAKAZO_COMPUTER_IMAGE=ghcr.io/elie222/rakazo/computer
+- `infra/compose/docker-compose.images.yml:263` `RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer` — image: ${RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer}:${RAKAZO_COMPUTER_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:263` `RAKAZO_COMPUTER_IMAGE_TAG:-edge` — image: ${RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer}:${RAKAZO_COMPUTER_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:280` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:280` `RAKAZO_IMAGE_TAG:-edge` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:296` `RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer` — RAKAZO_COMPUTER_IMAGE: ${RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer}:${RAKAZO_COMPUTER_IMAGE_TAG:-
+- `infra/compose/docker-compose.images.yml:296` `RAKAZO_COMPUTER_IMAGE_TAG:-edge` — RAKAZO_COMPUTER_IMAGE: ${RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer}:${RAKAZO_COMPUTER_IMAGE_TAG:-
+- `infra/compose/docker-compose.images.yml:335` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:335` `RAKAZO_IMAGE_TAG:-edge` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:423` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:423` `RAKAZO_IMAGE_TAG:-edge` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:456` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:456` `RAKAZO_IMAGE_TAG:-edge` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.prod.docker.yml:42` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.docker.yml:42` `RAKAZO_IMAGE_TAG:-local` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:267` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:267` `RAKAZO_IMAGE_TAG:-local` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:358` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:358` `RAKAZO_IMAGE_TAG:-local` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:391` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:391` `RAKAZO_IMAGE_TAG:-local` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:446` `RAKAZO_UPDATER_IMAGE:-ghcr.io/elie222/rakazo/updater` — image: ${RAKAZO_UPDATER_IMAGE:-ghcr.io/elie222/rakazo/updater}:${RAKAZO_UPDATER_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:446` `RAKAZO_UPDATER_IMAGE_TAG:-local` — image: ${RAKAZO_UPDATER_IMAGE:-ghcr.io/elie222/rakazo/updater}:${RAKAZO_UPDATER_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:467` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — RAKAZO_IMAGE: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}
+- `infra/compose/install-images.sh:5` `RAKAZO_DOWNLOAD_BASE:-https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose` — DOWNLOAD_BASE="${RAKAZO_DOWNLOAD_BASE:-https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose}"
+- `infra/updater/src/compose-images.test.ts:64` `ghcr.io/elie222/rakazo/app` — expect(compose.services[service]?.image).toContain("ghcr.io/elie222/rakazo/app");
+- `infra/updater/src/compose-images.test.ts:67` `ghcr.io/elie222/rakazo/computer` — expect(compose.services.computer?.image).toContain("ghcr.io/elie222/rakazo/computer");
+- `infra/updater/src/compose-images.test.ts:79` `ghcr.io/elie222/rakazo/computer:edge` — expect(firstPartyImageNames("ghcr.io/elie222/rakazo/computer:edge")).toEqual(["computer"]);
+- `infra/updater/src/compose-service.test.ts:115` `ghcr.io/elie222/rakazo/updater` — expect(updater.image).toContain("ghcr.io/elie222/rakazo/updater");
+- `infra/updater/src/compose-service.test.ts:116` `ghcr.io/elie222/rakazo/app` — expect(compose.services.api?.image).toContain("ghcr.io/elie222/rakazo/app");
+- `packages/contracts/src/ai-consent.ts:4` `https://rakazo.com/privacy` — export const AI_PRIVACY_URL = "https://rakazo.com/privacy/";
+- `packages/contracts/src/client-build.ts:19` `https://apps.apple.com/app/rakazo/id6801531099` — export const IOS_APP_STORE_URL = "https://apps.apple.com/app/rakazo/id6801531099";
+- `packages/contracts/src/client-build.ts:21` `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` — "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk";
+- `packages/contracts/src/client-build.ts:21` `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` — "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk";
+- `packages/core/src/self-update.ts:2` `https://github.com/elie222/rakazo` — export const OFFICIAL_REPO_URL = "https://github.com/elie222/rakazo";
+- `packages/core/src/self-update.ts:83` `github.com/elie222/rakazo` — /** `github.com/elie222/rakazo` for every spelling of the same remote, for comparison only. */
+

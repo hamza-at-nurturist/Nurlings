@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import type { Bot, Routine } from "@rakazo/contracts";
-import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup } from "./helpers";
+import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup, ui } from "./helpers";
 
 async function addScheduleTrigger(page: Page, freq: string) {
   await page.getByRole("button", { name: "Add trigger" }).click();
@@ -95,7 +95,7 @@ test("routine editing updates in place, preserves timezone, deletion persists, a
   await page.getByRole("button", { name: "Advanced", exact: true }).click();
   const modelSelect = page.getByRole("combobox", { name: "Model", exact: true });
   await expect(modelSelect).toHaveValue("");
-  await expect(modelSelect).toContainText("Bot's model");
+  await expect(modelSelect).toContainText(ui("Bot's model"));
   await captureScreenshot(page, testInfo, "routine-model-picker");
 
   await page.keyboard.press("Escape");

@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -22,6 +23,7 @@ import {
   isValidImageTag,
   manualUpgradeCommands,
   OFFICIAL_SERVER_IMAGE,
+  OFFICIAL_UPDATER_IMAGE,
   parseGitNameOnly,
   parseLsRemoteReleases,
   parseLsRemoteTags,
@@ -644,5 +646,13 @@ describe("sidecar boundary validation", () => {
       const result = validateUpdateRequest(input);
       expect("error" in result, JSON.stringify(input)).toBe(true);
     }
+  });
+});
+
+describe("the published image names", () => {
+  it("follow the brand registry, never the upstream project's namespace", () => {
+    expect(OFFICIAL_SERVER_IMAGE).toBe(`${brand.registry}/app`);
+    expect(OFFICIAL_UPDATER_IMAGE).toBe(`${brand.registry}/updater`);
+    expect(`${OFFICIAL_SERVER_IMAGE}${OFFICIAL_UPDATER_IMAGE}`).not.toContain("elie222");
   });
 });

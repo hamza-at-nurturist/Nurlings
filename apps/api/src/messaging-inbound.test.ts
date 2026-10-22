@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import { describe, expect, it, vi } from "vitest";
 import {
   createMessagingInboundHandler,
@@ -859,6 +860,15 @@ describe("createMessagingInboundHandler channel routing", () => {
         }),
       ]),
     );
+    // The text people read names the brand and the YES/NO prompt is unchanged.
+    const invite = deps.outboundRows.find((row) => row.idempotencyKey === "invite:ch-1:mi-1");
+    expect(invite?.body).toContain(`was linked to your ${brand.name} agent.`);
+    expect(invite?.body).toContain(
+      "Reply YES to let your agent join the conversation there, or NO to stay out.",
+    );
+    const intro = deps.outboundRows.find((row) => row.idempotencyKey === "intro:ch-1");
+    expect(intro?.body).toContain(`This line hosts ${brand.name} personal agents.`);
+    expect(JSON.stringify(deps.outboundRows)).not.toContain("Rakazo");
     // in-thread note for the invited owner
     expect(deps.txMock.message.create).toHaveBeenCalled();
     // sender is only invited, not approved: no fan-out yet

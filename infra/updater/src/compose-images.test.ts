@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
@@ -20,7 +21,7 @@ interface ComposeService {
 
 const repoRoot = path.resolve(import.meta.dirname, "../../..");
 const composeFile = path.resolve(repoRoot, "infra/compose/docker-compose.images.yml");
-const publishWorkflowFile = path.resolve(repoRoot, ".github/workflows/publish-server-image.yml");
+const publishWorkflowFile = path.resolve(repoRoot, ".github/workflows/publish-nurlings-images.yml");
 const compose = parse(readFileSync(composeFile, "utf8"), { merge: true }) as {
   services: Record<string, ComposeService>;
 };
@@ -37,7 +38,10 @@ const publishWorkflow = parse(readFileSync(publishWorkflowFile, "utf8")) as {
 };
 
 const appServices = ["api", "worker", "web", "supervisor"] as const;
-const FIRST_PARTY_IMAGE = /ghcr\.io\/elie222\/rakazo\/([a-z0-9][a-z0-9._-]*)/g;
+const FIRST_PARTY_IMAGE = new RegExp(
+  `${brand.registry.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/([a-z0-9][a-z0-9._-]*)`,
+  "g",
+);
 
 function firstPartyImageNames(value: unknown): string[] {
   if (typeof value !== "string") return [];
@@ -61,10 +65,10 @@ describe("the images compose file", () => {
       "worker",
     ]);
     for (const service of appServices) {
-      expect(compose.services[service]?.image).toContain("ghcr.io/elie222/rakazo/app");
+      expect(compose.services[service]?.image).toContain(`${brand.registry}/app`);
       expect(compose.services[service]?.image).toContain("RAKAZO_IMAGE_TAG");
     }
-    expect(compose.services.computer?.image).toContain("ghcr.io/elie222/rakazo/computer");
+    expect(compose.services.computer?.image).toContain(`${brand.registry}/computer`);
     expect(compose.services.computer?.image).toContain("RAKAZO_COMPUTER_IMAGE_TAG");
     expect(compose.services.postgres?.image).toMatch(
       /^\$\{POSTGRES_IMAGE:-postgres:16@sha256:[0-9a-f]{64}\}$/,
@@ -76,7 +80,7 @@ describe("the images compose file", () => {
     expect(firstPartyImageNames(null)).toEqual([]);
     expect(firstPartyImageNames(true)).toEqual([]);
     expect(firstPartyImageNames(7091)).toEqual([]);
-    expect(firstPartyImageNames("ghcr.io/elie222/rakazo/computer:edge")).toEqual(["computer"]);
+    expect(firstPartyImageNames(`${brand.registry}/computer:edge`)).toEqual(["computer"]);
   });
 
   it("only references first-party images that the publish matrix publishes", () => {

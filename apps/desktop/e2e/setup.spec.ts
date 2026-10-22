@@ -4,9 +4,10 @@ import { createServer, type Server } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
+import { brand } from "@nurlings/brand";
 import { type ElectronApplication, _electron as electron, expect, test } from "@playwright/test";
 
-const APP_MARKER = "Existing Rakazo instance ready";
+const APP_MARKER = `Existing ${brand.name} instance ready`;
 /** Outlasts the shell's 20s wait for a mounted app before it rejects the server. */
 const NOT_READY_TIMEOUT_MS = 30_000;
 const execFileAsync = promisify(execFile);
@@ -78,32 +79,23 @@ function launch(extraEnv: Record<string, string> = {}) {
   });
 }
 
-test("first run offers Rakazo Cloud first, with local and existing instances", async () => {
+test("first run offers this computer and an existing instance, with no hosted choice", async () => {
   app = await launch();
   if (process.env.RAKAZO_E2E_EXECUTABLE) {
     expect(await app.evaluate(({ app }) => app.isPackaged)).toBe(true);
   }
   const setup = await app.firstWindow();
 
-  await expect(setup.getByRole("heading", { name: "Welcome to Rakazo" })).toBeVisible();
+  await expect(setup.getByRole("heading", { name: `Welcome to ${brand.name}` })).toBeVisible();
   await expect(setup.getByText("Choose which server this app should use.")).toBeVisible();
-  await expect(setup.getByText("Rakazo Cloud")).toBeVisible();
   await expect(setup.getByText("This computer")).toBeVisible();
   await expect(setup.getByText("Existing instance")).toBeVisible();
+  await expect(setup.getByText(/Rakazo/)).toHaveCount(0);
+  await expect(setup.getByRole("radio")).toHaveCount(2);
   await expect(setup.locator(".card")).toHaveCount(0);
 
-  // Cloud is the default: one click opens the hosted app, with nothing to fill in.
-  await expect(setup.getByRole("radio", { name: /Rakazo Cloud/ })).toBeChecked();
-  await expect(setup.locator("#panel-new")).toBeHidden();
-  await expect(setup.locator("#panel-existing")).toBeHidden();
-  await expect(setup.getByRole("button", { name: "Check connection" })).toBeHidden();
-  await expect(setup.getByRole("button", { name: "Continue" })).toBeEnabled();
-  await setup.screenshot({
-    path: path.join(import.meta.dirname, "screenshots", "00-setup-cloud.png"),
-  });
-
-  // This computer runs the stack itself at the local address.
-  await setup.getByRole("radio", { name: /This computer/ }).check();
+  // This computer is the default: it runs the stack itself at the local address.
+  await expect(setup.getByRole("radio", { name: /This computer/ })).toBeChecked();
   // The panel is empty until a start begins, so check the attribute rather than the box.
   await expect(setup.locator("#panel-new")).toHaveJSProperty("hidden", false);
   await expect(setup.locator("#stack")).toBeHidden();
@@ -143,51 +135,6 @@ test("first run offers Rakazo Cloud first, with local and existing instances", a
   }
 });
 
-test("Rakazo Cloud saves the hosted address and is reselected when saved", async () => {
-  app = await launch();
-  const setup = await app.firstWindow();
-  await expect(setup.getByRole("radio", { name: /Rakazo Cloud/ })).toBeChecked();
-  await expect(setup.getByRole("button", { name: "Continue" })).toBeEnabled();
-
-  // Capture the request instead of reaching the hosted server, so CI stays offline.
-  const { cloudUrl } = await setup.evaluate(() =>
-    (
-      window as typeof window & { rakazoSetup: { state: () => Promise<{ cloudUrl: string }> } }
-    ).rakazoSetup.state(),
-  );
-  expect(cloudUrl).toMatch(/^https:\/\//);
-  await app.evaluate(({ ipcMain }) => {
-    const state = globalThis as typeof globalThis & { cloudSaves?: unknown[] };
-    state.cloudSaves = [];
-    ipcMain.removeHandler("desktop.setup.save");
-    ipcMain.handle("desktop.setup.save", (_event, payload: unknown) => {
-      state.cloudSaves?.push(payload);
-      return { ok: false, error: "Captured." };
-    });
-  });
-  await setup.getByRole("button", { name: "Continue" }).click();
-  await expect(setup.locator("#status")).toHaveText("Captured.");
-  expect(
-    await app.evaluate(
-      () => (globalThis as typeof globalThis & { cloudSaves?: unknown[] }).cloudSaves,
-    ),
-  ).toEqual([{ mode: "existing", serverUrl: cloudUrl }]);
-  expect(await readFile(path.join(userData, "setup.json"), "utf8").catch(() => null)).toBeNull();
-
-  // A saved Cloud setup reopens with Cloud chosen, not as a typed existing address.
-  await app.evaluate(({ ipcMain }, url) => {
-    ipcMain.removeHandler("desktop.setup.state");
-    ipcMain.handle("desktop.setup.state", () => ({
-      defaultLocalUrl: "http://127.0.0.1:45173",
-      cloudUrl: url,
-      saved: { mode: "existing", serverUrl: url },
-    }));
-  }, cloudUrl);
-  await setup.reload();
-  await expect(setup.getByRole("radio", { name: /Rakazo Cloud/ })).toBeChecked();
-  await expect(setup.locator("#panel-existing")).toBeHidden();
-});
-
 test("connecting to an existing instance verifies, saves, and opens it", async () => {
   app = await launch();
   const setup = await app.firstWindow();
@@ -197,7 +144,7 @@ test("connecting to an existing instance verifies, saves, and opens it", async (
 
   await setup.locator("#server-url").fill(serverUrl);
   await setup.getByRole("button", { name: "Check connection" }).click();
-  await expect(setup.locator("#status")).toHaveText(`Rakazo answered at ${serverUrl}.`);
+  await expect(setup.locator("#status")).toHaveText(`${brand.name} answered at ${serverUrl}.`);
   await expect(setup.locator("#status")).toHaveAttribute("data-tone", "ok");
 
   await setup.screenshot({
@@ -497,10 +444,10 @@ test("a malformed address is rejected before anything is written", async () => {
   }).toPass();
 });
 
-test("a generic web page is not accepted as a Rakazo server", async () => {
+test("a generic web page is not accepted as a server", async () => {
   const plain = createServer((_request, response) => {
     response.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-    response.end("<!doctype html><p>not Rakazo</p>");
+    response.end("<!doctype html><p>not a server</p>");
   });
   await new Promise<void>((resolve) => plain.listen(0, "127.0.0.1", resolve));
   const address = plain.address();
@@ -514,7 +461,7 @@ test("a generic web page is not accepted as a Rakazo server", async () => {
     await setup.getByRole("button", { name: "Continue" }).click();
 
     await expect(setup.locator("#status")).toHaveText(
-      "That address did not respond like a Rakazo server.",
+      `That address did not respond like a ${brand.name} server.`,
     );
     await expect(async () => {
       await expect(readFile(path.join(userData, "setup.json"), "utf8")).rejects.toThrow();
@@ -557,6 +504,24 @@ test("the setup probe refuses redirects instead of following them", async () => 
   }
 });
 
+test("a profile saved against the upstream hosted service is discarded and setup is shown", async () => {
+  await writeFile(
+    path.join(userData, "setup.json"),
+    `${JSON.stringify({ mode: "existing", serverUrl: "https://app.rakazo.com" }, null, 2)}\n`,
+    { encoding: "utf8", mode: 0o600 },
+  );
+
+  app = await launch();
+  const setup = await app.firstWindow();
+
+  await expect(setup.getByRole("heading", { name: `Welcome to ${brand.name}` })).toBeVisible();
+  await expect(setup.getByRole("radio", { name: /This computer/ })).toBeChecked();
+  await expect(setup.locator("#server-url")).toHaveValue("");
+  await expect(async () => {
+    await expect(readFile(path.join(userData, "setup.json"), "utf8")).rejects.toThrow();
+  }).toPass();
+});
+
 test("an unreachable saved server falls back to setup with a recovery message", async () => {
   await writeFile(
     path.join(userData, "setup.json"),
@@ -567,7 +532,7 @@ test("an unreachable saved server falls back to setup with a recovery message", 
   app = await launch();
   const setup = await app.firstWindow();
 
-  await expect(setup.getByRole("heading", { name: "Welcome to Rakazo" })).toBeVisible();
+  await expect(setup.getByRole("heading", { name: `Welcome to ${brand.name}` })).toBeVisible();
   await expect(setup.getByRole("radio", { name: /Existing instance/ })).toBeChecked();
   await expect(setup.locator("#server-url")).toHaveValue(closedUrl);
   await expect(setup.locator("#status")).toContainText("Could not reconnect to the saved server.");
@@ -589,7 +554,7 @@ test("the native application menu can reopen setup without exposing setup IPC to
   });
   const setup = await setupPromise;
 
-  await expect(setup.getByRole("heading", { name: "Welcome to Rakazo" })).toBeVisible();
+  await expect(setup.getByRole("heading", { name: `Welcome to ${brand.name}` })).toBeVisible();
   await expect(setup.locator("#status")).toBeEmpty();
 
   // Closing setup without saving restores the connected instance.

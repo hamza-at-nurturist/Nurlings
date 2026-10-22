@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { brand } from "@nurlings/brand";
 import type { DesktopUpdateState } from "@rakazo/contracts";
 import { Toaster } from "@rakazo/ui-web";
 import type { ReactNode } from "react";
@@ -141,7 +142,7 @@ it("opens integrations and keeps the existing account actions and links", async 
   const menu = document.querySelector('[data-slot="popover-content"]')!;
   expect([...menu.querySelectorAll("button, a")].map((row) => row.textContent)).toEqual([
     "Usage",
-    "Get the mobile app",
+    // "Get the mobile app" is absent: no store listing is configured for this brand.
     "Docs",
     "Board",
     "Artifacts",
@@ -159,14 +160,25 @@ it("omits Board when unavailable", async () => {
   );
 });
 
-it("offers the existing Android download on Android", async () => {
-  vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Android");
+it.each(["Android", "Mozilla/5.0 (iPhone)"])(
+  "offers no mobile app link while no store listing is configured (%s)",
+  async (userAgent) => {
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue(userAgent);
+    await render();
+    const links = [...document.querySelectorAll("a")].map((link) => link.textContent);
+    expect(links).not.toContain("Get the mobile app");
+    expect(links).toContain("Docs");
+  },
+);
+
+it("points Docs at the product site and shows the tagline, with no upstream link", async () => {
   await render();
-  const mobile = [...document.querySelectorAll("a")].find(
-    (link) => link.textContent === "Get the mobile app",
-  )!;
-  expect(mobile.href).toBe(
-    "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk",
+  const docs = [...document.querySelectorAll("a")].find((link) => link.textContent === "Docs")!;
+  expect(docs.href).toBe(`${brand.urls.site}/`);
+  const menu = document.querySelector('[data-slot="popover-content"]')!;
+  expect(menu.textContent).toContain(brand.tagline);
+  expect([...menu.querySelectorAll("a")].map((link) => link.href).join(" ")).not.toMatch(
+    /rakazo|elie222/i,
   );
 });
 

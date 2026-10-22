@@ -1,4 +1,5 @@
 import { createHash, createHmac, generateKeyPairSync, sign } from "node:crypto";
+import { brand } from "@nurlings/brand";
 import type * as Db from "@rakazo/db";
 import { memoryAdapter } from "better-auth/adapters/memory";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -25,6 +26,7 @@ let activeIssuer = issuer;
 let sequence: number;
 let cookies: string;
 let sentCodes: string[];
+let sentMessages: { subject: string; text: string; html: string }[];
 let corruptSignature = false;
 let omitIdToken = false;
 let replayedIdToken: string | undefined;
@@ -86,6 +88,7 @@ function setup(options: Partial<AuthEnv> = {}, hasMembership = true) {
       }),
       send: vi.fn(async (message) => {
         sentCodes.push(message.text);
+        sentMessages.push(message);
       }),
     },
     oidc: {
@@ -211,6 +214,7 @@ beforeEach(() => {
   sequence = 0;
   cookies = "";
   sentCodes = [];
+  sentMessages = [];
   corruptSignature = false;
   omitIdToken = false;
   replayedIdToken = undefined;
@@ -397,6 +401,14 @@ describe("OIDC callbacks", () => {
     await signIn();
     await request("/request-account-deletion", {});
     const code = sentCodes.at(-1)!.match(/\b[a-f0-9]{32}\b/)![0];
+    const deletionEmail = sentMessages.at(-1)!;
+    expect(deletionEmail.subject).toBe(`Confirm ${brand.name} account deletion`);
+    expect(`${deletionEmail.subject}${deletionEmail.text}${deletionEmail.html}`).toContain(
+      `in ${brand.name} to delete`,
+    );
+    expect(`${deletionEmail.subject}${deletionEmail.text}${deletionEmail.html}`).not.toContain(
+      "Rakazo",
+    );
     expect(rows("verification").some((row) => String(row.identifier).includes(code))).toBe(false);
     rows("verification").push({
       id: "legacy-deletion-code",

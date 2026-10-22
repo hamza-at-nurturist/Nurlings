@@ -1,5 +1,6 @@
+import { brand } from "@nurlings/brand";
 import type { AiRecipient } from "@rakazo/contracts";
-import { AI_DATA_DISCLOSURES, AI_PRIVACY_URL } from "@rakazo/contracts";
+import { AI_DATA_DISCLOSURES } from "@rakazo/contracts";
 import { Alert, AppState, Linking } from "react-native";
 import { t } from "./i18n";
 
@@ -7,7 +8,7 @@ export const FOREGROUND_FALLBACK_MS = 400;
 
 export function promptAiConsent(
   recipient: AiRecipient,
-  privacyUrl = AI_PRIVACY_URL,
+  privacyUrl = brand.urls.site,
 ): Promise<boolean> {
   return new Promise((resolve) => {
     let settled = false;

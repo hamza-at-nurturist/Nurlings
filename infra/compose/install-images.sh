@@ -2,14 +2,14 @@
 
 set -Eeuo pipefail
 
-DOWNLOAD_BASE="${RAKAZO_DOWNLOAD_BASE:-https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose}"
+DOWNLOAD_BASE="${RAKAZO_DOWNLOAD_BASE:-https://raw.githubusercontent.com/nurturist-ai/nurlings/main/infra/compose}"
 while [[ "$DOWNLOAD_BASE" == */ ]]; do
   DOWNLOAD_BASE="${DOWNLOAD_BASE%/}"
 done
 case "$DOWNLOAD_BASE" in
   https://*) ;;
   *)
-    echo "Rakazo setup failed: RAKAZO_DOWNLOAD_BASE must use https." >&2
+    echo "Nurlings setup failed: RAKAZO_DOWNLOAD_BASE must use https." >&2
     exit 1
     ;;
 esac
@@ -64,9 +64,21 @@ cleanup() {
 trap cleanup EXIT
 
 fail() {
-  echo "Rakazo setup failed: $*" >&2
+  echo "Nurlings setup failed: $*" >&2
   exit 1
 }
+
+# Optional credentials for a private repository and registry (shell variables only; never read
+# from .env and never printed). NURLINGS_DOWNLOAD_TOKEN is only a fallback for fetching the
+# Compose files: the supported path delivers installer, compose file and env example directly and
+# runs with --local. NURLINGS_REGISTRY_USER + NURLINGS_REGISTRY_TOKEN log in to ghcr.io before the pull.
+for secret_name in NURLINGS_DOWNLOAD_TOKEN NURLINGS_REGISTRY_TOKEN; do
+  secret_value="${!secret_name:-}"
+  if [[ "$secret_value" == *[$'"\\\n\r ']* ]]; then
+    fail "$secret_name contains a character a token never has; check the value."
+  fi
+done
+unset -v secret_name secret_value
 
 for command_name in curl docker openssl; do
   command -v "$command_name" >/dev/null 2>&1 || fail "'$command_name' is required."
@@ -171,6 +183,20 @@ prepare_proxy_env() {
 }
 prepare_proxy_env
 
+# One curl attempt. The bearer token travels on stdin as a curl config so it is not visible in the
+# process list or in any output.
+curl_once() {
+  local url="$1"
+  local out="$2"
+  shift 2
+  if [[ -n "${NURLINGS_DOWNLOAD_TOKEN:-}" ]]; then
+    printf 'header = "Authorization: Bearer %s"\n' "$NURLINGS_DOWNLOAD_TOKEN" |
+      curl -fsSL --proto-redir =https "$@" -K - "$url" -o "$out"
+  else
+    curl -fsSL --proto-redir =https "$@" "$url" -o "$out"
+  fi
+}
+
 curl_download() {
   local url="$1"
   local out="$2"
@@ -178,13 +204,13 @@ curl_download() {
   local max_attempts=3
 
   if curl --help all 2>/dev/null | grep -q -- '--retry-all-errors'; then
-    curl -fsSL --proto-redir =https --retry 3 --retry-delay 2 --retry-all-errors "$url" -o "$out"
+    curl_once "$url" "$out" --retry 3 --retry-delay 2 --retry-all-errors
     return $?
   fi
 
   attempt=1
   while [[ "$attempt" -le "$max_attempts" ]]; do
-    if curl -fsSL --proto-redir =https "$url" -o "$out"; then
+    if curl_once "$url" "$out"; then
       return 0
     fi
     if [[ "$attempt" -eq "$max_attempts" ]]; then
@@ -357,6 +383,18 @@ configure_computer_egress() {
   echo "See Restricted computer egress in docs/self-host.md." >&2
 }
 
+registry_login() {
+  local user="${NURLINGS_REGISTRY_USER:-}"
+  local token="${NURLINGS_REGISTRY_TOKEN:-}"
+  [[ -n "$user" || -n "$token" ]] || return 0
+  [[ -n "$user" && -n "$token" ]] || fail "set both NURLINGS_REGISTRY_USER and NURLINGS_REGISTRY_TOKEN, or neither."
+  # The token goes to docker on stdin only.
+  if ! printf '%s' "$token" | docker login ghcr.io --username "$user" --password-stdin >/dev/null; then
+    fail "could not log in to ghcr.io as ${user}. Check the token has read:packages and can read these packages."
+  fi
+  echo "Logged in to ghcr.io as ${user}."
+}
+
 download "$COMPOSE_FILE"
 download "$ENV_EXAMPLE"
 
@@ -379,7 +417,7 @@ validate_required_secrets
 warn_unpassed_settings
 
 if [[ "$prepare_only" == true ]]; then
-  echo "Rakazo files are ready. Edit .env, then run: bash install-images.sh"
+  echo "Nurlings files are ready. Edit .env, then run: bash install-images.sh"
   exit 0
 fi
 
@@ -389,7 +427,9 @@ prepare_proxy_env
 if [[ "$pull_never" == true ]]; then
   echo "Skipping image pull (--pull-never / --offline); images must already be on this Docker host."
 else
+  registry_login
   if ! docker compose --env-file "$ENV_FILE" "${compose_files[@]}" pull; then
+    echo "If the images are private, authenticate first: set NURLINGS_REGISTRY_USER and NURLINGS_REGISTRY_TOKEN (a token with read:packages), or run docker login ghcr.io, then retry." >&2
     fail "could not pull images. Shell HTTP_PROXY often does not reach the Docker daemon. Configure daemon proxy/registry-mirrors, set image env vars to a reachable registry, or preload images then compose up with --pull never."
   fi
 fi
@@ -412,4 +452,4 @@ else
   docker compose --env-file "$ENV_FILE" "${compose_files[@]}" up -d ${up_pull_args[@]+"${up_pull_args[@]}"}
 fi
 
-echo "Rakazo is starting at http://127.0.0.1:5173"
+echo "Nurlings is starting at http://127.0.0.1:5173"

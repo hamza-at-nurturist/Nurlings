@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup } from "./helpers";
+import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup, ui } from "./helpers";
 
 test("screen connection failures stay visible and can be retried", async ({ page }, testInfo) => {
   await signup(page, `screen-error-${Date.now()}@rakazo.test`, "password12", "Screen Error");
@@ -58,7 +58,10 @@ test("screen connection failures stay visible and can be retried", async ({ page
 
   failScreen = false;
   await page.getByRole("button", { name: "Retry screen" }).click();
-  await expect(page.locator('iframe[title="Bot screen"]')).toHaveAttribute("src", screenUrl);
+  await expect(page.locator(`iframe[title="${ui("Bot screen")}"]`)).toHaveAttribute(
+    "src",
+    screenUrl,
+  );
   await expect(page.getByRole("alert")).toHaveCount(0);
 });
 

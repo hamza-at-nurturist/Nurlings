@@ -1,3 +1,4 @@
+import { brand, brandText } from "@nurlings/brand";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const native = vi.hoisted(() => {
@@ -93,8 +94,17 @@ describe("mobile AI consent prompt", () => {
   it("omits empty details from the consent message", async () => {
     const pending = promptAiConsent({ ...recipient, detail: "" });
     expect(native.alert.mock.calls[0]?.[1]).toBe(
-      `${AI_DATA_DISCLOSURES.model}\n\nYou can turn this off in Account → AI data sharing.`,
+      `${brandText(AI_DATA_DISCLOSURES.model, brand)}\n\nYou can turn this off in Account → AI data sharing.`,
     );
+    currentAlert().buttons[0]?.onPress?.();
+    await expect(pending).resolves.toBe(false);
+  });
+
+  it("opens the product site as the privacy link unless one is given", async () => {
+    const pending = promptAiConsent(recipient);
+    const privacy = currentAlert().buttons.find((button) => /privacy/i.test(button.text ?? ""));
+    privacy?.onPress?.();
+    expect(native.openURL).toHaveBeenCalledWith(brand.urls.site);
     currentAlert().buttons[0]?.onPress?.();
     await expect(pending).resolves.toBe(false);
   });

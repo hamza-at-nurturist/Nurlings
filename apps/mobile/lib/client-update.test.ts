@@ -29,12 +29,12 @@ vi.mock("react-native", () => rn);
 vi.mock("./api", () => ({ configureClientBuild: vi.fn() }));
 vi.mock("./i18n", () => ({ t: (message: string) => message }));
 
-import { IOS_APP_STORE_URL } from "@rakazo/contracts";
 import {
   clientBuildHeaders,
   FOREGROUND_UPDATE_CHECK_MS,
   mobileClientBuild,
   noteClientUpdateRequired,
+  storeUpdateUrl,
   watchForegroundUpdates,
 } from "./client-update";
 
@@ -81,14 +81,29 @@ describe("update required", () => {
     expect(rn.Linking.openURL).not.toHaveBeenCalled();
   });
 
-  it("opens the store when no over-the-air update can fix it, and asks again next time", async () => {
+  it("opens no store page while no listing is configured, and asks again next time", async () => {
     noteClientUpdateRequired();
     pressUpdate();
     await flush();
     expect(updates.reloadAsync).not.toHaveBeenCalled();
-    expect(rn.Linking.openURL).toHaveBeenCalledWith(IOS_APP_STORE_URL);
+    expect(rn.Linking.openURL).not.toHaveBeenCalled();
     noteClientUpdateRequired();
     expect(rn.Alert.alert).toHaveBeenCalledTimes(2);
+  });
+
+  it("never offers an upstream store page", () => {
+    expect(storeUpdateUrl("ios")).toBeNull();
+    expect(storeUpdateUrl("android")).toBeNull();
+  });
+
+  it("picks the configured listing for the platform", () => {
+    const urls = {
+      iosApp: "https://apps.example.test/ios",
+      androidApp: "https://dl.example.test/a",
+    };
+    expect(storeUpdateUrl("ios", urls)).toBe(urls.iosApp);
+    expect(storeUpdateUrl("android", urls)).toBe(urls.androidApp);
+    expect(storeUpdateUrl("android", { ...urls, androidApp: null })).toBeNull();
   });
 });
 

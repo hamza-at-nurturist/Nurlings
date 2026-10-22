@@ -63,6 +63,7 @@ export async function hasGitCheckout(root: string): Promise<boolean> {
 }
 
 async function probeSidecar(config: UpdaterProxyConfig, fetchImpl: typeof fetch): Promise<boolean> {
+  if (config.disabled === true) return false;
   if (!isUpdaterConfigured(config) || !config.url || !config.token) return false;
   try {
     const response = await fetchImpl(new URL("/health", ensureTrailingSlash(config.url)), {

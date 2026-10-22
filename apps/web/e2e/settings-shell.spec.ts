@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import { expect, test } from "@playwright/test";
 import { captureScreenshot, completeOnboarding, openUserSettings, signup } from "./helpers";
 
@@ -202,7 +203,7 @@ test("Honcho memory settings empty and filled", async ({ page }, testInfo) => {
   await userPeer.fill("bot-123");
   await expect(userPeer).toHaveAttribute("aria-invalid", "true");
   await expect(
-    memory.getByText("rakazo-shared and IDs starting with bot- are reserved for Rakazo."),
+    memory.getByText(`rakazo-shared and IDs starting with bot- are reserved for ${brand.name}.`),
   ).toBeVisible();
   await expect(memory.getByRole("button", { name: "Connect", exact: true })).toBeDisabled();
   await captureScreenshot(page, testInfo, "memory-honcho-user-peer-reserved");

@@ -275,6 +275,45 @@ describe("account preferences", () => {
   );
 });
 
+describe("server self-update with the brand defaults", () => {
+  it("is switched off even when an updater sidecar is configured", async () => {
+    const fetchImpl = vi.fn();
+    vi.stubGlobal("fetch", fetchImpl);
+    try {
+      const deps = {
+        prisma: {} as unknown as PrismaClient,
+        env: {
+          updaterUrl: "http://updater:7092",
+          updaterToken: "fake-test-updater-token-0000000000000",
+          gitSha: "abc",
+        },
+        dataDir: "/tmp/rakazo-router-test",
+      } as unknown as RouterDeps;
+      const actor = {
+        spaceId: "workspace-1",
+        userId: "user-1",
+        email: "user@rakazo.test",
+        isDeploymentOwner: true,
+      } satisfies Actor;
+      const client = createRouterClient(createRouter(deps), { context: { actor } });
+
+      await expect(client.updater.status()).resolves.toMatchObject({
+        supported: false,
+        installKind: expect.not.stringMatching(/^sidecar$/),
+      });
+      await expect(client.updater.check({})).rejects.toMatchObject({
+        message: "Self-update is switched off for this deployment.",
+      });
+      await expect(client.updater.apply({})).rejects.toMatchObject({
+        message: "Self-update is switched off for this deployment.",
+      });
+      expect(fetchImpl).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
 describe("billing", () => {
   function billingDeps(isDeploymentOwner: boolean, billing?: RouterDeps["billing"]) {
     const prisma = {
@@ -2618,7 +2657,7 @@ describe("updater owner gate", () => {
     expect(Array.isArray(body.json.manualCommands)).toBe(true);
   });
 
-  it("refuses apply when the sidecar is not configured", async () => {
+  it("refuses apply because self-update is switched off for this deployment", async () => {
     const { handler } = updaterDeps();
     const actor = {
       spaceId: "workspace-1",
@@ -2639,7 +2678,7 @@ describe("updater owner gate", () => {
     expect(response.status).toBeGreaterThanOrEqual(400);
     const body = await response.json();
     const message = JSON.stringify(body);
-    expect(message).toMatch(/sidecar/i);
+    expect(message).toMatch(/Self-update is switched off/i);
     expect(message).not.toMatch(/git (fetch|merge|pull)/i);
   });
 });

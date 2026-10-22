@@ -1,0 +1,37 @@
+schema: spec-driven
+
+# Full project context lives in openspec/project.md; this is the part tooling must not miss.
+context: |
+  Nurlings is a private, rebranded fork of Rakazo (Apache-2.0, https://github.com/elie222/rakazo)
+  by Nurturist AI. We keep merging upstream, so every change must keep merge conflicts small.
+  White-label what clients see: the web, desktop and mobile UIs, and the text their dedicated
+  server sends (emails, chat messages, update messages, model/billing blurbs). Also: self-update
+  disabled (never re-pointed), our own images/compose/installer, mobile bundle id
+  com.nurturistai.nurlings. NOT in scope: model prompts, bot User-Agent, apps/www, telemetry,
+  README/docs/templates/SECURITY.md, and internal names (@rakazo/*, RAKAZO_*, DB/Docker/code
+  identifiers, rakazo:// scheme, Expo slug, desktop appId). Read brand values from the central
+  brand config (packages/brand) rather than hardcoding "Nurlings". Never touch LICENSE; NOTICE
+  credits Rakazo by Elie Steinbock. Do not use the Rakazo name or logo in branding.
+  Stack: TypeScript monorepo (pnpm/Turborepo), React, Electron, Expo, Hono, Postgres, Prisma,
+  Graphile Worker, Lingui.
+
+# Per-artifact rules (optional)
+rules:
+  proposal:
+    - State what stays internal on purpose and why (upstream mergeability)
+    - Flag anything that contacts Rakazo-owned infrastructure
+  tasks:
+    - Every task states how it is verified (command, test, or observable behaviour)
+    - Land tests with the work they cover; do not collect them in a final group
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

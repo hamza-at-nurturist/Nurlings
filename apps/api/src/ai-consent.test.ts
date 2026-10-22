@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type { Actor } from "@rakazo/contracts";
 import { AI_DISCLOSURE_VERSION } from "@rakazo/contracts";
 import { describe, expect, it, vi } from "vitest";
@@ -129,6 +130,13 @@ describe("consent grants", () => {
     const { deps, actor } = setup();
     deps.env.privacyPolicyUrl = "https://example.com/privacy";
     expect((await aiConsentStatus(deps, actor)).privacyUrl).toBe("https://example.com/privacy");
+  });
+  it("defaults the privacy link to the product site, never the upstream's", async () => {
+    const { deps, actor } = setup();
+    deps.env.privacyPolicyUrl = undefined;
+    const { privacyUrl } = await aiConsentStatus(deps, actor);
+    expect(privacyUrl).toBe(brand.urls.site);
+    expect(privacyUrl).not.toMatch(/rakazo/i);
   });
   it("rejects stale disclosures, unknown recipients, and a changed account or Space", async () => {
     const { deps, actor, upsert } = setup();

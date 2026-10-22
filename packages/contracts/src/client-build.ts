@@ -16,9 +16,9 @@ export const CLIENT_KINDS = ["web", "mobile"] as const;
 export type ClientKind = (typeof CLIENT_KINDS)[number];
 export type MinimumClientBuilds = Partial<Record<ClientKind, string>>;
 
-export const IOS_APP_STORE_URL = "https://apps.apple.com/app/rakazo/id6801531099";
-export const ANDROID_APK_URL =
-  "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk";
+// Store and download links come from the brand (`brand.urls.iosApp` / `androidApp`, null until a
+// listing exists). The upstream links were removed so they cannot ship in a bundle (Metro does not
+// tree-shake) and so any new use fails to compile instead of linking to the upstream's apps.
 
 const BUILD_ID = /^\d{14}$/;
 

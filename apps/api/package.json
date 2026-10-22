@@ -20,6 +20,7 @@
     "@rakazo/adapter-kit": "workspace:*",
     "@rakazo/adapters": "workspace:*",
     "@rakazo/auth": "workspace:*",
+    "@nurlings/brand": "workspace:*",
     "@rakazo/contracts": "workspace:*",
     "@rakazo/core": "workspace:*",
     "@rakazo/db": "workspace:*",

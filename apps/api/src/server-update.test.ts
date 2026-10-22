@@ -326,3 +326,32 @@ describe("sidecar proxy auth and no-git-apply", () => {
     });
   });
 });
+
+describe("server update switched off", () => {
+  const config = (fetchImpl: ReturnType<typeof vi.fn>): UpdaterProxyConfig => ({
+    url: URL,
+    token: TOKEN,
+    gitSha: "abc",
+    disabled: true,
+    fetch: fetchImpl as unknown as typeof fetch,
+  });
+
+  it("reports an install that cannot self-update, without contacting the sidecar", async () => {
+    const fetchImpl = vi.fn();
+    const status = await readServerUpdateStatus(config(fetchImpl));
+    expect(status.supported).toBe(false);
+    expect(status.installKind).not.toBe("sidecar");
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("rejects check and apply without contacting anything", async () => {
+    const fetchImpl = vi.fn();
+    await expect(checkServerUpdate(config(fetchImpl), {})).rejects.toThrow(
+      "Self-update is switched off for this deployment.",
+    );
+    await expect(applyServerUpdate(config(fetchImpl), {})).rejects.toThrow(
+      "Self-update is switched off for this deployment.",
+    );
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});

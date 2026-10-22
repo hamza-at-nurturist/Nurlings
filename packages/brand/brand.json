@@ -1,0 +1,52 @@
+{
+  "name": "Nurlings",
+  "bot": {
+    "singular": "Nurling",
+    "plural": "Nurlings"
+  },
+  "tagline": "Powered by Nurturist AI",
+  "description": "Your team of always-on agents.",
+  "company": {
+    "name": "Nurturist AI",
+    "url": "https://nurturistai.com"
+  },
+  "urls": {
+    "site": "https://nurlings.nurturistai.com",
+    "cloud": null,
+    "iosApp": null,
+    "androidApp": null,
+    "community": null
+  },
+  "native": {
+    "bundleId": "com.nurturistai.nurlings"
+  },
+  "mark": {
+    "viewBox": "292 254 440 516",
+    "path": "M300 762V262h92l240 342V262h92v500h-92L392 420v342z"
+  },
+  "registry": "ghcr.io/nurturist-ai/nurlings",
+  "colors": {
+    "themeLight": "#FCFCFC",
+    "themeDark": "#141414",
+    "splashLight": "#FCFCFC",
+    "splashDark": "#141414",
+    "iconBackground": "#141414"
+  },
+  "assets": {
+    "mark": "assets/logo/nurlings-mark.png",
+    "wordmark": "assets/logo/nurlings-wordmark.svg",
+    "appIcon": "assets/app-icon/app-icon-1024.png",
+    "appleIcon": "assets/app-icon/Nurlings.icon",
+    "androidAdaptiveForeground": "assets/android/adaptive-foreground-1024.png",
+    "androidAdaptiveBackground": "assets/android/adaptive-background-1024.png",
+    "androidMonochrome": "assets/android/monochrome-1024.png",
+    "androidNotification": "assets/android/notification-72.png",
+    "splash": "assets/splash/splash-icon-1024.png",
+    "favicon": "assets/favicon/favicon-128.png"
+  },
+  "updates": {
+    "desktop": false,
+    "mobileOta": false,
+    "serverSelfUpdate": false
+  }
+}

@@ -1,11 +1,21 @@
+import { brand } from "@nurlings/brand";
+
 /**
- * Messages that Rakazo, or its model library, adds to a conversation in the user's role
+ * Messages that the product, or its model library, adds to a conversation in the user's role
  * are not from the user: screenshots moved out of tool results, nudges to continue,
  * finished background shell output, a helper's task. Models (local ones especially)
  * took them for the user replying, kept going instead of asking, and confused their
  * helpers with the user. Label them plainly.
  */
-export const AUTOMATED_MESSAGE_LABEL = "[Automated message from Rakazo, not from the user]";
+export const AUTOMATED_MESSAGE_LABEL = `[Automated message from ${brand.name}, not from the user]`;
+/** The upstream wording, still recognised so data labelled under it is treated the same way. */
+export const LEGACY_AUTOMATED_MESSAGE_LABEL = "[Automated message from Rakazo, not from the user]";
+
+export function isAutomatedMessageText(text: string): boolean {
+  return (
+    text.startsWith(AUTOMATED_MESSAGE_LABEL) || text.startsWith(LEGACY_AUTOMATED_MESSAGE_LABEL)
+  );
+}
 
 export function automated(text: string): string {
   return `${AUTOMATED_MESSAGE_LABEL} ${text}`;

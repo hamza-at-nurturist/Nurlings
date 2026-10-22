@@ -19,6 +19,7 @@ COPY --chmod=755 apps/www/package.json apps/www/
 COPY --chmod=755 packages/adapter-kit/package.json packages/adapter-kit/
 COPY --chmod=755 packages/adapters/package.json packages/adapters/
 COPY --chmod=755 packages/auth/package.json packages/auth/
+COPY --chmod=755 packages/brand/package.json packages/brand/
 COPY --chmod=755 packages/chat-ui/package.json packages/chat-ui/
 COPY --chmod=755 packages/contracts/package.json packages/contracts/
 COPY --chmod=755 packages/core/package.json packages/core/

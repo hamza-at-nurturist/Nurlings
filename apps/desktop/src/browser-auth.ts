@@ -1,4 +1,5 @@
 import { createServer, type Server } from "node:http";
+import { brand } from "@nurlings/brand";
 import type { RakazoDesktopOAuthCallback } from "@rakazo/contracts";
 import { LOOPBACK_HOSTS } from "./oauth-callback.js";
 
@@ -83,11 +84,13 @@ export async function openBrowserAuth(
             !code ||
             target.searchParams.has("error")
           ) {
-            response.writeHead(400).end("Sign-in callback rejected. Return to Rakazo to retry.");
+            response
+              .writeHead(400)
+              .end(`Sign-in callback rejected. Return to ${brand.name} to retry.`);
             return;
           }
           consumed = true;
-          response.end("You can close this tab and return to Rakazo.", close);
+          response.end(`You can close this tab and return to ${brand.name}.`, close);
           options.onCallback({ code, state });
         });
         server.requestTimeout = 10_000;

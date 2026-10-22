@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_UPDATE_BRANCH,
@@ -200,6 +201,13 @@ describe("detectRestartSupervisor", () => {
     });
     expect(restartSupervisorAdvice(detectRestartSupervisor({}))).toContain(RESTART_SUPERVISOR_ENV);
     expect(restartSupervisorAdvice({ kind: "systemd", label: "systemd" })).toContain("systemd");
+    expect(restartSupervisorAdvice(detectRestartSupervisor({}))).toContain(
+      `${brand.name} will not exit on its own`,
+    );
+    expect(restartSupervisorAdvice({ kind: "systemd", label: "systemd" })).toContain(
+      `${brand.name} will exit after updating`,
+    );
+    expect(restartSupervisorAdvice({ kind: "systemd", label: "systemd" })).not.toContain("Rakazo");
   });
 });
 

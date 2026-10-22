@@ -16,6 +16,7 @@ RUN apt-get update \
 WORKDIR /app
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY patches patches
+COPY packages/brand packages/brand
 COPY packages/contracts packages/contracts
 COPY packages/core packages/core
 COPY packages/logging packages/logging

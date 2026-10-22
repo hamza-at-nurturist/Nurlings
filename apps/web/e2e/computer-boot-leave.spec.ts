@@ -7,6 +7,7 @@ import {
   createNamedBot,
   rpc,
   signup,
+  ui,
 } from "./helpers";
 
 const screenUrl = "https://screen.example/vnc.html";
@@ -125,7 +126,10 @@ test("a failed boot can be retried from the computer window", async ({ page }) =
 
   fail = false;
   await alert.getByRole("button", { name: "Retry screen" }).click();
-  await expect(page.locator('iframe[title="Bot screen"]')).toHaveAttribute("src", screenUrl);
+  await expect(page.locator(`iframe[title="${ui("Bot screen")}"]`)).toHaveAttribute(
+    "src",
+    screenUrl,
+  );
   await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
@@ -225,7 +229,7 @@ test("Retry screen clears a failed takeover on a running computer", async ({ pag
   await expect(preview.locator("iframe")).toHaveAttribute("src", screenUrl);
   await preview.hover();
   await preview.getByTestId("computer-preview-open").click();
-  const screen = page.locator('iframe[title="Bot screen"]');
+  const screen = page.locator(`iframe[title="${ui("Bot screen")}"]`);
   await expect(screen).toHaveAttribute("src", screenUrl);
   await page
     .getByTestId("computer-chrome")

@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, createBotFromPicker, rpc, signup } from "./helpers";
+import {
+  captureScreenshot,
+  completeOnboarding,
+  createBotFromPicker,
+  rpc,
+  signup,
+  ui,
+} from "./helpers";
 
 test("create opens form, then empty chat; picker lists bots; sidebar collapses", async ({
   page,
@@ -82,7 +89,7 @@ test("create opens form, then empty chat; picker lists bots; sidebar collapses",
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText("Groups", { exact: true })).toBeVisible();
   await expect(dialog).toContainText(
-    "Shared chat with 2-10 bots. They all reply in the same thread.",
+    ui("Shared chat with 2-10 bots. They all reply in the same thread."),
   );
   await expect(page.getByTestId("side-panel")).not.toHaveAttribute("data-panel", "create-group");
   await captureScreenshot(page, testInfo, "picker-group-info-dialog");
@@ -97,7 +104,7 @@ test("create opens form, then empty chat; picker lists bots; sidebar collapses",
   await spaceInfo.click();
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText("Spaces", { exact: true })).toBeVisible();
-  await expect(dialog).toContainText("own bots and groups");
+  await expect(dialog).toContainText(ui("own bots and groups"));
   await captureScreenshot(page, testInfo, "picker-space-info-dialog");
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();

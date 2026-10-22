@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup } from "./helpers";
+import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup, ui } from "./helpers";
 
 test("command palette opens with keyboard, filters, and switches bots", async ({
   page,
@@ -30,7 +30,7 @@ test("command palette opens with keyboard, filters, and switches bots", async ({
 
   await page.keyboard.press("ControlOrMeta+K");
   const palette = page.getByTestId("command-palette");
-  const dialog = page.getByRole("dialog", { name: "Switch bot" });
+  const dialog = page.getByRole("dialog", { name: ui("Switch bot") });
   await expect(dialog).toBeVisible();
   await expect(palette).toBeVisible();
   await expect(page.getByRole("tab")).toHaveCount(0);

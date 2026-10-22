@@ -1,7 +1,8 @@
+import { brand } from "@nurlings/brand";
 import type { Hono } from "hono";
 
-/** Package of the Rakazo Android app (apps/mobile/app.json). */
-const ANDROID_PACKAGE = "com.rakazo.app";
+/** Package of the Android app (apps/mobile/app.json), taken from the brand config. */
+const ANDROID_PACKAGE = brand.native.bundleId;
 
 /**
  * Which native apps can use this server's passkeys: only those the domain vouches for

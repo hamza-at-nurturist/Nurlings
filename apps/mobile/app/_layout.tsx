@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type { LinkFavicons } from "@rakazo/chat-ui/native";
 import {
   CodeCopyButtonContext,
@@ -336,7 +337,7 @@ function LayoutContent() {
                     >
                       <Stack.Screen
                         name="index"
-                        options={{ headerShown: false, title: "Rakazo" }}
+                        options={{ headerShown: false, title: brand.name }}
                       />
                       <Stack.Screen
                         name="search"

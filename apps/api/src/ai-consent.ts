@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { brand } from "@nurlings/brand";
 import { ORPCError } from "@orpc/server";
 import {
   aiRecipient,
@@ -8,7 +9,7 @@ import {
   toStringRecord,
 } from "@rakazo/adapters";
 import type { Actor, AiConsentQuery, AiConsentStatus, AiRecipient } from "@rakazo/contracts";
-import { AI_DISCLOSURE_VERSION, AI_PRIVACY_URL } from "@rakazo/contracts";
+import { AI_DISCLOSURE_VERSION } from "@rakazo/contracts";
 import {
   findDefaultModelCredential,
   findDefaultVoiceCredential,
@@ -249,7 +250,7 @@ export async function aiConsentStatus(
       .update(JSON.stringify([actor.userId, actor.spaceId]))
       .digest("hex"),
     version: AI_DISCLOSURE_VERSION,
-    privacyUrl: deps.env.privacyPolicyUrl ?? AI_PRIVACY_URL,
+    privacyUrl: deps.env.privacyPolicyUrl ?? brand.urls.site,
     recipients: [...recipients.values()],
   };
 }

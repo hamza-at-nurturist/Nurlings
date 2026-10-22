@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type {
   ArtifactStore,
   SandboxProvider,
@@ -2734,6 +2735,49 @@ describe("team chat bridge", () => {
         }),
       }),
     );
+  });
+
+  it("tells the sender to open the product by its brand name when a request fails", async () => {
+    const send = vi.fn(async () => ({ handle: "handle-1" }));
+    const prisma = {
+      externalMessage: {
+        updateMany: vi.fn(async () => ({ count: 1 })),
+        findUnique: vi.fn(async () => ({ providerReplyHandle: null })),
+        update: vi.fn(async () => ({})),
+      },
+    } as unknown as PrismaClient;
+    const bridge = new TeamChatBridge({
+      prisma,
+      events: { sendUserMessage: vi.fn() },
+      jobs: { enqueue: vi.fn() },
+      send,
+      providerId: "slack",
+      botId: "bot-1",
+      reconcileIntervalMs: 60_000,
+    });
+
+    await (
+      bridge as unknown as {
+        deliverFailure: (message: {
+          id: string;
+          kind: string;
+          replyThreadId: string | null;
+          externalConversation: { conversationId: string };
+        }) => Promise<void>;
+      }
+    ).deliverFailure({
+      id: "message-9",
+      kind: "direct",
+      replyThreadId: null,
+      externalConversation: { conversationId: "conversation-1" },
+    });
+
+    expect(send).toHaveBeenCalledTimes(1);
+    const request = (send.mock.calls[0] as unknown as [{ content: string }])[0];
+    expect(request.content).toBe(
+      `The agent could not complete that request. Open ${brand.name} for details.`,
+    );
+    expect(request.content).not.toContain("Rakazo");
   });
 
   it("does not reopen a linked run from a stale received snapshot", async () => {

@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 export const AI_DISCLOSURE_VERSION = "2026-09-14";
-export const AI_PRIVACY_URL = "https://rakazo.com/privacy/";
+// The privacy link comes from the brand (`brand.urls.site`) or the operator's configured policy URL.
 export const AiDataUseSchema = z.enum(["model", "voice", "memory"]);
 export type AiDataUse = z.infer<typeof AiDataUseSchema>;
 export const AI_DATA_DISCLOSURES: Record<AiDataUse, string> = {

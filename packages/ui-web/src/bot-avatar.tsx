@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type { BotColorDef } from "@rakazo/core";
 import {
   ACTIVE_RUN_STATUSES,
@@ -19,6 +20,7 @@ import type { CSSProperties } from "react";
 import { memo, useId, useMemo, useSyncExternalStore } from "react";
 import type { AvatarStyle } from "./avatar-style.js";
 import { useAvatarStyle } from "./avatar-style.js";
+import { BrandMark } from "./brand-mark.js";
 import { cn } from "./lib/utils.js";
 import "./styles.css";
 
@@ -534,12 +536,11 @@ export function BotShapePreview({
 export function Wordmark({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <div className="flex h-11 w-11 items-center justify-center gap-1.5 rounded-full bg-card">
-        <span className="h-4 w-[7px] rounded-full bg-primary" />
-        <span className="h-4 w-[7px] rounded-full bg-primary" />
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-primary">
+        <BrandMark className="h-5" />
       </div>
       <span className="font-[Aeonik,ui-sans-serif] text-[28px] tracking-tight text-foreground">
-        Rakazo
+        {brand.name}
       </span>
     </div>
   );

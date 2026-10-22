@@ -5,6 +5,7 @@ import {
   createBotFromPicker,
   openNewBot,
   signup,
+  ui,
 } from "./helpers";
 
 test("bot creation, editing, and deletion persist", async ({ page }, testInfo) => {
@@ -38,7 +39,7 @@ test("bot creation, editing, and deletion persist", async ({ page }, testInfo) =
   await expect(page.getByTestId("create-bot-error")).toBeVisible();
   expect(createFailed).toBe(true);
   await page.unroute("**/rpc/bots/create");
-  await page.getByRole("button", { name: "Cancel new bot" }).click();
+  await page.getByRole("button", { name: ui("Cancel new bot") }).click();
   await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "closed");
 
   let failedPostCreateRefresh = false;
@@ -100,7 +101,9 @@ test("bot creation, editing, and deletion persist", async ({ page }, testInfo) =
   const openWork = settings.getByTestId("bot-scratchpad");
   await expect(teamComputer).toBeHidden();
   await expect(settings.getByRole("switch", { name: "Read replies aloud" })).toBeHidden();
-  await expect(settings.getByRole("switch", { name: "Manage the bots it creates" })).toBeHidden();
+  await expect(
+    settings.getByRole("switch", { name: ui("Manage the bots it creates") }),
+  ).toBeHidden();
   await expect(modelSelect).toBeHidden();
   await expect(openWork).toBeHidden();
   await expect(settings.getByRole("button", { name: "Save", exact: true })).toBeVisible();
@@ -120,7 +123,9 @@ test("bot creation, editing, and deletion persist", async ({ page }, testInfo) =
   await captureScreenshot(page, testInfo, "27c-disabled-builtin-tools");
   await expect(teamComputer).toBeVisible();
   await expect(settings.getByRole("switch", { name: "Read replies aloud" })).toBeVisible();
-  await expect(settings.getByRole("switch", { name: "Manage the bots it creates" })).toBeVisible();
+  await expect(
+    settings.getByRole("switch", { name: ui("Manage the bots it creates") }),
+  ).toBeVisible();
   await expect(openWork).toBeVisible();
   await expect(modelSelect).toBeVisible();
   await expect(modelSelect).toContainText("Space default");
@@ -200,7 +205,7 @@ test("bot management switch persists and settings help is accessible", async ({
     page,
     `bot-management-${Date.now()}@rakazo.test`,
     "password12",
-    "Manage the bots it creates",
+    ui("Manage the bots it creates"),
   );
   await completeOnboarding(page);
   await page.goto("/app");
@@ -210,14 +215,15 @@ test("bot management switch persists and settings help is accessible", async ({
     await page.locator("main").getByRole("button", { name: "Chief", exact: true }).click();
     const settings = page.getByTestId("bot-settings");
     await settings.getByText("Advanced", { exact: true }).click();
-    return settings.getByRole("switch", { name: "Manage the bots it creates" });
+    return settings.getByRole("switch", { name: ui("Manage the bots it creates") });
   };
 
   const fleetSwitch = await openAdvanced();
   await expect(fleetSwitch).toBeChecked();
-  const help = page.getByRole("button", { name: "About Manage the bots it creates" });
-  const explanation =
-    "Organize the sidebar and edit bots. Instruction, model, routine and group edits need approval.";
+  const help = page.getByRole("button", { name: ui("About Manage the bots it creates") });
+  const explanation = ui(
+    "Organize the sidebar and edit bots. Instruction, model, routine and group edits need approval.",
+  );
   const descriptionId = await help.getAttribute("aria-describedby");
   expect(descriptionId).toBeTruthy();
   const description = page.locator(`[id="${descriptionId}"]`);

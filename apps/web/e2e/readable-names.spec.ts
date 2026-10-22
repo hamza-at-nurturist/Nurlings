@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { createDb } from "../../../packages/db/src/index";
-import { captureScreenshot, completeOnboarding, openUserSettings, rpc, signup } from "./helpers";
+import {
+  captureScreenshot,
+  completeOnboarding,
+  openUserSettings,
+  rpc,
+  signup,
+  ui,
+} from "./helpers";
 import { expectReadableNames } from "./visible-name-guard";
 
 test("legacy opaque names never appear in navigation, account, chats or Activity", async ({
@@ -35,7 +42,7 @@ test("legacy opaque names never appear in navigation, account, chats or Activity
     });
     await db.space.update({ where: { id: me.spaceId }, data: { name: "__SpaceTok1__" } });
     await page.goto(`/app/${bot.id}`);
-    await expect(page.getByPlaceholder("Message Bot")).toBeVisible();
+    await expect(page.getByPlaceholder(`Message ${ui("Bot")}`)).toBeVisible();
     const accountTrigger = page.getByTestId("user-menu-trigger");
     await expect(accountTrigger).toHaveAccessibleName(`Account menu for ${email}`);
     await accountTrigger.click();
@@ -66,7 +73,9 @@ test("legacy opaque names never appear in navigation, account, chats or Activity
     await page.getByRole("button", { name: "Activity", exact: true }).click();
     await page.reload();
     await expect(page.getByText("Loading activity…")).toBeHidden();
-    await expect(page.locator("aside").getByRole("button", { name: /^Bot, / })).toBeVisible();
+    await expect(
+      page.locator("aside").getByRole("button", { name: new RegExp(`^${ui("Bot")}, `) }),
+    ).toBeVisible();
     await expectReadableNames(page.locator("body"));
     await captureScreenshot(page, testInfo, "readable-names-activity");
   } finally {

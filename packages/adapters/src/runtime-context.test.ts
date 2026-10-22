@@ -3,6 +3,7 @@ import type { AgentRunRequest } from "@rakazo/adapter-kit";
 import { DEFAULT_CONTEXT_STRATEGY } from "@rakazo/adapter-kit";
 import { getLogger } from "@rakazo/logging";
 import { describe, expect, it, vi } from "vitest";
+import { COMPACTED_SUMMARY_PREFIX } from "./compacted-summary.js";
 import { ContextBudgetError, ContextCacheTracker } from "./context-selection.js";
 import { createRuntimeContextPolicy } from "./runtime-context.js";
 
@@ -557,6 +558,22 @@ describe("runtime context policy", () => {
     const { request, context } = fixture();
     const summary =
       "Rakazo-owned compacted context through message sequence 10.\n<compacted_thread_summary>Durable approval constraint</compacted_thread_summary>";
+    request.history.unshift({ role: "user", content: summary });
+    context.messages.unshift({
+      role: "user",
+      content: summary,
+      timestamp: 0,
+      rakazoHistory: true,
+    } as Message);
+    const prepared = createRuntimeContextPolicy({
+      ...request,
+      contextStrategy: "snapshots",
+    }).prepareContext(context, model);
+    expect(prepared.messages[0]!.content).toBe(summary);
+  });
+  it("preserves a rolling summary written under the current brand prefix when it fits", () => {
+    const { request, context } = fixture();
+    const summary = `${COMPACTED_SUMMARY_PREFIX}10.\n<compacted_thread_summary>Durable approval constraint</compacted_thread_summary>`;
     request.history.unshift({ role: "user", content: summary });
     context.messages.unshift({
       role: "user",
