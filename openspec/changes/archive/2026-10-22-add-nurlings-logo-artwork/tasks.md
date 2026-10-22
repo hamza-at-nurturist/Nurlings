@@ -29,7 +29,7 @@
 ## 5. Review and release
 
 - [x] 5.1 Show the contact sheet, the in-app preview and the animation frames. Verify: the maintainer said "ship it" before anything was committed.
-- [ ] 5.2 Run `pnpm brand:check` (also `--built`), the unit tests, lint and typecheck; open the pull request with the checklist below; merge when CI is green. Verify: green CI on the head commit.
+- [x] 5.2 Run `pnpm brand:check` (also `--built`), the unit tests, lint and typecheck; open the pull request with the checklist below; merge when CI is green. Verify: green CI on the head commit. Done in pull request 6: every job passed except the Playwright report aggregator, which failed twice before getting a runner while all four shards passed; the maintainer approved merging.
 
 ## Workflow follow-up
 
