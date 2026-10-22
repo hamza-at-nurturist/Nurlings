@@ -62,7 +62,9 @@ describe("brand.json", () => {
 
 describe("parseBrand", () => {
   it("accepts a lowercase registry", () => {
-    const parsed = parseBrand(withChange((d) => (d.registry = "ghcr.io/hamza-at-nurturist/nurlings")));
+    const parsed = parseBrand(
+      withChange((d) => (d.registry = "ghcr.io/hamza-at-nurturist/nurlings")),
+    );
     expect(parsed.registry).toBe("ghcr.io/hamza-at-nurturist/nurlings");
   });
 
