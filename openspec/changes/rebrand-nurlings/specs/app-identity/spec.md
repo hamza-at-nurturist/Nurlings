@@ -21,14 +21,44 @@ in system settings, permission descriptions, launcher and notification icons, an
 - **WHEN** the Expo configuration is resolved
 - **THEN** the display name is "Nurlings", every permission description names Nurlings, and icons and splash point at the Nurlings assets
 
-### Requirement: Native identifiers unchanged
-The change SHALL NOT alter the iOS bundle identifier, the Android package, the `rakazo://` URL
-scheme, the Expo slug, the desktop application id or the Linux executable name, so no server-side
-configuration needs to change.
+### Requirement: Mobile bundle identifier
+The iOS bundle identifier and the Android package SHALL both be `com.nurturistai.nurlings`, taken
+from the brand configuration. The `rakazo://` URL scheme, the Expo slug, the desktop application id
+and the Linux executable name SHALL NOT change.
 
-#### Scenario: Identifiers preserved
-- **WHEN** the resolved Expo config and desktop builder config are compared with upstream's
-- **THEN** bundle identifier, package, scheme, slug, desktop application id and executable name are identical
+#### Scenario: Resolved Expo config
+- **WHEN** the Expo configuration is resolved
+- **THEN** `ios.bundleIdentifier` and `android.package` are `com.nurturistai.nurlings` and `scheme` is `rakazo`
+
+#### Scenario: Other identifiers preserved
+- **WHEN** the resolved Expo slug, the desktop builder `appId` and the Linux `executableName` are compared with upstream's
+- **THEN** they are identical
+
+### Requirement: Minimal server support for the bundle identifier
+The server SHALL advertise the configured Android package in its Android passkey association file
+and SHALL leave its trusted mobile origins unchanged; iOS passkey association SHALL continue to
+come from the `PASSKEY_APPLE_APP_IDS` setting.
+
+#### Scenario: Android association
+- **WHEN** Android passkey fingerprints are configured and `/.well-known/assetlinks.json` is requested
+- **THEN** its `package_name` is `com.nurturistai.nurlings`
+
+#### Scenario: Origins unchanged
+- **WHEN** a sign-in redirect uses the `rakazo://` scheme
+- **THEN** it is accepted exactly as before, and no origin derived from the bundle identifier is added
+
+### Requirement: Expo ownership placeholders
+The mobile configuration SHALL NOT name the upstream Expo owner or EAS project. `owner` and the EAS
+project id SHALL be clearly marked placeholders, and a release build SHALL fail while a placeholder
+is present.
+
+#### Scenario: Placeholders present
+- **WHEN** `app.json` is read
+- **THEN** `owner` and `extra.eas.projectId` are the documented `REPLACE_WITH_…` placeholders and no upstream owner, project id or update URL appears
+
+#### Scenario: Release build blocked
+- **WHEN** a production EAS build profile resolves the configuration with a placeholder still set
+- **THEN** resolution throws an error naming the placeholder
 
 ### Requirement: Web identity
 The web app SHALL show the configured product name in the document title, the

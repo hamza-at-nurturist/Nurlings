@@ -40,12 +40,14 @@ We keep pulling upstream Rakazo updates (`git remote upstream` → `elie222/raka
 decision in this repo's branding work is judged by one question: *does it make the next upstream
 merge bigger?* Therefore:
 
-1. **White-label the customer-facing UI only** — the web, desktop (Electron) and mobile (Expo)
-   apps that clients see. The API/server, emails, prompts, User-Agent, self-update, images/installer/
-   CI, `apps/www`, telemetry, README/docs and internal names (`@rakazo/*` package names, `RAKAZO_*`
-   env vars, database / Docker names, storage keys, wire headers, code identifiers) stay as
-   upstream. Native identifiers (bundle id, Android package, `rakazo://`, Expo slug, desktop
-   `appId`) also stay: the API depends on them. Renaming creates conflicts for no user benefit.
+1. **White-label what clients see and what their dedicated server does.** Each client runs their
+   own server. In scope: the web, desktop (Electron) and mobile (Expo) UIs; the text the server
+   sends (account emails, chat-channel messages, update messages, model/billing blurbs, OAuth client
+   name); self-update disabled; our own images, compose defaults and installer; the mobile bundle id
+   (`com.nurturistai.nurlings`). Out of scope: model prompts, bot User-Agent, `apps/www`, telemetry,
+   README/docs/issue templates/`SECURITY.md`, and internal names (`@rakazo/*` package names,
+   `RAKAZO_*` env vars, database / Docker names, storage keys, wire headers, code identifiers). The
+   `rakazo://` scheme, Expo slug and desktop `appId` also stay. Disable updaters; never re-point them.
 2. **Centralise branding.** One brand config (`packages/brand`) holds name, bot terms, tagline,
    URLs, colours, logo paths. Product code reads it instead of hardcoding "Nurlings"; upstream
    text is rebranded at well-defined seams (catalog load, config generation) rather than by editing
@@ -59,8 +61,8 @@ merge bigger?* Therefore:
 - `LICENSE` is upstream's file and stays byte-for-byte untouched.
 - A `NOTICE` file states that Nurlings is based on Rakazo by Elie Steinbock, licensed under
   Apache-2.0, with a link to the original repo.
-- The Rakazo name and logo are not used in the Nurlings UI branding. Inside the customer-facing UI
-  scope, the name remains only in `LICENSE`, `NOTICE`, and internal identifiers.
+- The Rakazo name and logo are not used in Nurlings branding. In the scope above, the name remains
+  only in `LICENSE`, `NOTICE`, and internal identifiers.
 
 ## Conventions
 

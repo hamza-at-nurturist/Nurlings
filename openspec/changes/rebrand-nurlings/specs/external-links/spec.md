@@ -27,8 +27,9 @@ link.
 - **THEN** the web sidebar has no "Get the mobile app" entry and the mobile force-update prompt opens no upstream store page
 
 ### Requirement: Updaters that could fetch an upstream build are disabled
-The desktop auto-updater and mobile over-the-air updates SHALL be disabled so that a Nurlings
-build cannot be replaced by an upstream build. They are disabled, not re-pointed.
+The desktop auto-updater, mobile over-the-air updates and the server self-update SHALL be disabled
+so that a Nurlings build or client server cannot be replaced by an upstream one. They are disabled,
+not re-pointed.
 
 #### Scenario: Desktop update check
 - **WHEN** a packaged desktop app starts with default settings
@@ -37,3 +38,11 @@ build cannot be replaced by an upstream build. They are disabled, not re-pointed
 #### Scenario: Mobile OTA
 - **WHEN** the Expo configuration is resolved
 - **THEN** updates are disabled and no update URL is present
+
+#### Scenario: Server self-update refused
+- **WHEN** an owner requests a server update check or apply
+- **THEN** the server answers that self-update is switched off for this deployment and contacts neither the updater sidecar nor any upstream repository
+
+#### Scenario: Software-update section hidden
+- **WHEN** the web app's settings are opened on a server with self-update disabled
+- **THEN** no software-update section is shown

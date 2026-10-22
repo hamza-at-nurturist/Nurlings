@@ -4,12 +4,14 @@ schema: spec-driven
 context: |
   Nurlings is a private, rebranded fork of Rakazo (Apache-2.0, https://github.com/elie222/rakazo)
   by Nurturist AI. We keep merging upstream, so every change must keep merge conflicts small.
-  White-label ONLY the customer-facing UI (web, desktop, mobile): visible text, display names,
-  icons, visible links. No backend white-labeling (API, emails, prompts, User-Agent, self-update,
-  Docker/CI, apps/www, telemetry). Leave internal names and native identifiers alone (@rakazo/*,
-  RAKAZO_*, DB/Docker/code identifiers, bundle id, package, rakazo:// scheme). Read brand values
-  from the central brand config (packages/brand) rather than hardcoding "Nurlings". Never touch
-  LICENSE; NOTICE credits Rakazo by Elie Steinbock. Do not use the Rakazo name or logo in branding.
+  White-label what clients see: the web, desktop and mobile UIs, and the text their dedicated
+  server sends (emails, chat messages, update messages, model/billing blurbs). Also: self-update
+  disabled (never re-pointed), our own images/compose/installer, mobile bundle id
+  com.nurturistai.nurlings. NOT in scope: model prompts, bot User-Agent, apps/www, telemetry,
+  README/docs/templates/SECURITY.md, and internal names (@rakazo/*, RAKAZO_*, DB/Docker/code
+  identifiers, rakazo:// scheme, Expo slug, desktop appId). Read brand values from the central
+  brand config (packages/brand) rather than hardcoding "Nurlings". Never touch LICENSE; NOTICE
+  credits Rakazo by Elie Steinbock. Do not use the Rakazo name or logo in branding.
   Stack: TypeScript monorepo (pnpm/Turborepo), React, Electron, Expo, Hono, Postgres, Prisma,
   Graphile Worker, Lingui.
 

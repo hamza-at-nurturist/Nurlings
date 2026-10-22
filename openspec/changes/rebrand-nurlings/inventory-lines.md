@@ -2,6 +2,13 @@
 
 ## User-facing (UI text, page titles, sign-in headings, onboarding, errors, docs shown to users)
 
+- `apps/api/src/messaging-inbound.ts:579` `Rakazo` — body: "Hi. This line hosts Rakazo personal agents. Some people in this group haven't messaged it yet; send any message to this line first
+- `apps/api/src/messaging-inbound.ts:670` `Rakazo` — body: `"${name}" was linked to your Rakazo agent. Reply YES to let your agent join the conversation there, or NO to stay out.`,
+- `apps/api/src/team-chat-bridge.ts:482` `Rakazo` — throw new Error("Team chat conversation belongs to a different Rakazo target");
+- `apps/api/src/team-chat-bridge.ts:670` `Rakazo` — …(!conversation.thread) throw new Error("Team chat conversation has no Rakazo thread");
+- `apps/api/src/team-chat-bridge.ts:980` `Rakazo` — ? `${target.name} could not complete the delegated request. Open Rakazo for details.`
+- `apps/api/src/team-chat-bridge.ts:1231` `Rakazo` — if (!thread) throw new Error("Team chat conversation has no Rakazo thread");
+- `apps/api/src/team-chat-bridge.ts:1450` `Rakazo` — …is.target?.name ?? "The agent"} could not complete that request. Open Rakazo for details.`,
 - `apps/desktop/e2e/local-stack.spec.ts:9` `Rakazo` — const APP_MARKER = "Local Rakazo stack ready";
 - `apps/desktop/e2e/local-stack.spec.ts:65` `Rakazo` — `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Rakazo</title></head><body><main>${APP_MARKER}</main></body></html>`,
 - `apps/desktop/e2e/local-stack.spec.ts:182` `Rakazo` — await expect(setup.locator("#stack-phase")).toHaveText("Downloading Rakazo…");
@@ -217,7 +224,41 @@
 - `apps/web/src/pages/memory-providers/HonchoSettingsForm.tsx:123` `Rakazo` — <Trans>rakazo-shared and IDs starting with bot- are reserved for Rakazo.</Trans>
 - `apps/web/src/pages/model-settings/compatible-model-fields.tsx:106` `Rakazo` — {t`Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.`}
 - `apps/web/src/pages/model-settings/connection-controls.tsx:349` `Rakazo` — This subscription sign-in is not available in Rakazo yet. Use a deployment credential or
+- `infra/compose/install-images.sh:12` `Rakazo` — echo "Rakazo setup failed: RAKAZO_DOWNLOAD_BASE must use https." >&2
+- `infra/compose/install-images.sh:67` `Rakazo` — echo "Rakazo setup failed: $*" >&2
+- `infra/compose/install-images.sh:382` `Rakazo` — echo "Rakazo files are ready. Edit .env, then run: bash install-images.sh"
+- `infra/compose/install-images.sh:415` `Rakazo` — echo "Rakazo is starting at http://127.0.0.1:5173"
+- `packages/adapters/src/mcp-oauth.test.ts:851` `Rakazo` — expect(registration).toMatchObject({ client_name: "Rakazo", application_type: "native" });
+- `packages/adapters/src/mcp-oauth.ts:350` `Rakazo` — client_name: "Rakazo",
+- `packages/adapters/src/pi-models.test.ts:33` `Rakazo` — billing: "Uses your OpenAI API key. Rakazo does not pay for model usage.",
+- `packages/adapters/src/pi-models.test.ts:46` `Rakazo` — billing: "Uses your Azure OpenAI API key. Rakazo does not pay for model usage.",
+- `packages/adapters/src/pi-models.ts:223` `Rakazo` — …rastructure configured by the deployment owner. No model charges from Rakazo.";
+- `packages/adapters/src/pi-models.ts:226` `Rakazo` — return "Runs on a URL you control. Rakazo does not pay for model usage.";
+- `packages/adapters/src/pi-models.ts:229` `Rakazo` — return `${name} subscription login is not in the Rakazo UI yet. Skip if this deployment already has credentials.`;
+- `packages/adapters/src/pi-models.ts:232` `Rakazo` — return `Uses your ${name} API key. Rakazo does not pay for model usage.`;
+- `packages/adapters/src/pi-models.ts:234` `Rakazo` — return `Uses your ${name} key. Rakazo does not pay for model usage.`;
+- `packages/adapters/src/pi-oauth.ts:50` `Rakazo` — "Sign in with ChatGPT Plus or Pro. Uses your OpenAI subscription. Rakazo does not pay.",
+- `packages/adapters/src/pi-oauth.ts:56` `Rakazo` — …illing: "Sign in with GitHub Copilot. Uses your Copilot subscription. Rakazo does not pay.",
+- `packages/adapters/src/pi-oauth.ts:62` `Rakazo` — …lling: "Sign in with SuperGrok or X Premium, or paste an xAI API key. Rakazo does not pay.",
+- `packages/auth/src/account-security.ts:80` `Rakazo` — subject: "Confirm Rakazo account deletion",
+- `packages/auth/src/account-security.ts:81` `Rakazo` — text: `Enter this code in Rakazo to delete your account:\n\n${token}\n\nThis code expires in ten minutes. If you did not request deletio
+- `packages/auth/src/account-security.ts:82` `Rakazo` — html: `<p>Enter this code in Rakazo to delete your account:</p><p>${token}</p><p>This code expires in ten minutes. If you did not request d
+- `packages/auth/src/index.test.ts:155` `Rakazo` — subject: "Reset your Rakazo password",
+- `packages/auth/src/index.test.ts:167` `Rakazo` — …xpect(message).toMatchObject({ to: "ada@example.test", subject: "Your Rakazo sign-in code" });
+- `packages/auth/src/index.ts:326` `Rakazo` — appName: "Rakazo",
+- `packages/auth/src/index.ts:488` `Rakazo` — rpName: "Rakazo",
+- `packages/auth/src/index.ts:837` `Rakazo` — subject: "Verify your Rakazo email",
+- `packages/auth/src/index.ts:838` `Rakazo` — text: `Verify your email, then return to Rakazo to sign in:\n\n${url}\n\nThis link expires in one hour. If you did not register, ignore this email.`,
+- `packages/auth/src/index.ts:839` `Rakazo` — …ml: `<p><a href="${escapeHtml(url)}">Verify email</a>, then return to Rakazo to sign in.</p><p>This link expires in one hour. If you did not register, ignore this email.</p>`,
+- `packages/auth/src/index.ts:846` `Rakazo` — subject: "Your Rakazo sign-in code",
+- `packages/auth/src/index.ts:847` `Rakazo` — text: `Enter this code to sign in to Rakazo:\n\n${code}\n\nThis code expires in ten minutes. If you did not request it, ignore this email.`,
+- `packages/auth/src/index.ts:848` `Rakazo` — html: `<p>Enter this code to sign in to Rakazo:</p><p><strong>${escapeHtml(code)}</strong></p><p>This code expires in ten minutes. If you did not requ
+- `packages/auth/src/index.ts:861` `Rakazo` — subject: "Reset your Rakazo password",
+- `packages/auth/src/index.ts:865` `Rakazo` — "Reset your Rakazo password using this link:",
+- `packages/auth/src/index.ts:870` `Rakazo` — html: `<p>Hi ${safeName},</p><p>Reset your Rakazo password:</p><p><a href="${safeUrl}">Reset password</a></p><p>This link expires in one hour. If you did
 - `packages/contracts/src/openai-compatible-ui.ts:2` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.";
+- `packages/core/src/self-update.ts:259` `Rakazo` — return `Rakazo will exit after updating and ${supervisor.label} will start it on the new code.`;
+- `packages/core/src/self-update.ts:261` `Rakazo` — return `No process supervisor was detected, so Rakazo will not exit on its own. Restart the API, worker, and web processes yourself, or set ${RESTART_SUPERVI
 - `packages/ui-web/src/bot-avatar.tsx:542` `Rakazo` — Rakazo
 
 ## App identity (Electron/Expo display names, icons, splash, favicons, manifests)
@@ -257,8 +298,41 @@
 - `apps/web/src/components/SidebarFooter.test.tsx:169` `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` — "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk",
 - `apps/web/src/components/SidebarFooter.test.tsx:169` `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` — "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk",
 - `apps/web/src/components/SidebarFooter.tsx:164` `https://github.com/elie222/rakazo/blob/main/docs/self-host.md` — href="https://github.com/elie222/rakazo/blob/main/docs/self-host.md"
+- `infra/compose/.env.images.example:58` `ghcr.io/elie222/rakazo/app` — RAKAZO_IMAGE=ghcr.io/elie222/rakazo/app
+- `infra/compose/.env.images.example:60` `ghcr.io/elie222/rakazo/computer` — RAKAZO_COMPUTER_IMAGE=ghcr.io/elie222/rakazo/computer
+- `infra/compose/docker-compose.images.yml:263` `RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer` — image: ${RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer}:${RAKAZO_COMPUTER_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:263` `RAKAZO_COMPUTER_IMAGE_TAG:-edge` — image: ${RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer}:${RAKAZO_COMPUTER_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:280` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:280` `RAKAZO_IMAGE_TAG:-edge` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:296` `RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer` — RAKAZO_COMPUTER_IMAGE: ${RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer}:${RAKAZO_COMPUTER_IMAGE_TAG:-
+- `infra/compose/docker-compose.images.yml:296` `RAKAZO_COMPUTER_IMAGE_TAG:-edge` — RAKAZO_COMPUTER_IMAGE: ${RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer}:${RAKAZO_COMPUTER_IMAGE_TAG:-
+- `infra/compose/docker-compose.images.yml:335` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:335` `RAKAZO_IMAGE_TAG:-edge` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:423` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:423` `RAKAZO_IMAGE_TAG:-edge` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:456` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.images.yml:456` `RAKAZO_IMAGE_TAG:-edge` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-edge}
+- `infra/compose/docker-compose.prod.docker.yml:42` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.docker.yml:42` `RAKAZO_IMAGE_TAG:-local` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:267` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:267` `RAKAZO_IMAGE_TAG:-local` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:358` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:358` `RAKAZO_IMAGE_TAG:-local` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:391` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:391` `RAKAZO_IMAGE_TAG:-local` — image: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}:${RAKAZO_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:446` `RAKAZO_UPDATER_IMAGE:-ghcr.io/elie222/rakazo/updater` — image: ${RAKAZO_UPDATER_IMAGE:-ghcr.io/elie222/rakazo/updater}:${RAKAZO_UPDATER_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:446` `RAKAZO_UPDATER_IMAGE_TAG:-local` — image: ${RAKAZO_UPDATER_IMAGE:-ghcr.io/elie222/rakazo/updater}:${RAKAZO_UPDATER_IMAGE_TAG:-local}
+- `infra/compose/docker-compose.prod.yml:467` `RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app` — RAKAZO_IMAGE: ${RAKAZO_IMAGE:-ghcr.io/elie222/rakazo/app}
+- `infra/compose/install-images.sh:5` `RAKAZO_DOWNLOAD_BASE:-https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose` — DOWNLOAD_BASE="${RAKAZO_DOWNLOAD_BASE:-https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose}"
+- `infra/updater/src/compose-images.test.ts:64` `ghcr.io/elie222/rakazo/app` — expect(compose.services[service]?.image).toContain("ghcr.io/elie222/rakazo/app");
+- `infra/updater/src/compose-images.test.ts:67` `ghcr.io/elie222/rakazo/computer` — expect(compose.services.computer?.image).toContain("ghcr.io/elie222/rakazo/computer");
+- `infra/updater/src/compose-images.test.ts:79` `ghcr.io/elie222/rakazo/computer:edge` — expect(firstPartyImageNames("ghcr.io/elie222/rakazo/computer:edge")).toEqual(["computer"]);
+- `infra/updater/src/compose-service.test.ts:115` `ghcr.io/elie222/rakazo/updater` — expect(updater.image).toContain("ghcr.io/elie222/rakazo/updater");
+- `infra/updater/src/compose-service.test.ts:116` `ghcr.io/elie222/rakazo/app` — expect(compose.services.api?.image).toContain("ghcr.io/elie222/rakazo/app");
 - `packages/contracts/src/ai-consent.ts:4` `https://rakazo.com/privacy` — export const AI_PRIVACY_URL = "https://rakazo.com/privacy/";
 - `packages/contracts/src/client-build.ts:19` `https://apps.apple.com/app/rakazo/id6801531099` — export const IOS_APP_STORE_URL = "https://apps.apple.com/app/rakazo/id6801531099";
 - `packages/contracts/src/client-build.ts:21` `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` — "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk";
 - `packages/contracts/src/client-build.ts:21` `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` — "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk";
+- `packages/core/src/self-update.ts:2` `https://github.com/elie222/rakazo` — export const OFFICIAL_REPO_URL = "https://github.com/elie222/rakazo";
+- `packages/core/src/self-update.ts:83` `github.com/elie222/rakazo` — /** `github.com/elie222/rakazo` for every spelling of the same remote, for comparison only. */
 

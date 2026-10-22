@@ -2,25 +2,25 @@
 
 ### Requirement: Single brand configuration
 The product SHALL define its customer-facing brand in one configuration, and the web, desktop and
-mobile UIs SHALL read brand values from it instead of embedding the product name as a literal in
-code they newly author.
+mobile UIs and the server text that clients read SHALL take brand values from it instead of
+embedding the product name as a literal in code they newly author.
 
 #### Scenario: Name change is a one-file change
 - **WHEN** the product name in the brand configuration is changed to another value and the apps are rebuilt
-- **THEN** every user-visible occurrence of the product name in the web, desktop and mobile UIs shows the new value without any other source edit
+- **THEN** every user-visible occurrence of the product name in the web, desktop and mobile UIs and in server-generated emails and messages shows the new value without any other source edit
 
 ### Requirement: Brand configuration contents
 The brand configuration SHALL contain the product name, the singular and plural names for a bot,
-the tagline, the company name and URL, the product site URL, the theme colours, the paths of the
-logo and icon assets, and feature flags that keep the desktop auto-updater and mobile OTA updates
-off.
+the tagline, the company name and URL, the product site URL, the mobile bundle identifier, the
+container image registry prefix, the theme colours, the paths of the logo and icon assets, and
+feature flags that keep the desktop auto-updater, mobile OTA updates and server self-update off.
 
 #### Scenario: Bot terms come from the configuration
 - **WHEN** the singular bot name is "Nurling" and the plural is "Nurlings"
 - **THEN** UI copy that refers to one bot says "Nurling" and copy that refers to several says "Nurlings"
 
 #### Scenario: Invalid configuration is rejected
-- **WHEN** a required field is missing or a URL is malformed
+- **WHEN** a required field is missing, a URL is malformed, or the registry prefix is not lowercase
 - **THEN** validation fails with a message naming the field, and the build does not proceed
 
 ### Requirement: Optional entries are hidden when unset
@@ -51,12 +51,17 @@ without editing them.
 
 ### Requirement: Brand guard
 The repository SHALL include an automated check that fails when the upstream product name is
-visible in the rendered web and mobile catalogs or in the generated desktop, mobile and web
-identity, and that confirms `LICENSE` is byte-identical to upstream's.
+visible in the rendered web and mobile catalogs, the generated desktop, mobile and web identity, or
+the server-generated emails and messages; that confirms every compose file's image default equals
+the configured registry prefix; and that confirms `LICENSE` is byte-identical to upstream's.
 
 #### Scenario: Guard catches a leak
 - **WHEN** a user-visible string containing the upstream product name is introduced in a checked surface
 - **THEN** the guard check fails and names the offending string or file
+
+#### Scenario: Registry drift
+- **WHEN** a compose file or the env example names an image prefix different from the configured registry
+- **THEN** the guard check fails and names the file
 
 #### Scenario: LICENSE integrity
 - **WHEN** the guard runs

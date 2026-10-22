@@ -120,8 +120,29 @@ IN_SCOPE_FILES = {
 }
 
 
+# Dedicated-server scope: server text clients see, bundle-id support, self-update off, our images.
+SERVER_SCOPE_FILES = {
+    "packages/auth/src/index.ts", "packages/auth/src/account-security.ts",   # emails, app/RP name
+    "apps/api/src/messaging-inbound.ts", "apps/api/src/team-chat-bridge.ts",  # chat-channel text
+    "apps/api/src/app-association.ts",                                        # Android package
+    "packages/core/src/self-update.ts",                                       # update messages only
+    "packages/adapters/src/pi-models.ts", "packages/adapters/src/pi-oauth.ts",  # model/billing blurbs
+    "packages/adapters/src/mcp-oauth.ts",                                     # OAuth client name
+    "infra/compose/docker-compose.images.yml", "infra/compose/docker-compose.prod.yml",
+    "infra/compose/docker-compose.prod.docker.yml", "infra/compose/.env.images.example",
+    "infra/compose/install-images.sh", ".github/workflows/publish-server-image.yml",
+    # tests that pin the text/names above
+    "infra/updater/src/publish-workflow.test.ts", "infra/updater/src/compose-images.test.ts",
+    "infra/updater/src/compose-service.test.ts", "packages/auth/src/index.test.ts",
+    "packages/auth/src/account-security.test.ts", "packages/adapters/src/mcp-oauth.test.ts",
+    "packages/adapters/src/pi-models.test.ts", "packages/adapters/src/pi-oauth.test.ts",
+    "apps/api/src/app-association.test.ts", "apps/api/src/messaging-inbound.test.ts",
+    "apps/api/src/team-chat-bridge.test.ts",
+}
+
+
 def in_scope(path: str) -> bool:
-    return path.startswith(IN_SCOPE_PREFIXES) or path in IN_SCOPE_FILES
+    return path.startswith(IN_SCOPE_PREFIXES) or path in IN_SCOPE_FILES or path in SERVER_SCOPE_FILES
 
 
 def area(path: str) -> str:
@@ -169,10 +190,13 @@ with open(out_summary, "w") as f:
     for g in order:
         ins, out = split(g)
         f.write(f"| {g} | {len(ins)} ({len({h[0] for h in ins})}) | {len(out)} ({len({h[0] for h in out})}) |\n")
-    f.write("\n**In scope** = customer-facing UI: `apps/web`, `apps/desktop`, `apps/mobile`, "
+    f.write("\n**In scope** = (a) customer-facing UI: `apps/web`, `apps/desktop`, `apps/mobile`, "
             "`packages/ui-web`, `packages/chat-ui`, `packages/ui-tokens`, and three shared UI constants "
-            "in `packages/contracts`. **Out of scope** = everything else (API/server, auth, adapters, core, "
-            "infra, CI, docs, `apps/www`, root docs, test kit). Out-of-scope hits are kept as-is.\n")
+            "in `packages/contracts`; (b) the dedicated-server files listed in `SERVER_SCOPE_FILES` in "
+            "`inventory.py` (account emails, chat-channel text, update messages, model/billing blurbs, "
+            "OAuth client name, Android package for passkeys, compose files, installer, image workflow). "
+            "**Out of scope** = everything else (rest of API/server, adapters, core, infra, CI, docs, "
+            "`apps/www`, root docs, test kit). Out-of-scope hits are kept as-is.\n")
     for g in order:
         ins, out = split(g)
         f.write(f"\n## {titles[g]}\n\n### In scope — {len(ins)} hits\n\n")
