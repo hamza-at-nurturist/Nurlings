@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, signup, ui } from "./helpers";
 
 test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo) => {
   const stamp = Date.now();
@@ -16,7 +16,7 @@ test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo
   const studio = page.getByTestId("avatar-studio");
   await expect(studio).toBeVisible();
   await expect(studio.getByText("Avatar Studio", { exact: true })).toBeVisible();
-  await expect(studio.getByRole("tab", { name: "Bot", exact: true })).toBeVisible();
+  await expect(studio.getByRole("tab", { name: ui("Bot"), exact: true })).toBeVisible();
   await expect(studio.getByRole("tab", { name: "Upload", exact: true })).toBeVisible();
   await expect(studio.getByRole("button", { name: "Generate" })).toHaveCount(0);
   await expect(studio.getByTestId("avatar-studio-bot-tab")).toBeVisible();

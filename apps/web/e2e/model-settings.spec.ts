@@ -1,6 +1,7 @@
 import type { IncomingMessage } from "node:http";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
+import { brand } from "@nurlings/brand";
 import type { Route } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
@@ -690,7 +691,7 @@ test("a key connected in another space can replace server credentials for the sa
   const useModel = page.getByRole("button", { name: "Use this model", exact: true });
   await expect(useModel).toBeVisible();
   const personalBillingNote = page.getByText(
-    "Uses your Amazon Bedrock API key. Rakazo does not pay for model usage.",
+    `Uses your Amazon Bedrock API key. ${brand.name} does not pay for model usage.`,
   );
   await expect(personalBillingNote).toBeHidden();
   await captureScreenshot(page, testInfo, "model-settings-server-credentials-connected-key");

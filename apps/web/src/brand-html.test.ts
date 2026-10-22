@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
-import { brandIndexHtml, brandManifest } from "./brand-html";
+import { brandIndexHtml, brandManifest, brandPlugin, isAppIndexHtml } from "./brand-html";
 
 const read = (relative: string) =>
   readFileSync(fileURLToPath(new URL(relative, import.meta.url)), "utf8");
@@ -41,6 +41,41 @@ describe("brandIndexHtml", () => {
   it("fails loudly when upstream changes the markup it relies on", () => {
     expect(() => brandIndexHtml("<html><head></head></html>")).toThrow(/<title> was not found/);
     expect(() => brandIndexHtml("<title>x</title>")).toThrow(/apple-mobile-web-app-title/);
+  });
+});
+
+describe("isAppIndexHtml", () => {
+  it("is true only for the app's own index.html", () => {
+    expect(isAppIndexHtml("/repo/apps/web/index.html", "/repo/apps/web")).toBe(true);
+    expect(isAppIndexHtml("/repo/apps/web/e2e/fixtures/chart-links.html", "/repo/apps/web")).toBe(
+      false,
+    );
+    expect(isAppIndexHtml("/repo/apps/web/public/index.html", "/repo/apps/web")).toBe(false);
+  });
+});
+
+describe("brandPlugin", () => {
+  function resolved() {
+    const plugin = brandPlugin();
+    (plugin.configResolved as (config: unknown) => void)({
+      root: "/repo/apps/web",
+      publicDir: "/repo/apps/web/public",
+      build: { outDir: "dist" },
+    });
+    return plugin.transformIndexHtml as (html: string, context: { filename: string }) => string;
+  }
+
+  it("brands the app's index.html", () => {
+    const html = read("../index.html");
+    const out = resolved()(html, { filename: "/repo/apps/web/index.html" });
+    expect(out).toContain(`<title>${brand.name}</title>`);
+  });
+
+  it("leaves fixture pages without a home-screen title alone instead of throwing", () => {
+    const fixture = "<!doctype html><html><head><title>Chart fixture</title></head></html>";
+    expect(resolved()(fixture, { filename: "/repo/apps/web/e2e/fixtures/chart-links.html" })).toBe(
+      fixture,
+    );
   });
 });
 

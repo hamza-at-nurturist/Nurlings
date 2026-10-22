@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, openNewSpace, rpc, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, openNewSpace, rpc, signup, ui } from "./helpers";
 
 test("the only space is named in the sidebar and chat creation requires approval", async ({
   page,
@@ -189,7 +189,7 @@ test("deleting the last bot in a space stays in the app after first use", async 
   await expect(page).not.toHaveURL(/\/onboarding/);
   await expect(sidebar.getByRole("button", { name: "Open Side" })).toBeVisible();
   await expect(
-    page.locator("main").getByRole("button", { name: "Create new Bot", exact: true }),
+    page.locator("main").getByRole("button", { name: ui("Create new Bot"), exact: true }),
   ).toBeVisible();
 
   await sidebar.getByRole("button", { name: "Actions for Side" }).click();

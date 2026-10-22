@@ -69,6 +69,14 @@ export function brandManifest(
   };
 }
 
+/**
+ * Vite runs `transformIndexHtml` for every HTML page it serves, including the e2e fixture pages,
+ * which have no home-screen title to brand. Only the app's own `index.html` is branded.
+ */
+export function isAppIndexHtml(filename: string, root: string): boolean {
+  return path.resolve(filename) === path.resolve(root, "index.html");
+}
+
 const MANIFEST = "site.webmanifest";
 
 async function brandedManifestText(file: string): Promise<string> {
@@ -77,15 +85,18 @@ async function brandedManifestText(file: string): Promise<string> {
 }
 
 export function brandPlugin(): Plugin {
+  let root = "";
   let publicDir = "";
   let outDir = "";
   return {
     name: "nurlings-brand-identity",
     configResolved(config) {
+      root = config.root;
       publicDir = config.publicDir;
       outDir = path.resolve(config.root, config.build.outDir);
     },
-    transformIndexHtml: (html) => brandIndexHtml(html),
+    transformIndexHtml: (html, context) =>
+      isAppIndexHtml(context.filename, root) ? brandIndexHtml(html) : html,
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         if (!publicDir || req.url?.split("?", 1)[0] !== `/${MANIFEST}`) return next();

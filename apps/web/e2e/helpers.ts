@@ -1,7 +1,13 @@
 import { brand } from "@nurlings/brand";
+import { brandText } from "@nurlings/brand/text";
 import type { Locator, Page, TestInfo } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { signupRequiresEmailVerification } from "@rakazo/core";
+
+/** Upstream UI copy as the app now shows it: the bot terms follow the brand configuration. */
+export function ui(upstream: string) {
+  return brandText(upstream, brand);
+}
 
 export function isRealSandboxProvider(provider = process.env.SANDBOX_PROVIDER) {
   return provider === "e2b" || provider === "daytona" || provider === "boat";

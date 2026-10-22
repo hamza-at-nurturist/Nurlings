@@ -14,6 +14,7 @@ import { SettingsOverlay } from "../../src/pages/SettingsOverlay";
 import { BotSettings, CreateBotForm } from "../../src/pages/shell/bot-panel";
 import { TimeSeparator } from "../../src/pages/shell/chat-context";
 import "../../src/styles.css";
+import { ui } from "../helpers";
 
 const demoRpc: Record<string, unknown> = {
   "voice/voices": [],
@@ -100,9 +101,11 @@ function inboxBot(): Bot {
 function CreateShot() {
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    const name = document.querySelector<HTMLInputElement>('input[placeholder="Name this bot"]');
+    const name = document.querySelector<HTMLInputElement>(
+      `input[placeholder="${ui("Name this bot")}"]`,
+    );
     const title = document.querySelector<HTMLInputElement>(
-      'input[placeholder="Describe what this bot does"]',
+      `input[placeholder="${ui("Describe what this bot does")}"]`,
     );
     const description = document.querySelector<HTMLTextAreaElement>("textarea");
     fill(name, "Inbox");

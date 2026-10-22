@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Routine } from "@rakazo/contracts";
-import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup } from "./helpers";
+import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup, ui } from "./helpers";
 
 test("Slack message and GitHub event triggers persist their settings", async ({
   page,
@@ -39,7 +39,7 @@ test("Slack message and GitHub event triggers persist their settings", async ({
   const panel = page.getByTestId("side-panel");
   await expect(panel.getByText("Slack message", { exact: true })).toBeVisible();
   await expect(
-    panel.getByText("Runs when this bot receives a verified message from this provider."),
+    panel.getByText(ui("Runs when this bot receives a verified message from this provider.")),
   ).toBeVisible();
 
   expect(await savedRoutine("Triage Slack updates")).toMatchObject({

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup } from "./helpers";
+import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup, ui } from "./helpers";
 
 test("opens Artifacts from the account menu and lists created files", async ({
   page,
@@ -66,7 +66,7 @@ test("opens Artifacts from the account menu and lists created files", async ({
   await expect(page.getByRole("heading", { name: "Artifacts tab" })).toBeVisible();
   await captureScreenshot(page, testInfo, "artifacts-preview");
 
-  await page.getByRole("link", { name: "Bots" }).click();
+  await page.getByRole("link", { name: ui("Bots") }).click();
   await expect(page).toHaveURL(/\/app\/(?!artifacts(?:\/|$))[^/]+$/);
   await expect(page.getByTestId("transcript")).toBeVisible();
 

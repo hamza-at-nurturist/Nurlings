@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, signup, ui } from "./helpers";
 
 // win32 shares the non-darwin "this computer" branch with linux.
 for (const platform of ["darwin", "linux"]) {
@@ -46,10 +46,14 @@ for (const platform of ["darwin", "linux"]) {
       await route.fulfill({ response, json: body });
     });
     await page.reload();
-    const dialog = page.getByRole("dialog", { name: "Where should bots run?" });
+    const dialog = page.getByRole("dialog", { name: ui("Where should bots run?") });
     await expect(dialog).toBeVisible();
     await expect(dialog).toHaveAccessibleDescription(
-      /Local access lets bots run commands without asking\. Avoid it on shared or public servers\./,
+      new RegExp(
+        ui(
+          "Local access lets bots run commands without asking. Avoid it on shared or public servers.",
+        ).replaceAll(".", "\\."),
+      ),
     );
     const configuredProfile = page.waitForResponse(/\/rpc\/me$/);
     await page.evaluate(() => window.dispatchEvent(new Event("test-computer-configure")));
@@ -61,12 +65,16 @@ for (const platform of ["darwin", "linux"]) {
     const host = platform === "darwin" ? "this Mac" : "this computer";
     await expect(
       dialog.getByText(
-        `Docker limits access to your computer for added security. Using ${host} lets bots work with your local files and tools.`,
+        ui(
+          `Docker limits access to your computer for added security. Using ${host} lets bots work with your local files and tools.`,
+        ),
       ),
     ).toBeVisible();
     await expect(
       dialog.getByText(
-        "Local access lets bots run commands without asking. Avoid it on shared or public servers.",
+        ui(
+          "Local access lets bots run commands without asking. Avoid it on shared or public servers.",
+        ),
       ),
     ).toBeVisible();
     await expect(dialog.getByRole("button", { name: "Docker", exact: true })).toBeVisible();
@@ -163,7 +171,7 @@ test("a saved host choice closes when refreshing the profile fails", async ({ pa
     await route.fulfill({ response, json: body });
   });
   await page.reload();
-  const dialog = page.getByRole("dialog", { name: "Where should bots run?" });
+  const dialog = page.getByRole("dialog", { name: ui("Where should bots run?") });
   await expect(dialog).toBeVisible();
   await dialog.getByRole("button", { name: "Docker", exact: true }).click();
   await expect(dialog).toBeHidden();
