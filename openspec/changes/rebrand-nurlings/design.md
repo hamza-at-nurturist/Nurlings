@@ -173,14 +173,18 @@ README, the guard and the tests share.
 
 ### D7 — Guardrails and the upstream-merge routine
 
-`brand:check` (vitest + node script): (a) every web/mobile locale after the seam has no "Rakazo"
-word; (b) resolved Expo config (display name, permissions, bundle id/package, placeholders, no OTA),
-builder config (`productName`, mic text, no `elie222` feed), built `index.html`/manifest are clean;
-(c) each compose file's image defaults and `.env.images.example` equal `brand.registry`; (d)
-server text: auth emails and chat/update/billing strings contain no "Rakazo"; (e) `NOTICE` has
-the attribution and `LICENSE` is byte-identical to upstream's. `packages/brand/README.md` documents
-the merge routine: `git fetch upstream && git merge upstream/main`, `pnpm brand:check`, re-run
-`inventory.py`, review only new in-scope hits.
+`brand:check` is a node script of static checks (the `--built` flag adds a scan of the built web
+app) and is part of `pnpm test` through the guard's own tests; the behaviour that needs an app's own
+code is checked by that app's vitest suites. (a) every web/mobile locale after the seam has no
+"Rakazo" word (`i18n-brand.test.ts` in each app); (b) resolved Expo config, desktop packaging and
+strings, built `index.html`/manifest are clean (app vitest suites, plus the script's
+`package.json`/`app.json`/`dist` checks); (c) each compose file's image defaults and the env examples
+sit under `brand.registry`; (d) server text: auth emails and chat/update/billing strings contain no
+"Rakazo" (script scan of the listed files, plus behaviour tests); (e) `NOTICE` has the attribution
+and `LICENSE` is byte-identical to upstream's; (f) the deployment guide and installer name the same
+`NURLINGS_` variables. `packages/brand/README.md` documents the merge routine: `git fetch upstream
+&& git merge upstream/main`, `pnpm brand:check`, `pnpm test`, `pnpm brand:check --built`, review
+only new in-scope hits.
 
 ### D8 — Our images: new workflow, compose/installer defaults, documented client auth
 

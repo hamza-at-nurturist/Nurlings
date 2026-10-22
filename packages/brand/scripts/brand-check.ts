@@ -1,8 +1,10 @@
 import { fileURLToPath } from "node:url";
-import { brandChecks, runBrandChecks } from "../src/guard.ts";
+import { brandChecks, builtChecks, runBrandChecks } from "../src/guard.ts";
 
 const repoRoot = fileURLToPath(new URL("../../../", import.meta.url));
-const results = await runBrandChecks(repoRoot, brandChecks);
+// `--built` adds the scan of the built web app (run after `pnpm --filter @rakazo/web build`).
+const built = process.argv.includes("--built");
+const results = await runBrandChecks(repoRoot, built ? builtChecks : brandChecks);
 let failed = false;
 for (const { name, problems } of results) {
   if (problems.length === 0) {

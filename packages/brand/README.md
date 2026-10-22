@@ -83,3 +83,23 @@ icon, so none is needed. The packaged macOS icon comes from the `Nurlings.icon` 
   lowercase image prefix.
 - `pnpm --filter @nurlings/brand test` runs the unit tests, including one that fails if this README
   stops listing a source or generated file.
+
+## Merging upstream
+
+The branch stays mergeable with `elie222/rakazo` because upstream files are left alone: brand
+changes sit in new files, a few seams (`activateLoaded`, the mobile `t()`, `app.config.ts`, the Vite
+plugin, `copy-static.mjs`) and the small edits listed in the OpenSpec change `rebrand-nurlings`.
+
+1. `git fetch upstream && git merge upstream/main`. Expect, at most, small conflicts in files this
+   change edits (an import line next to a changed one, for example); keep both sides.
+2. `pnpm install`, then `pnpm brand:check`. It fails with the file and line if a merge brought back
+   the old name in a place it guards: compose or env image defaults, the desktop package, the
+   Expo `app.json`, server-sent text, the deployment guide, `NOTICE`, `LICENSE`.
+3. `pnpm test` and `pnpm check`. The vitest suites in `apps/web`, `apps/mobile` and
+   `apps/desktop` compile every translation catalog and scan the desktop strings, so new upstream
+   copy that still says Rakazo fails there.
+4. Build the web app and run `pnpm brand:check --built` (CI does this) to scan `apps/web/dist`.
+5. Review only the new in-scope hits: re-run `git grep -nIi rakazo` and compare against
+   `openspec/changes/rebrand-nurlings/inventory.py`'s categories. Internal identifiers
+   (`@rakazo/*`, `RAKAZO_*`, the `rakazo://` scheme) stay.
+6. A new workspace package must also be listed in both Dockerfiles; `infra/updater` has a test for it.

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { generatedAssetProblems, sourceAssetProblems } from "./assets.js";
+import { builtWebCheck, staticRepoChecks } from "./repo-checks.js";
 import { parseBrand } from "./schema.js";
 
 /**
@@ -65,7 +66,15 @@ export const assetsCheck: BrandCheck = {
   },
 };
 
-export const brandChecks: BrandCheck[] = [licenseCheck, noticeCheck, assetsCheck];
+export const brandChecks: BrandCheck[] = [
+  licenseCheck,
+  noticeCheck,
+  assetsCheck,
+  ...staticRepoChecks,
+];
+
+/** The default checks plus the ones that need a built web app (`brand:check --built`). */
+export const builtChecks: BrandCheck[] = [...brandChecks, builtWebCheck];
 
 export async function runBrandChecks(
   repoRoot: string,

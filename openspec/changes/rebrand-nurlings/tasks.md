@@ -64,8 +64,8 @@
 
 ## 9. Guardrails and merge routine
 
-- [ ] 9.1 Complete `brand:check` per design D7: locales rebranded (3.1, 4.1), resolved Expo config (4.2, 4.3) and builder config (5.3, 5.4), built `index.html`/manifest (3.2), compose/env image defaults equal `brand.registry` (7.3), server email/chat/update/billing strings clean (6.3–6.5), `NOTICE` and `LICENSE` (8.1). Verify: passes on the branch and fails on a seeded leak in each category (temporary edits, reverted).
-- [ ] 9.2 Wire `brand:check` into the root `test` script and CI, and document the upstream-merge routine in `packages/brand/README.md`. Verify: CI config parses; a dry-run merge of current `upstream/main` into the branch reports no conflicts.
+- [x] 9.1 Complete `brand:check` per design D7. The node script checks `LICENSE`, `NOTICE`, artwork sizes, compose/env image defaults equal to `brand.registry`, the desktop `package.json`, the Expo `app.json`, server-sent text files, and that the deployment guide and installer name the same `NURLINGS_` variables; `--built` also scans `apps/web/dist` (page, manifest, upstream hosts). Locales, the resolved Expo config, desktop strings and packaging, and the email/chat/billing behaviour stay in their vitest suites, which run in `pnpm test`. Verify: passes on the branch; each category fails on a seeded leak (unit tests with scratch copies, plus a temporary edit of the real files, reverted).
+- [x] 9.2 Run the guard in CI (`pnpm brand:check` in the lint job, `pnpm brand:check --built` after the production build) and in `pnpm test` (the root `vitest run` includes the guard's own tests, which run every check against the repository); document the upstream-merge routine in `packages/brand/README.md`. Verify: CI config parses; a dry-run merge of current `upstream/main` into a scratch branch had one trivial conflict (an import line in `apps/desktop/e2e/setup.spec.ts`, resolved by keeping both sides), `brand:check` passed on the merged tree, and the merged tree's suites exposed one pinned expectation (`local-stack.test.ts`) that this change had broken and that is now fixed.
 
 ## 10. Final verification (integration only)
 
