@@ -158,7 +158,7 @@ function expectedKeys(service: "api" | "worker"): string[] {
 
 function loadServices(file: string): Record<string, ComposeService> {
   return (
-    parse(readFileSync(path.join(composeDir, file), "utf8"), { merge: true }) as {
+    parse(readFileSync(path.resolve(composeDir, file), "utf8"), { merge: true }) as {
       services: Record<string, ComposeService>;
     }
   ).services;
@@ -170,6 +170,8 @@ const STACKS = [
   ["docker-compose.prod.yml"],
   ["docker-compose.prod.yml", "docker-compose.prod.docker.yml"],
   ["docker-compose.yml"],
+  // Coolify deployment (deploy/coolify), the same settings behind Coolify's variables.
+  ["../../deploy/coolify/docker-compose.yml"],
 ];
 
 function stackEnvironment(files: string[], service: string): Record<string, unknown> {

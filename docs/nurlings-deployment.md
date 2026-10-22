@@ -60,6 +60,12 @@ NURLINGS_REGISTRY_USER=nurlings-pull NURLINGS_REGISTRY_TOKEN=... bash install-im
 The installer refuses a user without a token (and the reverse), never prints either value, and
 prints this hint when a pull fails: set both variables, or run `docker login ghcr.io`.
 
+## Deploying with Coolify
+
+Client servers managed with Coolify use the compose file and runbook in
+[deploy/coolify](../deploy/coolify/README.md) instead of the installer. It covers the registry login
+above, the mandatory bot egress rules, DNS, upgrades and backups.
+
 ## Handing an install to a client (the install kit)
 
 The repository is private, so the installer cannot fetch its own files anonymously. Deliver these
