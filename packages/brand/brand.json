@@ -24,7 +24,7 @@
     "viewBox": "292 254 440 516",
     "path": "M300 762V262h92l240 342V262h92v500h-92L392 420v342z"
   },
-  "registry": "ghcr.io/nurturist-ai/nurlings",
+  "registry": "ghcr.io/hamza-at-nurturist/nurlings",
   "colors": {
     "themeLight": "#FCFCFC",
     "themeDark": "#141414",

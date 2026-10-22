@@ -35,7 +35,7 @@ echo "$TOKEN" | docker login ghcr.io --username nurlings-pull --password-stdin
 The token is a classic token with only `read:packages`. How to create the machine user and give
 it read access to the `app` and `computer` packages is in
 [docs/nurlings-deployment.md](../../docs/nurlings-deployment.md#how-a-client-server-pulls-private-images).
-Verify: `docker pull ghcr.io/nurturist-ai/nurlings/app:<version>` succeeds as root.
+Verify: `docker pull ghcr.io/hamza-at-nurturist/nurlings/app:<version>` succeeds as root.
 
 Do not run `docker system prune -a` on this server: it removes the bot computer image, which the
 supervisor needs on the host. A redeploy pulls it again.
@@ -177,7 +177,7 @@ Then **Redeploy** in Coolify to start everything again. Copy backups off the ser
 | Symptom | Cause and fix |
 | --- | --- |
 | `required variable NURLINGS_VERSION is missing a value` | Set `NURLINGS_VERSION` under Environment Variables. |
-| Image pull fails with `401`, `unauthorized` or `denied` | `docker login ghcr.io` was not run as root on this server, the token expired, it lacks `read:packages`, or the machine user has no Read access to the `app` or `computer` package. Test with `docker pull ghcr.io/nurturist-ai/nurlings/app:<version>` as root. |
+| Image pull fails with `401`, `unauthorized` or `denied` | `docker login ghcr.io` was not run as root on this server, the token expired, it lacks `read:packages`, or the machine user has no Read access to the `app` or `computer` package. Test with `docker pull ghcr.io/hamza-at-nurturist/nurlings/app:<version>` as root. |
 | `port is already allocated` or `address already in use` | This file publishes no host ports, so someone added a `ports:` entry. Remove it: Coolify's proxy owns 80 and 443. If the proxy itself will not start, another program on the server is using those ports. |
 | `permission denied while trying to connect to the Docker daemon socket` in the supervisor | `/var/run/docker.sock` is missing on the host or Docker is rootless, or a security module blocks it. Check `ls -l /var/run/docker.sock` and `docker info`. The supervisor runs as root and is the only service with the socket. |
 | A bot will not start; the error mentions `restrict-computer-egress.sh` | Step 3 was not done on this server. Run it, then try the bot again. |

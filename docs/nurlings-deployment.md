@@ -9,13 +9,13 @@ and still start with `RAKAZO_`.
 ## What is published
 
 `.github/workflows/publish-nurlings-images.yml` builds three amd64 images and pushes them to
-`ghcr.io/nurturist-ai/nurlings/<image>`. Every segment of an image reference is lowercase.
+`ghcr.io/hamza-at-nurturist/nurlings/<image>`. Every segment of an image reference is lowercase.
 
 | Image | Contents |
 | --- | --- |
-| `ghcr.io/nurturist-ai/nurlings/app` | api, worker, web and the sandbox supervisor |
-| `ghcr.io/nurturist-ai/nurlings/computer` | the Linux desktop used as each bot computer |
-| `ghcr.io/nurturist-ai/nurlings/updater` | the updater sidecar (not used, see below) |
+| `ghcr.io/hamza-at-nurturist/nurlings/app` | api, worker, web and the sandbox supervisor |
+| `ghcr.io/hamza-at-nurturist/nurlings/computer` | the Linux desktop used as each bot computer |
+| `ghcr.io/hamza-at-nurturist/nurlings/updater` | the updater sidecar (not used, see below) |
 
 | Tag | Published on |
 | --- | --- |
@@ -36,7 +36,8 @@ belongs to a dedicated machine user, never to a person.
 One-time setup, by a maintainer:
 
 1. Create a GitHub user for pulling images (for example `nurlings-pull`) and add it to the
-   `nurturist-ai` organization with read access to the `nurlings` repository.
+   repository `hamza-at-nurturist/Nurlings` with read access. The images sit under the repository
+   owner's namespace, so they move to the organization's namespace when the repository does.
 2. In each of the three packages' settings, confirm the package inherits access from the
    repository or grant the machine user **Read** directly. The workflow links each image to the
    repository through its `org.opencontainers.image.source` label.

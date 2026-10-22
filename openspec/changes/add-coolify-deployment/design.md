@@ -62,7 +62,7 @@ automation (documented only).
    Alphanumeric 64-character values satisfy the 32-character rule; the `ENCRYPTION_KEY` format
    accepted by the code is checked in task 1.2 before this is final.
 5. **Version pin.** `NURLINGS_VERSION: ${NURLINGS_VERSION:?...}` with no default, used for both
-   images; the registry prefix is a literal `ghcr.io/nurturist-ai/nurlings`, checked against
+   images; the registry prefix is a literal `ghcr.io/hamza-at-nurturist/nurlings`, checked against
    `brand.json` by the guard. Clients are pinned to `v0.1.0`, which is cut from `main` after this
    change merges (the tag must contain the worker health probe the file depends on). Until then a
    test deploy uses the `sha-<commit>` tag from a manual publish-workflow run on this branch. The
@@ -93,7 +93,7 @@ automation (documented only).
    healthcheck or `exclude_from_hc`. The check for "rakazo" in image/domain/value positions lives
    here too. `brand:check` is run separately and must still pass.
 10. **Bot images from our registry.** The supervisor's `RAKAZO_COMPUTER_IMAGE` is
-    `ghcr.io/nurturist-ai/nurlings/computer:${NURLINGS_VERSION}`. The `computer` stub service stays
+    `ghcr.io/hamza-at-nurturist/nurlings/computer:${NURLINGS_VERSION}`. The `computer` stub service stays
     so Compose pulls it with the stack; the host's `docker login` is what lets the supervisor create
     containers from it later.
 11. **Backup/restore.** `pg_dump -Fc` through `docker exec` into a dump file, plus a tar of the

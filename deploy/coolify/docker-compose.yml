@@ -266,7 +266,7 @@ services:
   # Pull-only stub so the stack fetches the bot computer image from our registry with everything
   # else. Runs once and exits.
   computer:
-    image: ghcr.io/nurturist-ai/nurlings/computer:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    image: ghcr.io/hamza-at-nurturist/nurlings/computer:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
     command: ["true"]
     network_mode: none
     restart: "no"
@@ -283,7 +283,7 @@ services:
   # Starts and stops bot computers. Access to it is equivalent to control of the Docker host, so it
   # is the only service with the Docker socket and its port is never published.
   supervisor:
-    image: ghcr.io/nurturist-ai/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    image: ghcr.io/hamza-at-nurturist/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
     restart: unless-stopped
     command: ["pnpm", "--filter", "@rakazo/sandbox-supervisor", "start"]
     init: true
@@ -299,7 +299,7 @@ services:
       SUPERVISOR_HOST: "0.0.0.0"
       SUPERVISOR_PORT: "7091"
       DOCKER_SOCKET: /var/run/docker.sock
-      RAKAZO_COMPUTER_IMAGE: ghcr.io/nurturist-ai/nurlings/computer:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+      RAKAZO_COMPUTER_IMAGE: ghcr.io/hamza-at-nurturist/nurlings/computer:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
       RAKAZO_COMPUTER_MEMORY: ${RAKAZO_COMPUTER_MEMORY:-2g}
       RAKAZO_COMPUTER_CPUS: ${RAKAZO_COMPUTER_CPUS:-2}
       RAKAZO_COMPUTER_PIDS_LIMIT: ${RAKAZO_COMPUTER_PIDS_LIMIT:-2048}
@@ -342,7 +342,7 @@ services:
       retries: 20
 
   api:
-    image: ghcr.io/nurturist-ai/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    image: ghcr.io/hamza-at-nurturist/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
     restart: unless-stopped
     # Node runs directly, not through pnpm, so a stop reaches it and in-flight work finishes.
     working_dir: /app/apps/api
@@ -424,7 +424,7 @@ services:
       start_period: 2m
 
   worker:
-    image: ghcr.io/nurturist-ai/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    image: ghcr.io/hamza-at-nurturist/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
     restart: unless-stopped
     working_dir: /app/apps/worker
     command: ["node", "--enable-source-maps", "dist/index.js"]
@@ -462,7 +462,7 @@ services:
   # The only service with a public domain. Coolify routes it to port 5173 and proxies /rpc and
   # screen traffic to the API, so the API itself is never exposed.
   web:
-    image: ghcr.io/nurturist-ai/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    image: ghcr.io/hamza-at-nurturist/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
     restart: unless-stopped
     working_dir: /app/apps/web
     command: ["node_modules/.bin/vite", "preview", "--host", "0.0.0.0", "--port", "5173"]

@@ -26,7 +26,7 @@ describe("brand.json", () => {
     expect(brand.company).toEqual({ name: "Nurturist AI", url: "https://nurturistai.com" });
     expect(brand.urls.site).toBe("https://nurlings.nurturistai.com");
     expect(brand.native.bundleId).toBe("com.nurturistai.nurlings");
-    expect(brand.registry).toBe("ghcr.io/nurturist-ai/nurlings");
+    expect(brand.registry).toBe("ghcr.io/hamza-at-nurturist/nurlings");
   });
 
   it("offers no hosted cloud, store, or community link until one exists", () => {
@@ -62,16 +62,16 @@ describe("brand.json", () => {
 
 describe("parseBrand", () => {
   it("accepts a lowercase registry", () => {
-    const parsed = parseBrand(withChange((d) => (d.registry = "ghcr.io/nurturist-ai/nurlings")));
-    expect(parsed.registry).toBe("ghcr.io/nurturist-ai/nurlings");
+    const parsed = parseBrand(withChange((d) => (d.registry = "ghcr.io/hamza-at-nurturist/nurlings")));
+    expect(parsed.registry).toBe("ghcr.io/hamza-at-nurturist/nurlings");
   });
 
   it.each([
     "ghcr.io/ORG/nurlings",
-    "ghcr.io/nurturist-ai/Nurlings",
-    "GHCR.io/nurturist-ai/nurlings",
+    "ghcr.io/hamza-at-nurturist/Nurlings",
+    "GHCR.io/hamza-at-nurturist/nurlings",
     "ghcr.io/Some-Org/nurlings",
-    "ghcr.io/nurturist-ai/nurlings/",
+    "ghcr.io/hamza-at-nurturist/nurlings/",
   ])("rejects %s: image paths are lowercase", (registry) => {
     expect(problem(withChange((d) => (d.registry = registry)))).toContain(
       "Invalid brand config: registry",

@@ -266,7 +266,9 @@ describe("the Coolify runbook", () => {
   });
 
   it("never names the upstream or tells the operator to use a floating tag", () => {
-    expect(readme).not.toMatch(/elie222|ghcr\.io\/[^n]/i);
+    expect(readme).not.toMatch(/elie222/i);
+    const images = readme.match(/ghcr\.io\/[^\s`'"<>]+/g) ?? [];
+    expect(images.filter((image) => !image.startsWith(`${brand.registry}/`))).toEqual([]);
     expect(readme).not.toMatch(/NURLINGS_VERSION\s*=\s*(latest|edge)\b/);
   });
 });
