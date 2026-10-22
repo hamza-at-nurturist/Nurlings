@@ -16,7 +16,10 @@ export interface Brand {
   };
   /** iOS bundle identifier and Android package share one value. */
   native: { bundleId: string };
-  /** Lowercase image prefix; compose defaults must equal it (`brand:check`). */
+  /**
+   * Lowercase image prefix; compose defaults must equal it (`brand:check`). Holds the
+   * `REGISTRY_PLACEHOLDER` until the repository's organization is known.
+   */
   registry: string;
   colors: {
     themeLight: string;
@@ -56,6 +59,17 @@ type Shape = Record<string, unknown>;
 
 const BUNDLE_ID = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9_]*)+$/;
 const REGISTRY = /^[a-z0-9][a-z0-9.-]*(?::\d+)?(?:\/[a-z0-9][a-z0-9._-]*)+$/;
+
+/**
+ * Stands in for the GitHub organization until the repository moves. It is the only uppercase value
+ * the validator accepts, so it cannot be mistaken for a real image path; `brand:check --release`
+ * fails while it is present.
+ */
+export const REGISTRY_PLACEHOLDER = "ghcr.io/REPLACE_WITH_ORG/nurlings";
+
+export function registryIsPlaceholder(registry: string): boolean {
+  return registry === REGISTRY_PLACEHOLDER;
+}
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
 function object(value: unknown, field: string, keys: readonly string[]): Shape {
@@ -186,12 +200,15 @@ export function parseBrand(input: unknown): Brand {
         "a lowercase reverse-DNS identifier such as com.example.app",
       ),
     },
-    registry: match(
-      root.registry,
-      "registry",
-      REGISTRY,
-      "a lowercase image prefix such as ghcr.io/owner/name",
-    ),
+    registry:
+      root.registry === REGISTRY_PLACEHOLDER
+        ? REGISTRY_PLACEHOLDER
+        : match(
+            root.registry,
+            "registry",
+            REGISTRY,
+            `a lowercase image prefix such as ghcr.io/owner/name (or ${REGISTRY_PLACEHOLDER})`,
+          ),
     colors: {
       themeLight: hex("themeLight"),
       themeDark: hex("themeDark"),

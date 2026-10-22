@@ -12,7 +12,7 @@
     "community": null
   },
   "native": { "bundleId": "com.nurturistai.nurlings" },
-  "registry": "ghcr.io/hamza-at-nurturist/nurlings",
+  "registry": "ghcr.io/REPLACE_WITH_ORG/nurlings",
   "colors": {
     "themeLight": "#FCFCFC",
     "themeDark": "#141414",

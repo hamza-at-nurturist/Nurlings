@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { parseBrand, registryIsPlaceholder } from "./schema.js";
 
 /**
  * Guards that keep an upstream merge from quietly undoing the white-label. Each check returns the
@@ -27,6 +28,23 @@ export const licenseCheck: BrandCheck = {
 };
 
 export const brandChecks: BrandCheck[] = [licenseCheck];
+
+/**
+ * Checks that only matter once something is published. They are expected to fail while the repo
+ * still holds a placeholder, so they run with `brand:check --release`, not in the default suite.
+ */
+export const registryReadyCheck: BrandCheck = {
+  name: "image registry prefix names a real organization",
+  async run(repoRoot) {
+    const file = path.join(repoRoot, "packages/brand/brand.json");
+    const brand = parseBrand(JSON.parse(await readFile(file, "utf8")));
+    return registryIsPlaceholder(brand.registry)
+      ? [`registry is still ${brand.registry}; set the real lowercase organization in brand.json.`]
+      : [];
+  },
+};
+
+export const releaseChecks: BrandCheck[] = [...brandChecks, registryReadyCheck];
 
 export async function runBrandChecks(
   repoRoot: string,

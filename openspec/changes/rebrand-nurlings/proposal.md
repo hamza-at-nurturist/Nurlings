@@ -118,20 +118,23 @@ Android passkey `assetlinks.json`); iOS passkey association comes from the
 
 ## Things you should know
 
-1. **The GitHub owner looks like a personal account, not an organization.** A GitHub search for
-   `hamza-at-nurturist` as an org returns nothing (please confirm), so images will be `ghcr.io/hamza-at-nurturist/nurlings/<name>`. GHCR pulls use a
-   personal access token (classic, `read:packages`) belonging to a GitHub user who has read access
-   to the packages; with a personal owner there are no teams or org-level machine accounts to
-   manage this cleanly. Recommend moving the repo to an organization before issuing client
-   credentials. The registry prefix is a single brand-config value that `brand:check` keeps in
-   sync with the compose defaults, so the move is a one-line change plus a re-publish.
-2. **Private repo constraints on the pipeline.** (a) `raw.githubusercontent.com` file downloads
-   need a token, so the installer supports an optional `NURLINGS_DOWNLOAD_TOKEN`; the recommended
-   path is to hand clients the small install kit (installer + compose + env example) instead.
-   (b) Upstream's workflow also builds arm64 on `ubuntu-24.04-arm` and attaches build-provenance
-   attestations; I expect neither to be available on a private personal repo without paid features,
-   so the new workflow builds **amd64 only** and omits attestations (design D8 — to be confirmed on
-   first run). (c) GHCR packages first published from a private repo should be private by default (verify on the first run).
+1. **The repo is moving to an organization; the registry prefix is a placeholder until then.**
+   `hamza-at-nurturist` is a personal account, so the repo is being transferred. `brand.json` holds
+   `registry: "ghcr.io/REPLACE_WITH_ORG/nurlings"` (the only uppercase value the validator accepts)
+   and `pnpm brand:check --release` fails until it names a real, **lowercase** organization. Every
+   image name and registry path is lowercase everywhere (the workflow also lowercases the owner and
+   repository name it derives), so the mixed-case `Nurlings` repo name can never produce an invalid
+   image reference. The org name is supplied before group 7; once the repo moves, remotes, workflow
+   references and the registry value are fixed up (task 7.6). GHCR pulls use a personal access
+   token (classic, `read:packages`) of a GitHub user with read access to the packages; an org
+   makes per-client machine users and package access manageable.
+2. **Private repo constraints on the pipeline.** (a) Clients are served the **install kit**
+   (installer + compose + env example, delivered directly), so they need no access to the private
+   repo; `NURLINGS_DOWNLOAD_TOKEN` stays as an optional fallback for `raw.githubusercontent.com`
+   downloads. (b) Client servers are x86, so the workflow builds **amd64 only** and omits
+   build-provenance attestations (upstream's arm64 runner and attestation steps are not carried
+   over). (c) GHCR packages first published from a private repo should be private by default
+   (verify on the first run).
 3. **Self-update off means upgrades are ours to roll out.** Clients upgrade by us publishing a new
    tag and an operator running `docker compose pull && up -d` (documented).
 4. **Bundle-id manual steps** (not code): register the App ID and create the app in App Store

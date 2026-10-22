@@ -23,6 +23,10 @@ feature flags that keep the desktop auto-updater, mobile OTA updates and server 
 - **WHEN** a required field is missing, a URL is malformed, or the registry prefix is not lowercase
 - **THEN** validation fails with a message naming the field, and the build does not proceed
 
+#### Scenario: Registry placeholder
+- **WHEN** the registry prefix is the documented `REPLACE_WITH_ORG` placeholder
+- **THEN** validation accepts it, no other uppercase prefix is accepted, and the release check fails until a real lowercase organization is set
+
 ### Requirement: Optional entries are hidden when unset
 A brand URL that is not set (null) SHALL cause the UI entry that would link to it to be omitted,
 not rendered as a dead or placeholder link. The community link, the hosted-cloud origin, the iOS

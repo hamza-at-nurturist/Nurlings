@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import data from "../brand.json" with { type: "json" };
-import { BrandConfigError, brand, parseBrand } from "./index.js";
+import {
+  BrandConfigError,
+  brand,
+  parseBrand,
+  REGISTRY_PLACEHOLDER,
+  registryIsPlaceholder,
+} from "./index.js";
 
 function withChange(change: (draft: Record<string, any>) => void) {
   const draft = structuredClone(data) as Record<string, any>;
@@ -26,7 +32,7 @@ describe("brand.json", () => {
     expect(brand.company).toEqual({ name: "Nurturist AI", url: "https://nurturistai.com" });
     expect(brand.urls.site).toBe("https://nurlings.nurturistai.com");
     expect(brand.native.bundleId).toBe("com.nurturistai.nurlings");
-    expect(brand.registry).toBe("ghcr.io/hamza-at-nurturist/nurlings");
+    expect(brand.registry).toBe(REGISTRY_PLACEHOLDER);
   });
 
   it("offers no hosted cloud, store, or community link until one exists", () => {
@@ -56,6 +62,28 @@ describe("brand.json", () => {
 });
 
 describe("parseBrand", () => {
+  it("holds the registry placeholder until the organization is known", () => {
+    expect(REGISTRY_PLACEHOLDER).toBe("ghcr.io/REPLACE_WITH_ORG/nurlings");
+    expect(registryIsPlaceholder(brand.registry)).toBe(true);
+  });
+
+  it("accepts a real lowercase registry and stops reporting a placeholder", () => {
+    const parsed = parseBrand(withChange((d) => (d.registry = "ghcr.io/nurturist-ai/nurlings")));
+    expect(parsed.registry).toBe("ghcr.io/nurturist-ai/nurlings");
+    expect(registryIsPlaceholder(parsed.registry)).toBe(false);
+  });
+
+  it.each([
+    "ghcr.io/REPLACE_WITH_ORG/Nurlings",
+    "ghcr.io/replace_with_org/nurlings/",
+    "GHCR.io/REPLACE_WITH_ORG/nurlings",
+    "ghcr.io/Some-Org/nurlings",
+  ])("rejects %s: only the exact placeholder may be uppercase", (registry) => {
+    expect(problem(withChange((d) => (d.registry = registry)))).toContain(
+      "Invalid brand config: registry",
+    );
+  });
+
   it("accepts a configured optional URL", () => {
     const parsed = parseBrand(withChange((d) => (d.urls.community = "https://example.com/chat")));
     expect(parsed.urls.community).toBe("https://example.com/chat");

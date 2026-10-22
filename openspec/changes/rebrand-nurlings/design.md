@@ -68,7 +68,7 @@ packages/brand/
 | `urls.site` | `https://nurlings.nurturistai.com` (docs and privacy links point here for now) |
 | `urls.cloud` / `urls.iosApp` / `urls.androidApp` / `urls.community` | `null` — UI hides the entry (no Discord, no replacement) |
 | `native.bundleId` | `com.nurturistai.nurlings` (iOS bundle id **and** Android package) |
-| `registry` | `ghcr.io/hamza-at-nurturist/nurlings` (image prefix; lowercase) |
+| `registry` | `ghcr.io/REPLACE_WITH_ORG/nurlings` — image prefix, lowercase; the exact placeholder is the only uppercase value accepted, and `brand:check --release` fails while it remains |
 | `updates` | `{ desktop: false, mobileOta: false, serverSelfUpdate: false }` |
 | `colors`, `assets` | defaults equal today's values / paths into `packages/brand/assets/` |
 
@@ -173,8 +173,8 @@ the merge routine: `git fetch upstream && git merge upstream/main`, `pnpm brand:
 - **New workflow `.github/workflows/publish-nurlings-images.yml`** (additive): on push to `main`
   (`edge`), tags `v*` (semver + `latest`) and `workflow_dispatch`; matrix `app`, `updater`,
   `computer` with the same Dockerfiles/contexts as upstream; pushes to
-  `ghcr.io/${owner_lowercase}/nurlings/<name>` (lowercased in a step, so the mixed-case repo name is
-  safe); `GIT_SHA` build-arg for `app`; `packages: write` with the job token; actions pinned to the
+  `ghcr.io/<org>/nurlings/<name>` where the owner is lowercased in a step and every other segment is
+  a lowercase literal (so the mixed-case `Nurlings` repo name never reaches an image reference); `GIT_SHA` build-arg for `app`; `packages: write` with the job token; actions pinned to the
   same commit SHAs as upstream; **amd64 only** and **no provenance attestation** (see Risks).
   Pull requests do not build images (cost); a structural test mirrors upstream's.
 - **Upstream workflow guarded**: its `validate`, `build`, `publish` jobs get
@@ -183,11 +183,13 @@ the merge routine: `git fetch upstream && git merge upstream/main`, `pnpm brand:
   keeps running.
 - **Compose and env defaults**: the 12 `ghcr.io/elie222/rakazo/…` defaults in `docker-compose.images.yml`,
   `docker-compose.prod.yml` and `docker-compose.prod.docker.yml`, plus the 2 in `.env.images.example`,
-  become `ghcr.io/hamza-at-nurturist/nurlings/…`; `RAKAZO_IMAGE*` variable names unchanged; the two
+  become `ghcr.io/<org>/nurlings/…` (the real lowercase org, set when it is known — group 7); `RAKAZO_IMAGE*` variable names unchanged; the two
   updater tests that assert the old names are updated. `brand:check` enforces equality with
   `brand.registry`.
-- **Installer** (`install-images.sh`, additive): default `RAKAZO_DOWNLOAD_BASE` → our repo's raw URL;
-  optional `NURLINGS_DOWNLOAD_TOKEN` sends `Authorization: Bearer` on downloads; optional
+- **Installer** (`install-images.sh`, additive): clients get the **install kit** (installer, compose
+  file, env example) delivered directly and run it with the existing local-files mode, so they never
+  touch the private repo; the default `RAKAZO_DOWNLOAD_BASE` still points at our repo's raw URL and
+  the optional `NURLINGS_DOWNLOAD_TOKEN` (bearer header on downloads) is a fallback only; optional
   `NURLINGS_REGISTRY_USER` + `NURLINGS_REGISTRY_TOKEN` run `docker login ghcr.io` (token via stdin,
   never logged) before the pull; a failed pull prints an auth hint; operator-facing echo text says
   Nurlings. Existing `--local/--offline` flows and smoke tests are preserved; a new smoke test
@@ -215,12 +217,12 @@ Provider-console names are a manual list (proposal).
 - **Hardcoded strings added later by upstream** are not caught by the catalog seam. Mitigation:
   `inventory.py` at merge time and the Playwright walk-through assertion.
 - **Lingui compiled-message shapes** (plural/select/rich text): tested against real catalogs.
-- **Owner is a personal account** (appears so; to confirm): no teams/org machine accounts for
-  package access; moving to an org later is a one-value change (`brand.registry`) plus a re-publish.
-- **Private-repo limits on the pipeline**: artifact attestations and arm64 hosted runners are not
-  expected to be available for a private personal repo, hence amd64-only and no attestation; both
-  can be added back (design D8) once confirmed. Installer downloads from a private repo need a
-  token → hand over the install kit instead.
+- **Repo transfer to an org is pending**: until the org name is known the registry is the
+  placeholder; the move is a one-value change (`brand.registry`) plus a re-publish, and
+  group 7 includes the post-transfer fix-ups (remote URL, workflow references, compose defaults).
+- **Pipeline scope**: client servers are x86, so images are amd64 only and carry no provenance
+  attestation (decided); both can be added back later. Installer downloads from a private repo
+  need a token → clients receive the install kit instead.
 - **Bundle id is now ours but unregistered**: nothing ships to a store from this change; account
   setup is manual (proposal).
 - **Edits to `router.ts`, `app.config.ts`, `vite.config.ts`, `i18n.ts`, `main.ts`, the upstream
@@ -236,6 +238,6 @@ publishes `edge`; nothing pulls it until a client server is provisioned.
 
 ## Open Questions
 
-None block implementation. Defaults applied unless you say otherwise: docs/privacy links point at
-the site root; README/docs/issue templates/`SECURITY.md` unchanged; confirm whether
-`hamza-at-nurturist` is the account that should own the client-facing packages.
+None block implementation. Pending input: the lowercase GitHub organization name (needed before
+group 7). Defaults applied: docs/privacy links point at the site root; README/docs/issue
+templates/`SECURITY.md` unchanged.

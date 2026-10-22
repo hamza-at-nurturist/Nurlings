@@ -12,8 +12,12 @@ source commit tag.
 - **THEN** all three images are built and pushed with the `edge` and commit tags to `ghcr.io/<owner>/nurlings/<image>`
 
 #### Scenario: Mixed-case repository name
-- **WHEN** the repository name contains uppercase letters
-- **THEN** the image references used by the workflow are lowercase and valid
+- **WHEN** the repository or owner name contains uppercase letters
+- **THEN** every image reference used by the workflow, compose files and installer is entirely lowercase and valid
+
+#### Scenario: Install kit without repository access
+- **WHEN** an operator runs the installer from the delivered install kit
+- **THEN** it starts the stack from local files and a read-only registry credential, with no access to the private repository
 
 #### Scenario: Upstream workflow does not run
 - **WHEN** a commit is pushed in this repository
