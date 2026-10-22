@@ -1,0 +1,12 @@
+Nurlings
+Published by Nurturist AI (https://nurturistai.com)
+
+Nurlings is based on Rakazo, created by Elie Steinbock and the Rakazo contributors,
+which is licensed under the Apache License, Version 2.0.
+
+  Rakazo: https://github.com/elie222/rakazo
+  License: https://www.apache.org/licenses/LICENSE-2.0
+
+This work has been modified from the original: the product name, branding and some
+user-facing text, configuration and deployment defaults have been changed. The
+LICENSE file is the unmodified license text of the original project.

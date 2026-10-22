@@ -28,6 +28,31 @@ export const licenseCheck: BrandCheck = {
   },
 };
 
+const NOTICE_PHRASES = [
+  "Nurlings",
+  "Nurturist AI",
+  "based on Rakazo",
+  "Elie Steinbock",
+  "Apache License, Version 2.0",
+  "https://github.com/elie222/rakazo",
+  "has been modified",
+];
+
+export const noticeCheck: BrandCheck = {
+  name: "NOTICE credits the upstream project",
+  async run(repoRoot) {
+    let notice: string;
+    try {
+      notice = (await readFile(path.join(repoRoot, "NOTICE"), "utf8")).replace(/\s+/g, " ");
+    } catch {
+      return ["NOTICE is missing; Apache-2.0 attribution to the upstream project must stay."];
+    }
+    return NOTICE_PHRASES.filter((phrase) => !notice.includes(phrase)).map(
+      (phrase) => `NOTICE no longer says "${phrase}".`,
+    );
+  },
+};
+
 export const assetsCheck: BrandCheck = {
   name: "brand artwork and generated icons exist at the documented sizes",
   async run(repoRoot) {
@@ -40,7 +65,7 @@ export const assetsCheck: BrandCheck = {
   },
 };
 
-export const brandChecks: BrandCheck[] = [licenseCheck, assetsCheck];
+export const brandChecks: BrandCheck[] = [licenseCheck, noticeCheck, assetsCheck];
 
 export async function runBrandChecks(
   repoRoot: string,

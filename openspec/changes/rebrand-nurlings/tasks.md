@@ -60,7 +60,7 @@
 
 ## 8. Compliance
 
-- [ ] 8.1 Add `NOTICE`: Nurlings is based on Rakazo by Elie Steinbock, licensed under Apache-2.0, link https://github.com/elie222/rakazo, published by Nurturist AI. `LICENSE` stays untouched. Verify: `brand:check` asserts the required phrases and that `git diff main -- LICENSE` is empty.
+- [x] 8.1 Add `NOTICE`: Nurlings is based on Rakazo by Elie Steinbock, licensed under Apache-2.0, link https://github.com/elie222/rakazo, published by Nurturist AI. `LICENSE` stays untouched. Verify: `brand:check` asserts the required phrases and that `git diff main -- LICENSE` is empty.
 
 ## 9. Guardrails and merge routine
 
