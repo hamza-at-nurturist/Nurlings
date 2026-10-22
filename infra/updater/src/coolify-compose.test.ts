@@ -176,6 +176,13 @@ describe("the Coolify compose file", () => {
     }
   });
 
+  it("leaves sign-up open until the operator closes it after the first account", () => {
+    const api = environment(services.api ?? {});
+    expect(api.SIGNUPS_ENABLED).toBe("${SIGNUPS_ENABLED:-true}");
+    expect(api.SIGNUP_ALLOWLIST).toBe("${SIGNUP_ALLOWLIST:-}");
+    expect(readFileSync(readmeFile, "utf8")).toMatch(/SIGNUPS_ENABLED[^\n]*false/);
+  });
+
   it("restricts bot computer egress unless an operator overrides it", () => {
     const env = environment(services.supervisor ?? {});
     expect(env.SANDBOX_COMPUTER_EGRESS).toBe("${SANDBOX_COMPUTER_EGRESS:-restricted}");

@@ -26,13 +26,11 @@
 - [x] 4.1 Write `deploy/coolify/README.md` with the sections from the spec, including the mandatory egress step (setup step 3) (requirements with RAM per bot and a Docker Engine 26+ check, machine-user `docker login`, DNS, Coolify steps, env table with optional marked, upgrade/rollback, backup/restore including `ENCRYPTION_KEY`, common problems). Verify: the guard test checks the sections and that every variable in the README table exists in the compose file; the README's shell blocks pass `bash -n` apart from their `<placeholder>` lines.
 - [x] 4.2 Link the runbook from `docs/nurlings-deployment.md` with a one-line pointer. Verify: the link resolves in the rendered file and `pnpm brand:check` still passes.
 
-## 5. Real-server check (done by the maintainer on test.nurlings.nurturistai.com from the draft PR)
+## 5. Real-server check (done by the maintainer on the test Coolify server)
 
-- [ ] 5.1 Deploy the file on the test Coolify server with only `NURLINGS_VERSION` and a domain set (a `sha-<commit>` tag from a manual publish run on this branch, until `v0.1.0` exists). Verify and report back on the PR: generated secrets exist and differ, the app signs up and signs in over TLS, a bot computer starts and keeps its home across a redeploy, the supervisor reaches `web` on the isolated network, `docker login` 401 behaves as documented, and an upgrade to a second tag migrates cleanly.
-- [ ] 5.2 Take a backup and restore it to a second empty stack using the README steps. Verify: messages and a bot's files are present after the restore.
+- [x] 5.1 Deploy the file on the test Coolify server with only `NURLINGS_VERSION` and a domain set. Verified by the maintainer on `v0.1.0`: every long-running service reached healthy (the exited one-shots did not mark the resource unhealthy), the site answers over TLS, the first account was created and sign-up then locked with `SIGNUPS_ENABLED=false`, a bot computer started, browsed the public internet and wrote a file, and with restricted egress the Docker bridge address and the cloud metadata address time out while the public internet works. Found and fixed on this server: the port-suffixed URL variable carries the port (PR 3).
 
 ## Workflow follow-up
 
-- Open the PR "Add Coolify deployment for Nurlings" from `deploy/coolify-compose` as a draft; do not merge.
-- After the maintainer's test deploy and the merge, cut `v0.1.0` from `main` so the publish workflow builds the release images clients are pinned to.
-- Archive the change after merge and verify the archived result.
+- Done: PR "Add Coolify deployment for Nurlings" opened as a draft and merged; `v0.1.0` cut from `main`; archived.
+- Still to verify on a real server (not covered by the test deploy above): a bot computer keeps its home across a redeploy; an upgrade to a second tag migrates cleanly; a missing registry login fails with the documented 401; a backup restores into a second empty stack with messages and a bot's files intact (README section 8).
