@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./brand.json": "./brand.json",
+    "./schema": "./src/schema.ts",
     "./guard": "./src/guard.ts"
   },
   "scripts": {

@@ -46,12 +46,14 @@ export interface Brand {
 }
 
 export class BrandConfigError extends Error {
-  constructor(
-    readonly field: string,
-    problem: string,
-  ) {
+  // A plain field, not a constructor parameter property: this file is loaded by plain Node
+  // (type stripping) from vite.config.ts, which cannot run parameter properties.
+  readonly field: string;
+
+  constructor(field: string, problem: string) {
     super(`Invalid brand config: ${field} ${problem}`);
     this.name = "BrandConfigError";
+    this.field = field;
   }
 }
 

@@ -74,7 +74,11 @@ packages/brand/
 
 The scheme, slug and desktop `appId` are deliberately not in the config. The package has no
 dependencies, so web, mobile, desktop, `ui-web`, `contracts`, `auth`, `api`, `adapters` and `core`
-can import it without cycles. `@nurlings/*` marks "ours" at a glance.
+can import it without cycles. Anything Node loads directly (for example `vite.config.ts`, which
+loads config-time modules with plain type stripping) must use the self-contained subpaths
+`@nurlings/brand/schema` and `@nurlings/brand/brand.json`, because the entry point's sibling
+imports (`./schema.js`) do not resolve there; the package compiles with `erasableSyntaxOnly` so
+its sources stay loadable. `@nurlings/*` marks "ours" at a glance.
 
 *Rejected*: a module in `ui-tokens` (colours-only; `contracts`/`auth`/`api` would depend on a UI
 package); env-var-driven branding (identity is a build-time property; avoids new `RAKAZO_*` config).
@@ -84,7 +88,7 @@ package); env-var-driven branding (identity is a build-time property; avoids new
 | Surface | Seam | Upstream files edited |
 |---|---|---|
 | Web UI strings | catalog load-time substitution in `apps/web/src/lib/i18n.ts` (D3) | 1 |
-| Web `<title>`, meta, manifest | small Vite plugin (new file) rewrites `index.html`, emits `site.webmanifest` | `vite.config.ts` (1 line); `index.html`/manifest become templates |
+| Web `<title>`, meta, manifest | small Vite plugin (new file `src/brand-html.ts`) transforms upstream's `index.html` and rewrites `site.webmanifest` at build and dev time; both upstream files stay byte-identical, and a pattern that stops matching throws | `vite.config.ts` (2 lines: import + plugin entry) |
 | Web hardcoded text/links | `Wordmark` (`ui-web`), `Auth`, `Welcome`, `McpOAuthCallback`, `HonchoSettingsForm`, model-settings fields, `SidebarFooter` | ≈8 |
 | Mobile strings | same helper in `apps/mobile/lib/i18n.ts`; ≈5 hardcoded files | ≈6 |
 | Mobile identity | `app.config.ts` overlays display name, permission strings, colours, icons, **bundle id/package**, OTA off; `app.json` edited only to drop Rakazo's `owner`, `projectId`, `updates.url` (D5) | `app.config.ts`, `app.json` (3 lines) |

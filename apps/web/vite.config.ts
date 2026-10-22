@@ -25,6 +25,7 @@ import type { PreviewServer, ProxyOptions, ViteDevServer } from "vite";
 import { defineConfig, loadEnv } from "vite";
 import { resolveScreenProxySecret } from "../../packages/core/src/secrets-guard.ts";
 import { createServiceLogger } from "../../packages/logging/src/env.ts";
+import { brandPlugin } from "./src/brand-html.js";
 import { appendForwardedFor } from "./src/forwarded-for.js";
 import { missingAssetMiddleware } from "./src/missing-asset.js";
 import {
@@ -464,6 +465,7 @@ export default defineConfig(({ command, mode }) => {
           this.emitFile({ type: "asset", fileName: "build-id", source: `${buildId}\n` });
         },
       },
+      brandPlugin(),
       react(),
       babel({ plugins: ["@lingui/babel-plugin-lingui-macro"] }),
       lingui(),
