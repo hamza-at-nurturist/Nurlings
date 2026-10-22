@@ -35,7 +35,7 @@ echo "$TOKEN" | docker login ghcr.io --username nurlings-pull --password-stdin
 The token is a classic token with only `read:packages`. How to create the machine user and give
 it read access to the `app` and `computer` packages is in
 [docs/nurlings-deployment.md](../../docs/nurlings-deployment.md#how-a-client-server-pulls-private-images).
-Verify: `docker pull ghcr.io/nurturist-ai/nurlings/app:<version>` succeeds as root.
+Verify: `docker pull ghcr.io/hamza-at-nurturist/nurlings/app:<version>` succeeds as root.
 
 Do not run `docker system prune -a` on this server: it removes the bot computer image, which the
 supervisor needs on the host. A redeploy pulls it again.
@@ -76,8 +76,8 @@ SSL mode to Full (strict).
    It is the only service with a domain. If Coolify asks for the port, it is `5173`.
 4. Open **Environment Variables**:
    - Set `NURLINGS_VERSION` to the release tag to deploy (see section 7). Never `latest` or `edge`.
-   - Check that the `SERVICE_PASSWORD_*` values and `SERVICE_URL_WEB_5173` / `SERVICE_FQDN_WEB_5173`
-     exist, and that the URL shows your domain.
+   - Check that the `SERVICE_PASSWORD_*` values and `SERVICE_URL_WEB` / `SERVICE_FQDN_WEB` exist,
+     and that the URL shows your domain with no port.
    - Fill any optional values from the table below.
    - Copy `SERVICE_PASSWORD_64_CRYPT` (the encryption key) to the client's password manager now.
 5. **Deploy**. The first start takes a few minutes: it pulls three images and runs migrations.
@@ -98,8 +98,8 @@ Only `NURLINGS_VERSION` is mandatory. Everything else works empty.
 | `SERVICE_PASSWORD_64_CRYPT` | generated | yes | Encryption key (`ENCRYPTION_KEY`). **Back it up**: data and backups cannot be read without it. |
 | `SERVICE_PASSWORD_64_SCREEN` | generated | yes | Secret shared by web and API for bot screens. |
 | `SERVICE_PASSWORD_64_SUPERVISOR` | generated | yes | Credential for the supervisor. |
-| `SERVICE_FQDN_WEB_5173` | generated | no | Public hostname, from the `web` domain. |
-| `SERVICE_URL_WEB_5173` | generated | no | Public URL, from the `web` domain. |
+| `SERVICE_FQDN_WEB` | generated | no | Public hostname, from the `web` domain. |
+| `SERVICE_URL_WEB` | generated | no | Public URL, from the `web` domain. |
 | `OPENROUTER_API_KEY` | optional | yes | Models through OpenRouter. |
 | `ANTHROPIC_API_KEY` | optional | yes | Anthropic models directly. |
 | `OPENAI_API_KEY` | optional | yes | OpenAI models directly. |
@@ -177,11 +177,11 @@ Then **Redeploy** in Coolify to start everything again. Copy backups off the ser
 | Symptom | Cause and fix |
 | --- | --- |
 | `required variable NURLINGS_VERSION is missing a value` | Set `NURLINGS_VERSION` under Environment Variables. |
-| Image pull fails with `401`, `unauthorized` or `denied` | `docker login ghcr.io` was not run as root on this server, the token expired, it lacks `read:packages`, or the machine user has no Read access to the `app` or `computer` package. Test with `docker pull ghcr.io/nurturist-ai/nurlings/app:<version>` as root. |
+| Image pull fails with `401`, `unauthorized` or `denied` | `docker login ghcr.io` was not run as root on this server, the token expired, it lacks `read:packages`, or the machine user has no Read access to the `app` or `computer` package. Test with `docker pull ghcr.io/hamza-at-nurturist/nurlings/app:<version>` as root. |
 | `port is already allocated` or `address already in use` | This file publishes no host ports, so someone added a `ports:` entry. Remove it: Coolify's proxy owns 80 and 443. If the proxy itself will not start, another program on the server is using those ports. |
 | `permission denied while trying to connect to the Docker daemon socket` in the supervisor | `/var/run/docker.sock` is missing on the host or Docker is rootless, or a security module blocks it. Check `ls -l /var/run/docker.sock` and `docker info`. The supervisor runs as root and is the only service with the socket. |
 | A bot will not start; the error mentions `restrict-computer-egress.sh` | Step 3 was not done on this server. Run it, then try the bot again. |
 | Bots start but cannot look anything up | DNS: set `SANDBOX_COMPUTER_DNS` to a public resolver your network allows. |
 | `Blocked request. This host is not allowed` on the web page | The `web` domain does not match the URL you are using. Fix the domain and redeploy. |
 | `worker` shows unhealthy right after a deploy | It reports healthy after about two minutes; look at its logs if it does not. |
-| Sign-in loops or redirects to `localhost` | `SERVICE_URL_WEB_5173` is empty. Set the `web` domain and redeploy. |
+| Sign-in loops or redirects to `localhost` | `SERVICE_URL_WEB` is empty. Set the `web` domain and redeploy. |

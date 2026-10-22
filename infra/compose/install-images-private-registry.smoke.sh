@@ -104,7 +104,7 @@ new_work "$tmp/plain"
 out="$(run_install "$tmp/plain" --)" || fail "plain install failed: $out"
 grep -q '^docker login' "$tmp/plain/docker.log" && fail "plain install must not log in"
 grep -q -- ' -K ' "$tmp/plain/curl.log" && fail "plain install must not send a curl config"
-grep -qF -e 'nurturist-ai/nurlings/main/infra/compose' "$tmp/plain/curl.log" || fail "default download base is not the Nurlings repository: $(cat "$tmp/plain/curl.log")"
+grep -qF -e 'hamza-at-nurturist/Nurlings/main/infra/compose' "$tmp/plain/curl.log" || fail "default download base is not the Nurlings repository: $(cat "$tmp/plain/curl.log")"
 [[ "$out" == *"Nurlings is starting"* ]] || fail "missing start message: $out"
 [[ "$out" != *"Rakazo"* ]] || fail "operator text still says Rakazo: $out"
 

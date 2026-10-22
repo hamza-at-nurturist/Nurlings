@@ -61,7 +61,7 @@ describe("registryDefaultsCheck", () => {
   it("names the file and line of an image outside the registry", async () => {
     const repo = await scratch(files);
     await repo.edit("infra/compose/docker-compose.images.yml", (text) =>
-      text.replace("ghcr.io/nurturist-ai/nurlings/app", "ghcr.io/elie222/rakazo/app"),
+      text.replace("ghcr.io/hamza-at-nurturist/nurlings/app", "ghcr.io/elie222/rakazo/app"),
     );
     const problems = await registryDefaultsCheck.run(repo.dir);
     expect(problems.length).toBeGreaterThan(0);
@@ -71,7 +71,10 @@ describe("registryDefaultsCheck", () => {
   it("rejects a mixed-case image path", async () => {
     const repo = await scratch(files);
     await repo.edit(".env.example", (text) =>
-      text.replace("ghcr.io/nurturist-ai/nurlings/app", "ghcr.io/nurturist-ai/Nurlings/app"),
+      text.replace(
+        "ghcr.io/hamza-at-nurturist/nurlings/app",
+        "ghcr.io/hamza-at-nurturist/Nurlings/app",
+      ),
     );
     expect((await registryDefaultsCheck.run(repo.dir)).join("\n")).toContain("Nurlings/app");
   });
