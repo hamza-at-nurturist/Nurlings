@@ -55,6 +55,7 @@
     "test": "vitest run --root ../.. packages/core/src"
   },
   "dependencies": {
+    "@nurlings/brand": "workspace:*",
     "@observablehq/plot": "0.6.17",
     "@rakazo/contracts": "workspace:*",
     "croner": "10.0.1",

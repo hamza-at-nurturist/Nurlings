@@ -18,6 +18,7 @@ import type {
   OAuthClientMetadata,
   OAuthTokens,
 } from "@modelcontextprotocol/sdk/shared/auth.js";
+import { brand } from "@nurlings/brand";
 import type { SecretStore } from "@rakazo/adapter-kit";
 import { SecretStoreUnavailableError } from "@rakazo/adapter-kit";
 import {
@@ -347,7 +348,7 @@ export class StoredMcpOAuthProvider implements OAuthClientProvider {
     const applicationType = hostname === "localhost" || hostname === "127.0.0.1" ? "native" : "web";
     return {
       redirect_uris: [redirectUri],
-      client_name: "Rakazo",
+      client_name: brand.name,
       grant_types: ["authorization_code", "refresh_token"],
       response_types: ["code"],
       token_endpoint_auth_method: "none",

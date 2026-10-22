@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { modelAcceptsImageInput } from "./model-vision.js";
 import {
@@ -7,9 +8,26 @@ import {
   probeCatalogProviderModels,
   scriptedCatalogEntry,
 } from "./pi-models.js";
+import { CHATGPT_OAUTH_PROVIDER, SUBSCRIPTION_SIGN_IN_PROVIDERS } from "./pi-oauth.js";
 import { probeOpenAiCompatibleModels } from "./pi-openai-compatible-provider.js";
 
 describe("Pi model catalog", () => {
+  it("never names the upstream product in the billing blurb of any entry", () => {
+    const catalog = listPiCatalog();
+    expect(catalog.length).toBeGreaterThan(0);
+    for (const entry of catalog) {
+      expect(`${entry.billing} ${entry.oauthLabel ?? ""} ${entry.authHint ?? ""}`).not.toContain(
+        "Rakazo",
+      );
+    }
+    for (const meta of Object.values(SUBSCRIPTION_SIGN_IN_PROVIDERS)) {
+      expect(meta.billing).not.toContain("Rakazo");
+    }
+    expect(SUBSCRIPTION_SIGN_IN_PROVIDERS[CHATGPT_OAUTH_PROVIDER]?.billing).toContain(
+      `${brand.name} does not pay.`,
+    );
+  });
+
   it("preserves provider names and sign-in options from before pi 1.3", () => {
     const catalog = listPiCatalog();
     const codex = catalog.filter((entry) => entry.provider === "openai-codex");
@@ -30,7 +48,7 @@ describe("Pi model catalog", () => {
         providerName: "OpenAI",
         auth: "api-key",
         subscription: false,
-        billing: "Uses your OpenAI API key. Rakazo does not pay for model usage.",
+        billing: `Uses your OpenAI API key. ${brand.name} does not pay for model usage.`,
       });
       expect(entry.oauthLabel).toBeUndefined();
       expect(entry.signIn).toBeUndefined();
@@ -43,7 +61,7 @@ describe("Pi model catalog", () => {
         providerName: "Azure OpenAI",
         auth: "api-key",
         subscription: false,
-        billing: "Uses your Azure OpenAI API key. Rakazo does not pay for model usage.",
+        billing: `Uses your Azure OpenAI API key. ${brand.name} does not pay for model usage.`,
       });
     }
   });

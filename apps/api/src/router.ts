@@ -1,4 +1,5 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
+import { brand } from "@nurlings/brand";
 import { implement, ORPCError } from "@orpc/server";
 import type {
   AdapterContext,
@@ -6825,6 +6826,7 @@ function updaterConfig(deps: RouterDeps): UpdaterProxyConfig {
     token: deps.env.updaterToken ?? null,
     gitSha: deps.env.gitSha,
     imageTag: deps.env.imageTag ?? null,
+    disabled: !brand.updates.serverSelfUpdate,
   };
 }
 

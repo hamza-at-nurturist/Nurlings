@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { brand } from "@nurlings/brand";
 import type { TransactionalEmailProvider } from "@rakazo/adapter-kit";
 import type { BetterAuthPlugin } from "better-auth";
 import {
@@ -77,9 +78,9 @@ export function accountSecurity(
           });
           await email.send({
             to: user.email,
-            subject: "Confirm Rakazo account deletion",
-            text: `Enter this code in Rakazo to delete your account:\n\n${token}\n\nThis code expires in ten minutes. If you did not request deletion, ignore this email.`,
-            html: `<p>Enter this code in Rakazo to delete your account:</p><p>${token}</p><p>This code expires in ten minutes. If you did not request deletion, ignore this email.</p>`,
+            subject: `Confirm ${brand.name} account deletion`,
+            text: `Enter this code in ${brand.name} to delete your account:\n\n${token}\n\nThis code expires in ten minutes. If you did not request deletion, ignore this email.`,
+            html: `<p>Enter this code in ${brand.name} to delete your account:</p><p>${token}</p><p>This code expires in ten minutes. If you did not request deletion, ignore this email.</p>`,
           });
           return ctx.json({ success: true });
         },

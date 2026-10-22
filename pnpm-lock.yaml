@@ -619,6 +619,9 @@ importers:
       '@mozilla/readability':
         specifier: 0.6.0
         version: 0.6.0
+      '@nurlings/brand':
+        specifier: workspace:*
+        version: link:../brand
       '@observablehq/plot':
         specifier: 0.6.17
         version: 0.6.17
@@ -734,6 +737,9 @@ importers:
       '@better-auth/passkey':
         specifier: 1.7.11
         version: 1.7.11(g7wr6ga2nrjnacxw2l7adks7ai)
+      '@nurlings/brand':
+        specifier: workspace:*
+        version: link:../brand
       '@rakazo/adapter-kit':
         specifier: workspace:*
         version: link:../adapter-kit
@@ -836,6 +842,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@nurlings/brand':
+        specifier: workspace:*
+        version: link:../brand
       '@observablehq/plot':
         specifier: 0.6.17
         version: 0.6.17

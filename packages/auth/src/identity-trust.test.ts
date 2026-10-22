@@ -1,4 +1,5 @@
 import { createHash, createHmac, generateKeyPairSync, randomBytes, sign } from "node:crypto";
+import { brand } from "@nurlings/brand";
 import type { TransactionalEmail } from "@rakazo/adapter-kit";
 import { bootstrapUserSpace, recordSecurityEvent } from "@rakazo/db";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -711,7 +712,11 @@ describe("verification email without blocking", () => {
     expect(await f.sessionFor(token)).toMatchObject({ user: { emailVerified: false } });
     expect(bootstrapUserSpace).toHaveBeenCalledTimes(1);
     expect(f.messages).toHaveLength(1);
-    expect(f.messages[0]).toMatchObject({ subject: "Verify your Rakazo email" });
+    expect(f.messages[0]).toMatchObject({ subject: `Verify your ${brand.name} email` });
+    const verification = f.messages[0] as { subject: string; text: string; html: string };
+    expect(`${verification.subject}${verification.text}${verification.html}`).not.toContain(
+      "Rakazo",
+    );
     expect((await f.signin()).status).toBe(200);
     expect(f.messages).toHaveLength(1);
     await f.verify();
@@ -735,7 +740,7 @@ describe("email code sign-in", () => {
     expect(f.messages).toHaveLength(1);
     expect(f.messages[0]).toMatchObject({
       to: "approved@example.test",
-      subject: "Your Rakazo sign-in code",
+      subject: `Your ${brand.name} sign-in code`,
     });
     const code = f.lastCode();
     expect(JSON.stringify(f.data.verification)).not.toContain(code);

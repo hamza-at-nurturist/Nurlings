@@ -1,5 +1,6 @@
 import { expo } from "@better-auth/expo";
 import { passkey } from "@better-auth/passkey";
+import { brand } from "@nurlings/brand";
 import type {
   ProductAnalytics,
   TransactionalEmail,
@@ -323,7 +324,7 @@ export function createAuth(prisma: PrismaClient, env: AuthEnv) {
   let authContext: Promise<{ secretConfig: TokenKey }> | undefined;
   const tokenKey = async () => (await authContext!).secretConfig;
   const auth = betterAuth({
-    appName: "Rakazo",
+    appName: brand.name,
     logger: env.logger,
     secret: env.secret,
     baseURL: env.baseURL,
@@ -485,7 +486,7 @@ export function createAuth(prisma: PrismaClient, env: AuthEnv) {
         ? [
             passkey({
               rpID: relyingParty.rpID,
-              rpName: "Rakazo",
+              rpName: brand.name,
               origin: relyingParty.origins,
             }) as BetterAuthPlugin,
           ]
@@ -834,18 +835,18 @@ export function createAuth(prisma: PrismaClient, env: AuthEnv) {
 export function verificationEmail(email: string, url: string): TransactionalEmail {
   return {
     to: email,
-    subject: "Verify your Rakazo email",
-    text: `Verify your email, then return to Rakazo to sign in:\n\n${url}\n\nThis link expires in one hour. If you did not register, ignore this email.`,
-    html: `<p><a href="${escapeHtml(url)}">Verify email</a>, then return to Rakazo to sign in.</p><p>This link expires in one hour. If you did not register, ignore this email.</p>`,
+    subject: `Verify your ${brand.name} email`,
+    text: `Verify your email, then return to ${brand.name} to sign in:\n\n${url}\n\nThis link expires in one hour. If you did not register, ignore this email.`,
+    html: `<p><a href="${escapeHtml(url)}">Verify email</a>, then return to ${brand.name} to sign in.</p><p>This link expires in one hour. If you did not register, ignore this email.</p>`,
   };
 }
 
 export function signInCodeEmail(email: string, code: string): TransactionalEmail {
   return {
     to: email,
-    subject: "Your Rakazo sign-in code",
-    text: `Enter this code to sign in to Rakazo:\n\n${code}\n\nThis code expires in ten minutes. If you did not request it, ignore this email.`,
-    html: `<p>Enter this code to sign in to Rakazo:</p><p><strong>${escapeHtml(code)}</strong></p><p>This code expires in ten minutes. If you did not request it, ignore this email.</p>`,
+    subject: `Your ${brand.name} sign-in code`,
+    text: `Enter this code to sign in to ${brand.name}:\n\n${code}\n\nThis code expires in ten minutes. If you did not request it, ignore this email.`,
+    html: `<p>Enter this code to sign in to ${brand.name}:</p><p><strong>${escapeHtml(code)}</strong></p><p>This code expires in ten minutes. If you did not request it, ignore this email.</p>`,
   };
 }
 
@@ -858,16 +859,16 @@ export function passwordResetEmail(
   const safeUrl = escapeHtml(resetUrl);
   return {
     to: user.email,
-    subject: "Reset your Rakazo password",
+    subject: `Reset your ${brand.name} password`,
     text: [
       `Hi ${name},`,
       "",
-      "Reset your Rakazo password using this link:",
+      `Reset your ${brand.name} password using this link:`,
       resetUrl,
       "",
       "This link expires in one hour. If you did not request this, you can ignore this email.",
     ].join("\n"),
-    html: `<p>Hi ${safeName},</p><p>Reset your Rakazo password:</p><p><a href="${safeUrl}">Reset password</a></p><p>This link expires in one hour. If you did not request this, you can ignore this email.</p>`,
+    html: `<p>Hi ${safeName},</p><p>Reset your ${brand.name} password:</p><p><a href="${safeUrl}">Reset password</a></p><p>This link expires in one hour. If you did not request this, you can ignore this email.</p>`,
   };
 }
 
