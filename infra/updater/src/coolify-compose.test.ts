@@ -160,12 +160,14 @@ describe("the Coolify compose file", () => {
 
   it("derives every public URL from the single web domain", () => {
     const web = environment(services.web ?? {});
+    // The _5173 variable routes to the container port; its value carries ":5173", so the app's
+    // public URLs must come from the port-free SERVICE_URL_WEB / SERVICE_FQDN_WEB.
     expect(Object.keys(web)).toEqual(expect.arrayContaining(["SERVICE_FQDN_WEB_5173"]));
-    expect(web.RAKAZO_HOST).toBe("${SERVICE_FQDN_WEB_5173}");
+    expect(web.RAKAZO_HOST).toBe("${SERVICE_FQDN_WEB}");
     const api = environment(services.api ?? {});
-    expect(api.BETTER_AUTH_URL).toBe("${SERVICE_URL_WEB_5173}");
-    expect(api.WEB_ORIGIN).toBe("${SERVICE_URL_WEB_5173}");
-    expect(api.API_URL).toBe("${SERVICE_URL_WEB_5173}");
+    expect(api.BETTER_AUTH_URL).toBe("${SERVICE_URL_WEB}");
+    expect(api.WEB_ORIGIN).toBe("${SERVICE_URL_WEB}");
+    expect(api.API_URL).toBe("${SERVICE_URL_WEB}");
     for (const [name, service] of Object.entries(services)) {
       if (name === "web") continue;
       expect(

@@ -76,8 +76,8 @@ SSL mode to Full (strict).
    It is the only service with a domain. If Coolify asks for the port, it is `5173`.
 4. Open **Environment Variables**:
    - Set `NURLINGS_VERSION` to the release tag to deploy (see section 7). Never `latest` or `edge`.
-   - Check that the `SERVICE_PASSWORD_*` values and `SERVICE_URL_WEB_5173` / `SERVICE_FQDN_WEB_5173`
-     exist, and that the URL shows your domain.
+   - Check that the `SERVICE_PASSWORD_*` values and `SERVICE_URL_WEB` / `SERVICE_FQDN_WEB` exist,
+     and that the URL shows your domain with no port.
    - Fill any optional values from the table below.
    - Copy `SERVICE_PASSWORD_64_CRYPT` (the encryption key) to the client's password manager now.
 5. **Deploy**. The first start takes a few minutes: it pulls three images and runs migrations.
@@ -98,8 +98,8 @@ Only `NURLINGS_VERSION` is mandatory. Everything else works empty.
 | `SERVICE_PASSWORD_64_CRYPT` | generated | yes | Encryption key (`ENCRYPTION_KEY`). **Back it up**: data and backups cannot be read without it. |
 | `SERVICE_PASSWORD_64_SCREEN` | generated | yes | Secret shared by web and API for bot screens. |
 | `SERVICE_PASSWORD_64_SUPERVISOR` | generated | yes | Credential for the supervisor. |
-| `SERVICE_FQDN_WEB_5173` | generated | no | Public hostname, from the `web` domain. |
-| `SERVICE_URL_WEB_5173` | generated | no | Public URL, from the `web` domain. |
+| `SERVICE_FQDN_WEB` | generated | no | Public hostname, from the `web` domain. |
+| `SERVICE_URL_WEB` | generated | no | Public URL, from the `web` domain. |
 | `OPENROUTER_API_KEY` | optional | yes | Models through OpenRouter. |
 | `ANTHROPIC_API_KEY` | optional | yes | Anthropic models directly. |
 | `OPENAI_API_KEY` | optional | yes | OpenAI models directly. |
@@ -184,4 +184,4 @@ Then **Redeploy** in Coolify to start everything again. Copy backups off the ser
 | Bots start but cannot look anything up | DNS: set `SANDBOX_COMPUTER_DNS` to a public resolver your network allows. |
 | `Blocked request. This host is not allowed` on the web page | The `web` domain does not match the URL you are using. Fix the domain and redeploy. |
 | `worker` shows unhealthy right after a deploy | It reports healthy after about two minutes; look at its logs if it does not. |
-| Sign-in loops or redirects to `localhost` | `SERVICE_URL_WEB_5173` is empty. Set the `web` domain and redeploy. |
+| Sign-in loops or redirects to `localhost` | `SERVICE_URL_WEB` is empty. Set the `web` domain and redeploy. |

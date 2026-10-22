@@ -48,7 +48,10 @@ automation (documented only).
 3. **Routing.** `web` declares `SERVICE_FQDN_WEB_5173`. `BETTER_AUTH_URL`, `WEB_ORIGIN`, `API_URL`
    use `${SERVICE_URL_WEB}`; `RAKAZO_HOST` uses `${SERVICE_FQDN_WEB}` (the vite host allowlist needs
    the bare hostname). The api is not exposed: browsers and the mobile app go through `web`'s proxy,
-   exactly as in the single-origin published-images setup. `ports:` are removed everywhere.
+   exactly as in the single-origin published-images setup. `ports:` are removed everywhere. The `_5173`
+   variants carry the container port in their value (seen on a real Coolify 4.1 instance), so they
+   are used for routing only; the app settings use the port-free `SERVICE_URL_WEB` and
+   `SERVICE_FQDN_WEB`.
 4. **Secrets.** Distinct generated names so values differ: `POSTGRES_PASSWORD` ←
    `SERVICE_PASSWORD_POSTGRES`, `POSTGRES_APP_PASSWORD` ← `SERVICE_PASSWORD_APPDB`,
    `BETTER_AUTH_SECRET` ← `SERVICE_PASSWORD_64_AUTH`, `ENCRYPTION_KEY` ← `SERVICE_PASSWORD_64_CRYPT`,
@@ -118,7 +121,7 @@ automation (documented only).
 - **Magic-variable behaviour unverified** (docs only) → the maintainer deploys the draft PR to a
   test server first (task 5.1); the `:?` guards turn a failed version into a blocked deploy, and the
   app refuses to start on a missing or too-short secret. Specific things to confirm: generated
-  values exist and differ, `SERVICE_URL_WEB_5173` carries the domain, the docker.sock mount is
+  values exist and differ, `SERVICE_URL_WEB` carries the domain, the docker.sock mount is
   accepted, the exited one-shots do not mark the resource unhealthy, and the README's label-based
   `docker ps` filters find the containers and the `appdata` volume.
 - **Docker socket on a managed platform** is root-equivalent → scoped to one service, documented,

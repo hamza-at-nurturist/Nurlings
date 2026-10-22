@@ -1,6 +1,9 @@
 # Coolify v4 deployment of one dedicated Nurlings client server.
 # Add Resource -> Docker Compose Empty -> paste this file. Runbook: deploy/coolify/README.md
 #
+# The routing variable SERVICE_FQDN_WEB_5173 carries the container port; the app settings use the
+# port-free SERVICE_URL_WEB / SERVICE_FQDN_WEB that Coolify derives from the same domain.
+#
 # Set NURLINGS_VERSION (a release tag such as v0.1.0, never latest or edge) and give the `web`
 # service its domain. Coolify generates every secret below (SERVICE_PASSWORD_*): back up
 # ENCRYPTION_KEY from the resource's variables. Everything else is optional.
@@ -30,7 +33,7 @@ x-app-environment: &app-environment
   CONTENT_ENCRYPTION: ${CONTENT_ENCRYPTION:-on}
   WAKEUP_DRIVER: graphile
   AGENT_RUNTIME: pi
-  API_URL: ${SERVICE_URL_WEB_5173}
+  API_URL: ${SERVICE_URL_WEB}
   MAX_UPLOAD_SIZE_MB: ${MAX_UPLOAD_SIZE_MB:-10}
   RAKAZO_IMAGE_TAG: ${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
   RAKAZO_UPDATE_RESTART_SUPERVISOR:
@@ -362,8 +365,8 @@ services:
       API_HOST: "0.0.0.0"
       API_PORT:
       BETTER_AUTH_SECRET: ${SERVICE_PASSWORD_64_AUTH}
-      BETTER_AUTH_URL: ${SERVICE_URL_WEB_5173}
-      WEB_ORIGIN: ${SERVICE_URL_WEB_5173}
+      BETTER_AUTH_URL: ${SERVICE_URL_WEB}
+      WEB_ORIGIN: ${SERVICE_URL_WEB}
       AUTH_PASSWORD_ENABLED: ${AUTH_PASSWORD_ENABLED:-true}
       AUTH_BREACHED_PASSWORD_CHECK_ENABLED: ${AUTH_BREACHED_PASSWORD_CHECK_ENABLED:-false}
       PASSKEY_APPLE_APP_IDS: ${PASSKEY_APPLE_APP_IDS:-}
@@ -476,7 +479,7 @@ services:
       - NODE_ENV=production
       - API_PROXY_TARGET=http://api:3100
       # The vite host allowlist needs the bare public hostname.
-      - RAKAZO_HOST=${SERVICE_FQDN_WEB_5173}
+      - RAKAZO_HOST=${SERVICE_FQDN_WEB}
       - RAKAZO_IMAGE_TAG=${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
       - SCREEN_PROXY_SECRET=${SERVICE_PASSWORD_64_SCREEN}
       - RAKAZO_CSP_SCRIPT_SRC=${RAKAZO_CSP_SCRIPT_SRC:-}
