@@ -5,8 +5,6 @@ export type { Brand } from "./schema.js";
 export {
   BrandConfigError,
   parseBrand,
-  REGISTRY_PLACEHOLDER,
-  registryIsPlaceholder,
 } from "./schema.js";
 export type { CompiledMessage } from "./text.js";
 export { brandMessage, brandMessages, brandProduct, brandText } from "./text.js";

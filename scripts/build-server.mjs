@@ -35,7 +35,9 @@ for (const entry of entries) {
             if (args.path.startsWith("node:") || builtins.has(args.path)) {
               return { path: args.path, external: true };
             }
-            if (args.path.startsWith("@rakazo/")) return undefined;
+            // Workspace packages ship source, so they are bundled rather than left external.
+            if (args.path.startsWith("@rakazo/") || args.path.startsWith("@nurlings/"))
+              return undefined;
             const resolved = await builder.resolve(args.path, {
               kind: args.kind,
               resolveDir: args.resolveDir,

@@ -45,11 +45,85 @@ describe("server image publish workflow", () => {
     const validate = workflow.jobs.validate;
     const build = workflow.jobs.build;
     const publish = workflow.jobs.publish;
-    expect(validate.if).toBe("github.event_name == 'pull_request'");
-    expect(build.if).toBe("github.event_name != 'pull_request'");
-    expect(publish.if).toBe("github.event_name != 'pull_request'");
+    const upstreamOnly = "github.repository == 'elie222/rakazo' && ";
+    expect(validate.if).toBe(`${upstreamOnly}github.event_name == 'pull_request'`);
+    expect(build.if).toBe(`${upstreamOnly}github.event_name != 'pull_request'`);
+    expect(publish.if).toBe(`${upstreamOnly}github.event_name != 'pull_request'`);
     expect(workflowText).toContain("push: false");
     for (const match of workflowText.matchAll(/uses:\s+([^\s#]+)/g)) {
+      expect(match[1], match[1]).toMatch(/@[0-9a-f]{40}$/);
+    }
+  });
+});
+
+const nurlingsText = readFileSync(
+  path.resolve(import.meta.dirname, "../../../.github/workflows/publish-nurlings-images.yml"),
+  "utf8",
+);
+const nurlings = parse(nurlingsText) as {
+  on: { push: { branches: string[]; tags: string[] }; workflow_dispatch: unknown };
+  jobs: {
+    publish: {
+      permissions: Record<string, string>;
+      strategy: { matrix: { include: Array<Record<string, string>> } };
+    };
+  };
+};
+
+describe("upstream publish workflow in this repository", () => {
+  it("only runs the image jobs in the upstream repository", () => {
+    expect(workflowText).toContain("github.repository == 'elie222/rakazo'");
+    for (const job of [workflow.jobs.validate, workflow.jobs.build, workflow.jobs.publish]) {
+      expect(job.if).toMatch(/^github\.repository == 'elie222\/rakazo' && /);
+    }
+    // The installer smokes stay on everywhere.
+    expect(parse(workflowText).jobs["installer-smoke"].if).toBe(
+      "github.event_name == 'pull_request'",
+    );
+  });
+});
+
+describe("nurlings image publish workflow", () => {
+  it("publishes on main, release tags and manual runs only", () => {
+    expect(nurlings.on.push.branches).toEqual(["main"]);
+    expect(nurlings.on.push.tags).toEqual(["v*"]);
+    expect(nurlings.on).toHaveProperty("workflow_dispatch");
+    expect(nurlingsText).not.toContain("pull_request");
+  });
+
+  it("builds app, updater and computer for amd64 from upstream's Dockerfiles", () => {
+    const include = nurlings.jobs.publish.strategy.matrix.include;
+    expect(include.map((entry) => entry.name)).toEqual(["app", "updater", "computer"]);
+    expect(include.map((entry) => entry.dockerfile)).toEqual([
+      "infra/compose/Dockerfile",
+      "infra/updater/Dockerfile",
+      "infra/sandboxes/computer/Dockerfile",
+    ]);
+    expect(nurlingsText).toContain("platforms: linux/amd64");
+    expect(nurlingsText).not.toContain("arm64");
+    expect(nurlingsText).not.toContain("attest");
+    expect(nurlingsText).toContain("GIT_SHA={0}");
+  });
+
+  it("lowercases the namespace and never uses the mixed-case repository name", () => {
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions syntax, not a template literal
+    expect(nurlingsText).toContain("${OWNER,,}");
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions syntax, not a template literal
+    expect(nurlingsText).toContain("ghcr.io/${OWNER,,}/nurlings/${{ matrix.name }}");
+    expect(nurlingsText).not.toContain("github.repository }}");
+    expect(nurlingsText).not.toMatch(/ghcr\.io\/[^\s$]*[A-Z]/);
+  });
+
+  it("tags edge on main and latest only for stable release tags", () => {
+    expect(nurlingsText).toContain("type=sha,prefix=sha-");
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions syntax, not a template literal
+    expect(nurlingsText).toContain("value=edge,enable=${{ github.ref == 'refs/heads/main' }}");
+    expect(nurlingsText).toContain("!contains(github.ref, '-')");
+  });
+
+  it("has the least privilege it needs and pins every action to a commit", () => {
+    expect(nurlings.jobs.publish.permissions).toEqual({ contents: "read", packages: "write" });
+    for (const match of nurlingsText.matchAll(/uses:\s+([^\s#]+)/g)) {
       expect(match[1], match[1]).toMatch(/@[0-9a-f]{40}$/);
     }
   });

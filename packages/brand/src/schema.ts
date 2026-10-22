@@ -21,10 +21,7 @@ export interface Brand {
    * it and the placeholder artwork is generated from it; real artwork replaces this value.
    */
   mark: { viewBox: string; path: string };
-  /**
-   * Lowercase image prefix; compose defaults must equal it (`brand:check`). Holds the
-   * `REGISTRY_PLACEHOLDER` until the repository's organization is known.
-   */
+  /** Lowercase image prefix; compose defaults must equal it (`brand:check`). */
   registry: string;
   colors: {
     themeLight: string;
@@ -67,16 +64,6 @@ type Shape = Record<string, unknown>;
 const BUNDLE_ID = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9_]*)+$/;
 const REGISTRY = /^[a-z0-9][a-z0-9.-]*(?::\d+)?(?:\/[a-z0-9][a-z0-9._-]*)+$/;
 
-/**
- * Stands in for the GitHub organization until the repository moves. It is the only uppercase value
- * the validator accepts, so it cannot be mistaken for a real image path; `brand:check --release`
- * fails while it is present.
- */
-export const REGISTRY_PLACEHOLDER = "ghcr.io/REPLACE_WITH_ORG/nurlings";
-
-export function registryIsPlaceholder(registry: string): boolean {
-  return registry === REGISTRY_PLACEHOLDER;
-}
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 const VIEW_BOX = /^-?\d+(?:\.\d+)?(?: -?\d+(?:\.\d+)?){3}$/;
 // SVG path data only: commands, numbers, separators. Nothing that could break out of an attribute.
@@ -216,15 +203,12 @@ export function parseBrand(input: unknown): Brand {
       viewBox: match(mark.viewBox, "mark.viewBox", VIEW_BOX, "four numbers such as 0 0 100 100"),
       path: match(mark.path, "mark.path", PATH_DATA, "SVG path data"),
     },
-    registry:
-      root.registry === REGISTRY_PLACEHOLDER
-        ? REGISTRY_PLACEHOLDER
-        : match(
-            root.registry,
-            "registry",
-            REGISTRY,
-            `a lowercase image prefix such as ghcr.io/owner/name (or ${REGISTRY_PLACEHOLDER})`,
-          ),
+    registry: match(
+      root.registry,
+      "registry",
+      REGISTRY,
+      "a lowercase image prefix such as ghcr.io/owner/name",
+    ),
     colors: {
       themeLight: hex("themeLight"),
       themeDark: hex("themeDark"),

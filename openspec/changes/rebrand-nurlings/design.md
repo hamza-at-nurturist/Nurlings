@@ -69,7 +69,7 @@ packages/brand/
 | `urls.cloud` / `urls.iosApp` / `urls.androidApp` / `urls.community` | `null` — UI hides the entry (no Discord, no replacement) |
 | `native.bundleId` | `com.nurturistai.nurlings` (iOS bundle id **and** Android package) |
 | `mark` | `{ viewBox, path }`: the in-app logo as one SVG path, drawn by the UI (`BrandMark`, `Wordmark`) and used to generate the placeholder PNGs; real artwork replaces this value or the component |
-| `registry` | `ghcr.io/REPLACE_WITH_ORG/nurlings` — image prefix, lowercase; the exact placeholder is the only uppercase value accepted, and `brand:check --release` fails while it remains |
+| `registry` | `ghcr.io/nurturist-ai/nurlings` — image prefix; every segment lowercase, validated |
 | `updates` | `{ desktop: false, mobileOta: false, serverSelfUpdate: false }` |
 | `colors`, `assets` | defaults equal today's values / paths into `packages/brand/assets/` |
 

@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import {
   DEFAULT_UPDATE_REMOTE,
   isOfficialRepoUrl,
@@ -15,10 +16,13 @@ import {
  */
 export const PUBLISHED_IMAGE_REPO = "elie222/rakazo";
 
-/** The published server image. One image runs api, worker, and web. */
-export const OFFICIAL_SERVER_IMAGE = `ghcr.io/${PUBLISHED_IMAGE_REPO}/app`;
+/**
+ * The published server image. One image runs api, worker, and web. It follows the brand's registry
+ * prefix, so a deployment that never sets RAKAZO_IMAGE cannot pick up the upstream project's image.
+ */
+export const OFFICIAL_SERVER_IMAGE = `${brand.registry}/app`;
 /** The updater sidecar's image, published alongside the server image but tagged independently. */
-export const OFFICIAL_UPDATER_IMAGE = `ghcr.io/${PUBLISHED_IMAGE_REPO}/updater`;
+export const OFFICIAL_UPDATER_IMAGE = `${brand.registry}/updater`;
 
 /**
  * The tag a deployment that has never run an update is on. It is deliberately *not* `latest`: no

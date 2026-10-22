@@ -1,5 +1,8 @@
 name: publish-server-image
 
+# Nurlings: this upstream workflow only runs in elie222/rakazo; publish-nurlings-images.yml
+# publishes our images. The installer smokes below still run everywhere.
+#
 # Release tags publish the source-addressed image used by in-app updates plus the human-readable
 # semver tags. Main publishes `edge`. Pull requests build with a read-only token and an isolated
 # cache, so untrusted code can validate the images without receiving package-publish authority.
@@ -48,7 +51,7 @@ jobs:
 
   validate:
     name: Validate ${{ matrix.name }} image
-    if: github.event_name == 'pull_request'
+    if: github.repository == 'elie222/rakazo' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
@@ -91,7 +94,7 @@ jobs:
 
   build:
     name: Build ${{ matrix.name }} ${{ matrix.arch }}
-    if: github.event_name != 'pull_request'
+    if: github.repository == 'elie222/rakazo' && github.event_name != 'pull_request'
     # Each architecture builds natively on its own runner and pushes by digest only.
     # No QEMU: GitHub hosts native arm64 runners, and emulated arm64 took hours for the
     # desktop-sized computer image. See docs/self-host.md (Published images and tags).
@@ -169,7 +172,7 @@ jobs:
 
   publish:
     name: Publish ${{ matrix.name }} image
-    if: github.event_name != 'pull_request'
+    if: github.repository == 'elie222/rakazo' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15

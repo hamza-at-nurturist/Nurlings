@@ -9,7 +9,7 @@ text, the placeholder artwork, and the checks that keep the white-label from reg
 | Rewrites upstream strings at load time (`Rakazo` → name, `bot(s)` → Nurling(s)) | `brandText`, `brandMessages` |
 | Source artwork (what you replace) | `assets/` |
 | Per-platform icon generator | `pnpm --filter @nurlings/brand export:assets` |
-| Guards | `pnpm brand:check` (add `--release` before publishing) |
+| Guards | `pnpm brand:check` |
 
 Do not write the product name as a literal in new code; read it from `brand`.
 
@@ -79,8 +79,7 @@ icon, so none is needed. The packaged macOS icon comes from the `Nurlings.icon` 
 
 - `pnpm brand:check` verifies `LICENSE` is byte-identical to upstream's and that all artwork and
   generated icons exist at the sizes above.
-- `pnpm --filter @nurlings/brand brand:check -- --release` also fails while `registry` in
-  `brand.json` still holds the `ghcr.io/REPLACE_WITH_ORG/nurlings` placeholder. Image names and
-  registry paths are lowercase everywhere.
+- Image names and registry paths are lowercase everywhere; `registry` in `brand.json` must be a
+  lowercase image prefix.
 - `pnpm --filter @nurlings/brand test` runs the unit tests, including one that fails if this README
   stops listing a source or generated file.

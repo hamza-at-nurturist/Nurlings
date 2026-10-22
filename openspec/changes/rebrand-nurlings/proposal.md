@@ -118,14 +118,11 @@ Android passkey `assetlinks.json`); iOS passkey association comes from the
 
 ## Things you should know
 
-1. **The repo is moving to an organization; the registry prefix is a placeholder until then.**
-   `hamza-at-nurturist` is a personal account, so the repo is being transferred. `brand.json` holds
-   `registry: "ghcr.io/REPLACE_WITH_ORG/nurlings"` (the only uppercase value the validator accepts)
-   and `pnpm brand:check --release` fails until it names a real, **lowercase** organization. Every
-   image name and registry path is lowercase everywhere (the workflow also lowercases the owner and
-   repository name it derives), so the mixed-case `Nurlings` repo name can never produce an invalid
-   image reference. The org name is supplied before group 7; once the repo moves, remotes, workflow
-   references and the registry value are fixed up (task 7.6). GHCR pulls use a personal access
+1. **The repo moved to the `nurturist-ai` organization; the registry prefix is `ghcr.io/nurturist-ai/nurlings`.**
+   Every image name and registry path is lowercase everywhere (the workflow also lowercases the
+   owner it derives), so the mixed-case `Nurlings` repo name can never produce an invalid image
+   reference. The placeholder and its `--release` check existed only until the org name was known
+   and have been removed (task 7.6). GHCR pulls use a personal access
    token (classic, `read:packages`) of a GitHub user with read access to the packages; an org
    makes per-client machine users and package access manageable.
 2. **Private repo constraints on the pipeline.** (a) Clients are served the **install kit**
