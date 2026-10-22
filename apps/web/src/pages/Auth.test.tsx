@@ -20,7 +20,9 @@ vi.mock("@lingui/react/macro", () => ({
   Trans: ({ children }: { children: ReactNode }) => children,
 }));
 vi.mock("@rakazo/ui-web", () => ({
-  BrandMark: () => <svg data-testid="brand-mark" />,
+  BrandAnimation: ({ variant }: { variant: string }) => (
+    <span data-testid="brand-animation" data-variant={variant} />
+  ),
   Button: ({
     children,
     variant,
@@ -115,11 +117,13 @@ async function submit() {
   });
 }
 it.each(["in", "up", "forgot"] as const)(
-  "draws the brand mark and the tagline, not the upstream face, on %s",
+  "plays the intro animation and shows the tagline, not the upstream face, on %s",
   async (mode) => {
     vi.mocked(fetchAuthCapabilities).mockResolvedValue(capabilities);
     await render(mode);
-    expect(host.querySelector('[data-testid="brand-mark"]')).not.toBeNull();
+    expect(
+      host.querySelector('[data-testid="brand-animation"][data-variant="intro"]'),
+    ).not.toBeNull();
     expect(host.textContent).toContain(brand.tagline);
     // Heading text is rebranded by the catalog loader (see lib/i18n-brand.test.ts); this file
     // mocks Trans, so it only checks what the frame itself draws.

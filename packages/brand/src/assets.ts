@@ -10,8 +10,16 @@ export type Size = readonly [width: number, height: number];
 
 /** Source artwork in packages/brand/assets, keyed like `brand.assets`. `null` is not a PNG. */
 export const SOURCE_SIZES: Record<keyof Brand["assets"], Size | null> = {
+  markSvg: null,
+  markSmallSvg: null,
+  iconSvg: null,
+  logoSvg: null,
+  introSvg: null,
+  loaderSvg: null,
   mark: [1024, 1024],
   wordmark: null,
+  wordmarkLight: null,
+  wordmarkDark: null,
   appIcon: [1024, 1024],
   appleIcon: null,
   androidAdaptiveForeground: [1024, 1024],
@@ -88,6 +96,11 @@ export async function sourceAssetProblems(brandDir: string, brand: Brand): Promi
     if (size) {
       problems.push(...(await expectPng(file, `packages/brand/${relative}`, size)));
     } else if (!(await exists(file))) {
+      problems.push(`packages/brand/${relative} is missing.`);
+    }
+  }
+  for (const relative of [brand.wordmarkFont.file, brand.wordmarkFont.css]) {
+    if (!(await exists(path.join(brandDir, relative)))) {
       problems.push(`packages/brand/${relative} is missing.`);
     }
   }

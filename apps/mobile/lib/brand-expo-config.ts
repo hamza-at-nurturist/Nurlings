@@ -28,6 +28,9 @@ function brandPrompts(value: Json, key = ""): Json {
   return value;
 }
 
+/** Width the splash image is shown at, in points: the mark fills most of the image. */
+export const SPLASH_IMAGE_WIDTH = 240;
+
 /** Splash colours come from the brand; the splash image itself is `assets/splash-icon.png`. */
 function brandSplash(plugin: Json): Json {
   if (!Array.isArray(plugin) || plugin[0] !== "expo-splash-screen") return plugin;
@@ -36,6 +39,7 @@ function brandSplash(plugin: Json): Json {
     "expo-splash-screen",
     {
       ...options,
+      imageWidth: SPLASH_IMAGE_WIDTH,
       backgroundColor: brand.colors.splashLight,
       dark: { ...options.dark, backgroundColor: brand.colors.splashDark },
     },

@@ -50,6 +50,7 @@ import type { GroupAvatarMember } from "@rakazo/ui-web";
 import {
   AvatarStyleProvider,
   BotAvatar,
+  BrandAnimation,
   Button,
   DropdownMenu,
   DropdownMenuContent,
@@ -61,7 +62,6 @@ import {
   InputGroupButton,
   InputGroupInput,
   Sidebar,
-  Spinner,
   toast,
 } from "@rakazo/ui-web";
 import { useIsMobile } from "@rakazo/ui-web/hooks/use-mobile";
@@ -2916,7 +2916,7 @@ function SpaceShell() {
   const computerBooting =
     booting || computer?.state === "booting" ? (
       <span className="flex flex-col items-center gap-3">
-        <Spinner aria-hidden className="size-5 motion-reduce:animate-none" />
+        <BrandAnimation variant="loader" className="h-9" />
         {t`Booting live desktop…`}
       </span>
     ) : null;

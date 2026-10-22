@@ -3,7 +3,7 @@ import type { LinkFavicons } from "@rakazo/chat-ui/web";
 import { LinkFaviconsContext, RemoteImagesContext } from "@rakazo/chat-ui/web";
 import { LOCAL_SETTINGS_PAGE } from "@rakazo/contracts";
 import { analyticsScreen } from "@rakazo/core";
-import { Button, Skeleton } from "@rakazo/ui-web";
+import { BrandAnimation, Button, Skeleton } from "@rakazo/ui-web";
 import {
   Suspense,
   useEffect,
@@ -137,10 +137,13 @@ function SessionApp() {
       <ShellSkeleton />
     ) : (
       <div
-        className="grid h-full place-items-center text-muted-foreground/80"
+        className="grid h-full place-items-center bg-background text-muted-foreground/80"
         data-rakazo-app-state="session-pending"
       >
-        <Trans>Loading…</Trans>
+        <BrandAnimation variant="intro" className="h-16" />
+        <span className="sr-only">
+          <Trans>Loading…</Trans>
+        </span>
       </div>
     );
   }
@@ -238,6 +241,7 @@ function SessionUnavailable({ refetch }: { refetch: () => Promise<void> }) {
   return (
     <div className="grid h-full place-items-center bg-background px-6 text-center">
       <div className="flex flex-col items-center">
+        <BrandAnimation variant="loader" className="mb-4 h-10" />
         <LoadingState label={t`Reconnecting`} />
         <p className="mt-3 text-[13.5px] text-muted-foreground/80">
           <Trans>Can&apos;t reach the server.</Trans>

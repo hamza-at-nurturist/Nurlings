@@ -1,47 +1,91 @@
 # @nurlings/brand
 
 The single place the Nurlings brand is defined: configuration, the helpers that rebrand upstream
-text, the placeholder artwork, and the checks that keep the white-label from regressing.
+text, the logo artwork, and the checks that keep the white-label from regressing.
 
 | Piece | Where |
 |---|---|
 | Brand configuration (name, bot terms, tagline, URLs, bundle id, registry, colours, updater flags) | `brand.json`, read through `import { brand } from "@nurlings/brand"` |
 | Rewrites upstream strings at load time (`Rakazo` → name, `bot(s)` → Nurling(s)) | `brandText`, `brandMessages` |
 | Source artwork (what you replace) | `assets/` |
+| PNG sources from the SVGs | `pnpm --filter @nurlings/brand make:sources` |
 | Per-platform icon generator | `pnpm --filter @nurlings/brand export:assets` |
 | Guards | `pnpm brand:check` |
 
 Do not write the product name as a literal in new code; read it from `brand`.
 
-## Replacing the placeholder artwork
+## Updating the artwork
 
-The files in `assets/` are plain placeholder tiles (a geometric "N"). To use real artwork:
+The artwork is vector. Four SVG files are the only things you edit:
 
-1. Overwrite the **source** files listed below, keeping each file's exact pixel size and name.
-2. Run `pnpm --filter @nurlings/brand export:assets`. It rewrites every web, desktop and mobile
-   icon from the sources.
-3. Run `pnpm brand:check` (it fails if a source or generated file is missing or the wrong size),
-   then commit the sources **and** the generated files.
+| SVG | Used for |
+|---|---|
+| `assets/app-icon/nurlings-icon.svg` | The square app icon on the navy plate (iOS, Android, desktop, web) |
+| `assets/logo/nurlings-mark.svg` | The full mark, transparent: blob and orb. In-app logo, desktop setup, splash, adaptive foreground |
+| `assets/logo/nurlings-mark-small.svg` | The blob alone. Favicons, the Android themed icon and the notification icon, where the orb's eyes disappear |
+| `assets/logo/nurlings-logo.svg` | The original composition. Reference only; nothing reads it |
+| `assets/logo/nurlings-intro.svg` | The animated mark that plays once, then idles. Plain `<img>`: sign-in, the desktop setup screen and the web app's opening screen |
+| `assets/logo/nurlings-loader.svg` | The animated mark on a loop. Plain `<img>`: full loading states |
 
-`pnpm --filter @nurlings/brand make:placeholders` recreates the placeholders but never overwrites
-an existing file unless you pass `--force`, so real artwork is safe. Do not hand-edit the generated
-files, and do not run upstream's `ui-tokens` generator directly: `pnpm --filter @rakazo/ui-tokens
-export:brand` now just calls `export:assets`.
+Both animated files switch their animation off for `prefers-reduced-motion`, and the apps draw the
+static mark if one fails to load. They are shown on the navy plate. Small inline spinners are left
+alone: the mark would be too small to read.
+
+The blob is white, so the transparent mark shows fully only on a dark background; the in-app mark
+draws the blob in the text colour instead.
+
+To change the artwork:
+
+1. Replace the SVGs, and copy the new shapes and colours into `brand.json` (`mark`, `colors`). The
+   check below fails if the two disagree.
+2. `pnpm --filter @nurlings/brand make:sources -- --force` renders the PNG sources below from the
+   SVGs. Without `--force` it never overwrites an existing file.
+3. `pnpm --filter @nurlings/brand export:assets` writes every web, desktop and mobile icon from
+   those sources.
+4. `pnpm brand:check`, then commit the SVGs, the sources **and** the generated files.
+
+Do not hand-edit the PNG sources or the generated files, and do not run upstream's `ui-tokens`
+generator directly: `pnpm --filter @rakazo/ui-tokens export:brand` now just calls `export:assets`.
+
+## The wordmark's typeface
+
+The product name beside the mark is set in Poppins Medium (500) with letter-spacing -0.02em, the
+typeface of nurturistai.com's header; the rest of the UI keeps its own. The font is self-hosted so
+desktop and mobile work offline: `assets/fonts/poppins-latin-500.woff2` (Latin subset),
+`assets/fonts/poppins.css` (its `@font-face`) and `assets/fonts/OFL.txt` (the SIL Open Font
+License 1.1 it is distributed under). `brand.json` (`wordmarkFont`) holds the family, weight,
+spacing and the fallback stack. The wordmark SVGs embed the font so they render the same as images.
+`nurlings-wordmark.svg` follows the surrounding text colour only when placed inline; as an `<img>`
+it renders black, so use `nurlings-wordmark-light.svg` or `nurlings-wordmark-dark.svg` anywhere the
+file is used as an image.
+
+## Platform rules the checks enforce
+
+- The Android adaptive foreground and the themed icon keep all visible pixels inside the central
+  circle of 676 pixels (66% of the layer) and fill at least 95% of its radius: the mark is placed
+  so the smallest circle around it is 672 pixels across.
+- The app icon, the iOS and Android legacy icons and the adaptive background are opaque.
+- Favicons use the blob alone on a navy rounded plate, drawn from the vector at 16, 32 and 48
+  pixels. The themed and notification icons are white on transparent.
+- The app icon source is a render of its SVG: edit the SVG and the check names the stale file.
 
 ## Source files (you edit these)
 
 | Source | Size | Used for |
 |---|---|---|
-| `assets/logo/nurlings-mark.png` | 1024×1024, transparent | The mark on its own |
-| `assets/logo/nurlings-wordmark.svg` | vector | The wordmark (uses `currentColor`) |
+| `assets/app-icon/nurlings-icon.svg`, `assets/logo/nurlings-mark.svg`, `assets/logo/nurlings-mark-small.svg`, `assets/logo/nurlings-logo.svg` | vector | The artwork itself (see above) |
+| `assets/logo/nurlings-mark.png` | 1024×1024, transparent | The full mark with a margin |
+| `assets/logo/nurlings-wordmark.svg` | vector | The mark and the product name (uses `currentColor`, for inline use) |
+| `assets/logo/nurlings-wordmark-light.svg` | vector | The same with fixed colours, navy text and blob, for light backgrounds outside the app (socials, docs, emails) |
+| `assets/logo/nurlings-wordmark-dark.svg` | vector | The same with fixed colours, white text and blob, for dark backgrounds outside the app |
 | `assets/app-icon/app-icon-1024.png` | 1024×1024, opaque, full-bleed | Web, desktop and iOS/Android launcher icons |
 | `assets/app-icon/Nurlings.icon/` | Icon Composer bundle; layer `Assets/nurlings-mark.png` is 1024×1024 | macOS and iOS app icon (edit with Xcode 26+ Icon Composer) |
-| `assets/android/adaptive-foreground-1024.png` | 1024×1024, transparent; keep art inside the central 66% (a 676px circle) | Android adaptive icon foreground |
-| `assets/android/adaptive-background-1024.png` | 1024×1024, solid | Android adaptive icon background |
-| `assets/android/monochrome-1024.png` | 1024×1024, white on transparent, inside the central 66% | Android themed icon and the in-app mobile mark |
-| `assets/android/notification-72.png` | 72×72, white on transparent silhouette | Android notification icon |
-| `assets/splash/splash-icon-1024.png` | 1024×1024 transparent, art about 620px and centred; it must read on both `#FCFCFC` and `#141414` | Mobile splash screen |
-| `assets/favicon/favicon-128.png` | 128×128, rounded corners | Web and mobile web favicon |
+| `assets/android/adaptive-foreground-1024.png` | 1024×1024, transparent; the full mark inside the central 66% (a 676px circle) | Android adaptive icon foreground |
+| `assets/android/adaptive-background-1024.png` | 1024×1024, solid navy | Android adaptive icon background |
+| `assets/android/monochrome-1024.png` | 1024×1024, the blob alone in white on transparent, inside the central 66% | Android themed icon and the in-app mobile mark |
+| `assets/android/notification-72.png` | 72×72, the blob alone as a white silhouette | Android notification icon |
+| `assets/splash/splash-icon-1024.png` | 1024×1024 transparent, the mark about 620px wide and centred; the splash background is navy in both themes | Mobile splash screen |
+| `assets/favicon/favicon-128.png` | 128×128, rounded navy plate with the blob | Web and mobile web favicon |
 
 ## Generated files (do not edit)
 

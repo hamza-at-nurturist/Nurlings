@@ -1,6 +1,7 @@
 @import "tw-animate-css";
 @import "./shadcn.css";
 @import "@rakazo/ui-tokens/css";
+@import "@nurlings/brand/assets/fonts/poppins.css";
 
 @source "./**/*.{ts,tsx}";
 

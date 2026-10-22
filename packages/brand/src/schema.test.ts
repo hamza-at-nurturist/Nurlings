@@ -36,22 +36,41 @@ describe("brand.json", () => {
     expect(brand.urls.community).toBeNull();
   });
 
-  it("defines the logo mark as one path, filled by the surrounding colour", () => {
-    expect(brand.mark.viewBox).toBe("292 254 440 516");
-    expect(brand.mark.path.startsWith("M300 762")).toBe(true);
+  it("defines the logo mark as a blob and an orb with a gradient", () => {
+    expect(brand.mark.viewBox).toBe("237 574 1584.9 898");
+    expect(brand.mark.smallViewBox).toBe("237 574 1369 898");
+    expect(brand.mark.blob.startsWith("M1343 1432")).toBe(true);
+    expect(brand.mark.orb.startsWith("M1400.7 846.5")).toBe(true);
+    expect(brand.mark.orbGradient).toEqual({ x1: 1457.9, y1: 713, x2: 1724.7, y2: 979.9 });
+  });
+
+  it("rejects a mark with unsafe path data or a malformed gradient", () => {
+    for (const change of [
+      (d: Record<string, any>) => (d.mark.blob = 'M0 0" onload="x'),
+      (d: Record<string, any>) => (d.mark.orb = "<script>"),
+      (d: Record<string, any>) => (d.mark.smallViewBox = "0 0 100"),
+      (d: Record<string, any>) => (d.mark.orbGradient.x1 = "1457.9"),
+      (d: Record<string, any>) => (d.colors.orbGradient = ["#4FFFDB", "#6AAEF6"]),
+      (d: Record<string, any>) => (d.colors.orbGradient = ["#4FFFDB", "#6AAEF6", "blue"]),
+      (d: Record<string, any>) => (d.colors.blob = "white"),
+    ]) {
+      expect(() => parseBrand(withChange(change))).toThrow(BrandConfigError);
+    }
   });
 
   it("keeps every updater off", () => {
     expect(brand.updates).toEqual({ desktop: false, mobileOta: false, serverSelfUpdate: false });
   });
 
-  it("keeps today's colours so nothing shifts visually", () => {
+  it("uses the brand colours: navy plate and splash, white blob, mint to violet orb", () => {
     expect(brand.colors).toEqual({
       themeLight: "#FCFCFC",
       themeDark: "#141414",
-      splashLight: "#FCFCFC",
-      splashDark: "#141414",
-      iconBackground: "#141414",
+      splashLight: "#03091F",
+      splashDark: "#03091F",
+      iconBackground: "#03091F",
+      blob: "#FFFFFF",
+      orbGradient: ["#4FFFDB", "#6AAEF6", "#8F7AFB"],
     });
   });
 
