@@ -11,9 +11,12 @@
   "scripts": {
     "check": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run --root ../.. packages/brand/src",
-    "brand:check": "tsx scripts/brand-check.ts"
+    "brand:check": "tsx scripts/brand-check.ts",
+    "make:placeholders": "tsx scripts/make-placeholders.ts",
+    "export:assets": "tsx scripts/export-assets.ts"
   },
   "devDependencies": {
+    "sharp": "0.35.4",
     "typescript": "7.0.2",
     "vitest": "4.1.12"
   }
