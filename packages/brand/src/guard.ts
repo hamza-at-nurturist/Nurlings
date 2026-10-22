@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { generatedAssetProblems, sourceAssetProblems } from "./assets.js";
 import { parseBrand, registryIsPlaceholder } from "./schema.js";
 
 /**
@@ -27,7 +28,19 @@ export const licenseCheck: BrandCheck = {
   },
 };
 
-export const brandChecks: BrandCheck[] = [licenseCheck];
+export const assetsCheck: BrandCheck = {
+  name: "brand artwork and generated icons exist at the documented sizes",
+  async run(repoRoot) {
+    const brandDir = path.join(repoRoot, "packages/brand");
+    const brand = parseBrand(JSON.parse(await readFile(path.join(brandDir, "brand.json"), "utf8")));
+    return [
+      ...(await sourceAssetProblems(brandDir, brand)),
+      ...(await generatedAssetProblems(repoRoot)),
+    ];
+  },
+};
+
+export const brandChecks: BrandCheck[] = [licenseCheck, assetsCheck];
 
 /**
  * Checks that only matter once something is published. They are expected to fail while the repo

@@ -151,11 +151,17 @@ of those lines conflicts and each new upstream string leaks until noticed.
   release guard already throws for a missing API URL; the same guard rejects placeholders).
 - Unchanged: `scheme`, `slug`, desktop `appId` `dev.rakazo.desktop`, Linux `executableName`.
 
-### D6 — Assets: one folder, upstream generator repointed
+### D6 — Assets: one folder, one generator
 
-Placeholder sources in `packages/brand/assets/`; upstream's `export-brand.ts` is repointed at them
-(source path and `Nurlings.icon`) and its `apps/www` outputs dropped, so one generator remains and
-`apps/www` is untouched. Placeholders are neutral "N" tiles with no Rakazo mascot.
+Placeholder sources live in `packages/brand/assets/`. A new generator,
+`packages/brand/scripts/export-assets.ts`, writes the 17 web/desktop/mobile icon files from them and
+never touches `apps/www`. Upstream's `ui-tokens/scripts/export-brand.ts` is left untouched and
+unused: it bakes in the Rakazo mascot's position and does not produce five of the mobile/desktop
+files, so repointing it would have been a larger, riskier edit. Instead `ui-tokens`'s `export:brand`
+script (one `package.json` line) delegates to the new generator, so running it can never bring the
+mascot back. Placeholders are neutral vector "N" tiles; `make-placeholders` refuses to overwrite
+existing files without `--force`. The expected sizes live in one table (`src/assets.ts`) that the
+README, the guard and the tests share.
 
 ### D7 — Guardrails and the upstream-merge routine
 

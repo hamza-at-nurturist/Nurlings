@@ -16,8 +16,8 @@
 ## 2. Placeholder assets
 
 - [x] 2.1 Create placeholder sources in `packages/brand/assets/`: `logo/nurlings-mark.png`, `logo/nurlings-wordmark.svg`, `app-icon/app-icon-1024.png`, `app-icon/Nurlings.icon/`, `android/{adaptive-foreground,adaptive-background,monochrome}-1024.png`, `android/notification-72.png`, `splash/splash-icon-1024.png`, `favicon/favicon-128.png` — neutral "N" tiles, no Rakazo mascot. Verify: `identify` shows the documented dimensions; contact-sheet visual check.
-- [ ] 2.2 Repoint `packages/ui-tokens/scripts/export-brand.ts` at the brand assets (source image, `Nurlings.icon`), drop its `apps/www` outputs, run it, and regenerate web/desktop/mobile icon, favicon, splash and notification files. Verify: re-running gives no diff; `identify` on every generated file matches the sizes table; `git status` shows nothing changed under `apps/www`; no file in the three apps still derives from `orange-bot.png`.
-- [ ] 2.3 Write `packages/brand/README.md` with the per-platform size table (from the proposal), the export command, and "do not hand-edit generated files". Verify: every file listed exists; the export command runs clean from a fresh checkout.
+- [x] 2.2 Add `packages/brand/scripts/export-assets.ts` and make `ui-tokens`'s `export:brand` delegate to it (upstream's `export-brand.ts` stays untouched and unused); run it to regenerate the 17 web/desktop/mobile icon, favicon, splash and notification files. Verify: re-running gives byte-identical files; every generated file matches the sizes table (`assets.test.ts` + `brand:check`); `git status` shows nothing changed under `apps/www`; every output differs from the Rakazo-derived original (hash comparison).
+- [x] 2.3 Write `packages/brand/README.md` with the per-platform size table (from the proposal), the export command, and "do not hand-edit generated files". Verify: a test fails if the README omits a source or generated file; the export command runs clean in a fresh checkout of the branch.
 
 ## 3. Web app
 

@@ -157,8 +157,8 @@ Android passkey `assetlinks.json`); iOS passkey association comes from the
 ## Placeholder assets and the sizes each platform needs
 
 Placeholders live in **one folder**, `packages/brand/assets/`, with names that say what they are;
-upstream's `ui-tokens` `export:brand` generator (which already derives every size from one source
-image) is repointed at it, and no longer writes into `apps/www`. Drop real artwork over the files
+a new generator (`export:assets`) derives every platform size from them, upstream's `ui-tokens`
+`export:brand` command delegates to it, and nothing is written into `apps/www`. Drop real artwork over the files
 marked **source**; do not hand-edit generated files.
 
 | Surface | File(s) the app uses | Size / format | Source asset |
