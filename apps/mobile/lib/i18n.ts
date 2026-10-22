@@ -1,3 +1,4 @@
+import { brand, brandText } from "@nurlings/brand";
 import { useSyncExternalStore } from "react";
 import { DE_MESSAGES } from "./locales/de";
 import { NL_MESSAGES } from "./locales/nl";
@@ -39,8 +40,13 @@ export function dateLocaleForUi(locale: UiLocale = activeLocale): string {
   return locale === "en" ? "en-US" : htmlLangForLocale(locale);
 }
 
+/**
+ * Upstream catalogs and source strings stay untouched; the product name and "bot" are rebranded
+ * on the way out. This runs on the template, before placeholders are filled, so values such as a
+ * bot's own name are never rewritten, and it covers untranslated (English fallback) messages too.
+ */
 export function t(message: string, values?: Record<string, string | number>): string {
-  const template = catalogs[activeLocale]?.[message] ?? message;
+  const template = brandText(catalogs[activeLocale]?.[message] ?? message, brand);
   if (!values) return template;
   return template.replace(/\{([A-Za-z0-9_]+)\}/g, (match, key: string) =>
     Object.hasOwn(values, key) ? String(values[key]) : match,

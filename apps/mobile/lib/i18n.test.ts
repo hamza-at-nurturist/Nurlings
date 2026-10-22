@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { brand } from "@nurlings/brand";
 import { createScanner, ScriptTarget } from "typescript";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -61,8 +62,9 @@ describe("mobile i18n", () => {
     const { resetI18nForTests, t } = await import("./i18n");
     resetI18nForTests("zh-CN");
     expect(t("Account")).toBe("账户");
-    expect(t("Sign in to Rakazo")).toBe("登录 Rakazo");
-    expect(t("New bot")).toBe("新建 Bot");
+    expect(t("Sign in to Rakazo")).toBe(`登录 ${brand.name}`);
+    // The translation keeps the Latin word "Bot", which the brand rule rewrites.
+    expect(t("New bot")).toBe(`新建 ${brand.bot.singular}`);
     expect(t("{runs} runs · {tokens} tokens", { runs: 3, tokens: 12 })).toBe(
       "3 次运行 · 12 个 token",
     );
@@ -70,7 +72,7 @@ describe("mobile i18n", () => {
 
     resetI18nForTests("ru");
     expect(t("Account")).toBe("Аккаунт");
-    expect(t("Sign in to Rakazo")).toBe("Войти в Rakazo");
+    expect(t("Sign in to Rakazo")).toBe(`Войти в ${brand.name}`);
     expect(t("New bot")).toBe("Новый бот");
     expect(t("{runs} runs · {tokens} tokens", { runs: 3, tokens: 12 })).toBe(
       "Запусков: 3 · токенов: 12",
@@ -79,8 +81,9 @@ describe("mobile i18n", () => {
 
     resetI18nForTests("nl");
     expect(t("Account")).toBe("Account");
-    expect(t("Sign in to Rakazo")).toBe("Aanmelden bij Rakazo");
-    expect(t("New bot")).toBe("Nieuwe bot");
+    expect(t("Sign in to Rakazo")).toBe(`Aanmelden bij ${brand.name}`);
+    // Dutch keeps the Latin word "bot", which the brand rule rewrites.
+    expect(t("New bot")).toBe(`Nieuwe ${brand.bot.singular}`);
     expect(t("{runs} runs · {tokens} tokens", { runs: 3, tokens: 12 })).toBe(
       "3 uitvoeringen · 12 tokens",
     );
@@ -88,8 +91,9 @@ describe("mobile i18n", () => {
 
     resetI18nForTests("de");
     expect(t("Account")).toBe("Konto");
-    expect(t("Sign in to Rakazo")).toBe("Bei Rakazo anmelden");
-    expect(t("New bot")).toBe("Neuer Bot");
+    expect(t("Sign in to Rakazo")).toBe(`Bei ${brand.name} anmelden`);
+    // German keeps the Latin word "Bot", which the brand rule rewrites.
+    expect(t("New bot")).toBe(`Neuer ${brand.bot.singular}`);
     expect(t("{runs} runs · {tokens} tokens", { runs: 3, tokens: 12 })).toBe(
       "3 Ausführungen · 12 Token",
     );

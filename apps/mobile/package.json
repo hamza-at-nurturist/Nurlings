@@ -19,6 +19,7 @@
   "dependencies": {
     "@expo/metro-runtime": "57.0.17",
     "@expo/ui": "57.0.26",
+    "@nurlings/brand": "workspace:*",
     "@rakazo/chat-ui": "workspace:*",
     "@rakazo/contracts": "workspace:*",
     "@rakazo/core": "workspace:*",
