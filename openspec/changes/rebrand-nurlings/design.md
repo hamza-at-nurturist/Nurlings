@@ -92,7 +92,7 @@ package); env-var-driven branding (identity is a build-time property; avoids new
 | Web `<title>`, meta, manifest | small Vite plugin (new file `src/brand-html.ts`) transforms upstream's `index.html` and rewrites `site.webmanifest` at build and dev time; both upstream files stay byte-identical, and a pattern that stops matching throws | `vite.config.ts` (2 lines: import + plugin entry) |
 | Web hardcoded text/links/logo | `Wordmark` + new `BrandMark` (`ui-web`), `AuthFrame` and `Welcome` (face logo → mark, tagline), `SidebarFooter` (Docs, store link, tagline) via `lib/brand-links.ts`. `Auth`/`McpOAuthCallback`/`HonchoSettingsForm`/model-settings strings are catalog keys: the seam rebrands them and editing them would orphan their translations | 5 |
 | Mobile strings | same helper in `apps/mobile/lib/i18n.ts`; ≈5 hardcoded files | ≈6 |
-| Mobile identity | `app.config.ts` overlays display name, permission strings, colours, icons, **bundle id/package**, OTA off; `app.json` edited only to drop Rakazo's `owner`, `projectId`, `updates.url` (D5) | `app.config.ts`, `app.json` (3 lines) |
+| Mobile identity | `app.config.ts` calls `brandExpoConfig` (new `lib/brand-expo-config.ts`) to overlay display name, permission prompts, splash colours, the iOS icon bundle, **bundle id/package** and OTA off, and rejects `REPLACE_WITH_…` owner/project ids in release profiles. Expo evaluates `app.config.ts` by transpiling it to CJS with no TypeScript resolution for what it imports, so the helper is imported by explicit `.ts` extension (Node type stripping, one `@ts-expect-error TS5097`) and reads the brand through the self-contained subpaths `brand.json`, `schema`, `text`. `app.json` is edited on 5 lines only: `owner`, `projectId`, the two bundle-id literals, and the `updates` block (D5) | `app.config.ts`, `app.json` |
 | Desktop identity | layered electron-builder config supplies `productName`, mic text, icon; verify empirically which mechanism electron-builder 26 honours (`--config` file / CLI `-c.*`), fallback: 3 guarded `package.json` lines. `appId`, `executableName`, `extraMetadata.name` untouched | 0–1 |
 | Desktop runtime text | `setup.html` becomes a template; `setup.js`/`main.ts`/`local-stack.ts`/`browser-auth.ts`/`auto-update.ts` read the config; About via `app.setAboutPanelOptions` | ≈6 |
 | Shared constants | **`contracts` is left byte-identical.** Its Rakazo URLs (`AI_PRIVACY_URL`, store/APK) are read only by UI/API call sites, which now read `brand` instead; the unused exports are tree-shaken, and `brand:check` scans built output for upstream hosts so a future upstream use cannot slip in. `openai-compatible-ui.ts` text is a catalog key (rebranded by the seam). `client-build.ts` is also loaded by plain Node from `vite.config.ts`, so it cannot import the brand entry point | 0 |
@@ -130,7 +130,7 @@ of those lines conflicts and each new upstream string leaks until noticed.
   `elie222/rakazo` is dropped from the effective builder config. Unit test: with defaults the
   updater module is never loaded and no network call is made.
 - **Mobile OTA**: `app.config.ts` sets `updates.enabled = false` and no `updates.url`;
-  `app.json`'s `updates.url` is removed.
+  `app.json`'s `updates` block (which held only the upstream URL) is removed.
 - **Server self-update**: `updaterConfig()` sets `disabled: brand.updates.serverSelfUpdate === false`.
   `requireSidecar` then throws "Self-update is switched off for this deployment", `check` and
   `apply` never reach the sidecar, and `resolveInstallKind` reports a non-sidecar kind so the
@@ -150,10 +150,13 @@ of those lines conflicts and each new upstream string leaks until noticed.
 - **API changes, minimal**: `ANDROID_PACKAGE` in `app-association.ts` reads
   `brand.native.bundleId`; its test is updated. iOS needs no code: `PASSKEY_APPLE_APP_IDS` is a
   deployment env var, documented as `<TeamID>.com.nurturistai.nurlings`.
-- **EAS**: in `app.json`, `owner` and `extra.eas.projectId` become obvious placeholders
+- **EAS and push**: in `app.json`, `owner` and `extra.eas.projectId` become obvious placeholders
   (`REPLACE_WITH_NURLINGS_EXPO_OWNER`, `REPLACE_WITH_NURLINGS_EAS_PROJECT_ID`) and `updates.url`
   is removed. Release-profile builds fail loudly while a placeholder is present (the `app.config.ts`
-  release guard already throws for a missing API URL; the same guard rejects placeholders).
+  release guard already throws for a missing API URL; the same guard rejects placeholders). Push
+  registration (`lib/push.ts`) reads this project id inside a `try/catch`, so a placeholder leaves
+  push inert instead of failing; before this change tokens would have been minted under Rakazo's
+  Expo project, so push needs our project id before it works.
 - Unchanged: `scheme`, `slug`, desktop `appId` `dev.rakazo.desktop`, Linux `executableName`.
 
 ### D6 — Assets: one folder, one generator

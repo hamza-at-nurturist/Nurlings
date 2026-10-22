@@ -1,4 +1,8 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
+// Expo loads this file with Node's type stripping, which needs the explicit extension that
+// TypeScript only allows with allowImportingTsExtensions.
+// @ts-expect-error TS5097
+import { brandExpoConfig, placeholderProblems } from "./lib/brand-expo-config.ts";
 
 const RELEASE_PROFILES = new Set(["production", "android-apk"]);
 
@@ -22,7 +26,15 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     }
   }
 
-  let result = config as ExpoConfig;
+  let result = brandExpoConfig(config as ExpoConfig);
+  if (RELEASE_PROFILES.has(process.env.EAS_BUILD_PROFILE ?? "")) {
+    const problems = placeholderProblems(result);
+    if (problems.length > 0) {
+      throw new Error(
+        `Fill in the Nurlings Expo project before building a release: ${problems.join("; ")}.`,
+      );
+    }
+  }
   const rpId = passkeyRpId(process.env.EXPO_PUBLIC_API_URL);
   if (rpId) {
     // Native passkeys only work for domains the binary is associated with, so the app reads the

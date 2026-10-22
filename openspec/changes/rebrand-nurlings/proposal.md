@@ -140,7 +140,7 @@ Android passkey `assetlinks.json`); iOS passkey association comes from the
 4. **Bundle-id manual steps** (not code): register the App ID and create the app in App Store
    Connect / Play Console under our accounts; add `<TeamID>.com.nurturistai.nurlings` to
    `PASSKEY_APPLE_APP_IDS` and our signing-cert SHA-256 to `PASSKEY_ANDROID_CERT_SHA256` on each
-   server; supply a `google-services.json` (FCM) for the new package if push is used; create the
+   server; supply a `google-services.json` (FCM) for the new package if push is used (mobile push also stays inert until the Expo project id is set; with Rakazo's id baked in, tokens would have been minted under Rakazo's Expo project); create the
    Expo project and fill the `owner` / `projectId` placeholders.
 5. **Names configured outside the repo (manual list)** — these appear on third-party screens and
    are set in each provider's console/account, not in code: `EMAIL_FROM` display name (SMTP/

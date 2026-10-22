@@ -2,7 +2,7 @@
   "expo": {
     "name": "Rakazo",
     "slug": "rakazo",
-    "owner": "inbox-zero",
+    "owner": "REPLACE_WITH_NURLINGS_EXPO_OWNER",
     "scheme": "rakazo",
     "version": "1.0.6",
     "orientation": "default",
@@ -59,7 +59,7 @@
       "./plugins/with-lan-cleartext"
     ],
     "ios": {
-      "bundleIdentifier": "com.rakazo.app",
+      "bundleIdentifier": "com.nurturistai.nurlings",
       "buildNumber": "1",
       "supportsTablet": false,
       "icon": "../../packages/ui-tokens/assets/Rakazo.icon",
@@ -76,7 +76,7 @@
       }
     },
     "android": {
-      "package": "com.rakazo.app",
+      "package": "com.nurturistai.nurlings",
       "versionCode": 10,
       "softwareKeyboardLayoutMode": "resize",
       "icon": "./assets/icon.png",
@@ -93,14 +93,11 @@
       "router": {},
       "supportsRTL": true,
       "eas": {
-        "projectId": "07f7eb04-45e3-47fe-9374-99a2f991131e"
+        "projectId": "REPLACE_WITH_NURLINGS_EAS_PROJECT_ID"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/07f7eb04-45e3-47fe-9374-99a2f991131e"
     }
   }
 }
