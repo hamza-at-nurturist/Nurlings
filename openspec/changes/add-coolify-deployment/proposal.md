@@ -49,6 +49,7 @@ set a domain, fill a few keys, deploy".
 - New: `deploy/coolify/docker-compose.yml`, `deploy/coolify/README.md`, one guard test.
 - Reads: `packages/brand/brand.json` (registry prefix), `infra/compose/docker-compose.images.yml`
   (source of truth for the app env list), the publish workflow's tag contract.
-- Existing `infra/compose/*` install path is untouched and keeps working.
+- The existing `infra/compose/*` install path keeps working; its four compose files only gain the
+  worker healthcheck from the upstream port.
 - Operational: clients pin `v0.1.0`, which is cut from `main` after this merges. Until then a test
   deploy uses a `sha-<commit>` tag from a manual publish run (see design).
