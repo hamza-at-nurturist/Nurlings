@@ -127,7 +127,7 @@ describe("serverTextCheck", () => {
       "// Rakazo is described in a comment",
       " * Rakazo in a doc block",
       'throw new Error("different Rakazo target");',
-      'export const AUTOMATED_MESSAGE_LABEL = "[Automated message from Rakazo]";',
+      'export const LEGACY_AUTOMATED_MESSAGE_LABEL = "[Automated message from Rakazo, not from the user]";',
       "const repo = OFFICIAL_REPO_URL; // Rakazo",
       "const text = `Open Rakazo for details.`;",
       'const ok = "Open Nurlings for details.";',

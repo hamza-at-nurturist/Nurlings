@@ -103,7 +103,7 @@ None — `openspec/specs/` is empty; these specs are created by archiving this c
 | `@rakazo/*` packages (≈2,300 references), `RAKAZO_*` env vars (incl. `RAKAZO_IMAGE`, `RAKAZO_DOWNLOAD_BASE`), `x-rakazo-*` headers, DB/Docker/systemd names, storage keys (`rakazo.*`), native module names, TS identifiers | Internal; renaming makes every upstream merge huge |
 | `OFFICIAL_REPO_URL`, `PUBLISHED_IMAGE_REPO`, updater sidecar logic | Self-update is disabled, not re-pointed; the code is unreachable |
 | Bot User-Agent, internal error messages (`throw new Error(…)`), `apps/www`, README/docs, telemetry wiring | Out of scope |
-| Model-facing prompts ("You are a Rakazo bot…"): the fallback system prompts, the helper prompt, the approval-resume text and the summarizer prompt | In scope (added later); the stored-message markers stay |
+| Model-facing prompts ("You are a Rakazo bot…"): the fallback system prompts, the helper prompt, the approval-resume text and the summarizer prompt | In scope (added later); so are the automated-message label and the compaction prefix (upstream wording still matched) |
 
 Rule of thumb: **if a client or their users can read it in an app, an email, a chat message or a
 settings screen, it is branded; if only code or an operator log can, it stays.**

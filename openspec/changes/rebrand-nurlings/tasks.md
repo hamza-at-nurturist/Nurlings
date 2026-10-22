@@ -77,7 +77,7 @@
 
 ## 11. Model prompts (added after review)
 
-- [x] 11.1 Rebrand the prompts built in code: the two fallback system prompts and the helper prompt in `pi-runtime.ts` (via `brand.bot.singular` and a new `brandArticle`), the approval-resume text in `executor.ts` and the previous-summary label in `history-compaction.ts`; keep `AUTOMATED_MESSAGE_LABEL` and the compaction prefix unchanged. Verify: `pi-system-prompts.test.ts` builds every `PiAgentRuntime` system prompt (computer, sandbox-only, helper) and fails on "Rakazo"; `pi-runtime-helper-framing.test.ts` and `executor-approval-replay.test.ts` follow the brand; `brand:check` scans the prompt files; `pnpm --filter @rakazo/adapters test` passes except the two pre-existing host-computer tests.
+- [x] 11.1 Rebrand the prompts built in code: the two fallback system prompts and the helper prompt in `pi-runtime.ts` (via `brand.bot.singular` and a new `brandArticle`), the approval-resume text in `executor.ts` and the previous-summary label in `history-compaction.ts`; the automated-message label and the compaction prefix now name the brand (new `compacted-summary.ts`), with the upstream wording kept as `LEGACY_` constants that the matchers (`isAutomatedMessageText`, `isCompactedSummaryText`) still accept. Verify: tests assert both wordings match and a user message does not; `pi-system-prompts.test.ts` builds every `PiAgentRuntime` system prompt (computer, sandbox-only, helper) and fails on "Rakazo"; `pi-runtime-helper-framing.test.ts` and `executor-approval-replay.test.ts` follow the brand; `brand:check` scans the prompt files; `pnpm --filter @rakazo/adapters test` passes except the two pre-existing host-computer tests.
 
 ## Workflow follow-up
 

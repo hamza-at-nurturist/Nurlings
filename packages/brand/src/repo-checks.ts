@@ -136,16 +136,18 @@ const SERVER_TEXT_FILES = [
   "packages/adapters/src/pi-runtime.ts",
   "packages/adapters/src/executor.ts",
   "packages/adapters/src/history-compaction.ts",
+  "packages/adapters/src/compacted-summary.ts",
+  "packages/adapters/src/automated-messages.ts",
   "packages/adapters/src/auto-review.ts",
   "packages/adapters/src/builtin-skills.ts",
   "apps/api/src/team-chat-judge.ts",
 ];
 /**
- * Lines that name the upstream on purpose: internal errors and markers stored in conversations
- * (the automated-message label and the compaction prefix), which other code matches on.
+ * Lines that name the upstream on purpose: internal errors and the legacy automated-message label
+ * and compaction prefix, which the matchers still accept.
  */
 const SERVER_TEXT_EXEMPT =
-  /throw new Error|OFFICIAL_REPO_URL|AUTOMATED_MESSAGE_LABEL|Rakazo-owned compacted context/;
+  /throw new Error|OFFICIAL_REPO_URL|Automated message from Rakazo|Rakazo-owned compacted context/;
 
 export function upstreamNameInServerText(source: string): number[] {
   const lines: number[] = [];

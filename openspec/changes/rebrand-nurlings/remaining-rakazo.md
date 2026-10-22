@@ -9,7 +9,7 @@ its reason. `pnpm brand:check` and the vitest guards fail if the in-scope ones c
 
 | Where | What a person sees | Reason |
 |---|---|---|
-| `AUTOMATED_MESSAGE_LABEL` ("[Automated message from Rakazo, not from the user]") in `automated-messages.ts`, and the `Rakazo-owned compacted context…` prefix in `history-compaction.ts` | Seen by a model inside the messages that carry them; not in any system prompt | These are written into conversations and matched by code (`runtime-context.ts`), so changing them would break existing threads. The system prompts themselves are rebranded and tested. |
+| The upstream wording of the automated-message label and the compaction prefix (`LEGACY_AUTOMATED_MESSAGE_LABEL`, `LEGACY_COMPACTED_SUMMARY_PREFIX`) | Not shown: only recognised if imported data carries it | Kept so the matchers accept old data; the labels models see now name the brand. |
 | `User-Agent: Rakazo/0.1 (+https://github.com/elie222/rakazo; web tools)` in the web tools | Visible only to the sites a bot fetches | Excluded: bot User-Agent. |
 | `README.md`, `docs/*`, `SETUP_PROMPT.md`, `CONTRIBUTING.md`, `SECURITY.md`, `VISION.md`, `CHANGELOG.md`, `.github/ISSUE_TEMPLATE/*`, `infra/railway`, `infra/systemd` | Operator and contributor documents | Decided: left as-is. `docs/nurlings-deployment.md` is the Nurlings guide. `SETUP_PROMPT.md` still points at the upstream installer, so do not hand it to a client. |
 | `apps/www` (marketing site) | The upstream marketing pages | Out of scope. |
@@ -30,8 +30,7 @@ its reason. `pnpm brand:check` and the vitest guards fail if the in-scope ones c
 database, Docker and code identifiers, storage keys such as `rakazo.composerDraft…`, the desktop
 `appId` (`dev.rakazo.desktop`), `executableName`, the Expo `slug`, `throw new Error("…Rakazo…")`
 messages that no screen shows, `OFFICIAL_REPO_URL` and `PUBLISHED_IMAGE_REPO` (repository identity
-checks), `AUTOMATED_MESSAGE_LABEL` and the compaction prefix (persisted in conversations), and
-`RAKAZO_CLOUD_URL` in `apps/desktop/src/setup-config.ts` (used only to discard a profile saved
+checks), `RAKAZO_CLOUD_URL` in `apps/desktop/src/setup-config.ts` (used only to discard a profile saved
 against the upstream's hosted service). The Android Kotlin module `com.rakazo.notifications` is an
 internal native module, not the app package.
 

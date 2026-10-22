@@ -2,9 +2,13 @@ import type { Server } from "node:http";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { builtinModels } from "@earendil-works/pi-ai/providers/all";
+import { brand } from "@nurlings/brand";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   AUTOMATED_MESSAGE_LABEL,
+  automated,
+  isAutomatedMessageText,
+  LEGACY_AUTOMATED_MESSAGE_LABEL,
   relabelToolImageMessages,
   TOOL_IMAGES_LABEL,
   TOOL_IMAGES_TEXT,
@@ -168,5 +172,35 @@ describe("automated messages are labelled as not from the user", () => {
       expect(JSON.stringify(sent)).not.toContain(TOOL_IMAGES_TEXT);
       expect(JSON.stringify(users.at(-1)?.content)).toContain("data:image/png;base64,aGk=");
     });
+  });
+});
+
+describe("the automated-message label", () => {
+  it("names the brand, not the upstream", () => {
+    expect(AUTOMATED_MESSAGE_LABEL).toBe(
+      `[Automated message from ${brand.name}, not from the user]`,
+    );
+    expect(AUTOMATED_MESSAGE_LABEL).not.toMatch(/rakazo/i);
+    expect(automated("Shell command finished.")).toBe(
+      `${AUTOMATED_MESSAGE_LABEL} Shell command finished.`,
+    );
+  });
+
+  it("is recognised in both its current and its upstream wording", () => {
+    expect(isAutomatedMessageText(`${AUTOMATED_MESSAGE_LABEL} Shell command finished.`)).toBe(true);
+    expect(
+      isAutomatedMessageText(`${LEGACY_AUTOMATED_MESSAGE_LABEL} Shell command finished.`),
+    ).toBe(true);
+    expect(LEGACY_AUTOMATED_MESSAGE_LABEL).toBe(
+      "[Automated message from Rakazo, not from the user]",
+    );
+  });
+
+  it("does not match a message from the user", () => {
+    expect(isAutomatedMessageText("Automated message from the user")).toBe(false);
+    expect(isAutomatedMessageText("[Automated message from someone else, not from the user]")).toBe(
+      false,
+    );
+    expect(isAutomatedMessageText(`hello ${AUTOMATED_MESSAGE_LABEL}`)).toBe(false);
   });
 });
