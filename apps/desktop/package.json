@@ -1,9 +1,9 @@
 {
   "name": "@rakazo/desktop",
-  "productName": "Rakazo",
+  "productName": "Nurlings",
   "version": "0.3.1",
   "author": {
-    "name": "Rakazo"
+    "name": "Nurturist AI"
   },
   "license": "Apache-2.0",
   "type": "module",
@@ -19,6 +19,7 @@
     "release": "pnpm --filter @rakazo/web build && pnpm build && electron-builder --publish never"
   },
   "dependencies": {
+    "@nurlings/brand": "workspace:*",
     "@rakazo/contracts": "workspace:*",
     "electron-updater": "6.8.9",
     "koffi": "3.3.3"
@@ -62,13 +63,13 @@
       "main": "dist/main.js"
     },
     "mac": {
-      "icon": "../../packages/ui-tokens/assets/Rakazo.icon",
+      "icon": "../../packages/brand/assets/app-icon/Nurlings.icon",
       "category": "public.app-category.productivity",
       "x64ArchFiles": "**/node_modules/@koromix/koffi-darwin-*/darwin_*/koffi.node",
       "entitlements": "assets/entitlements.mac.plist",
       "entitlementsInherit": "assets/entitlements.mac.plist",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "Rakazo uses the microphone for dictation and voice calls with your bots."
+        "NSMicrophoneUsageDescription": "Nurlings uses the microphone for dictation and voice calls with your Nurlings."
       },
       "target": [
         "dmg",
@@ -110,13 +111,6 @@
       "target": [
         "AppImage"
       ]
-    },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "elie222",
-        "repo": "rakazo"
-      }
-    ]
+    }
   }
 }

@@ -9,7 +9,7 @@ export {
   registryIsPlaceholder,
 } from "./schema.js";
 export type { CompiledMessage } from "./text.js";
-export { brandMessage, brandMessages, brandText } from "./text.js";
+export { brandMessage, brandMessages, brandProduct, brandText } from "./text.js";
 
 /** The validated brand configuration. Import this instead of writing the product name. */
 export const brand = parseBrand(data);

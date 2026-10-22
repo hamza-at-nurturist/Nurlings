@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { brand } from "@nurlings/brand";
 import type { DesktopReachability, DesktopSetup } from "@rakazo/contracts";
 import { LOCAL_SETTINGS_PAGE } from "@rakazo/contracts/local-settings";
 import {
@@ -24,6 +25,7 @@ import {
   LAUNCH_CHECK_DELAY_MS,
 } from "./auto-update.js";
 import { createBadgeHandler } from "./badge.js";
+import { aboutPanelOptions, isUpstreamCloudSetup } from "./brand-desktop.js";
 import { openBrowserAuth } from "./browser-auth.js";
 import { DOCKER_INSTALL_LINKS, isDesktopSetupLink, runDocker } from "./docker-cli.js";
 import { prepareHostComputer } from "./host-computer.js";
@@ -53,7 +55,6 @@ import {
   normalizeServerUrl,
   parseSetupInput,
   probeFailureMessage,
-  RAKAZO_CLOUD_URL,
   readProbeJson,
   resolveStartupTarget,
   safeExternalUrl,
@@ -102,7 +103,8 @@ const WARM_WINDOW_TTL_MS = warmWindowTtlMs(process.env.RAKAZO_WARM_WINDOW_TTL_MS
 const updaterEnvironment = {
   packaged: app.isPackaged,
   version: app.getVersion(),
-  disabled: process.env.RAKAZO_DISABLE_AUTO_UPDATE === "1",
+  // Off unless the brand turns updates on: the feed must never be able to replace this build.
+  disabled: !brand.updates.desktop || process.env.RAKAZO_DISABLE_AUTO_UPDATE === "1",
 };
 const desktopUpdater = new DesktopUpdateController(
   updaterEnvironment,
@@ -688,7 +690,7 @@ function installApplicationMenu() {
   };
   const changeServer: Electron.MenuItemConstructorOptions = {
     id: "change-rakazo-server",
-    label: "Change Rakazo Server…",
+    label: `Change ${brand.name} Server…`,
     accelerator: "CmdOrCtrl+Shift+K",
     click: () => showSetupWindow(),
   };
@@ -800,7 +802,7 @@ async function probeServer(rawUrl: string, signal?: AbortSignal): Promise<Deskto
         ok: false,
         status: response.status,
         url,
-        error: "That address redirects elsewhere. Enter the final Rakazo server address.",
+        error: `That address redirects elsewhere. Enter the final ${brand.name} server address.`,
       };
     }
     if (!response.ok) {
@@ -817,7 +819,7 @@ async function probeServer(rawUrl: string, signal?: AbortSignal): Promise<Deskto
         ok: false,
         status: response.status,
         url,
-        error: "That address did not respond like a Rakazo server.",
+        error: `That address did not respond like a ${brand.name} server.`,
       };
     }
     return {
@@ -1027,6 +1029,7 @@ function safeOrigin(targetUrl: string) {
 }
 
 app.whenReady().then(async () => {
+  app.setAboutPanelOptions(aboutPanelOptions(app.getVersion()));
   installSessionPermissions(session.defaultSession, permissionTarget);
   const userDataDir = app.getPath("userData");
   try {
@@ -1063,6 +1066,11 @@ app.whenReady().then(async () => {
     },
   });
   currentSetup = await readSetup(userDataDir);
+  if (isUpstreamCloudSetup(currentSetup)) {
+    // This profile chose the upstream's hosted service: forget it so setup opens again.
+    currentSetup = null;
+    await clearSetup(userDataDir);
+  }
   const target = resolveStartupTarget({
     envUrl: process.env.RAKAZO_WEB_URL,
     saved: currentSetup,
@@ -1253,7 +1261,8 @@ app.whenReady().then(async () => {
     if (!fromSetupWindow(event)) return null;
     return {
       defaultLocalUrl: localStack.webUrl(),
-      cloudUrl: RAKAZO_CLOUD_URL,
+      // Empty while the brand has no hosted service: setup then offers no such choice.
+      cloudUrl: brand.urls.cloud ?? "",
       saved: currentSetup,
       error: setupError ?? undefined,
     };
@@ -1290,7 +1299,7 @@ app.whenReady().then(async () => {
         if (managedUrl === null || !(await localStack.matchesDesiredStack())) {
           return {
             ok: false,
-            error: "The app-managed Rakazo services are not ready. Retry setup.",
+            error: `The app-managed ${brand.name} services are not ready. Retry setup.`,
           };
         }
         openSetup = { mode: "new", serverUrl: managedUrl };

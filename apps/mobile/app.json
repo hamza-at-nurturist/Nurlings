@@ -62,7 +62,7 @@
       "bundleIdentifier": "com.nurturistai.nurlings",
       "buildNumber": "1",
       "supportsTablet": false,
-      "icon": "../../packages/ui-tokens/assets/Rakazo.icon",
+      "icon": "../../packages/brand/assets/app-icon/Nurlings.icon",
       "config": {
         "usesNonExemptEncryption": false
       },

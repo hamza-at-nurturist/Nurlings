@@ -95,6 +95,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@nurlings/brand':
+        specifier: workspace:*
+        version: link:../../packages/brand
       '@rakazo/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

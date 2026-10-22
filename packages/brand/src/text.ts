@@ -13,18 +13,20 @@ import type { Brand } from "./schema.js";
 const PRODUCT = /(?<![\w{])Rakazo(?:(['’])s)?(?!\w)/g;
 const AGENT = /(?<![\w{\-./:@#])([Bb]ot)(s?)(?![\w\-/:@#]|\.\w)/g;
 
+/** The product-name rule alone, for text that is not prose (page sources, script strings). */
+export function brandProduct(input: string, brand: Pick<Brand, "name">): string {
+  if (!input.includes("Rakazo")) return input;
+  return input.replace(PRODUCT, (_match, apostrophe: string | undefined) => {
+    if (!apostrophe) return brand.name;
+    return brand.name.endsWith("s") ? `${brand.name}${apostrophe}` : `${brand.name}${apostrophe}s`;
+  });
+}
+
 export function brandText(input: string, brand: Pick<Brand, "name" | "bot">): string {
   if (!input.includes("Rakazo") && !/bot/i.test(input)) return input;
-  return input
-    .replace(PRODUCT, (_match, apostrophe: string | undefined) => {
-      if (!apostrophe) return brand.name;
-      return brand.name.endsWith("s")
-        ? `${brand.name}${apostrophe}`
-        : `${brand.name}${apostrophe}s`;
-    })
-    .replace(AGENT, (_match, _word: string, plural: string) =>
-      plural ? brand.bot.plural : brand.bot.singular,
-    );
+  return brandProduct(input, brand).replace(AGENT, (_match, _word: string, plural: string) =>
+    plural ? brand.bot.plural : brand.bot.singular,
+  );
 }
 
 /** A compiled message is a string, or an array of literal strings and `[name, type?, options?]` tokens. */

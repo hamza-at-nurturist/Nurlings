@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { copyFile, lstat, mkdir, readFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import path from "node:path";
+import { brand } from "@nurlings/brand";
 import type { DesktopLocalStackState } from "@rakazo/contracts";
 import {
   classifyDockerFailure,
@@ -281,8 +282,8 @@ export function stackFailureMessage(
       return "Docker Compose is missing. Install Docker Desktop or the docker-compose-plugin, then retry.";
     case "other":
       return phase === "pulling"
-        ? "Downloading Rakazo images failed. Check the output below, then retry."
-        : "Rakazo services did not start. Check the output below, then retry.";
+        ? `Downloading ${brand.name} images failed. Check the output below, then retry.`
+        : `${brand.name} services did not start. Check the output below, then retry.`;
   }
 }
 

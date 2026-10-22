@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CompiledMessage } from "./index.js";
-import { brand, brandMessage, brandMessages, brandText } from "./index.js";
+import { brand, brandMessage, brandMessages, brandProduct, brandText } from "./index.js";
 
 const t = (input: string) => brandText(input, brand);
 
@@ -151,5 +151,25 @@ describe("brandMessage / brandMessages on compiled catalogs", () => {
     const copy = structuredClone(original);
     brandMessage(original, brand);
     expect(original).toEqual(copy);
+  });
+});
+
+describe("brandProduct (the name rule alone)", () => {
+  it("rewrites the product name and nothing else", () => {
+    expect(brandProduct("Welcome to Rakazo. Quit Rakazo's setup.", brand)).toBe(
+      "Welcome to Nurlings. Quit Nurlings' setup.",
+    );
+  });
+
+  it("leaves the word bot alone, in any case, so it is safe on source code", () => {
+    const code = 'const bot = Bot.create("bots"); // Bot, bots';
+    expect(brandProduct(code, brand)).toBe(code);
+    expect(brandProduct("Rakazo bot", brand)).toBe("Nurlings bot");
+  });
+
+  it("does not touch identifiers", () => {
+    expect(brandProduct("rakazo-shared RAKAZO_X RakazoDesktop", brand)).toBe(
+      "rakazo-shared RAKAZO_X RakazoDesktop",
+    );
   });
 });
