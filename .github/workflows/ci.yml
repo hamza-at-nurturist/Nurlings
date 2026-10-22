@@ -12,6 +12,29 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Heavy jobs wait for this and are skipped when a pull request only changes documentation.
+  # Lint, Typecheck and Unit tests always run. Pushes to main always run everything.
+  changes:
+    name: Changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.paths.outputs.code }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - id: paths
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" != pull_request ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            # The checkout is the merge of the pull request into its base: the first parent is the base.
+            git diff --name-only HEAD^1 HEAD | bash scripts/ci-docs-only.sh >> "$GITHUB_OUTPUT"
+          fi
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -53,6 +76,8 @@ jobs:
 
   build:
     name: Production builds
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -106,6 +131,8 @@ jobs:
 
   native-computer:
     name: Native computer (${{ matrix.os }})
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
@@ -134,6 +161,8 @@ jobs:
 
   test-integration:
     name: Postgres journeys
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -150,6 +179,8 @@ jobs:
 
   test-e2e:
     name: Web E2E
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     uses: ./.github/workflows/playwright.yml
     with:
       upload_artifacts: true
