@@ -36,11 +36,14 @@ const BRANCHING = new Set(["plural", "select", "selectordinal"]);
 function brandToken(token: CompiledToken, brand: Pick<Brand, "name" | "bot">): CompiledToken {
   const [name, type, options] = token;
   // The variable name and the plural/select keys are identifiers; only the branch texts are copy.
+  // Compiled plurals also carry non-text options (`offset: 0`), which pass through untouched.
   if (typeof type === "string" && BRANCHING.has(type) && options && typeof options === "object") {
     const branches = Object.fromEntries(
-      Object.entries(options as Record<string, CompiledMessage>).map(([key, value]) => [
+      Object.entries(options as Record<string, unknown>).map(([key, value]) => [
         key,
-        brandMessage(value, brand),
+        typeof value === "string" || Array.isArray(value)
+          ? brandMessage(value as CompiledMessage, brand)
+          : value,
       ]),
     );
     return [name, type, branches];

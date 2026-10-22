@@ -1,4 +1,5 @@
 import { i18n } from "@lingui/core";
+import { brand, brandMessages } from "@nurlings/brand";
 import { applyUiDirection } from "./apply-ui-direction";
 import { importChunk } from "./preload-recovery";
 import { persistUiLocale, resolveUiLocale, type UiLocale } from "./ui-locale";
@@ -7,6 +8,7 @@ export { i18n };
 
 type CatalogMessages = Parameters<typeof i18n.load>[1];
 type CatalogModule = { messages: CatalogMessages };
+type BrandableCatalog = Parameters<typeof brandMessages>[0];
 type CatalogLoader = () => Promise<CatalogModule>;
 
 const defaultCatalogLoaders: Record<UiLocale, CatalogLoader> = {
@@ -45,7 +47,8 @@ async function loadCatalog(locale: UiLocale): Promise<CatalogMessages> {
 }
 
 function activateLoaded(locale: UiLocale, messages: CatalogMessages): UiLocale {
-  i18n.load(locale, messages);
+  // Upstream catalogs stay untouched; the product name and "bot" are rebranded as they load.
+  i18n.load(locale, brandMessages(messages as BrandableCatalog, brand) as CatalogMessages);
   i18n.activate(locale);
   activeLocale = locale;
   applyUiDirection(locale);

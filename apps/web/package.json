@@ -20,6 +20,7 @@
     "@orpc/client": "1.15.7",
     "@orpc/contract": "1.15.7",
     "@rakazo/chat-ui": "workspace:*",
+    "@nurlings/brand": "workspace:*",
     "@rakazo/contracts": "workspace:*",
     "@rakazo/core": "workspace:*",
     "@rakazo/ui-tokens": "workspace:*",

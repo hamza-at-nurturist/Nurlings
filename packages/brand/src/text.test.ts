@@ -112,6 +112,15 @@ describe("brandMessage / brandMessages on compiled catalogs", () => {
     ]);
   });
 
+  it("leaves the numeric offset of a compiled plural alone", () => {
+    const message: CompiledMessage = [
+      ["count", "plural", { offset: 0, one: "# bot", other: "# bots" }],
+    ];
+    expect(brandMessage(message, brand)).toEqual([
+      ["count", "plural", { offset: 0, one: "# Nurling", other: "# Nurlings" }],
+    ]);
+  });
+
   it("handles select with nested placeholders", () => {
     const message: CompiledMessage = [
       ["kind", "select", { bot: ["Open ", ["name"], " in Rakazo"], other: "Open Rakazo" }],

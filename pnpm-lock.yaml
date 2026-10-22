@@ -301,6 +301,9 @@ importers:
       '@lingui/react':
         specifier: 6.6.0
         version: 6.6.0(@babel/core@7.29.7)(@babel/types@7.29.8)(react@19.2.3)
+      '@nurlings/brand':
+        specifier: workspace:*
+        version: link:../../packages/brand
       '@orpc/client':
         specifier: 1.15.7
         version: 1.15.7(@opentelemetry/api@1.9.1)
