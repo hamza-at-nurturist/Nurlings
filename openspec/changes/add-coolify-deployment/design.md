@@ -60,10 +60,11 @@ automation (documented only).
    accepted by the code is checked in task 1.2 before this is final.
 5. **Version pin.** `NURLINGS_VERSION: ${NURLINGS_VERSION:?...}` with no default, used for both
    images; the registry prefix is a literal `ghcr.io/nurturist-ai/nurlings`, checked against
-   `brand.json` by the guard. Because only `edge` and `sha-*` exist now, the first client deploy
-   needs either a pushed release tag (recommended: cut `v0.1.0`) or a `sha-<commit>` value; the
-   README says which to use. The compose file cannot forbid someone typing `edge`; the README says
-   not to, and the guard checks the file only.
+   `brand.json` by the guard. Clients are pinned to `v0.1.0`, which is cut from `main` after this
+   change merges (the tag must contain the worker health probe the file depends on). Until then a
+   test deploy uses the `sha-<commit>` tag from a manual publish-workflow run on this branch. The
+   compose file cannot forbid someone typing `edge`; the README says not to, and the guard checks
+   the file only.
 6. **Internal names kept, user-visible values branded.** `RAKAZO_*` keys the images read stay (they
    appear only in Coolify's variable list). Fresh servers have no history, so `POSTGRES_USER` and
    `POSTGRES_DB` default to `nurlings` here; the app role `rakazo_app` is created by migrations and
@@ -71,9 +72,14 @@ automation (documented only).
    or that role.
 7. **Healthchecks.** postgres (`pg_isready`), supervisor (`/health` on 7091), api (`/health` on
    3100), web (fetch `/` on 5173, `start_period: 2m`, as in the prod compose) copy existing probes.
-   `computer` and `data-init` are one-shot (`service_completed_successfully`, marked
-   `exclude_from_hc: true` for Coolify). The **worker has no health endpoint in this tree** (see open
-   question 1).
+   `computer` and `data-init` are one-shot (`service_completed_successfully`, `restart: "no"`).
+   Coolify's `exclude_from_hc` key is not used: Compose's schema rejects it, so the file would not
+   pass `docker compose config`. If Coolify reports the exited one-shots as unhealthy, the first real
+   deploy will show it.
+   The **worker** had no health endpoint in this tree. Task 2.1 ports the worker slice of upstream
+   `cc90c276` (heartbeat file, `dist/health-check.js`, reconciler freshness and the log-sink health
+   counter it reports, plus the same healthcheck in the four stock compose files). The rest of that
+   commit (client monitoring, 68 files) is not taken.
 8. **Docker socket.** Mounted on `supervisor` only, with `user: root` as today. Coolify's docs do
    not say whether absolute host-path mounts are accepted for a pasted compose resource; this is
    verified on a real server in task 5.1 before the PR is marked ready.
@@ -92,15 +98,29 @@ automation (documented only).
     (read from Coolify's variables). Volume names carry a Coolify prefix, so the README finds them
     with `docker volume ls` instead of assuming a name. Restore is the reverse into an empty stack
     with the same key. The repo's `backup-prod.sh` assumes a host layout and is not reused.
-12. **Egress.** `SANDBOX_COMPUTER_EGRESS` is a pass-through, default auto, which means open without
-    the host iptables script. The README states that bot computers can reach the host's private
-    network by default and links `restrict-computer-egress.sh` as an optional hardening step.
+12. **Egress is restricted, and installing the rules is a mandatory README step.** Coolify servers
+    can host other apps and the Coolify dashboard, which bots must not reach.
+    `SANDBOX_COMPUTER_EGRESS` defaults to `restricted`, so the supervisor refuses to start a
+    computer until `infra/compose/restrict-computer-egress.sh` has been installed on the host (it
+    probes for the rules); the README runs it in setup step 3 and `SANDBOX_COMPUTER_DNS` defaults to
+    public resolvers so name lookups survive the private-resolver block.
+13. **No `host.docker.internal`.** The stock file maps it for api and worker so they can reach
+    services on the host; on a shared server that would expose the host's other listeners, so it is
+    dropped here (checked by the guard).
+14. **Which pass-through keys Coolify shows.** Coolify only lists variables a file references as
+    `${NAME}`; a bare `NAME:` is invisible in its UI. Keys an operator may reasonably set (the
+    ones in `.env.images.example`, plus the Anthropic and OpenAI keys) are written
+    `NAME: ${NAME:-default}` with the defaults the stock `.env` uses, which the app already treats
+    as unset when empty. Tuning keys stay bare and are reachable only by editing the file.
 
 ## Risks / Trade-offs
 
-- **Magic-variable behaviour unverified** (docs only) → task 5.1 runs the file on a throw-away
-  Coolify server and records the result in the PR; the `:?` guards turn a failed generation into a
-  blocked deploy, not an insecure one.
+- **Magic-variable behaviour unverified** (docs only) → the maintainer deploys the draft PR to a
+  test server first (task 5.1); the `:?` guards turn a failed version into a blocked deploy, and the
+  app refuses to start on a missing or too-short secret. Specific things to confirm: generated
+  values exist and differ, `SERVICE_URL_WEB_5173` carries the domain, the docker.sock mount is
+  accepted, the exited one-shots do not mark the resource unhealthy, and the README's label-based
+  `docker ps` filters find the containers and the `appdata` volume.
 - **Docker socket on a managed platform** is root-equivalent → scoped to one service, documented,
   one dedicated server per client, no other tenant.
 - **Volume subpaths need Docker Engine 26+** → README lists it as a requirement with a check command.
@@ -108,7 +128,8 @@ automation (documented only).
   only upgrade control.
 - **Coolify may rename volumes or networks**, which the supervisor tolerates because it inspects its
   own mounts and project label; `container_name` is never set.
-- **Open egress by default** → documented, not silently changed.
+- **Restricted egress needs host iptables rules and the DOCKER-USER chain** → the supervisor fails
+  closed with a message naming the script; README setup step 3 installs it.
 
 ## Migration Plan
 
@@ -117,16 +138,10 @@ the first client. Rollback is changing `NURLINGS_VERSION` back and redeploying; 
 forward-only, so the README tells operators to back up before an upgrade. Removing the setup means
 deleting the Coolify resource; data volumes stay until deleted explicitly.
 
-## Open Questions
+## Resolved questions
 
-1. **Worker healthcheck.** The worker has no health endpoint here; upstream added
-   `apps/worker/src/health-check.ts` (commit `cc90c276`) and its prod compose probes it with
-   `node dist/health-check.js`. Options: (a) cherry-pick that upstream commit (small, keeps us
-   aligned, touches `apps/worker`); (b) ship a probe in the compose file that only proves the
-   process is alive and can open a TCP connection to Postgres (no code change, weaker). Recommend
-   (a). This changes the task list, so it needs your decision before implementation.
-2. **First version tag.** Cut `v0.1.0` (recommended) or pin a `sha-<commit>` for the first client?
-3. **Egress default** for client servers: keep open-by-default with the documented optional script
-   (this design), or require restricted egress in the README as a mandatory step?
-4. **Postgres user/db defaults** as `nurlings` (this design) versus the existing `rakazo` defaults
-   so a client server can later be moved to the stock install without renaming.
+1. Worker health: port the upstream probe (decision 7), worker slice only.
+2. First tag: `v0.1.0`, cut after merge.
+3. Egress: restricted by default, rules installed in README setup (decision 12).
+4. Postgres user/db default to `nurlings`; the `rakazo_app` role is created by migrations and stays.
+5. Internal `RAKAZO_*` names and the `rakazo_app` role stay (confirmed); the guard checks everything else.

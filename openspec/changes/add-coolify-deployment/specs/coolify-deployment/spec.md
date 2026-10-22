@@ -62,6 +62,30 @@ publish the supervisor's port.
 - **WHEN** the rendered file is inspected
 - **THEN** exactly one service mounts the Docker socket and it is `supervisor`
 
+### Requirement: Bot computers are cut off from the host and private network
+The supervisor SHALL default to restricted egress so bot computers reach only the public internet
+and cannot reach the Docker host, the Coolify dashboard, other apps or the private network. The
+runbook SHALL install the host rules as a mandatory setup step before the first deploy.
+
+#### Scenario: Restricted by default
+- **WHEN** the file is rendered with no egress setting
+- **THEN** the supervisor runs with restricted egress and public DNS servers for computers
+
+#### Scenario: Rules missing
+- **WHEN** the host rules are not installed and a computer is requested
+- **THEN** the supervisor refuses to start it and names the script that installs them
+
+#### Scenario: Setup installs the rules
+- **WHEN** an operator follows the runbook's setup steps in order
+- **THEN** the egress rules are installed and verified before the stack is deployed
+
+### Requirement: No service can reach the host by name
+The file SHALL NOT map `host.docker.internal` or any other host alias into a service.
+
+#### Scenario: No host alias
+- **WHEN** the rendered file is inspected
+- **THEN** no service has `extra_hosts`
+
 ### Requirement: Data that must survive redeploys is in named volumes
 Postgres data and the app data directory (bot workspaces and home directories) SHALL be named
 volumes. A redeploy or version change SHALL NOT remove them.
@@ -92,7 +116,7 @@ The file SHALL NOT include the updater service or any variable that enables serv
 
 #### Scenario: No updater
 - **WHEN** the rendered file is inspected
-- **THEN** it has no updater service, no updater URL or token, and no `updater` image
+- **THEN** it has no updater service or `updater` image, and sets no updater URL or token
 
 ### Requirement: A runbook covers a new client end to end
 `deploy/coolify/README.md` SHALL describe server requirements (including memory per running bot),

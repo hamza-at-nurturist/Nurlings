@@ -29,8 +29,10 @@ set a domain, fill a few keys, deploy".
   client sees use Nurlings.
 - Nothing contacts Rakazo-owned infrastructure. Self-update stays off (`serverSelfUpdate: false`);
   the `updater` image and service are not part of this file.
-- No application code changes. One small supporting change may land (worker health probe), see
-  design open question 1.
+- One supporting code change: the worker health probe (heartbeat file and `dist/health-check.js`)
+  ported from upstream `cc90c276`, worker slice only, because the file needs a worker healthcheck.
+- Bot computers get restricted egress by default, and installing the host rules is a mandatory
+  setup step, because Coolify servers can host the dashboard and other apps.
 
 ## Capabilities
 
@@ -48,5 +50,5 @@ set a domain, fill a few keys, deploy".
 - Reads: `packages/brand/brand.json` (registry prefix), `infra/compose/docker-compose.images.yml`
   (source of truth for the app env list), the publish workflow's tag contract.
 - Existing `infra/compose/*` install path is untouched and keeps working.
-- Operational: the first client deploy needs a pushed `v*` release tag or an explicit
-  `sha-<commit>` tag, because only `edge` and `sha-*` exist today (see design).
+- Operational: clients pin `v0.1.0`, which is cut from `main` after this merges. Until then a test
+  deploy uses a `sha-<commit>` tag from a manual publish run (see design).
