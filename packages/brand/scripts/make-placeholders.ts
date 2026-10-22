@@ -16,8 +16,9 @@ import { brand } from "../src/index.ts";
 const force = process.argv.includes("--force");
 const brandDir = (relative: string) => fileURLToPath(new URL(`../${relative}`, import.meta.url));
 
-// A geometric "N" centred in a 1024 box (424 wide, 500 tall).
-const GLYPH = "M300 762V262h92l240 342V262h92v500h-92L392 420v342z";
+// The mark is defined once, in brand.json, and also drawn by the app's logo component. The
+// placeholder geometry is a plain "N" centred in a 1024 box (424 wide, 500 tall).
+const GLYPH = brand.mark.path;
 const INK = brand.colors.themeLight;
 const PLATE = brand.colors.iconBackground;
 const PLATE_RADIUS = 200;

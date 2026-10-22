@@ -42,6 +42,11 @@ describe("brand.json", () => {
     expect(brand.urls.community).toBeNull();
   });
 
+  it("defines the logo mark as one path, filled by the surrounding colour", () => {
+    expect(brand.mark.viewBox).toBe("292 254 440 516");
+    expect(brand.mark.path.startsWith("M300 762")).toBe(true);
+  });
+
   it("keeps every updater off", () => {
     expect(brand.updates).toEqual({ desktop: false, mobileOta: false, serverSelfUpdate: false });
   });
@@ -130,6 +135,16 @@ describe("parseBrand", () => {
       "an uppercase bundle id",
       (d: Record<string, any>) => (d.native.bundleId = "com.Nurlings.app"),
       "native.bundleId",
+    ],
+    [
+      "a malformed mark view box",
+      (d: Record<string, any>) => (d.mark.viewBox = "0 0 100"),
+      "mark.viewBox",
+    ],
+    [
+      "mark path data that could break out of an attribute",
+      (d: Record<string, any>) => (d.mark.path = 'M0 0" onload="x'),
+      "mark.path",
     ],
     [
       "a short colour",

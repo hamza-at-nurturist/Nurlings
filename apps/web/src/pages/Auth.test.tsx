@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { brand } from "@nurlings/brand";
 import type { ReactNode } from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
@@ -19,6 +20,7 @@ vi.mock("@lingui/react/macro", () => ({
   Trans: ({ children }: { children: ReactNode }) => children,
 }));
 vi.mock("@rakazo/ui-web", () => ({
+  BrandMark: () => <svg data-testid="brand-mark" />,
   Button: ({
     children,
     variant,
@@ -112,6 +114,19 @@ async function submit() {
     host.querySelector("form")!.requestSubmit();
   });
 }
+it.each(["in", "up", "forgot"] as const)(
+  "draws the brand mark and the tagline, not the upstream face, on %s",
+  async (mode) => {
+    vi.mocked(fetchAuthCapabilities).mockResolvedValue(capabilities);
+    await render(mode);
+    expect(host.querySelector('[data-testid="brand-mark"]')).not.toBeNull();
+    expect(host.textContent).toContain(brand.tagline);
+    // Heading text is rebranded by the catalog loader (see lib/i18n-brand.test.ts); this file
+    // mocks Trans, so it only checks what the frame itself draws.
+    // The upstream mark was two rounded dots drawn with spans.
+    expect(host.querySelectorAll("form span.rounded-full").length).toBe(0);
+  },
+);
 it("shows no credential form while capabilities load", async () => {
   vi.mocked(fetchAuthCapabilities).mockReturnValue(new Promise(() => undefined));
   await render();

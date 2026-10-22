@@ -1,9 +1,15 @@
 {
   "name": "Nurlings",
-  "bot": { "singular": "Nurling", "plural": "Nurlings" },
+  "bot": {
+    "singular": "Nurling",
+    "plural": "Nurlings"
+  },
   "tagline": "Powered by Nurturist AI",
   "description": "Your team of always-on agents.",
-  "company": { "name": "Nurturist AI", "url": "https://nurturistai.com" },
+  "company": {
+    "name": "Nurturist AI",
+    "url": "https://nurturistai.com"
+  },
   "urls": {
     "site": "https://nurlings.nurturistai.com",
     "cloud": null,
@@ -11,7 +17,13 @@
     "androidApp": null,
     "community": null
   },
-  "native": { "bundleId": "com.nurturistai.nurlings" },
+  "native": {
+    "bundleId": "com.nurturistai.nurlings"
+  },
+  "mark": {
+    "viewBox": "292 254 440 516",
+    "path": "M300 762V262h92l240 342V262h92v500h-92L392 420v342z"
+  },
   "registry": "ghcr.io/REPLACE_WITH_ORG/nurlings",
   "colors": {
     "themeLight": "#FCFCFC",
@@ -32,5 +44,9 @@
     "splash": "assets/splash/splash-icon-1024.png",
     "favicon": "assets/favicon/favicon-128.png"
   },
-  "updates": { "desktop": false, "mobileOta": false, "serverSelfUpdate": false }
+  "updates": {
+    "desktop": false,
+    "mobileOta": false,
+    "serverSelfUpdate": false
+  }
 }

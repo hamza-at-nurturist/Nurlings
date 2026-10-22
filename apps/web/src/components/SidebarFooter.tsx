@@ -1,5 +1,5 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import { ANDROID_APK_URL, IOS_APP_STORE_URL } from "@rakazo/contracts";
+import { brand } from "@nurlings/brand";
 import {
   AppMarkStack,
   Button,
@@ -21,6 +21,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
+import { DOCS_URL, mobileAppUrl } from "../lib/brand-links";
 import { useSidebarUpdate } from "./DesktopUpdates";
 import { IconTooltip } from "./IconTooltip";
 
@@ -67,6 +68,7 @@ export function SidebarFooter({
   logOutError,
 }: Props) {
   const { t } = useLingui();
+  const mobileUrl = mobileAppUrl(navigator.userAgent);
   const update = useSidebarUpdate();
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const pillRef = useRef<HTMLButtonElement>(null);
@@ -150,18 +152,20 @@ export function SidebarFooter({
               <Gauge className="text-muted-foreground" strokeWidth={1.75} />
               <Trans>Usage</Trans>
             </Button>
+            {mobileUrl ? (
+              <a
+                className={`${buttonVariants({ variant: "ghost" })} h-9 w-full justify-start gap-2.5 font-normal`}
+                href={mobileUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Smartphone className="text-muted-foreground" strokeWidth={1.75} />
+                <Trans>Get the mobile app</Trans>
+              </a>
+            ) : null}
             <a
               className={`${buttonVariants({ variant: "ghost" })} h-9 w-full justify-start gap-2.5 font-normal`}
-              href={/Android/i.test(navigator.userAgent) ? ANDROID_APK_URL : IOS_APP_STORE_URL}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <Smartphone className="text-muted-foreground" strokeWidth={1.75} />
-              <Trans>Get the mobile app</Trans>
-            </a>
-            <a
-              className={`${buttonVariants({ variant: "ghost" })} h-9 w-full justify-start gap-2.5 font-normal`}
-              href="https://github.com/elie222/rakazo/blob/main/docs/self-host.md"
+              href={DOCS_URL}
               target="_blank"
               rel="noreferrer"
             >
@@ -210,6 +214,7 @@ export function SidebarFooter({
                 {logOutError}
               </p>
             ) : null}
+            <p className="px-2.5 pt-2 pb-1.5 text-xs text-muted-foreground">{brand.tagline}</p>
           </PopoverContent>
         ) : null}
       </Popover>

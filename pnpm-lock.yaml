@@ -1006,6 +1006,9 @@ importers:
       '@base-ui/react':
         specifier: 1.9.0
         version: 1.9.0(@types/react@19.2.18)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@nurlings/brand':
+        specifier: workspace:*
+        version: link:../brand
       '@rakazo/core':
         specifier: workspace:*
         version: link:../core

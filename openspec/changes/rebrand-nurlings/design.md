@@ -68,6 +68,7 @@ packages/brand/
 | `urls.site` | `https://nurlings.nurturistai.com` (docs and privacy links point here for now) |
 | `urls.cloud` / `urls.iosApp` / `urls.androidApp` / `urls.community` | `null` — UI hides the entry (no Discord, no replacement) |
 | `native.bundleId` | `com.nurturistai.nurlings` (iOS bundle id **and** Android package) |
+| `mark` | `{ viewBox, path }`: the in-app logo as one SVG path, drawn by the UI (`BrandMark`, `Wordmark`) and used to generate the placeholder PNGs; real artwork replaces this value or the component |
 | `registry` | `ghcr.io/REPLACE_WITH_ORG/nurlings` — image prefix, lowercase; the exact placeholder is the only uppercase value accepted, and `brand:check --release` fails while it remains |
 | `updates` | `{ desktop: false, mobileOta: false, serverSelfUpdate: false }` |
 | `colors`, `assets` | defaults equal today's values / paths into `packages/brand/assets/` |
@@ -89,12 +90,12 @@ package); env-var-driven branding (identity is a build-time property; avoids new
 |---|---|---|
 | Web UI strings | catalog load-time substitution in `apps/web/src/lib/i18n.ts` (D3) | 1 |
 | Web `<title>`, meta, manifest | small Vite plugin (new file `src/brand-html.ts`) transforms upstream's `index.html` and rewrites `site.webmanifest` at build and dev time; both upstream files stay byte-identical, and a pattern that stops matching throws | `vite.config.ts` (2 lines: import + plugin entry) |
-| Web hardcoded text/links | `Wordmark` (`ui-web`), `Auth`, `Welcome`, `McpOAuthCallback`, `HonchoSettingsForm`, model-settings fields, `SidebarFooter` | ≈8 |
+| Web hardcoded text/links/logo | `Wordmark` + new `BrandMark` (`ui-web`), `AuthFrame` and `Welcome` (face logo → mark, tagline), `SidebarFooter` (Docs, store link, tagline) via `lib/brand-links.ts`. `Auth`/`McpOAuthCallback`/`HonchoSettingsForm`/model-settings strings are catalog keys: the seam rebrands them and editing them would orphan their translations | 5 |
 | Mobile strings | same helper in `apps/mobile/lib/i18n.ts`; ≈5 hardcoded files | ≈6 |
 | Mobile identity | `app.config.ts` overlays display name, permission strings, colours, icons, **bundle id/package**, OTA off; `app.json` edited only to drop Rakazo's `owner`, `projectId`, `updates.url` (D5) | `app.config.ts`, `app.json` (3 lines) |
 | Desktop identity | layered electron-builder config supplies `productName`, mic text, icon; verify empirically which mechanism electron-builder 26 honours (`--config` file / CLI `-c.*`), fallback: 3 guarded `package.json` lines. `appId`, `executableName`, `extraMetadata.name` untouched | 0–1 |
 | Desktop runtime text | `setup.html` becomes a template; `setup.js`/`main.ts`/`local-stack.ts`/`browser-auth.ts`/`auto-update.ts` read the config; About via `app.setAboutPanelOptions` | ≈6 |
-| Shared constants | `contracts`: `AI_PRIVACY_URL` → site; `openai-compatible-ui.ts` text → brand name; store URLs inert | 3 |
+| Shared constants | **`contracts` is left byte-identical.** Its Rakazo URLs (`AI_PRIVACY_URL`, store/APK) are read only by UI/API call sites, which now read `brand` instead; the unused exports are tree-shaken, and `brand:check` scans built output for upstream hosts so a future upstream use cannot slip in. `openai-compatible-ui.ts` text is a catalog key (rebranded by the seam). `client-build.ts` is also loaded by plain Node from `vite.config.ts`, so it cannot import the brand entry point | 0 |
 | Server text (D9) | `import { brand } from "@nurlings/brand"` in `packages/auth`, `apps/api`, `packages/adapters`, `packages/core` | ≈9 |
 | Self-update (D4) | `updaterConfig()` in `apps/api/src/router.ts` reads the flag | 1 line |
 | Images/installer (D8) | compose defaults, `.env.images.example`, `install-images.sh`, new workflow + doc | ≈8 |

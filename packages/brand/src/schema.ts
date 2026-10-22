@@ -17,6 +17,11 @@ export interface Brand {
   /** iOS bundle identifier and Android package share one value. */
   native: { bundleId: string };
   /**
+   * The in-app logo mark as one SVG path (filled with the surrounding text colour). The UI draws
+   * it and the placeholder artwork is generated from it; real artwork replaces this value.
+   */
+  mark: { viewBox: string; path: string };
+  /**
    * Lowercase image prefix; compose defaults must equal it (`brand:check`). Holds the
    * `REGISTRY_PLACEHOLDER` until the repository's organization is known.
    */
@@ -73,6 +78,9 @@ export function registryIsPlaceholder(registry: string): boolean {
   return registry === REGISTRY_PLACEHOLDER;
 }
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+const VIEW_BOX = /^-?\d+(?:\.\d+)?(?: -?\d+(?:\.\d+)?){3}$/;
+// SVG path data only: commands, numbers, separators. Nothing that could break out of an attribute.
+const PATH_DATA = /^[MmLlHhVvCcSsQqTtAaZz0-9.,\-\s]+$/;
 
 function object(value: unknown, field: string, keys: readonly string[]): Shape {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -144,6 +152,7 @@ export function parseBrand(input: unknown): Brand {
     "company",
     "urls",
     "native",
+    "mark",
     "registry",
     "colors",
     "assets",
@@ -153,6 +162,7 @@ export function parseBrand(input: unknown): Brand {
   const company = object(root.company, "company", ["name", "url"]);
   const urls = object(root.urls, "urls", ["site", "cloud", "iosApp", "androidApp", "community"]);
   const native = object(root.native, "native", ["bundleId"]);
+  const mark = object(root.mark, "mark", ["viewBox", "path"]);
   const colors = object(root.colors, "colors", [
     "themeLight",
     "themeDark",
@@ -201,6 +211,10 @@ export function parseBrand(input: unknown): Brand {
         BUNDLE_ID,
         "a lowercase reverse-DNS identifier such as com.example.app",
       ),
+    },
+    mark: {
+      viewBox: match(mark.viewBox, "mark.viewBox", VIEW_BOX, "four numbers such as 0 0 100 100"),
+      path: match(mark.path, "mark.path", PATH_DATA, "SVG path data"),
     },
     registry:
       root.registry === REGISTRY_PLACEHOLDER
