@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
-import { brandSetupHtml, brandSetupScript } from "./brand-setup";
+import { brandSetupHtml, brandSetupScript, brandSetupStyles, SETUP_LOGO } from "./brand-setup";
 
 const read = (file: string) => readFileSync(path.resolve(import.meta.dirname, file), "utf8");
 const html = read("setup.html");
@@ -57,6 +57,13 @@ describe("brandSetupHtml", () => {
     expect(withCloud).not.toMatch(/rakazo/i);
   });
 
+  it("shows the intro animation above the heading, as an image the content policy allows", () => {
+    expect(branded).toContain(`${SETUP_LOGO}<h1 class="heading">`);
+    expect(branded).toContain('src="intro.svg"');
+    expect(branded).toContain("img-src 'self' data:");
+    expect(branded).not.toContain("style=");
+  });
+
   it("fails loudly when upstream changes the markup it relies on", () => {
     expect(() => brandSetupHtml("<html></html>")).toThrow(/hosted-cloud choice was not found/);
     const withoutNew = html.replace('id="mode-new"', 'id="mode-fresh"');
@@ -83,5 +90,28 @@ describe("brandSetupScript", () => {
 
   it("does not rewrite the word bot or other prose rules", () => {
     expect(brandSetupScript("const bot = 1; // a bot")).toBe("const bot = 1; // a bot");
+  });
+});
+
+describe("the setup window's logo", () => {
+  it("is styled on the brand's navy plate without touching upstream's stylesheet rules", () => {
+    const css = ".heading { margin: 0; }\n";
+    const styled = brandSetupStyles(css);
+    expect(styled.startsWith(css.trimEnd())).toBe(true);
+    expect(styled).toContain(".logo {");
+    expect(styled).toContain(`background: ${brand.colors.iconBackground};`);
+    // People who asked for less motion get the still mark.
+    expect(styled).toMatch(
+      /prefers-reduced-motion: reduce\) \{\s+\.logo \{\s+content: url\("mark\.svg"\)/,
+    );
+  });
+
+  it("is the brand's intro animation", () => {
+    expect(SETUP_LOGO).toContain('src="intro.svg"');
+    const intro = readFileSync(
+      path.resolve(import.meta.dirname, "../../../packages/brand", brand.assets.introSvg),
+      "utf8",
+    );
+    expect(intro).toContain("prefers-reduced-motion");
   });
 });

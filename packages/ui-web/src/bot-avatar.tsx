@@ -536,10 +536,20 @@ export function BotShapePreview({
 export function Wordmark({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-primary">
+      <div
+        className="flex h-11 w-11 items-center justify-center rounded-full"
+        style={{ backgroundColor: brand.colors.iconBackground, color: brand.colors.blob }}
+      >
         <BrandMark className="h-5" />
       </div>
-      <span className="font-[Aeonik,ui-sans-serif] text-[28px] tracking-tight text-foreground">
+      <span
+        className="text-[28px] text-foreground"
+        style={{
+          fontFamily: `${brand.wordmarkFont.family}, ${brand.wordmarkFont.fallback}`,
+          fontWeight: brand.wordmarkFont.weight,
+          letterSpacing: brand.wordmarkFont.letterSpacing,
+        }}
+      >
         {brand.name}
       </span>
     </div>

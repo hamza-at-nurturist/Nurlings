@@ -7,7 +7,7 @@ import {
   signupRequiresEmailVerification,
 } from "@rakazo/core";
 import {
-  BrandMark,
+  BrandAnimation,
   Button,
   Input,
   InputOTP,
@@ -543,9 +543,7 @@ export function AuthFrame({
   return (
     <div className="flex min-h-full items-center justify-center bg-background px-6 py-16 text-foreground">
       <form onSubmit={onSubmit} className="flex w-[460px] flex-col items-center">
-        <div className="flex h-[74px] w-[74px] items-center justify-center rounded-full bg-muted text-primary">
-          <BrandMark className="h-[30px]" />
-        </div>
+        <BrandAnimation variant="intro" className="h-12" />
         <h1 aria-live="polite" className="mb-9 mt-7 text-4xl font-medium tracking-tight">
           {title}
         </h1>

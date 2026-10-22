@@ -8,6 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { brand } from "../src/index.ts";
+import { faviconSvg } from "./artwork.ts";
 
 const repoPath = (relative: string) =>
   fileURLToPath(new URL(`../../../${relative}`, import.meta.url));
@@ -38,9 +39,12 @@ async function resized(input: Buffer, size: number) {
 /** Re-encodes a source file so generated copies are normalised PNGs. */
 const copyOf = (relative: string) => sharp(assetPath(relative)).png().toBuffer();
 
+/** A favicon frame drawn straight from the vector at its own size, so 16 and 32 pixels stay crisp. */
+const faviconFrame = (size: number) => sharp(faviconSvg(size)).png().toBuffer();
+
 // An ICO is a header plus PNG frames, which Windows and browsers both accept.
-async function ico(input: Buffer, sizes: number[]) {
-  const frames = await Promise.all(sizes.map((size) => resized(input, size)));
+async function ico(frameFor: (size: number) => Promise<Buffer>, sizes: number[]) {
+  const frames = await Promise.all(sizes.map((size) => frameFor(size)));
   const header = Buffer.alloc(6 + frames.length * 16);
   header.writeUInt16LE(1, 2);
   header.writeUInt16LE(frames.length, 4);
@@ -60,18 +64,21 @@ async function ico(input: Buffer, sizes: number[]) {
 
 // Web app: square touch icons, rounded favicons.
 const web = "apps/web/public";
-await write(`${web}/favicon-16x16.png`, await resized(roundedIcon, 16));
-await write(`${web}/favicon-32x32.png`, await resized(roundedIcon, 32));
+await write(`${web}/favicon-16x16.png`, await faviconFrame(16));
+await write(`${web}/favicon-32x32.png`, await faviconFrame(32));
 await write(`${web}/favicon.png`, await copyOf(brand.assets.favicon));
 await write(`${web}/apple-touch-icon.png`, await resized(appIcon, 180));
 await write(`${web}/icon-192.png`, await resized(appIcon, 192));
 await write(`${web}/icon-512.png`, await resized(appIcon, 512));
-await write(`${web}/favicon.ico`, await ico(roundedIcon, [16, 32, 48]));
+await write(`${web}/favicon.ico`, await ico(faviconFrame, [16, 32, 48]));
 
 // Desktop: opaque square, rounded macOS development icon, Windows ICO.
 await write("apps/desktop/assets/icon.png", appIcon);
 await write("apps/desktop/assets/icon-macos.png", roundedIcon);
-await write("apps/desktop/assets/icon.ico", await ico(roundedIcon, [16, 32, 48, 64, 128, 256]));
+await write(
+  "apps/desktop/assets/icon.ico",
+  await ico((size) => resized(roundedIcon, size), [16, 32, 48, 64, 128, 256]),
+);
 
 // Mobile: iOS and the Android legacy icon must be opaque; adaptive layers keep their alpha.
 const mobile = "apps/mobile/assets";

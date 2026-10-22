@@ -17,10 +17,33 @@ export interface Brand {
   /** iOS bundle identifier and Android package share one value. */
   native: { bundleId: string };
   /**
-   * The in-app logo mark as one SVG path (filled with the surrounding text colour). The UI draws
-   * it and the placeholder artwork is generated from it; real artwork replaces this value.
+   * The logo mark as SVG path data: a blob and an orb. The UI draws them (the blob in the
+   * surrounding text colour, the orb with `colors.orbGradient`), and the checks compare them with
+   * the source SVGs in `packages/brand/assets/logo`. `viewBox` frames the whole mark;
+   * `smallViewBox` frames the blob alone, for favicons and single-colour icons.
    */
-  mark: { viewBox: string; path: string };
+  mark: {
+    viewBox: string;
+    smallViewBox: string;
+    blob: string;
+    orb: string;
+    /** User-space coordinates of the orb gradient, in the mark's own units. */
+    orbGradient: { x1: number; y1: number; x2: number; y2: number };
+  };
+  /**
+   * The wordmark's typeface (the product name beside the mark, nowhere else in the UI). The font
+   * is self-hosted in `packages/brand` so desktop and mobile render it offline; `fallback` is the
+   * stack used until it loads or if it fails.
+   */
+  wordmarkFont: {
+    family: string;
+    weight: number;
+    letterSpacing: string;
+    fallback: string;
+    /** Font file and the stylesheet that declares it, relative to `packages/brand`. */
+    file: string;
+    css: string;
+  };
   /** Lowercase image prefix; compose defaults must equal it (`brand:check`). */
   registry: string;
   colors: {
@@ -28,12 +51,28 @@ export interface Brand {
     themeDark: string;
     splashLight: string;
     splashDark: string;
+    /** The navy plate behind the app icon. */
     iconBackground: string;
+    /** The blob, on the navy plate. */
+    blob: string;
+    /** The orb's gradient stops, first to last. */
+    orbGradient: [string, string, string];
   };
   /** Paths relative to `packages/brand`. */
   assets: {
+    /** Vector sources: the transparent full mark, the blob alone, the square app icon, the original composition (reference only). */
+    markSvg: string;
+    markSmallSvg: string;
+    iconSvg: string;
+    logoSvg: string;
+    /** Animated marks used as plain images: plays once then idles, and a loop. */
+    introSvg: string;
+    loaderSvg: string;
     mark: string;
     wordmark: string;
+    /** The wordmark with fixed colours for use outside the app: navy text for light backgrounds, white for dark. */
+    wordmarkLight: string;
+    wordmarkDark: string;
     appIcon: string;
     appleIcon: string;
     androidAdaptiveForeground: string;
@@ -64,6 +103,10 @@ type Shape = Record<string, unknown>;
 const BUNDLE_ID = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9_]*)+$/;
 const REGISTRY = /^[a-z0-9][a-z0-9.-]*(?::\d+)?(?:\/[a-z0-9][a-z0-9._-]*)+$/;
 
+const FONT_NAME = /^[A-Za-z][A-Za-z0-9 -]*$/;
+const LETTER_SPACING = /^-?\d+(?:\.\d+)?em$/;
+// Names, quotes, commas and spaces only: nothing that could break out of a style attribute.
+const FONT_STACK = /^[A-Za-z0-9 ,'"-]+$/;
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 const VIEW_BOX = /^-?\d+(?:\.\d+)?(?: -?\d+(?:\.\d+)?){3}$/;
 // SVG path data only: commands, numbers, separators. Nothing that could break out of an attribute.
@@ -124,6 +167,20 @@ function assetPath(value: unknown, field: string): string {
   return raw;
 }
 
+function coordinate(value: unknown, field: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new BrandConfigError(field, "must be a number");
+  }
+  return value;
+}
+
+function fontWeight(value: unknown, field: string): number {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 100 || value > 900) {
+    throw new BrandConfigError(field, "must be a whole number from 100 to 900");
+  }
+  return value;
+}
+
 function flag(value: unknown, field: string): boolean {
   if (typeof value !== "boolean") throw new BrandConfigError(field, "must be true or false");
   return value;
@@ -140,6 +197,7 @@ export function parseBrand(input: unknown): Brand {
     "urls",
     "native",
     "mark",
+    "wordmarkFont",
     "registry",
     "colors",
     "assets",
@@ -149,17 +207,36 @@ export function parseBrand(input: unknown): Brand {
   const company = object(root.company, "company", ["name", "url"]);
   const urls = object(root.urls, "urls", ["site", "cloud", "iosApp", "androidApp", "community"]);
   const native = object(root.native, "native", ["bundleId"]);
-  const mark = object(root.mark, "mark", ["viewBox", "path"]);
+  const mark = object(root.mark, "mark", ["viewBox", "smallViewBox", "blob", "orb", "orbGradient"]);
+  const font = object(root.wordmarkFont, "wordmarkFont", [
+    "family",
+    "weight",
+    "letterSpacing",
+    "fallback",
+    "file",
+    "css",
+  ]);
+  const gradient = object(mark.orbGradient, "mark.orbGradient", ["x1", "y1", "x2", "y2"]);
   const colors = object(root.colors, "colors", [
     "themeLight",
     "themeDark",
     "splashLight",
     "splashDark",
     "iconBackground",
+    "blob",
+    "orbGradient",
   ]);
   const assets = object(root.assets, "assets", [
+    "markSvg",
+    "markSmallSvg",
+    "iconSvg",
+    "logoSvg",
+    "introSvg",
+    "loaderSvg",
     "mark",
     "wordmark",
+    "wordmarkLight",
+    "wordmarkDark",
     "appIcon",
     "appleIcon",
     "androidAdaptiveForeground",
@@ -171,6 +248,15 @@ export function parseBrand(input: unknown): Brand {
   ]);
   const updates = object(root.updates, "updates", ["desktop", "mobileOta", "serverSelfUpdate"]);
   const hex = (key: string) => match(colors[key], `colors.${key}`, HEX_COLOR, "a #RRGGBB colour");
+  const gradientStops = (value: unknown): [string, string, string] => {
+    if (!Array.isArray(value) || value.length !== 3) {
+      throw new BrandConfigError("colors.orbGradient", "must list exactly three #RRGGBB colours");
+    }
+    const [a, b, c] = value.map((stop, index) =>
+      match(stop, `colors.orbGradient[${index}]`, HEX_COLOR, "a #RRGGBB colour"),
+    );
+    return [a as string, b as string, c as string];
+  };
   const asset = (key: string) => assetPath(assets[key], `assets.${key}`);
   return {
     name: text(root.name, "name"),
@@ -201,7 +287,33 @@ export function parseBrand(input: unknown): Brand {
     },
     mark: {
       viewBox: match(mark.viewBox, "mark.viewBox", VIEW_BOX, "four numbers such as 0 0 100 100"),
-      path: match(mark.path, "mark.path", PATH_DATA, "SVG path data"),
+      smallViewBox: match(
+        mark.smallViewBox,
+        "mark.smallViewBox",
+        VIEW_BOX,
+        "four numbers such as 0 0 100 100",
+      ),
+      blob: match(mark.blob, "mark.blob", PATH_DATA, "SVG path data"),
+      orb: match(mark.orb, "mark.orb", PATH_DATA, "SVG path data"),
+      orbGradient: {
+        x1: coordinate(gradient.x1, "mark.orbGradient.x1"),
+        y1: coordinate(gradient.y1, "mark.orbGradient.y1"),
+        x2: coordinate(gradient.x2, "mark.orbGradient.x2"),
+        y2: coordinate(gradient.y2, "mark.orbGradient.y2"),
+      },
+    },
+    wordmarkFont: {
+      family: match(font.family, "wordmarkFont.family", FONT_NAME, "a font family name"),
+      weight: fontWeight(font.weight, "wordmarkFont.weight"),
+      letterSpacing: match(
+        font.letterSpacing,
+        "wordmarkFont.letterSpacing",
+        LETTER_SPACING,
+        "an em value such as -0.02em",
+      ),
+      fallback: match(font.fallback, "wordmarkFont.fallback", FONT_STACK, "a font stack"),
+      file: assetPath(font.file, "wordmarkFont.file"),
+      css: assetPath(font.css, "wordmarkFont.css"),
     },
     registry: match(
       root.registry,
@@ -215,10 +327,20 @@ export function parseBrand(input: unknown): Brand {
       splashLight: hex("splashLight"),
       splashDark: hex("splashDark"),
       iconBackground: hex("iconBackground"),
+      blob: hex("blob"),
+      orbGradient: gradientStops(colors.orbGradient),
     },
     assets: {
+      markSvg: asset("markSvg"),
+      markSmallSvg: asset("markSmallSvg"),
+      iconSvg: asset("iconSvg"),
+      logoSvg: asset("logoSvg"),
+      introSvg: asset("introSvg"),
+      loaderSvg: asset("loaderSvg"),
       mark: asset("mark"),
       wordmark: asset("wordmark"),
+      wordmarkLight: asset("wordmarkLight"),
+      wordmarkDark: asset("wordmarkDark"),
       appIcon: asset("appIcon"),
       appleIcon: asset("appleIcon"),
       androidAdaptiveForeground: asset("androidAdaptiveForeground"),

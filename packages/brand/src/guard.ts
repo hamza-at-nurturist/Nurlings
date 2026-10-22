@@ -1,6 +1,12 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  animatedSvgProblems,
+  iconPixelProblems,
+  sourceSvgProblems,
+  wordmarkFontProblems,
+} from "./artwork-check.js";
 import { generatedAssetProblems, sourceAssetProblems } from "./assets.js";
 import { builtWebCheck, staticRepoChecks } from "./repo-checks.js";
 import { parseBrand } from "./schema.js";
@@ -66,10 +72,25 @@ export const assetsCheck: BrandCheck = {
   },
 };
 
+export const artworkCheck: BrandCheck = {
+  name: "logo SVGs match brand.json and the icons follow the platform rules",
+  async run(repoRoot) {
+    const brandDir = path.join(repoRoot, "packages/brand");
+    const brand = parseBrand(JSON.parse(await readFile(path.join(brandDir, "brand.json"), "utf8")));
+    return [
+      ...(await sourceSvgProblems(brandDir, brand)),
+      ...(await animatedSvgProblems(brandDir, brand)),
+      ...(await wordmarkFontProblems(brandDir, brand)),
+      ...(await iconPixelProblems(repoRoot, brandDir, brand)),
+    ];
+  },
+};
+
 export const brandChecks: BrandCheck[] = [
   licenseCheck,
   noticeCheck,
   assetsCheck,
+  artworkCheck,
   ...staticRepoChecks,
 ];
 

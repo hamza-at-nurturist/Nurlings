@@ -63,6 +63,8 @@ describe("brandExpoConfig", () => {
     expect(splash?.backgroundColor).toBe(brand.colors.splashLight);
     expect(splash?.dark.backgroundColor).toBe(brand.colors.splashDark);
     expect(splash?.image).toBe("./assets/splash-icon.png");
+    // The mark fills most of the image, so it is shown wide enough to read.
+    expect(splash?.imageWidth).toBe(240);
   });
 
   it("points the iOS icon at the Nurlings icon bundle, and every referenced icon exists", () => {
