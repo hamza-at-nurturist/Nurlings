@@ -128,7 +128,7 @@ describe("app.json and the Maestro flows", () => {
 
   it("leaves obvious placeholders for the Expo owner and project", () => {
     expect(upstream.owner).toBe("REPLACE_WITH_NURLINGS_EXPO_OWNER");
-    expect((upstream.extra?.eas as { projectId: string }).projectId).toBe(
+    expect((upstream.extra as { eas: { projectId: string } }).eas.projectId).toBe(
       "REPLACE_WITH_NURLINGS_EAS_PROJECT_ID",
     );
     expect(placeholderProblems(upstream)).toHaveLength(2);
