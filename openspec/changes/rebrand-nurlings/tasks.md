@@ -1,76 +1,61 @@
 # Tasks
 
-> Gate: do not start group 1 until the proposal is approved. Open questions Q1–Q5 are in
-> `design.md`; tasks assume the recommended answers and are adjusted if you decide otherwise.
-> Conventions: one small commit per task or tight group; "Verify" is what proves it done.
+> Scope: customer-facing UI only (web, desktop, mobile). No API/server, prompts, User-Agent,
+> self-update, Docker/installer/CI, `apps/www`, telemetry, README/docs, or internal identifiers.
+> Native identifiers (bundle id, package, `rakazo://`, slug, desktop `appId`) are unchanged.
+> Gate: do not start group 1 until the proposal is approved. One small commit per task or tight
+> group. "Verify" is what proves a task done.
 
 ## 1. Brand package (foundation)
 
-- [ ] 1.1 Create `packages/brand` (`@nurlings/brand`, no dependencies on `@rakazo/*`) with `brand.json` (name, bot singular/plural, tagline, company, URLs with `null` for community/cloud/iOS/Android, native ids, colours defaulting to today's values, asset paths) and a typed, validated accessor. Verify: `pnpm --filter @nurlings/brand test` covers required fields, `null` optional URLs, and rejects a malformed config; `pnpm install` and `pnpm --filter @nurlings/brand check` pass.
-- [ ] 1.2 Add the load-time rebrand helper (`brandMessages`) that rewrites whole-word `Rakazo` (and, per Q1, English `bot`/`bots`) in strings and nested compiled-message arrays, preserving placeholders and possessives. Verify: unit tests with plural/select/rich-text shaped messages and `Rakazo's`, `Rakazo-Server`, `bot-123` (unchanged), `botId` (unchanged).
-- [ ] 1.3 Add the `brand:check` script/test skeleton (LICENSE hash equals upstream's, `NOTICE` exists) and the root script `pnpm brand:check`. Verify: it passes now and fails when `LICENSE` is edited (tested by a temporary edit).
+- [ ] 1.1 Create `packages/brand` (`@nurlings/brand`, no dependency on `@rakazo/*`) with `brand.json` (name, bot singular/plural, tagline "Powered by Nurturist AI", company, site URL, `null` for cloud/iOS/Android/community URLs, colours defaulting to today's values, asset paths, `updates: { desktop: false, mobileOta: false }`) and a typed, validated accessor. Verify: `pnpm --filter @nurlings/brand test` covers required fields, `null` optional URLs, and rejects a malformed config; `pnpm install` and `pnpm --filter @nurlings/brand check` pass.
+- [ ] 1.2 Add the load-time rebrand helper (`brandMessages`): whole-word `Rakazo` → `brand.name`, English `bot`/`bots` → `Nurling`/`Nurlings` (capitalised brand noun), applied to strings and nested compiled-message arrays, preserving placeholders and possessives. Verify: unit tests with plural/select/rich-text shaped messages, `Rakazo's`, `Rakazo-Server`; `bot-123`, `botId`, `robot`, `chatbot`, `bottom` unchanged.
+- [ ] 1.3 Add the `brand:check` skeleton and root script `pnpm brand:check` (checks `LICENSE` equals the upstream copy). Verify: passes now; fails when `LICENSE` is edited (temporary edit, reverted).
 
-## 2. Web app
+## 2. Placeholder assets
 
-- [ ] 2.1 Apply the catalog seam in `apps/web/src/lib/i18n.ts`. Verify: a Vitest loads all 12 locales through the real loader and asserts no message contains the word "Rakazo"; `pnpm --filter @rakazo/web intl:extract` leaves `.po` files unchanged (`git diff --exit-code apps/web/src/locales`).
-- [ ] 2.2 Vite plugin that renders `index.html` (`<title>`, `apple-mobile-web-app-title`, theme colour) and emits `site.webmanifest` from the brand config. Verify: after `pnpm --filter @rakazo/web build`, `dist/index.html` and `dist/site.webmanifest` contain "Nurlings" and no "Rakazo".
-- [ ] 2.3 Replace hardcoded web brand text and links: `Wordmark` in `packages/ui-web`, `SidebarFooter` (docs link → brand docs URL; "Get the mobile app" hidden when store URLs are null), "Powered by Nurturist AI" on login and footer, `McpOAuthCallback`/`Welcome`/`Auth` literals. Verify: component tests; `pnpm --filter @rakazo/web test` passes.
-- [ ] 2.4 Update web unit tests and Playwright specs that assert old names/URLs (`auth-lifecycle.spec.ts` etc.) to read the brand config. Verify: `pnpm --filter @rakazo/web test` passes; changed Playwright specs run against the dev stack where available and otherwise typecheck.
+- [ ] 2.1 Create placeholder sources in `packages/brand/assets/`: `logo/nurlings-mark.png`, `logo/nurlings-wordmark.svg`, `app-icon/app-icon-1024.png`, `app-icon/Nurlings.icon/`, `android/{adaptive-foreground,adaptive-background,monochrome}-1024.png`, `android/notification-72.png`, `splash/splash-icon-1024.png`, `favicon/favicon-128.png` — neutral "N" tiles, no Rakazo mascot. Verify: `identify` shows the documented dimensions; contact-sheet visual check.
+- [ ] 2.2 Repoint `packages/ui-tokens/scripts/export-brand.ts` at the brand assets (source image, `Nurlings.icon`), drop its `apps/www` outputs, run it, and regenerate web/desktop/mobile icon, favicon, splash and notification files. Verify: re-running gives no diff; `identify` on every generated file matches the sizes table; `git status` shows nothing changed under `apps/www`; no file in the three apps still derives from `orange-bot.png`.
+- [ ] 2.3 Write `packages/brand/README.md` with the per-platform size table (from the proposal), the export command, and "do not hand-edit generated files". Verify: every file listed exists; the export command runs clean from a fresh checkout.
 
-## 3. Mobile app
+## 3. Web app
 
-- [ ] 3.1 Apply the catalog seam in `apps/mobile/lib/i18n.ts`. Verify: test loads every `lib/locales/*.ts` map through the loader and finds no "Rakazo" word; existing `i18n.test.ts` passes.
-- [ ] 3.2 Overlay identity in `apps/mobile/app.config.ts` (name, slug, scheme, `bundleIdentifier`, `package`, permission strings incl. `NSLocalNetworkUsageDescription`, splash/theme colours; `owner`, `eas.projectId`, `updates.url` from env and absent when unset); leave `app.json` untouched. Verify: new test resolves the config with no env and asserts the values; `pnpm --filter @rakazo/mobile exec expo config --json` shows Nurlings and no `u.expo.dev`/`inbox-zero`.
-- [ ] 3.3 Replace hardcoded mobile text/links (`client-update.ts` store URLs hidden when null, `endpoint.ts`/`models.tsx`/`ai-data-sharing.tsx` literals, `_layout.tsx` title) and update Maestro flows (`appId`, `rakazo://` links, "Sign in to …" assertions). Verify: `pnpm --filter @rakazo/mobile test` and `pnpm --filter @rakazo/mobile check` pass; flows are syntax-checked by YAML lint (Maestro runs are CI/device-only and noted in the PR).
+- [ ] 3.1 Apply the catalog seam in `apps/web/src/lib/i18n.ts`. Verify: a Vitest loads all 12 locales through the real loader and asserts no message contains the word "Rakazo"; a reviewed snapshot lists every message where the bot rule fires; `pnpm --filter @rakazo/web intl:extract` leaves `apps/web/src/locales` unchanged (`git diff --exit-code`).
+- [ ] 3.2 Vite plugin (new file) that renders `index.html` (`<title>`, `apple-mobile-web-app-title`, theme colour) and emits `site.webmanifest` from the brand config; icons come from group 2. Verify: after `pnpm --filter @rakazo/web build`, `dist/index.html` and `dist/site.webmanifest` contain "Nurlings" and no "Rakazo".
+- [ ] 3.3 Replace hardcoded web text and links: `Wordmark` in `packages/ui-web/src/bot-avatar.tsx`; `Auth`, `Welcome`, `McpOAuthCallback`, `HonchoSettingsForm`, `compatible-model-fields`, `connection-controls`; `SidebarFooter` (Docs → site; "Get the mobile app" hidden when store URLs are null); `packages/contracts` `AI_PRIVACY_URL` → site and `openai-compatible-ui.ts` text; add the "Powered by Nurturist AI" line to login and sidebar footer. Verify: component tests for each (including the hidden mobile-app entry and the tagline); `pnpm --filter @rakazo/web test` passes.
+- [ ] 3.4 Update web tests that assert old names/URLs (`SidebarFooter.test.tsx`, Playwright specs such as `auth-lifecycle.spec.ts`) to read the brand config; storage-key assertions (`rakazo.composerDraft…`) stay. Verify: `pnpm --filter @rakazo/web test` passes; changed Playwright specs typecheck and run against the dev stack where available.
 
-## 4. Desktop app
+## 4. Mobile app
 
-- [ ] 4.1 Template `setup.html`/`setup.js` text from the brand config; hide the hosted-cloud option unless `urls.cloud` is set (default selection becomes local/self-hosted); rebrand `main.ts` menu/dialog strings and `auto-update.ts` messages. Verify: `pnpm --filter @rakazo/desktop test` (unit) passes with updated expectations; Playwright e2e specs updated but, per `AGENTS.md`, not run locally.
-- [ ] 4.2 Electron identity: `productName`, `appId`, `executableName`, `appimage`/dmg names, icon path, macOS microphone text via the layered electron-builder config (first choice) or the guarded `package.json` lines. Verify: `pnpm --filter @rakazo/desktop exec electron-builder --dir --config <resolved>` (or a config-print test) shows Nurlings identity and no Rakazo.
-- [ ] 4.3 T1: change `build.publish` to our repository and keep the updater inactive unless `brand.updates.desktop` is true. Verify: unit test that the updater is not initialised by default; resolved config contains no `elie222`.
-- [ ] 4.4 T5: `RAKAZO_CLOUD_URL` and the setup "Rakazo Cloud" choice come from `brand.urls.cloud` (null by default); update `setup-config` tests and `e2e/setup.spec.ts`. Verify: `pnpm --filter @rakazo/desktop test` passes.
+- [ ] 4.1 Apply the catalog seam in `apps/mobile/lib/i18n.ts`. Verify: a test loads every `lib/locales/*.ts` map through the loader and finds no "Rakazo" word; existing `i18n.test.ts` passes; the list of locales that keep a native-script word for "bot" is recorded in the test.
+- [ ] 4.2 Overlay display identity in `apps/mobile/app.config.ts`: display `name`, all permission strings (camera, photos, microphone, speech, `NSLocalNetworkUsageDescription`), splash/theme colours, icons; disable OTA (`updates.enabled = false`, no `updates.url`); leave `app.json`, `slug`, `scheme`, `bundleIdentifier`, `package`, `owner` and `eas.projectId` untouched. Verify: a new test resolves the config and asserts the values, that OTA is off, and that identifiers equal `app.json`'s; `pnpm --filter @rakazo/mobile exec expo config --json` shows the same and no `u.expo.dev`.
+- [ ] 4.3 Replace hardcoded mobile text/links: `sign-in.tsx`, `_layout.tsx` title, `endpoint.ts`, `(settings)/models.tsx`, `(settings)/ai-data-sharing.tsx`; `client-update.ts` no longer opens Rakazo's store/APK (inert when URLs are null). Update Maestro flow assertions ("Sign in to Nurlings"); flow `appId` and `rakazo://` links stay. Verify: `pnpm --filter @rakazo/mobile test` and `pnpm --filter @rakazo/mobile check` pass; flows pass a YAML lint (Maestro runs are device/CI-only and noted in the PR).
 
-## 5. API, auth, core, adapters, contracts
+## 5. Desktop app
 
-- [ ] 5.1 `packages/auth`: `appName`, passkey `rpName`, all email subjects/bodies from the brand config. Verify: updated `packages/auth` tests assert Nurlings in every email and none of the upstream name.
-- [ ] 5.2 `apps/api`: chat-channel messages (`messaging-inbound.ts`, `team-chat-bridge.ts`), accept both `nurlings://` and `rakazo://` app origins, `ANDROID_PACKAGE` from brand. Verify: `auth-origins.test.ts`, `app-association.test.ts` updated and passing for both schemes/packages.
-- [ ] 5.3 `packages/adapters` and `packages/contracts`: `pi-models.ts`/`pi-oauth.ts` blurbs, `openai-compatible-ui.ts`, MCP OAuth `client_name`, the four User-Agent strings (T4, brand UA + site URL), model-identity sentences in `pi-runtime.ts`/`executor.ts` (Q5); keep `AUTOMATED_MESSAGE_LABEL` and the compaction prefix. Verify: adapter tests updated (`favicon.test.ts` UA match, prompt tests); `pnpm --filter @rakazo/adapters test` passes; a test proves a stored message with the persisted label is still recognised.
-- [ ] 5.4 `packages/core` and `packages/contracts`: `self-update.ts`/`compose-update.ts` repo and image-repo constants driven by the brand config (T2; "no update source" when unconfigured), `secrets-guard.ts` text, `AI_PRIVACY_URL`, `IOS_APP_STORE_URL`/`ANDROID_APK_URL` nullable. Verify: `apps/api/src/server-update.test.ts` and core tests updated and passing; no `elie222` in non-doc runtime code (`git grep elie222 -- apps packages ':!*.md'` returns only intentional attribution).
-- [ ] 5.5 T3/T8: remove Rakazo's Expo owner/EAS/OTA from effective config; retarget or disable CI jobs that point at Rakazo (`deploy-production` URL, `eas update` job) in `.github/workflows/ci.yml`. Verify: `actionlint` (or YAML parse) passes; the jobs are skipped without our secrets/vars.
+- [ ] 5.1 Setup window: template `setup.html` and read `setup.js` strings from the brand config; remove the hosted-cloud choice (`RAKAZO_CLOUD_URL`, `cloudUrl` plumbing) so the default selection is local/self-hosted; a profile that saved the hosted-cloud choice falls back to the setup screen. Verify: `setup-config` and setup unit tests updated and passing, including the saved-cloud fallback; `e2e/setup.spec.ts` updated (not run locally, per `AGENTS.md`).
+- [ ] 5.2 Menus, dialogs and messages: `main.ts` (e.g. "Change … Server…", error strings), `local-stack.ts`, `browser-auth.ts`, `auto-update.ts` strings read the brand config; About panel configured via `app.setAboutPanelOptions` with name, version and "Powered by Nurturist AI". Verify: `pnpm --filter @rakazo/desktop test` passes with updated expectations; a unit test covers the About options.
+- [ ] 5.3 Display identity: layered electron-builder config (first choice) or the guarded `package.json` lines supply `productName`, the macOS microphone text and the icon path (`Nurlings.icon`, `icon.ico`, `icon.png`); `appId`, `executableName`, `extraMetadata.name` unchanged. Verify: resolved builder config (`electron-builder --dir` config print or a config test) shows Nurlings and the unchanged identifiers; `brand:check` covers it.
+- [ ] 5.4 Disable the auto-updater: set `DesktopUpdateController`'s `disabled` from `brand.updates.desktop === false`, and drop the `elie222/rakazo` `build.publish` block from the effective builder config. Verify: unit test that with defaults the updater module is never loaded and no network call is made; the in-app update UI shows no pending update; effective config contains no `elie222`.
 
-## 6. Placeholder assets
+## 6. Compliance
 
-- [ ] 6.1 Create placeholder sources in `packages/brand/assets/` (`logo/nurlings-mark.png`, `logo/nurlings-wordmark.svg`, `app-icon/app-icon-1024.png`, `app-icon/Nurlings.icon/`, `android/{adaptive-foreground,adaptive-background,monochrome}-1024.png`, `android/notification-72.png`, `splash/splash-icon-1024.png`, `favicon/favicon-128.png`, `social/og-image-1200x630.png`) — neutral "N" tiles, no Rakazo mascot. Verify: `identify` shows the documented dimensions; visual check of a contact sheet.
-- [ ] 6.2 Repoint `packages/ui-tokens/scripts/export-brand.ts` (source path, output name) to the brand assets and run it; regenerate web/www/desktop/mobile outputs; remove `Rakazo.icon` and `orange-bot.png` from use. Verify: re-running yields no diff; `identify` on every generated file matches the sizes table; `git grep -il "orange-bot"` is empty.
-- [ ] 6.3 `packages/brand/README.md`: full per-platform size table (from the proposal), the export command, "do not hand-edit generated files". Verify: every file listed exists; `pnpm --filter @nurlings/brand export:assets` runs clean.
+- [ ] 6.1 Add `NOTICE`: Nurlings is based on Rakazo by Elie Steinbock, licensed under Apache-2.0, link https://github.com/elie222/rakazo, published by Nurturist AI. `LICENSE` stays untouched. Verify: `brand:check` asserts the required phrases and that `git diff main -- LICENSE` is empty.
 
-## 7. Marketing site (`apps/www`)
+## 7. Guardrails and merge routine
 
-- [ ] 7.1 Rebuild `src/site.ts`, `astro.config.mjs`, `vercel.json`, structured data, `ai-catalog.json`, `llms.txt` and page/component literals from the brand config; drop Discord, cloud/waitlist, upstream store and APK links. Verify: `pnpm --filter @rakazo/www build` succeeds; `git grep -i rakazo -- apps/www/dist` has no visible matches.
-- [ ] 7.2 Q2: replace `privacy`/`terms`/`support` with placeholder pages without upstream operator text; unlist blog and comparison pages from nav, sitemap and `llms.txt`; remove Cloud/billing copy from visible pages. Verify: build output sitemap and nav contain none of them; visual check with Playwright screenshots of home, about, privacy, terms, support.
-- [ ] 7.3 Regenerate OG images with the new mark (`render-og.mjs`) and update `www` unit tests (`github.test.ts`, `download.test.ts`, `middleware.test.ts`). Verify: `pnpm --filter @rakazo/www test` passes; OG files are 1200×630.
+- [ ] 7.1 Complete `brand:check`: all web/mobile locales rebranded (3.1, 4.1), resolved Expo config and builder config clean (4.2, 5.3), built `index.html`/manifest clean (3.2), no `elie222`/`u.expo.dev` in effective desktop/mobile runtime config (4.2, 5.4), `NOTICE` and `LICENSE` (6.1). Verify: passes on the branch and fails on a seeded leak in each category (temporary edits, reverted).
+- [ ] 7.2 Wire `brand:check` into the root `test` script and CI, and document the upstream-merge routine in `packages/brand/README.md` (`git fetch upstream`, merge, `pnpm brand:check`, re-run `inventory.py`, review only new in-scope hits). Verify: CI config parses; a dry-run merge of current `upstream/main` into the branch reports no conflicts.
 
-## 8. Docs, compliance, and repo metadata
+## 8. Final verification (integration only)
 
-- [ ] 8.1 Add `NOTICE` (based on Rakazo by Elie Steinbock, Apache-2.0, https://github.com/elie222/rakazo; published by Nurturist AI; upstream name/logo not used for branding). Verify: brand guard checks the required phrases; `LICENSE` hash unchanged.
-- [ ] 8.2 Rewrite `README.md` for Nurlings (what it is, setup, stack, "Powered by Nurturist AI", link to https://nurlings.nurturistai.com, credit line to Rakazo near the bottom; no Discord/Railway/App Store/APK badges). Verify: guard test for README structure; all links resolve to allowed hosts.
-- [ ] 8.3 Rebrand user-facing docs: `docs/*.md`, `SETUP_PROMPT.md`, `VISION.md`, `CONTRIBUTING.md`, `infra/railway/README.md`, `.github/ISSUE_TEMPLATE/*`, `SECURITY.md` (remove `*@rakazo.com` addresses; leave clearly marked placeholders for Nurturist AI contacts), `CHANGELOG.md` header (upstream history entries kept as attributed history). Installer/registry instructions are left pointing at the current registries with a note (rule 4). Verify: `git grep -n "rakazo.com\|discord" -- '*.md' .github` shows only allow-listed attribution lines.
-- [ ] 8.4 Write the registry/installer prerequisites into `docs/nurlings-hosting-prerequisites.md` (images, installer URL, Railway template, release pipelines, accounts) and link it from the PR. Verify: every item in the proposal's Docker section is covered.
-
-## 9. Guardrails and merge routine
-
-- [ ] 9.1 Complete `brand:check`: catalogs rebranded, resolved Expo/Electron/Vite outputs clean, no upstream hosts in shipped runtime config (T1–T7), allow-list for NOTICE/README credit/LICENSE/internal tokens. Verify: passes on the branch; fails on a seeded leak in each category (temporary edits).
-- [ ] 9.2 Wire `brand:check` into root `test` and CI; document the upstream-merge routine in `packages/brand/README.md` (`git fetch upstream`, merge, `pnpm brand:check`, re-run `inventory.py`, review new hits only). Verify: CI config lint/parse passes; a dry-run merge of current `upstream/main` into the branch is conflict-free.
-
-## 10. Final verification (integration only)
-
-- [ ] 10.1 Clean install and full static checks: `pnpm install`, `pnpm check` (typecheck), `pnpm lint`. Verify: all exit 0.
-- [ ] 10.2 Unit/integration tests: `pnpm test` (Vitest). Failures caused by the rebrand are fixed; unrelated pre-existing failures are reported with output, not hidden. Verify: exit 0, or documented upstream-baseline failures.
-- [ ] 10.3 Start the web app (`pnpm dev` stack, or built preview) and walk sign-in, onboarding, bot list, thread, settings, models, memory and usage with Playwright; assert page text and `document.title` contain no "Rakazo"; save screenshots. Verify: automated assertion passes; screenshots reviewed.
-- [ ] 10.4 Final grep: `git grep -nIi rakazo` classified with `inventory.py`; every remaining occurrence is internal on purpose or an allowed attribution, listed with its reason in `remaining-rakazo.md` (and the PR). Verify: zero user-facing and zero external-link occurrences remain outside the allow-list.
-- [ ] 10.5 Check off every task in this file. Verify: `openspec validate rebrand-nurlings --strict` passes and `openspec status --change rebrand-nurlings` shows all tasks complete.
+- [ ] 8.1 Clean install and static checks: `pnpm install`, `pnpm check`, `pnpm lint`. Verify: all exit 0.
+- [ ] 8.2 Unit/integration tests: `pnpm test`. Failures caused by the rebrand are fixed; unrelated pre-existing failures are reported with their output, not hidden. Verify: exit 0, or documented upstream-baseline failures.
+- [ ] 8.3 Start the web app and walk sign-in, onboarding, bot list, thread, settings, models, memory and usage with Playwright; assert `document.title` and visible text contain no "Rakazo"; save screenshots; list any server-supplied text that still says Rakazo (known residual, out of scope). Verify: automated assertion passes; residual list written to `remaining-rakazo.md`.
+- [ ] 8.4 Final grep: `git grep -nIi rakazo` classified with `inventory.py`; every remaining occurrence is listed with its reason in `remaining-rakazo.md` and the PR. Verify: zero in-scope user-facing, identity or link occurrences remain outside `LICENSE`/`NOTICE`.
+- [ ] 8.5 Check off every task in this file. Verify: `openspec validate rebrand-nurlings --strict` passes and `openspec status --change rebrand-nurlings` shows all tasks complete.
 
 ## Workflow follow-up
 
-- Open the PR "Rebrand Rakazo to Nurlings (Powered by Nurturist AI)" with: summary, link to this OpenSpec change, what was intentionally left internal, and manual steps (assets, domains, app store ids, signing identities, image/installer hosting, contact emails, legal pages).
+- Open the PR "Rebrand Rakazo to Nurlings (Powered by Nurturist AI)" with: summary, link to this OpenSpec change, what was intentionally left internal / out of scope, and manual steps (final artwork, Expo project for builds, store identifiers, signing identities, building and hosting images so clients receive this UI).
 - After the PR is merged: run `openspec archive rebrand-nurlings` so the five capability specs move into `openspec/specs/`.

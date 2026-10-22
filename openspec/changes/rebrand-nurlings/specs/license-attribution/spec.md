@@ -11,26 +11,18 @@ repository's copy.
 ### Requirement: NOTICE attribution
 The repository SHALL contain a `NOTICE` file stating that Nurlings is based on Rakazo by Elie
 Steinbock, licensed under the Apache License 2.0, with a link to https://github.com/elie222/rakazo,
-and that the Rakazo name and logo are not used to endorse or brand Nurlings.
+and identifying Nurturist AI as the publisher of Nurlings.
 
 #### Scenario: NOTICE content
 - **WHEN** `NOTICE` is read
-- **THEN** it names Rakazo and Elie Steinbock, names the Apache-2.0 license, includes the original repository URL, and identifies Nurturist AI as the publisher of Nurlings
+- **THEN** it names Rakazo and Elie Steinbock, names the Apache-2.0 license, includes the original repository URL, and names Nurturist AI as publisher
 
-### Requirement: No upstream marks in branding
-The upstream name and logo SHALL NOT appear in product branding. The only places the upstream name
-may appear are `LICENSE`, `NOTICE`, the README credit line, and the code identifiers and comments
-that are kept internal on purpose.
+### Requirement: No upstream marks in UI branding
+The upstream name and logo SHALL NOT appear in the web, desktop or mobile UI branding: icons,
+splash, favicons, wordmark and manifests. The upstream name may remain in `LICENSE`, `NOTICE`, and
+in code identifiers, comments and files outside the customer-facing UI that this change does not
+touch.
 
 #### Scenario: Branding surfaces
-- **WHEN** icons, splash, favicons, wordmark, store metadata and social images are inspected
+- **WHEN** the icons, splash, favicons, wordmark and manifests of the three UIs are inspected
 - **THEN** none shows the upstream logo, mascot or name
-
-### Requirement: README for Nurlings
-The README SHALL describe Nurlings (what it is, setup), carry the "Powered by Nurturist AI" line
-and a link to https://nurlings.nurturistai.com, and include a short credit to Rakazo near the
-bottom.
-
-#### Scenario: README structure
-- **WHEN** the README is read
-- **THEN** its title is Nurlings, it links to https://nurlings.nurturistai.com, it says "Powered by Nurturist AI", and the only mention of Rakazo is the credit line near the bottom

@@ -40,9 +40,12 @@ We keep pulling upstream Rakazo updates (`git remote upstream` → `elie222/raka
 decision in this repo's branding work is judged by one question: *does it make the next upstream
 merge bigger?* Therefore:
 
-1. **Rebrand the user-visible surface, not the internals.** `@rakazo/*` package names, `RAKAZO_*`
-   env vars, database / Docker service names, storage keys, wire headers, and code identifiers stay
-   as they are. Renaming them creates conflicts in thousands of lines for no user benefit.
+1. **White-label the customer-facing UI only** — the web, desktop (Electron) and mobile (Expo)
+   apps that clients see. The API/server, emails, prompts, User-Agent, self-update, images/installer/
+   CI, `apps/www`, telemetry, README/docs and internal names (`@rakazo/*` package names, `RAKAZO_*`
+   env vars, database / Docker names, storage keys, wire headers, code identifiers) stay as
+   upstream. Native identifiers (bundle id, Android package, `rakazo://`, Expo slug, desktop
+   `appId`) also stay: the API depends on them. Renaming creates conflicts for no user benefit.
 2. **Centralise branding.** One brand config (`packages/brand`) holds name, bot terms, tagline,
    URLs, colours, logo paths. Product code reads it instead of hardcoding "Nurlings"; upstream
    text is rebranded at well-defined seams (catalog load, config generation) rather than by editing
@@ -56,8 +59,8 @@ merge bigger?* Therefore:
 - `LICENSE` is upstream's file and stays byte-for-byte untouched.
 - A `NOTICE` file states that Nurlings is based on Rakazo by Elie Steinbock, licensed under
   Apache-2.0, with a link to the original repo.
-- The Rakazo name and logo are not used in Nurlings branding. The only places the name appears by
-  design are `NOTICE`, the README credit line, and `LICENSE`.
+- The Rakazo name and logo are not used in the Nurlings UI branding. Inside the customer-facing UI
+  scope, the name remains only in `LICENSE`, `NOTICE`, and internal identifiers.
 
 ## Conventions
 

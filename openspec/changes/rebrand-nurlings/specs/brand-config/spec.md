@@ -1,18 +1,19 @@
 ## ADDED Requirements
 
 ### Requirement: Single brand configuration
-The product SHALL define its brand in one configuration, and every surface (web, desktop, mobile,
-API-generated text, marketing site) SHALL read brand values from it instead of embedding the
-product name as a literal in code it newly authors.
+The product SHALL define its customer-facing brand in one configuration, and the web, desktop and
+mobile UIs SHALL read brand values from it instead of embedding the product name as a literal in
+code they newly author.
 
 #### Scenario: Name change is a one-file change
 - **WHEN** the product name in the brand configuration is changed to another value and the apps are rebuilt
-- **THEN** every user-visible occurrence of the product name on web, desktop, mobile, in emails and on the marketing site shows the new value without any other source edit
+- **THEN** every user-visible occurrence of the product name in the web, desktop and mobile UIs shows the new value without any other source edit
 
 ### Requirement: Brand configuration contents
-The brand configuration SHALL contain the product name, the singular and plural bot names, the
-tagline, the company name and URL, the product, docs, privacy, terms and repository URLs, the
-native identifiers, the theme colours, and the paths of the logo and icon assets.
+The brand configuration SHALL contain the product name, the singular and plural names for a bot,
+the tagline, the company name and URL, the product site URL, the theme colours, the paths of the
+logo and icon assets, and feature flags that keep the desktop auto-updater and mobile OTA updates
+off.
 
 #### Scenario: Bot terms come from the configuration
 - **WHEN** the singular bot name is "Nurling" and the plural is "Nurlings"
@@ -24,16 +25,16 @@ native identifiers, the theme colours, and the paths of the logo and icon assets
 
 ### Requirement: Optional entries are hidden when unset
 A brand URL that is not set (null) SHALL cause the UI entry that would link to it to be omitted,
-not rendered as a dead or placeholder link. The community/support link, the hosted-cloud origin,
-the iOS App Store link and the Android download link SHALL be unset by default.
+not rendered as a dead or placeholder link. The community link, the hosted-cloud origin, the iOS
+App Store link and the Android download link SHALL be unset by default.
 
 #### Scenario: No community link
 - **WHEN** the community URL is unset
-- **THEN** no Discord or community link appears in the README, web app, desktop app, mobile app, marketing site or issue templates
+- **THEN** no Discord or community link appears in the web, desktop or mobile UI
 
-#### Scenario: No hosted cloud choice
-- **WHEN** the hosted-cloud URL is unset
-- **THEN** the desktop first-run setup does not offer a hosted-cloud option and its default selection is a self-hosted or local option
+#### Scenario: No store links
+- **WHEN** the iOS and Android store URLs are unset
+- **THEN** "Get the mobile app" is not shown in the web app and the mobile update prompt does not open an upstream store page
 
 ### Requirement: Upstream strings are rebranded at load time
 Translated UI strings inherited from upstream SHALL be rebranded when a catalog is loaded, so that
@@ -50,13 +51,13 @@ without editing them.
 
 ### Requirement: Brand guard
 The repository SHALL include an automated check that fails when the upstream product name is
-visible in rendered or generated user-facing output, and that confirms the Apache-2.0 `LICENSE`
-file is byte-identical to the original.
+visible in the rendered web and mobile catalogs or in the generated desktop, mobile and web
+identity, and that confirms `LICENSE` is byte-identical to upstream's.
 
 #### Scenario: Guard catches a leak
-- **WHEN** a user-visible string containing the upstream product name outside the allowed attribution files is introduced
+- **WHEN** a user-visible string containing the upstream product name is introduced in a checked surface
 - **THEN** the guard check fails and names the offending string or file
 
 #### Scenario: LICENSE integrity
 - **WHEN** the guard runs
-- **THEN** it fails if the `LICENSE` file differs from the original upstream copy
+- **THEN** it fails if the `LICENSE` file differs from the upstream copy
