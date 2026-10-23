@@ -37,7 +37,8 @@
 ## Risks
 
 - If Coolify's redeploy does not pull a moved `edge` tag, the test server keeps running the old
-  image. The verification task compares the server's reported commit (`/health`) with the merge
+  image. The verification task compares the revision reported inside the `api` container
+  (`/internal/health` on the API port; the public `/health` stays `{"ok":true}`) with the merge
   commit; a fix would be a pull policy on the test resource only.
 - A tag cut within minutes of a merge may find no `sha-` image yet (publish still running); the
   fallback build then runs, which is today's behaviour.
