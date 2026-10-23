@@ -27,6 +27,7 @@ describe("brand.json", () => {
     expect(brand.urls.site).toBe("https://nurlings.nurturistai.com");
     expect(brand.native.bundleId).toBe("com.nurturistai.nurlings");
     expect(brand.registry).toBe("ghcr.io/hamza-at-nurturist/nurlings");
+    expect(brand.ticketPrefix).toBe("NUR");
   });
 
   it("offers no hosted cloud, store, or community link until one exists", () => {
@@ -76,6 +77,18 @@ describe("brand.json", () => {
 
   it("never contains the upstream name", () => {
     expect(JSON.stringify(brand).toLowerCase()).not.toContain("rakazo");
+  });
+});
+
+describe("ticketPrefix", () => {
+  it.each(["", "1AB", "NU-R", "nur", "ABCDEFGHIJKLM"])("rejects %j", (prefix) => {
+    expect(problem(withChange((d) => (d.ticketPrefix = prefix)))).toContain(
+      "Invalid brand config: ticketPrefix",
+    );
+  });
+
+  it("accepts a letter followed by letters or digits", () => {
+    expect(parseBrand(withChange((d) => (d.ticketPrefix = "N2"))).ticketPrefix).toBe("N2");
   });
 });
 

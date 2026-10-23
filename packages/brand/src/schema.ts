@@ -16,6 +16,8 @@ export interface Brand {
   };
   /** iOS bundle identifier and Android package share one value. */
   native: { bundleId: string };
+  /** Prefix new boards number their tickets with: `NUR` gives `NUR-1`. */
+  ticketPrefix: string;
   /**
    * The logo mark as SVG path data: a blob and an orb. The UI draws them (the blob in the
    * surrounding text colour, the orb with `colors.orbGradient`), and the checks compare them with
@@ -101,6 +103,8 @@ export class BrandConfigError extends Error {
 type Shape = Record<string, unknown>;
 
 const BUNDLE_ID = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9_]*)+$/;
+// Board prefixes are upper-cased by the API; at most 12 characters, as in the board contract.
+const TICKET_PREFIX = /^[A-Z][A-Z0-9]{0,11}$/;
 const REGISTRY = /^[a-z0-9][a-z0-9.-]*(?::\d+)?(?:\/[a-z0-9][a-z0-9._-]*)+$/;
 
 const FONT_NAME = /^[A-Za-z][A-Za-z0-9 -]*$/;
@@ -196,6 +200,7 @@ export function parseBrand(input: unknown): Brand {
     "company",
     "urls",
     "native",
+    "ticketPrefix",
     "mark",
     "wordmarkFont",
     "registry",
@@ -285,6 +290,12 @@ export function parseBrand(input: unknown): Brand {
         "a lowercase reverse-DNS identifier such as com.example.app",
       ),
     },
+    ticketPrefix: match(
+      root.ticketPrefix,
+      "ticketPrefix",
+      TICKET_PREFIX,
+      "1 to 12 upper-case letters or digits, starting with a letter, such as NUR",
+    ),
     mark: {
       viewBox: match(mark.viewBox, "mark.viewBox", VIEW_BOX, "four numbers such as 0 0 100 100"),
       smallViewBox: match(

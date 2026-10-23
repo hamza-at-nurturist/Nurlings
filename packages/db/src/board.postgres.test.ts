@@ -56,6 +56,7 @@ describePostgres("board creation (PostgreSQL)", () => {
     );
     expect(new Set(boards.map((board) => board.id)).size).toBe(1);
     expect(boards.every((board) => board.name === "General")).toBe(true);
+    expect(boards.every((board) => board.ticketPrefix === "NUR")).toBe(true);
     expect(await fixtures.board.count({ where: { spaceId } })).toBe(1);
   });
   it("returns user and bot display names with comments", async () => {
