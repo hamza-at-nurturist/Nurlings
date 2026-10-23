@@ -47,17 +47,24 @@ jobs:
         shell: bash
         run: |
           result="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}/jobs?per_page=100" \
-            --jq '[.jobs[] | select(.name == "Web E2E / Web E2E") | .conclusion] | unique | if length == 1 then .[0] else error("expected exactly one Playwright job") end')"
+            --jq '[.jobs[] | select(.name == "Web E2E / Web E2E") | .conclusion] | unique | if length == 0 then "none" elif length == 1 then .[0] else error("expected at most one Playwright job") end')"
           case "$result" in
             success|failure) ;;
             timed_out) ;;
+            none|skipped)
+              # Pull requests that touch no end-to-end path skip Web E2E, so there is nothing to publish.
+              echo "::notice::Web E2E did not run for this change, so there is no Playwright report to publish."
+              echo "ran=false" >> "$GITHUB_OUTPUT"
+              exit 0
+              ;;
             *) echo "Unexpected Playwright job conclusion: $result" >&2; exit 1 ;;
           esac
+          echo "ran=true" >> "$GITHUB_OUTPUT"
           echo "job_result=$result" >> "$GITHUB_OUTPUT"
           if [[ "$result" == "timed_out" ]]; then result="failure"; fi
           echo "result=$result" >> "$GITHUB_OUTPUT"
       - name: Resolve pull request
-        if: github.event.workflow_run.event == 'pull_request'
+        if: steps.playwright.outputs.ran == 'true' && github.event.workflow_run.event == 'pull_request'
         id: pull_request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -76,6 +83,7 @@ jobs:
           fi
           echo "number=$number" >> "$GITHUB_OUTPUT"
       - name: Check for Playwright artifact
+        if: steps.playwright.outputs.ran == 'true'
         id: artifact
         env:
           ARTIFACT_NAME: playwright-artifacts-${{ github.event.workflow_run.id }}-${{ github.event.workflow_run.run_attempt }}
@@ -113,6 +121,7 @@ jobs:
             "$RUNNER_TEMP/playwright-artifacts.zip" "$RUNNER_TEMP/playwright-artifacts"
       - name: Check screenshot gallery storage
         id: storage
+        if: steps.playwright.outputs.ran == 'true'
         env:
           S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}

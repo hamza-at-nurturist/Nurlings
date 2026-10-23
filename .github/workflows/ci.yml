@@ -7,8 +7,11 @@ on:
 permissions:
   contents: read
 
+# A pull request has one group so a new push replaces its older run. Every other run gets its own
+# group per commit: a group holds one waiting run, so a shared group for main would cancel the
+# waiting run of a middle commit when a third merge lands.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
