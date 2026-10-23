@@ -186,3 +186,23 @@ Then **Redeploy** in Coolify to start everything again. Copy backups off the ser
 | `Blocked request. This host is not allowed` on the web page | The `web` domain does not match the URL you are using. Fix the domain and redeploy. |
 | `worker` shows unhealthy right after a deploy | It reports healthy after about two minutes; look at its logs if it does not. |
 | Sign-in loops or redirects to `localhost` | `SERVICE_URL_WEB` is empty. Set the `web` domain and redeploy. |
+
+## 10. The test server
+
+`nurlings-test` is the one server that runs `edge`: every merge to `main` publishes new images and
+asks Coolify to redeploy it. Client servers always run a release tag (section 7), never `edge`.
+
+One-time setup:
+
+1. On `nurlings-test`, set `NURLINGS_VERSION` to `edge` and redeploy once.
+2. In Coolify, open the resource's **Webhooks** page and copy the **Deploy Webhook** address. It
+   ends in `/api/v1/deploy?uuid=<resource-uuid>&force=false`.
+3. Create an API token under **Keys & Tokens → API tokens** with deploy permission. If the API is
+   off, turn it on under **Settings → Advanced**.
+4. In the GitHub repository, add two Actions secrets: `COOLIFY_TEST_DEPLOY_WEBHOOK` (the address)
+   and `COOLIFY_TEST_DEPLOY_TOKEN` (the token). Without both, the workflow skips the redeploy and
+   says so.
+
+Check it after the first merge: the server's health endpoint reports the commit it runs, and it
+should match the merge commit. If it still shows the previous commit, Coolify did not pull the
+moved `edge` image; set the resource's image pull policy to always pull and redeploy.

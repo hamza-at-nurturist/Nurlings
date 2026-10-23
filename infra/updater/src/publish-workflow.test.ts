@@ -128,3 +128,62 @@ describe("nurlings image publish workflow", () => {
     }
   });
 });
+
+describe("nurlings image publish workflow: tags and the test server", () => {
+  interface Step {
+    name?: string;
+    id?: string;
+    if?: string;
+    run?: string;
+    uses?: string;
+    env?: Record<string, string>;
+  }
+  const jobs = (
+    parse(nurlingsText) as {
+      jobs: Record<
+        string,
+        {
+          needs?: string;
+          if?: string;
+          permissions?: Record<string, string>;
+          steps: Step[];
+          concurrency?: { "cancel-in-progress": boolean };
+        }
+      >;
+    }
+  ).jobs;
+  const steps = jobs.publish?.steps ?? [];
+
+  it("retags the commit's image for version tags and builds only when it did not", () => {
+    const retag = steps.find((step) => step.id === "retag");
+    expect(retag?.if).toBe("startsWith(github.ref, 'refs/tags/v')");
+    expect(retag?.run).toContain("scripts/retag-commit-image.sh");
+    expect(retag?.run).toContain("grep -v ':sha-'");
+    const build = steps.find((step) => step.uses?.startsWith("docker/build-push-action@"));
+    expect(build?.if).toBe("steps.retag.outputs.retagged != 'true'");
+    expect(steps.indexOf(retag as Step)).toBeLessThan(steps.indexOf(build as Step));
+  });
+
+  it("redeploys the test server only after every image is published from main", () => {
+    const deploy = jobs["deploy-test"];
+    expect(deploy?.needs).toBe("publish");
+    expect(deploy?.if).toBe("github.event_name == 'push' && github.ref == 'refs/heads/main'");
+    expect(deploy?.permissions).toEqual({});
+  });
+
+  it("reads the webhook and token from secrets through the environment only", () => {
+    const step = jobs["deploy-test"]?.steps[0] as Step;
+    expect(step.env).toEqual({
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions syntax, not a template literal
+      WEBHOOK: "${{ secrets.COOLIFY_TEST_DEPLOY_WEBHOOK }}",
+      // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub Actions syntax, not a template literal
+      TOKEN: "${{ secrets.COOLIFY_TEST_DEPLOY_TOKEN }}",
+    });
+    expect(step.run).not.toContain("secrets.");
+    expect(step.run).toContain('-z "$WEBHOOK"');
+    expect(step.run).toContain("exit 0");
+    // Only the status code is printed, so the address cannot reach the log.
+    expect(step.run).toContain("2> /dev/null");
+    expect(step.run).not.toMatch(/echo[^\n]*\$WEBHOOK/);
+  });
+});

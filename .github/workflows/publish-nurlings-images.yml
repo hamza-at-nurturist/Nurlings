@@ -1,8 +1,10 @@
 name: publish-nurlings-images
 
 # Publishes the Nurlings server images (amd64 only) to ghcr.io/<org>/nurlings/<image>. Every
-# segment of an image reference is lowercase. Main publishes `edge`; `v*` tags publish semver tags
-# (and `latest` for stable ones); a manual run from any ref publishes the `sha-<commit>` tag.
+# segment of an image reference is lowercase. Main publishes `edge` and then redeploys the test
+# server; `v*` tags retag the commit's existing `sha-<commit>` images as semver tags (and `latest`
+# for stable ones) and only build when that image is missing; a manual run from any ref publishes
+# the `sha-<commit>` tag.
 # The upstream publish-server-image.yml only runs in elie222/rakazo.
 on:
   push:
@@ -69,7 +71,23 @@ jobs:
             type=raw,value=edge,enable=${{ github.ref == 'refs/heads/main' }}
             # Stable releases only: a hyphen marks a prerelease (v1.0.0-rc.1) that must not move latest.
             type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-') }}
+      - name: Retag the commit's image
+        id: retag
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          IMAGE: ${{ steps.namespace.outputs.image }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          mapfile -t tags < <(grep -v ':sha-' <<< "$TAGS")
+          status=0
+          bash scripts/retag-commit-image.sh "$IMAGE" "$GITHUB_SHA" "${tags[@]}" || status=$?
+          case "$status" in
+            0) echo "retagged=true" >> "$GITHUB_OUTPUT" ;;
+            10) echo "retagged=false" >> "$GITHUB_OUTPUT" ;;
+            *) exit "$status" ;;
+          esac
       - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        if: steps.retag.outputs.retagged != 'true'
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
@@ -83,3 +101,35 @@ jobs:
           cache-to: type=gha,mode=max,scope=nurlings-${{ matrix.name }}
           provenance: false
           sbom: false
+
+  # Runs only after all three images are published from main. The test server runs `edge`.
+  deploy-test:
+    name: Redeploy the test server
+    needs: publish
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    concurrency:
+      group: deploy-nurlings-test
+      cancel-in-progress: false
+    steps:
+      - name: Ask Coolify to redeploy nurlings-test
+        env:
+          WEBHOOK: ${{ secrets.COOLIFY_TEST_DEPLOY_WEBHOOK }}
+          TOKEN: ${{ secrets.COOLIFY_TEST_DEPLOY_TOKEN }}
+        run: |
+          if [ -z "$WEBHOOK" ] || [ -z "$TOKEN" ]; then
+            echo "::notice::COOLIFY_TEST_DEPLOY_WEBHOOK or COOLIFY_TEST_DEPLOY_TOKEN is not set; the test server was not redeployed."
+            exit 0
+          fi
+          # Only the status code is printed: the address and token never reach the log.
+          code=$(curl --silent --output /dev/null --max-time 30 --write-out '%{http_code}' \
+            --header "Authorization: Bearer $TOKEN" "$WEBHOOK" 2> /dev/null || true)
+          case "$code" in
+            2??) echo "Requested a redeploy of the test server." ;;
+            *)
+              echo "::error::Coolify did not accept the redeploy request (HTTP status: ${code:-none})."
+              exit 1
+              ;;
+          esac
