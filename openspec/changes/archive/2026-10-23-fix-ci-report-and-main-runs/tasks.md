@@ -20,7 +20,7 @@
 
 - [x] 4.1 `openspec validate fix-ci-report-and-main-runs --strict`, lint, and the workflow-reading
   tests pass.
-- [ ] 4.2 After merge, confirm the next docs-only pull request's report run ends green with the
+- [x] 4.2 After merge, confirm the next docs-only pull request's report run ends green with the
   notice, and that three quick merges to `main` leave no cancelled `ci` run. Verify: the Actions
   run list.
-- [ ] 4.3 Archive the change.
+- [x] 4.3 Archive the change.
