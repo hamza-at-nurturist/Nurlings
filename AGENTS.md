@@ -1,5 +1,31 @@
 # AGENTS.md
 
+## OpenSpec pipeline
+
+- Every feature, bug fix or behaviour change starts with an OpenSpec change: proposal + tasks always, spec delta when behaviour changes, design when there are real decisions.
+- Run `openspec validate <change> --strict` and get the maintainer's approval on the proposal before writing code.
+- Implement by working through `tasks.md`, ticking tasks as you go.
+- Archive the change after the PR merges.
+- Small bug fixes still get a change, but proposal + tasks is enough.
+- Exempt: docs-only, CI-only, dependency bumps and typo fixes. Say so in the PR description.
+
+## Branch naming
+
+- Never commit on the session's auto-generated `claude/*` branch.
+- Before the first commit, create a descriptive branch from up-to-date `main`:
+  - `feature/<name>` for new features
+  - `fix/<name>` for bug fixes
+  - `chore/<name>` for maintenance, CI, docs
+  - `brand/<name>` for branding and assets
+- Name it after the OpenSpec change (e.g. change `the-nest-dashboard` → `feature/the-nest-dashboard`).
+- PR titles describe the change in plain words.
+
+## Releases
+
+- Never create or push tags. Tell the maintainer when something is ready to release; they cut the tag.
+
+## Repository rules
+
 - This is a public repository: assume all tracked content and diffs are public. Never commit secrets, `.env` files, private URLs, personal/customer data, or real production data; use fake placeholders. Review `git status` and the staged diff before committing, and never force-add ignored files. If private data appears, stop and alert the maintainer.
 - Rakazo is one product across web, Electron desktop, and Expo mobile; Electron hosts the web UI. Put shared behavior, contracts, API logic, and reusable UI in packages. Keep only genuinely native navigation, storage, permissions, and interactions platform-specific. Core workflows must cover every applicable surface or degrade safely for an explicit reason.
 - No hosted vendor is required to run the core product. Keep LLMs, sandboxes, memory, voice, integrations, and future external services optional and behind provider-neutral interfaces. Vendor SDKs, configuration, and translation belong only in adapters and composition roots. New providers must reuse shared contracts and deterministic offline conformance tests.
