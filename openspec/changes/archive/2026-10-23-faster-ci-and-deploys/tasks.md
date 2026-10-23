@@ -10,7 +10,7 @@
 ## 2. Tags reuse images
 
 - [x] 2.1 Add `scripts/retag-commit-image.sh` (retag from `sha-<commit>`, distinct exit status when the source is missing) with a vitest file using a stubbed `docker`. Verify: tests cover retag with several tags, missing source, and a failing `docker`.
-- [ ] 2.2 In `publish-nurlings-images.yml`, retag on `v*` tags and build only on `main`, manual runs, or when the retag reports a missing source. Verify: a workflow test asserts the step conditions; the first tag after merge shows no build step and the version tags on the same digest as `sha-<commit>`.
+- [x] 2.2 In `publish-nurlings-images.yml`, retag on `v*` tags and build only on `main`, manual runs, or when the retag reports a missing source. Verify: a workflow test asserts the step conditions; the first tag after merge shows no build step and the version tags on the same digest as `sha-<commit>`. Skipped at the maintainer's request: the workflow test passed, but the retag on a real release tag has not been run; the maintainer will check it on the next release.
 
 ## 3. Test server redeploy
 
@@ -25,5 +25,5 @@
 ## 5. Review and measure
 
 - [x] 5.1 `openspec validate faster-ci-and-deploys --strict`, `pnpm lint` and the updater tests pass. Verify: commands succeed.
-- [ ] 5.2 After merge, record merge-to-live and tag-to-release times from the Actions timestamps and the `revision` the `api` container reports. Verify: numbers reported to the maintainer.
-- [ ] 5.3 Open the PR from `chore/faster-ci-and-deploys`, merge when green, then archive in its own PR. Verify: change under `openspec/changes/archive/`, specs updated.
+- [x] 5.2 After merge, record merge-to-live and tag-to-release times from the Actions timestamps and the `revision` the `api` container reports. Verify: numbers reported to the maintainer. Recorded for the merge to `main`: images published about 2m14 after the merge, redeploy requested about 2m20 after it, and the test server reported the merge commit. Tag-to-release time not measured: skipped at the maintainer's request until the next release.
+- [x] 5.3 Open the PR from `chore/faster-ci-and-deploys`, merge when green, then archive in its own PR. Verify: change under `openspec/changes/archive/`, specs updated.
