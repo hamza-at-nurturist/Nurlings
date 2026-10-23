@@ -112,6 +112,7 @@ Only `NURLINGS_VERSION` is mandatory. Everything else works empty.
 | `SIGNUP_ALLOWLIST` | optional | no | Comma-separated addresses allowed to register. |
 | `MAX_UPLOAD_SIZE_MB` | optional | no | Per-file upload limit, default `10`. |
 | `CONTENT_ENCRYPTION` | optional | no | `on` (default) or `off`. |
+| `TICKET_BOARD_ENABLED` | optional | no | `false` by default. Set it to `true` to turn on the ticket board. |
 | `RAKAZO_COMPUTER_MEMORY` | optional | no | RAM limit per bot computer, default `2g`. |
 | `RAKAZO_COMPUTER_CPUS` | optional | no | CPU limit per bot computer, default `2`. |
 | `SANDBOX_COMPUTER_DNS` | optional | no | DNS servers for bot computers, default `1.1.1.1,1.0.0.1`. |
