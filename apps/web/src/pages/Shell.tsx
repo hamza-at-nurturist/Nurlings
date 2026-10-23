@@ -3312,11 +3312,6 @@ function SpaceShell() {
                 }
               : undefined
           }
-          onNest={() => {
-            setMenuOpen(false);
-            setMobileSidebarOpen(false);
-            navigate("/app/nest");
-          }}
           onArtifacts={() => {
             setMenuOpen(false);
             setMobileSidebarOpen(false);

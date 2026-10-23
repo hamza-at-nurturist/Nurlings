@@ -293,7 +293,6 @@ import {
   serializeSpaceMemoryConfig,
   updateMemoryProviderDefaultScope,
 } from "./memory-provider-config.js";
-import { buildNestSnapshot } from "./nest.js";
 import {
   chooseFocus,
   dismissFocus,
@@ -6715,11 +6714,6 @@ export function createRouter(deps: RouterDeps) {
     },
     links: {
       favicon: authed.links.favicon.handler(async ({ input }) => favicons.favicon(input.origin)),
-    },
-    nest: {
-      snapshot: authed.nest.snapshot.handler(async ({ context }) =>
-        buildNestSnapshot(deps.prisma, context.actor),
-      ),
     },
     runs: {
       list: authed.runs.list.handler(async ({ context, input }) => ({

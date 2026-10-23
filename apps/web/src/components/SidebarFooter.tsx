@@ -11,7 +11,6 @@ import {
 import {
   BookOpen,
   Download,
-  Egg,
   FolderOpen,
   Gauge,
   LogOut,
@@ -37,7 +36,6 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   onIntegrations: () => void;
   onBoard?: () => void;
-  onNest?: () => void;
   onArtifacts: () => void;
   onSettings: () => void;
   onUsage: () => void;
@@ -62,7 +60,6 @@ export function SidebarFooter({
   onOpenChange,
   onIntegrations,
   onBoard,
-  onNest,
   onArtifacts,
   onSettings,
   onUsage,
@@ -183,16 +180,6 @@ export function SidebarFooter({
               >
                 <SquareKanban className="text-muted-foreground" strokeWidth={1.75} />
                 <Trans>Board</Trans>
-              </Button>
-            ) : null}
-            {onNest ? (
-              <Button
-                variant="ghost"
-                className="h-9 w-full justify-start gap-2.5 font-normal"
-                onClick={onNest}
-              >
-                <Egg className="text-muted-foreground" strokeWidth={1.75} />
-                <Trans>The Nest</Trans>
               </Button>
             ) : null}
             <Button

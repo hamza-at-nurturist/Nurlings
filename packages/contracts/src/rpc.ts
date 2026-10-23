@@ -108,7 +108,6 @@ import {
   IntegrationProviderConfigSchema,
   IntegrationSetupStateSchema,
 } from "./integration-settings.js";
-import { NestSnapshotSchema } from "./nest.js";
 import { MessageReactionSchema } from "./reactions.js";
 import { RoutineWatchSchema } from "./routine-watch.js";
 import { RoutineHistorySchema, RoutineRunCursorSchema, RunsListOutputSchema } from "./runs.js";
@@ -996,9 +995,6 @@ export const appContract = {
       // The longest origin: a scheme, a 253-character host name and a port.
       .input(z.object({ origin: z.string().max("https://".length + 253 + ":65535".length) }))
       .output(z.object({ icon: z.string().nullable(), retry: z.boolean().optional() })),
-  },
-  nest: {
-    snapshot: oc.output(NestSnapshotSchema),
   },
   runs: {
     list: oc.input(z.object({ filter: z.enum(["active", "recent"]) })).output(RunsListOutputSchema),
