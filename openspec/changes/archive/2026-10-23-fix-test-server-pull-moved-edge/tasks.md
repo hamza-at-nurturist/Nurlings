@@ -18,7 +18,7 @@
 
 ## 3. After merge
 
-- [ ] 3.1 Maintainer pastes the updated compose into the `nurlings-test` resource, sets
+- [x] 3.1 Maintainer pastes the updated compose into the `nurlings-test` resource, sets
   `NURLINGS_PULL_POLICY=always` there, and redeploys. Verify: the runbook's revision check prints
   the latest `main` commit.
-- [ ] 3.2 Archive the change.
+- [x] 3.2 Archive the change.
