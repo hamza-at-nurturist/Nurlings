@@ -13,12 +13,14 @@ concurrency:
 
 jobs:
   # Heavy jobs wait for this and are skipped when a pull request only changes documentation.
-  # Lint, Typecheck and Unit tests always run. Pushes to main always run everything.
+  # Lint, Typecheck and Unit tests always run. Pushes to main always run everything. On pull requests
+  # Web E2E also needs the paths it exercises to change, and Native computer does not run.
   changes:
     name: Changed paths
     runs-on: ubuntu-latest
     outputs:
       code: ${{ steps.paths.outputs.code }}
+      e2e: ${{ steps.e2e.outputs.e2e }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -33,6 +35,16 @@ jobs:
           else
             # The checkout is the merge of the pull request into its base: the first parent is the base.
             git diff --name-only HEAD^1 HEAD | bash scripts/ci-docs-only.sh >> "$GITHUB_OUTPUT"
+          fi
+      # Web E2E: a pull request runs it only when it changes something the job exercises.
+      - id: e2e
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" != pull_request ]; then
+            echo "e2e=true" >> "$GITHUB_OUTPUT"
+          else
+            git diff --name-only HEAD^1 HEAD | bash scripts/ci-e2e-paths.sh >> "$GITHUB_OUTPUT"
           fi
 
   lint:
@@ -132,7 +144,7 @@ jobs:
   native-computer:
     name: Native computer (${{ matrix.os }})
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: github.event_name == 'push' && needs.changes.outputs.code == 'true'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
@@ -180,7 +192,7 @@ jobs:
   test-e2e:
     name: Web E2E
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.code == 'true' && needs.changes.outputs.e2e == 'true'
     uses: ./.github/workflows/playwright.yml
     with:
       upload_artifacts: true

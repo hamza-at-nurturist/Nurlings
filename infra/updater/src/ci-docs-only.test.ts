@@ -56,14 +56,25 @@ const workflow = parse(readFileSync(path.join(repoRoot, ".github/workflows/ci.ym
 describe("the ci workflow's docs-only skipping", () => {
   const needsChanges = (job: Job) => [job.needs ?? []].flat().includes("changes");
 
-  it.each(["build", "native-computer", "test-integration", "test-e2e"])(
-    "skips %s when only documentation changed",
-    (name) => {
-      const job = workflow.jobs[name] as Job;
-      expect(needsChanges(job)).toBe(true);
-      expect(job.if).toBe("needs.changes.outputs.code == 'true'");
-    },
-  );
+  it.each(["build", "test-integration"])("skips %s when only documentation changed", (name) => {
+    const job = workflow.jobs[name] as Job;
+    expect(needsChanges(job)).toBe(true);
+    expect(job.if).toBe("needs.changes.outputs.code == 'true'");
+  });
+
+  it("skips Web E2E on a pull request unless it changes something the job exercises", () => {
+    const job = workflow.jobs["test-e2e"] as Job;
+    expect(needsChanges(job)).toBe(true);
+    expect(job.if).toBe(
+      "needs.changes.outputs.code == 'true' && needs.changes.outputs.e2e == 'true'",
+    );
+  });
+
+  it("runs the native computer jobs on pushes only", () => {
+    const job = workflow.jobs["native-computer"] as Job;
+    expect(needsChanges(job)).toBe(true);
+    expect(job.if).toBe("github.event_name == 'push' && needs.changes.outputs.code == 'true'");
+  });
 
   it.each(["lint", "check", "test"])("always runs %s", (name) => {
     const job = workflow.jobs[name] as Job;
@@ -75,5 +86,6 @@ describe("the ci workflow's docs-only skipping", () => {
     const source = readFileSync(path.join(repoRoot, ".github/workflows/ci.yml"), "utf8");
     expect(source).toContain('if [ "$EVENT_NAME" != pull_request ]');
     expect(source).toMatch(/echo "code=true" >> "\$GITHUB_OUTPUT"/);
+    expect(source).toMatch(/echo "e2e=true" >> "\$GITHUB_OUTPUT"/);
   });
 });
