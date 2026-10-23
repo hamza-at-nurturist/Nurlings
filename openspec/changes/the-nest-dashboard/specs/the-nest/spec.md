@@ -19,15 +19,14 @@ current task and its next scheduled routine.
   next check is not shown as a run
 
 ### Requirement: Mood is derived by the server from existing state
-The server SHALL return one mood per Nurling: needs approval when its latest run is
-`waiting_input` or `waiting_takeover`; otherwise error when its latest run failed; otherwise
-working when a run is `queued`, `leased` or `running`; otherwise sleeping when it has no armed
-routine and no run in the last 24 hours; otherwise idle. Clients SHALL render the returned mood
-and SHALL NOT derive it.
+The server SHALL return one mood per Nurling: needs you when its latest run is `waiting_input` or
+`waiting_takeover`; otherwise error when its latest run failed; otherwise working when a run is
+`queued`, `leased` or `running`; otherwise sleeping when it has no armed routine and no run in
+the last 24 hours; otherwise idle. Clients SHALL render the returned mood and SHALL NOT derive it.
 
 #### Scenario: Waiting beats failure
 - **WHEN** a Nurling is waiting on the user and also has an earlier failed run
-- **THEN** its mood is needs approval
+- **THEN** its mood is needs you
 
 #### Scenario: Quiet Nurling
 - **WHEN** a Nurling has no armed routine and no run in 24 hours
@@ -47,41 +46,34 @@ accessibly, and SHALL NOT animate under `prefers-reduced-motion`.
 - **THEN** the badge renders each mood without animation and keeps its accessible name
 
 ### Requirement: Needs you tray
-The Nest SHALL show, above the cards, every pending ask and approval across the space's
-Nurlings, and SHALL render nothing when there are none. Secret requests SHALL show who is asking
-but not the request's content, and SHALL be answered only in the thread.
+The Nest SHALL show, above the cards, every pending ask across the space's Nurlings, SHALL render
+nothing when there are none, and SHALL only open the Nurling's thread; it SHALL NOT answer. Secret
+requests SHALL show who is asking but not the request's content.
 
-#### Scenario: Pending approval
-- **WHEN** a Nurling's run waits on an approval
-- **THEN** the tray lists it with the Nurling and the question, and the item opens the thread
+#### Scenario: Pending ask
+- **WHEN** a Nurling's run waits on an ask
+- **THEN** the tray lists it with the Nurling and the question, and its Open button goes to the
+  thread
 
 #### Scenario: Secret request
 - **WHEN** a Nurling asks for a password
-- **THEN** the tray item does not include the request's text and offers no inline answer
+- **THEN** the tray item does not include the request's text
 
-#### Scenario: Answer in place
-- **WHEN** an ask carries explicit actions and the user chooses one in the tray
-- **THEN** the answer is sent through the existing answer endpoint and the item leaves the tray
+#### Scenario: Group thread
+- **WHEN** the ask was made in a group thread
+- **THEN** Open goes to the group's thread
 
-### Requirement: Routines timeline for today
-The Nest SHALL show, for the user's local day, the routine runs that already happened with their
-outcome and the remaining scheduled occurrences, across all Nurlings.
+### Requirement: Sections are independent
+The snapshot SHALL be an object of named sections and the page SHALL render each section from its
+own component, so adding a section does not change the existing ones.
 
-#### Scenario: Ran and next
-- **WHEN** a routine ran at 09:00 and is scheduled again at 14:00
-- **THEN** the timeline shows both, ordered by time, with the first marked with its outcome
+#### Scenario: Unknown section
+- **WHEN** a snapshot carries a key the client does not know
+- **THEN** the known sections still render
 
-### Requirement: Today's stats use existing data only
-Per-Nurling stats SHALL be limited to runs completed, runs failed (when any), routine runs and
-tokens used, for the user's local day.
-
-#### Scenario: Missing token data
-- **WHEN** some usage rows have no token total
-- **THEN** the tokens figure sums the rows that have one and does not error
-
-### Requirement: Live and cheap
+### Requirement: Cheap and visible-only polling
 The Nest SHALL refresh from a single snapshot request about every three seconds while the page is
-visible, and SHALL NOT poll while hidden.
+visible, and SHALL NOT request while the tab is hidden.
 
 #### Scenario: Hidden tab
 - **WHEN** the browser tab is hidden

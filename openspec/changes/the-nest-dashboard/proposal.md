@@ -9,80 +9,84 @@ user pulled to the top.
 
 ## What Changes
 
-New web screen **The Nest** (the desktop app shows it too, since Electron hosts the web UI):
+New web screen **The Nest** at `/app/nest` (the desktop app shows it too, since Electron hosts
+the web UI). Scope is deliberately small:
 
-1. **Nurling cards.** One card per active (non-archived) Nurling in the current space, using its
-   existing avatar as is (no new avatar assets, no custom avatars). Next to the avatar sits a
-   small **eyes badge**, drawn from the two slanted eyes of the logo, with one of five moods:
-   working, idle, sleeping, needs approval, error. Each mood has a subtle animation (off under
-   `prefers-reduced-motion`). The badge only reports status; the avatar stays the identity.
-2. **Per card:** current task (the active run's prompt, one line), next scheduled routine
-   (name + time), and a short "today" line (phase 2).
-3. **Needs you tray** at the top: pending asks and approvals across all Nurlings. Phase 1 lists
-   them and opens the thread; phase 2 answers them in place.
-4. **Routines timeline for today** across all Nurlings: what ran, what is next (phase 3).
+1. **Nurling cards.** One card per non-archived Nurling in the current space: its existing avatar
+   as is, a small **eyes badge** drawn from the two slanted eyes of the logo with one of five
+   moods (working, idle, sleeping, needs you, error) and a subtle animation per mood, the current
+   task, and the next scheduled routine. The badge only reports status; the avatar stays the
+   identity.
+2. **Needs you tray** above the cards: pending asks across all Nurlings, read-only. Each item
+   shows the Nurling and opens its thread. Nothing is answered from the tray.
 
-Backend: one new read endpoint, `nest.snapshot`, that returns everything the screen needs in a
-single request, plus a pure mood function in `@rakazo/core`. No database migration, no new
-tables, no change to how runs, routines or approvals work. Approvals are answered with the
-existing `threads.answer`.
+Backend: one new read endpoint, `nest.snapshot`, returning `{ nurlings, needsYou }`, and one pure
+mood function in `@rakazo/core`. No migration, no new tables, no new packages or dependencies, no
+new build targets or CI jobs. Polling reuses the Shell's pattern and runs only while the Nest
+page is visible.
 
-### Phases
+### Built to extend, not extended yet
 
-| Phase | Ships | Why this cut |
-|---|---|---|
-| 1 | Route + menu entry, cards, eyes badge, current task, next routine, Needs you tray (read-only, opens the thread), `nest.snapshot`, mood function | Smallest slice that is useful and deploys to the test server on merge |
-| 2 | Inline answer for asks that carry explicit actions; "today" stats | Adds the only new write path (reusing `threads.answer`) and the stats queries |
-| 3 | Routines timeline for today; optional `nest.subscribe` live signal if polling proves too slow or costly | Needs cron expansion across routines and is the heaviest query |
+- The snapshot is an object of named sections. A new section is a new key; existing keys never
+  change shape.
+- The page is a list of separate section components (`NeedsYouTray`, `NurlingGrid`). A new section
+  is a new component added to that list.
+- The mood logic is one tested pure function.
 
-Mobile is a later change (see design.md, "Mobile").
+### Future ideas (not commitments, nothing for them is built)
+
+These stay here only so the foundation above is chosen with them in mind:
+
+- Answer simple asks in place from the tray, reusing the existing `threads.answer`.
+- A "today" stats line per Nurling (runs done and failed, routine runs, tokens).
+- A routines timeline for today across all Nurlings.
+- A live signal (`nest.subscribe`) if polling proves too chatty.
+- A mobile screen reading the same snapshot and mood.
+- Promoting the Nest to a sidebar button or the default home.
 
 ### Where it lives
 
-A separate entry in the existing menu (next to Artifacts and Board) at `/app/nest`, **not** the
-new default home. See design.md, "Placement", for the reasoning.
+A separate entry in the existing account menu (next to Artifacts and Board) at `/app/nest`, not
+the default home. See design.md, "Placement".
 
 ### User-facing copy
 
-Every visible word, with why it cannot be removed or revealed later:
+Every visible word, with why it stays:
 
 - Menu entry and page title **"The Nest"**: the feature's name; needed to find it.
-- Tray heading **"Needs you"**: the one label that tells the tray's purpose; the tray renders
-  nothing when empty, so the text is only shown when relevant.
-- Mood names **Working / Idle / Sleeping / Needs approval / Error**: accessible names and tooltip
-  for the eyes badge only. Not rendered as text on the card.
-- Next routine **"Next: {routine name} · {time}"**: the routine name and time are the content;
-  "Next:" disambiguates from the current task line.
-- Tray item action labels come from the ask's own actions (phase 2); no new copy.
+- Tray heading **"Needs you"**: the one label that explains the tray; the tray renders nothing
+  when empty, so the text appears only when relevant.
+- Mood names **Working / Idle / Sleeping / Needs you / Error**: accessible name and tooltip of the
+  eyes badge only, not text on the card.
+- **"Next: {routine name} · {time}"**: the name and time are the content; "Next:" tells it apart
+  from the current task line.
+- Tray item button **"Open"**: the only action. A name-only link would be ambiguous in a row that
+  also shows the question.
 
-Bot names use the brand config's bot noun (`@nurlings/brand`), never a hardcoded product word.
+Bot nouns come from the brand config, never a hardcoded product word.
 
 ### Upstream merge safety
 
-New files wherever possible. Edits to existing upstream files, each kept to a few lines:
+New files wherever possible. Edits to existing upstream files, each a few lines:
 
 | File | Edit |
 |---|---|
-| `packages/contracts/src/rpc.ts` | add a `nest: { snapshot }` namespace and its import |
+| `packages/contracts/src/rpc.ts` | add `nest: { snapshot }` and its import |
 | `packages/contracts/src/index.ts` | one `export * from "./nest.js"` line |
 | `packages/core/src/index.ts` | one export line for the mood function |
-| `apps/api/src/router.ts` | one import and a `nest: { snapshot }` handler that delegates to `apps/api/src/nest.ts` |
+| `apps/api/src/router.ts` | one import and a `nest: { snapshot }` handler delegating to `apps/api/src/nest.ts` |
 | `apps/web/src/App.tsx` | one lazy import and one `<Route path="/app/nest">` |
-| `apps/web/src/pages/Shell.tsx` | pass an `onNest` handler to the account menu (same shape as `onBoard`) |
-| the menu component that renders `onBoard` | one extra item, `onNest` |
+| `apps/web/src/pages/Shell.tsx` | pass `onNest` to the account menu (same shape as `onBoard`) |
+| `apps/web/src/components/SidebarFooter.tsx` | one extra menu item, `onNest` |
 | `apps/web/src/locales/*.po` | regenerated catalog entries for the new strings |
 
 Everything else is new: `packages/contracts/src/nest.ts`, `packages/core/src/nest-mood.ts`,
-`apps/api/src/nest.ts`, `apps/web/src/pages/Nest.tsx`, `apps/web/src/components/nest/*`, tests and
-an E2E spec.
-
-Nothing here contacts Rakazo-owned infrastructure, and nothing is renamed that is internal on
-purpose (`@rakazo/*` packages, identifiers).
+`apps/api/src/nest.ts`, `apps/web/src/pages/Nest.tsx`, `apps/web/src/components/nest/*`, their
+tests and one E2E spec. Nothing contacts Rakazo-owned infrastructure and no internal names change.
 
 ## Impact
 
 - Capability: new `the-nest` spec.
-- Code: as listed above. No Prisma migration, so the side-by-side deploy rule is not affected.
+- No Prisma migration, so the side-by-side deploy rule is unaffected.
 - Security: the snapshot is scoped to the caller's space and user like `runs.list`; secret asks
-  never expose their content (see design.md).
-- Docs-only/CI exemption: not applicable; this is a feature.
+  never expose their content.

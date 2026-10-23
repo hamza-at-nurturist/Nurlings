@@ -821,6 +821,7 @@ msgstr "Avatars"
 
 #: src/pages/Auth.tsx
 #: src/pages/Board.tsx
+#: src/pages/Nest.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/RoutineEditor.tsx
 msgid "Back"
@@ -2344,6 +2345,7 @@ msgstr "Enter an API key before testing."
 msgid "Environment variables"
 msgstr "Environment variables"
 
+#: src/components/nest/EyesBadge.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/sidebar-roster.tsx
 msgid "Error"
@@ -2679,6 +2681,10 @@ msgstr "How to check"
 #: src/pages/shell/computer-release-actions.tsx
 msgid "I’m done"
 msgstr "I’m done"
+
+#: src/components/nest/EyesBadge.tsx
+msgid "Idle"
+msgstr "Idle"
 
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
@@ -3285,6 +3291,8 @@ msgstr "Needs input"
 msgid "Needs takeover"
 msgstr "Needs takeover"
 
+#: src/components/nest/EyesBadge.tsx
+#: src/components/nest/NeedsYouTray.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/computer-overlay.tsx
 msgid "Needs you"
@@ -3327,6 +3335,10 @@ msgstr "New ticket"
 #: src/pages/SettingsOverlay.tsx
 msgid "Next settings sections"
 msgstr "Next settings sections"
+
+#: src/components/nest/NurlingGrid.tsx
+msgid "Next: {routine} · {time}"
+msgstr "Next: {routine} · {time}"
 
 #: src/pages/MessagingSettingsOverlay.tsx
 msgid "No agent connections yet."
@@ -3534,6 +3546,7 @@ msgid "Only empty spaces can be deleted. Delete its bots and groups first."
 msgstr "Only empty spaces can be deleted. Delete its bots and groups first."
 
 #: src/components/markdown-link-prompt.tsx
+#: src/components/nest/NeedsYouTray.tsx
 #: src/pages/ScratchpadSection.tsx
 #: src/pages/shell/computer-panel.tsx
 #: src/pages/shell/message-view.tsx
@@ -4588,6 +4601,10 @@ msgstr "Slack message"
 msgid "Slack not enabled"
 msgstr "Slack not enabled"
 
+#: src/components/nest/EyesBadge.tsx
+msgid "Sleeping"
+msgstr "Sleeping"
+
 #: src/components/composer/HoldToTalk.tsx
 msgid "Slide up to lock"
 msgstr "Slide up to lock"
@@ -4814,6 +4831,11 @@ msgstr "The connection timed out."
 #: src/lib/run-error.ts
 msgid "The model provider returned an error."
 msgstr "The model provider returned an error."
+
+#: src/components/SidebarFooter.tsx
+#: src/pages/Nest.tsx
+msgid "The Nest"
+msgstr "The Nest"
 
 #: src/lib/model-connection-preflight.ts
 msgid "The provider is rate-limiting requests."
@@ -5340,6 +5362,10 @@ msgstr "Where should bots run?"
 #: src/lib/ticket-status.ts
 msgid "Won't do"
 msgstr "Won't do"
+
+#: src/components/nest/EyesBadge.tsx
+msgid "Working"
+msgstr "Working"
 
 #: src/lib/roster-status.ts
 #: src/pages/Auth.tsx

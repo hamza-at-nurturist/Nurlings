@@ -1,53 +1,44 @@
 # Tasks
 
-> Nothing is committed before the maintainer approves this proposal (task 1.1).
+> Scope: phase 1 only (cards, eyes badge, read-only Needs you tray). Anything under "Future ideas"
+> in the proposal is out of scope and gets no code, fields or endpoints.
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal and answers the open questions (sleeping definition,
-  mood label, menu placement). Verify: explicit approval in the session.
+- [x] 1.1 Maintainer approves the proposal; sleeping = idle, no armed routine, no run in 24 h;
+  mood named "Needs you"; menu entry at `/app/nest`; phase 1 only. Verify: explicit approval in
+  the session.
 
-## Phase 1: cards, eyes badge, tray (read-only)
+## 2. Backend and shared logic
 
-- [ ] 2.1 Add `packages/contracts/src/nest.ts` (snapshot schema, mood enum) and export it; add
-  `nest.snapshot` to `rpc.ts`. Verify: contract test parses a full payload and an older one with
-  missing optional fields.
-- [ ] 2.2 Add `packages/core/src/nest-mood.ts` and export it. Verify: table-driven unit test for
-  every status, precedence and the sleeping threshold.
-- [ ] 2.3 Add `apps/api/src/nest.ts` (bots with latest run, current task, next routine, waiting
-  asks with secret redaction) and the delegating handler in `router.ts`. Verify: unit tests with
-  the repo's prisma test doubles for scoping to the caller's space, archived bots excluded,
-  `watch` routines ignored for "next", secret asks redacted; a `*.postgres.test.ts` for the
-  queries.
-- [ ] 2.4 Add the eyes badge component from the brand mark geometry, with the five moods and
-  reduced-motion handling. Verify: component test for the accessible name per mood and no
-  animation class under reduced motion.
-- [ ] 2.5 Add `Nest.tsx` and `components/nest/*` (grid, card, tray), the lazy route, and the menu
-  entry. Verify: web test opens the page against a mocked snapshot; Lingui extract run.
-- [ ] 2.6 Poll every 3 s while visible with the stale-response guard. Verify: web test with fake
-  timers for hidden tab, focus refresh and out-of-order responses.
-- [ ] 2.7 Add a Playwright spec that opens `/app/nest` with seeded Nurlings in each mood. Verify:
-  CI E2E passes and its screenshot is linked on the PR.
-- [ ] 2.8 Build and brand checks. Verify: `pnpm` lint, typecheck, unit tests and the brand/i18n
-  guards pass; `openspec validate the-nest-dashboard --strict`.
+- [x] 2.1 Add `packages/core/src/nest-mood.ts` (pure function) and export it. Verify: table-driven
+  unit test covering every run status, error, precedence, and the sleeping boundary (with and
+  without an armed routine, just inside and outside 24 h).
+- [x] 2.2 Add `packages/contracts/src/nest.ts` (mood enum, snapshot schema with `nurlings` and
+  `needsYou`), export it, and add `nest.snapshot` to `rpc.ts`. Verify: contract test parses a full
+  payload and rejects an unknown mood.
+- [x] 2.3 Add `apps/api/src/nest.ts` and the delegating handler in `router.ts`. Verify: unit tests
+  with the repo's prisma test doubles for caller scoping, archived bots excluded, current task
+  from the active run, `watch` routines and inactive routines ignored for "next routine", ask
+  kinds, secret asks returned without text. No Postgres test: the queries are plain Prisma reads
+  covered by the stubbed unit tests.
 
-## Phase 2: answer in place, today's stats
+## 3. Web
 
-- [ ] 3.1 Tray actions call `threads.answer` for asks with explicit actions; secret, login and
-  takeover items only open the thread. Verify: web test for answered, failed and already-answered
-  races; no new endpoint.
-- [ ] 3.2 Add `today` stats (done, failed, routine runs, tokens) to the snapshot for the user's
-  local day. Verify: unit tests around midnight in two timezones and null token rows.
+- [x] 3.1 Add the eyes badge component with five moods and reduced-motion handling. Verify:
+  component test for the accessible name per mood and no animation under reduced motion.
+- [x] 3.2 Add `Nest.tsx` with separate `NeedsYouTray` and `NurlingGrid` section components, the
+  lazy route, and the `SidebarFooter` / `Shell` menu entry. Verify: web tests against a mocked
+  snapshot (cards, tray hidden when empty, links open the right thread, group asks); Lingui
+  extract run.
+- [x] 3.3 Poll every 3 s only while visible, skipping a tick while a request is in flight. Verify: web test with
+  fake timers for hidden tab, focus refresh, and no overlapping requests.
+- [ ] 3.4 Add a Playwright spec that opens `/app/nest`, checks the card, the mood badge and the
+  Working state, and follows a card to its thread. Verify: CI web E2E passes and its screenshot
+  is linked on the PR.
 
-## Phase 3: timeline and live signal
+## 4. Checks and wrap-up
 
-- [ ] 4.1 Add the `timeline` to the snapshot (ran, failed, running, next, check) using the cron
-  helpers, capped per routine. Verify: unit tests for multi-cron, one-shot, `watch` and DST days.
-- [ ] 4.2 Render the timeline. Verify: web test and updated E2E screenshot.
-- [ ] 4.3 Only if polling proves too chatty: add `nest.subscribe` modelled on `boards.subscribe`.
-  Verify: contract test and a fanout test that a run change yields one frame.
-
-## 5. Wrap-up
-
-- [ ] 5.1 After merge, archive the change. Verify: `openspec archive` output lists the new
-  `the-nest` capability.
+- [ ] 4.1 Lint, typecheck, unit tests, brand and i18n guards, and
+  `openspec validate the-nest-dashboard --strict` pass locally and in CI.
+- [ ] 4.2 After merge, archive the change. Verify: archive output lists the `the-nest` capability.

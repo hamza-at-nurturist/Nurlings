@@ -16,17 +16,17 @@
 | Mood | Derived from | New backend data? |
 |---|---|---|
 | Working | `status` in `queued`, `leased`, `running` (`WORKING_RUN_STATUSES`) | No |
-| Needs approval | `status` in `waiting_input`, `waiting_takeover` (`WAITING_ON_USER_RUN_STATUSES`) | No (see note) |
+| Needs you | `status` in `waiting_input`, `waiting_takeover` (`WAITING_ON_USER_RUN_STATUSES`) | No (see note) |
 | Error | `runErrorId != null` | No (see note) |
 | Idle | `status = "idle"` and not sleeping | No |
 | **Sleeping** | **no such concept exists** | **Yes, a definition (derived, not stored)** |
 
-Precedence: needs approval, then error, then working, then idle, then sleeping.
+Precedence: needs you, then error, then working, then idle, then sleeping.
 
 Notes:
 
 - `waiting_input` covers every pause for the user (a question, an approval, a secret request,
-  a login card), not only approvals. The badge says "Needs approval" as asked; the tray tells
+  a login card), not only approvals. The mood is called "Needs you" for that reason; the tray tells
   them apart. `waiting_takeover` is a computer takeover request.
 - Error is a latest-run signal. The Nest cannot honour the Shell's per-session dismissal, so a
   failed bot shows Error until its next run starts. This is stated, not hidden.
@@ -48,10 +48,9 @@ computes it and returns `mood` in the snapshot, so web and mobile cannot disagre
 - Existing endpoints are per bot or per routine only: `routines.list({botId})`,
   `routines.history({routineId})`. There is no cross-bot list, so the dashboard would need N+1
   calls. A single server-side read is cleaner. **New endpoint needed.**
-- `core/cron.ts` already has `nextCronDate`, `nextCronDateAcross`, used for "next run". The
-  timeline (phase 3) expands today's remaining occurrences with the same helpers, capped.
+- The card uses the stored `nextRunAt`; no cron expansion is needed.
 - A `watch` routine's `nextRunAt` is the next *check*, not a scheduled run. The card ignores
-  these for "next routine" and the timeline marks them as checks (phase 3).
+  these for "next routine".
 - **Approvals are not a table.** A pending approval is an `ask` block (`status != "answered"`,
   optionally with `approvalEffectId` and `actions`) on a message whose run is `waiting_input`.
   `runs.list({filter: "active"})` returns waiting runs but not the ask. `threads.get` returns
@@ -72,26 +71,9 @@ computes it and returns `mood` in the snapshot, so web and mobile cannot disagre
 - `ActivityList` polls `runs.list`.
 - There is **no space-wide run/approval stream**.
 
-Decision: reuse the Shell's pattern. The Nest polls `nest.snapshot` every 3 s while the tab is
-visible and focused, one request instead of one per Nurling, with the same
-stale-response guard. If that proves too chatty, phase 3 adds `nest.subscribe`, modelled on
-`boards.subscribe` (a transient "changed" frame, client refetches). Not built before it is needed.
-
-### Today's stats: what can honestly be built
-
-"Today" is the user's local day (`me.timezone`, falling back to the browser's). From existing data:
-
-| Stat | Source | Notes |
-|---|---|---|
-| Done | `Run` with status `completed`, `completedAt` today | A run is one handled request; call it "done" |
-| Failed | `Run` with status `failed`, `completedAt` today | Shown only when non-zero |
-| Routine runs | `Run` with `trigger = "routine"`, created today | Includes failed; ties to the timeline |
-| Tokens | `UsageRecord.totalTokens` summed for the bot, `createdAt` today | Nullable per row: sum what exists |
-
-Deliberately left out: messages sent (noisy, not a measure of work), cost (`costUsd` is nullable
-and partly estimated per `costSource`; a wrong total is worse than none, so it can come later if
-the maintainer wants it), anything like "time saved". Phase 2 ships these four, failed only when
-non-zero.
+Decision: reuse the Shell's pattern. The Nest polls `nest.snapshot` every 3 s while the page is
+visible, one request instead of one per Nurling, never overlapping. A push
+signal modelled on `boards.subscribe` is a future idea, not built.
 
 ### Current task
 
@@ -101,109 +83,89 @@ is waiting, the card shows the waiting state instead of a task; when idle it sho
 
 ## API shape
 
-One RPC, `nest.snapshot` (no input; scoped to the caller's space and user):
+One RPC, `nest.snapshot` (no input; scoped to the caller's space and user). The output is an
+object of named sections so a later section is a new key:
 
 ```
 {
-  generatedAt, timezone,
-  bots: [{ id, name, title, color, mood, currentTask?: { runId, status, trigger, text, startedAt },
-           lastRunAt, nextRoutine?: { routineId, name, at },
-           today?: { done, failed, routineRuns, tokens } }],        // today: phase 2
-  needsYou: [{ botId, groupId?, runId, messageId, kind: "approval"|"question"|"secret"|"takeover",
-               text?, detail?, actions?: [{ id, label }], askedAt }],
-  timeline?: [{ botId, routineId, name, at, state: "ran"|"failed"|"running"|"next"|"check",
-                runId? }]                                           // phase 3
+  nurlings: [{ id, name, title, color, mood, updatedAt,
+               currentTask: { runId, status, text } | null,
+               nextRoutine: { routineId, name, at } | null }],
+  needsYou: [{ botId, groupId, runId, messageId, kind, text, askedAt }]
 }
 ```
 
-Types live in the new `packages/contracts/src/nest.ts` (zod), with an older-payload-safe default
-for each optional field, like `runErrorId`. Queries live in `apps/api/src/nest.ts`: four
-indexed reads (bots with their latest run, active routines, waiting runs with their ask message,
-phase 2/3 aggregates), each bounded by the space. Content encryption: ask text goes through the
-same message-block read path `threads.get` uses, so encrypted content is handled identically.
+`kind` is `"question" | "approval" | "secret" | "takeover"`; `text` is null for `secret`. Types
+live in the new `packages/contracts/src/nest.ts` (zod). Queries live in `apps/api/src/nest.ts`: a
+few bounded reads over the caller's space (non-archived bots with their latest run, armed
+routines, runs waiting on the user with their ask message). Ask text goes through the same
+message-block read path `threads.get` uses, so encrypted content is handled identically.
 
 ## UI
-
-Desktop width sketch:
 
 ```
  The Nest
 ┌─ Needs you ───────────────────────────────────────────────────────────┐
-│ (A) Ada ◉◉  "Send the quote to Dana?"                 [ Open ]        │  phase 2: [Approve] [Decline]
-│ (B) Bo  ◉◉  Needs a computer takeover                 [ Open ]        │
+│ (A) Ada  "Send the quote to Dana?"                        [ Open ]    │
+│ (B) Bo   Needs a computer takeover                        [ Open ]    │
 └───────────────────────────────────────────────────────────────────────┘
 
 ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐
 │ (avatar)◉◉        │ │ (avatar)◉◉        │ │ (avatar)◉◉        │
 │ Ada               │ │ Bo                │ │ Cy                │
-│ Drafting Q3 deck… │ │ Needs you         │ │                   │
-│ Next: Inbox · 14:00│ │ Next: Digest · 17:00│ │ Next: none      │
-│ 6 done · 1 failed │ │ 2 done            │ │ 0 done           │  phase 2
+│ Drafting Q3 deck… │ │                   │ │                   │
+│ Next: Inbox · 14:00│ │ Next: Digest · 17:00│ │                 │
 └───────────────────┘ └───────────────────┘ └───────────────────┘
-
- Today                                                            phase 3
- 09:00 ●Inbox (Ada)  ✓   10:30 ●Digest (Bo) ✗   │now│   14:00 ○Inbox (Ada)   17:00 ○Digest (Bo)
 ```
 
-`◉◉` is the eyes badge. The grid collapses to one column on narrow screens. The tray renders
-nothing when empty. Cards open the Nurling's thread (`/app/:botId`). Components are shadcn/ui from
-`packages/ui-web` (Card, Badge, Tooltip) and the existing `BotAvatar`; AI-moment primitives from
-`apps/web/src/components/ai/` are reused for the loading state.
+`◉◉` is the eyes badge. The grid is one column on narrow screens and the tray renders nothing
+when empty. Cards open the Nurling's thread (`/app/:botId`). The page uses `WindowChrome`, the
+shadcn components already in `@rakazo/ui-web` and the existing `BotAvatar`. It follows the
+light/dark theme.
+
+The page is a list of section components rendered in order, each taking the snapshot and
+rendering its own part (or nothing): `NeedsYouTray`, `NurlingGrid`. A future section is a new
+component in that list.
 
 ### Eyes badge
 
-An inline SVG of the two slanted capsule eyes, taken from the brand mark geometry in
-`@nurlings/brand` (no copied path data). Moods change colour, shape and motion, never the shape
-family:
+An inline SVG of the two slanted eyes, taken from the brand mark's orb geometry in
+`@nurlings/brand` (the eye sub-paths of `brand.mark.orb`; no copied path data). Moods change
+colour, shape and motion, never the shape family:
 
 | Mood | Look | Motion (subtle, CSS only) |
 |---|---|---|
-| Working | open eyes, orb gradient from brand config | slow glance left and right |
+| Working | open eyes, orb gradient from the brand config | slow glance left and right |
 | Idle | open eyes, foreground colour | rare blink |
 | Sleeping | eyes closed to thin slits, muted | slow opacity "breath" |
-| Needs approval | wide eyes, `warning` token | small lift, two cycles then still |
+| Needs you | wide eyes, `warning` token | small lift, two cycles then still |
 | Error | eyes tilted down, `destructive` token | one short shake, then still |
 
-Colours come from semantic tokens in `@rakazo/ui-tokens`; only the orb gradient comes from
-`@nurlings/brand` (`colors.orbGradient`), used for the working eyes. No hardcoded hex. Navy
-`#03091F` is the brand's icon/splash colour and is not used as a page background, because the app
-follows the light/dark theme and is monochrome; the Nest follows the theme. Every motion is
-disabled under `prefers-reduced-motion`, and the badge has the mood as its accessible name.
+Colours come from semantic tokens; only the working gradient comes from the brand config. No
+hardcoded hex. Navy `#03091F` is not a page background; the Nest follows the theme. Motion is off
+under `prefers-reduced-motion`, and the badge's accessible name is the mood.
 
 ## Placement
 
-Recommendation: **a separate menu entry at `/app/nest`; do not make it the default home yet.**
-
-- `/app` is owned by `Shell` (about 4,000 lines of upstream code) which picks the first bot or the
-  welcome state. Making the Nest the home means editing that selection logic and the first-run
-  flow, the highest-conflict spot in the repo.
-- A new route plus one menu item is a handful of lines and ships quickly.
-- Users who live in one chat should not lose their landing view before the Nest has proven itself.
-- The entry sits in the same account menu as Artifacts and Board, which is the lowest-conflict
-  place but not very prominent. If the Nest sticks, a follow-up promotes it to a sidebar header
-  button and, behind a preference, to the home screen.
+A separate menu entry at `/app/nest`, not the default home. `/app` belongs to `Shell`, about
+4,000 lines of upstream code; making the Nest the home means editing its selection logic and the
+first-run flow, the highest-conflict spot in the repo. A route plus one menu item is a handful of
+lines and ships quickly. The entry shares the account menu with Artifacts and Board.
 
 ## Desktop
 
-Electron loads the web UI, so the Nest appears in the desktop app with no desktop code. The
-desktop Playwright suite is not run locally; CI covers it.
+Electron loads the web UI, so the Nest appears in the desktop app with no desktop code.
 
-## Mobile (later change)
+## Polling
 
-Not in this change. What it would take: a new Expo Router screen `apps/mobile/app/nest.tsx`
-reading the same `nest.snapshot` through the existing RPC client and the same `mood` field, so the
-logic is shared. The pieces that are native work: cards as plain StyleSheet with tokens from
-`lib/appearance`, the eyes badge as a small react-native-svg view with Reanimated (the logo
-geometry is shared via `@nurlings/brand`), the tray answering through native alerts or action
-sheets, and an entry in native navigation. Push notifications for approvals already exist.
-Roughly one phase of the size of web phase 1, after the web design settles.
+The page fetches `nest.snapshot` every 3 s, the Shell's cadence, only while mounted and the tab
+is visible. It refreshes on focus and on becoming visible, skips a tick while a request is in
+flight, so responses cannot arrive out of order.
 
-## Risks and open questions
+## Risks
 
-- **Sleeping definition** (above) needs the maintainer's call.
-- `waiting_input` mixes approvals with plain questions; the badge label may over-promise. The
-  tray labels the kind. Alternative: name the mood "Needs you". Your call.
-- Polling every 3 s with a heavier snapshot: bounded queries and the visibility gate keep it
-  close to today's `bots.list` cost; measured in phase 1 before adding anything.
-- Group-thread asks are answered with `groupId`; the tray carries it through.
-- Spaces: the Nest shows the current space only. Cross-space view is out of scope.
+- `waiting_input` mixes approvals with plain questions, hence "Needs you".
+- Polling a heavier snapshot every 3 s: the queries are bounded to the space and the visibility
+  gate keeps the cost near `bots.list`.
+- Group-thread asks carry `groupId` so the link opens the right thread.
+- Spaces: current space only.
