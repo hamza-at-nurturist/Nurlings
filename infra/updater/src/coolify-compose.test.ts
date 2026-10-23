@@ -10,6 +10,7 @@ interface ComposeService {
   container_name?: unknown;
   extra_hosts?: unknown;
   restart?: string;
+  pull_policy?: string;
   volumes?: unknown[];
   /** A list of `KEY=value` strings or a map. */
   environment?: Record<string, unknown> | string[];
@@ -98,6 +99,27 @@ describe("the Coolify compose file", () => {
     expect(environment(services.supervisor ?? {}).RAKAZO_COMPUTER_IMAGE).toContain(
       `${brand.registry}/computer:${required}`,
     );
+  });
+
+  it("lets one variable make a redeploy pull moved images, and defaults to not pulling", () => {
+    const firstParty = Object.entries(services).filter(([, service]) =>
+      service.image?.startsWith(`${brand.registry}/`),
+    );
+    expect(firstParty.map(([name]) => name).sort()).toEqual([
+      "api",
+      "computer",
+      "supervisor",
+      "web",
+      "worker",
+    ]);
+    for (const [name, service] of firstParty) {
+      expect({ name, pullPolicy: service.pull_policy }).toEqual({
+        name,
+        pullPolicy: "${NURLINGS_PULL_POLICY:-missing}",
+      });
+    }
+    // A client server on a release tag must not depend on the registry at every redeploy.
+    expect(source).not.toMatch(/pull_policy:\s*always/);
   });
 
   it("uses only our registry, a digest-pinned database and no floating tags", () => {
