@@ -55,7 +55,7 @@ so the tray never decides on its own that an ask is gone.
 
 Option A (or B) is described in the proposal. Either way the ring is the avatar's wrapper in the
 card (a border, no new layout), colors come from semantic tokens only (`warning`, `destructive`,
-`success`, neutral border, muted), and the working pulse is CSS and off under
+`foreground`, `muted-foreground`), and the working pulse is CSS and off under
 `prefers-reduced-motion`. The label is plain text from the mood's existing strings.
 
 ## Risks

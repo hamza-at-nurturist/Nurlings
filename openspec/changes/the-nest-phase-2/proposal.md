@@ -32,19 +32,58 @@ visible.
 
 ## Options for the mood indicator
 
-Mockups of both, light and dark, with the five moods and the tray: `mockup/mood-indicator-light.png`
-and `mockup/mood-indicator-dark.png` (source: `mockup/mood-indicator.html`).
+Mockups, light and dark, rendered from the repo's own `BotAvatar` and the phase 1 grid layout
+(three columns at desktop width) with seeded fake data, on the default avatar colors and shapes:
+`mockup/mood-indicator-light.png` and `mockup/mood-indicator-dark.png`. The top block is today's
+real `NurlingGrid` for comparison (the eyes-on-eyes problem is visible there). The mockup page was
+a throwaway and is not in the repo.
 
-Both share the same base: a **ring around the avatar** whose color and style carry the mood
-(needs you warning, error destructive, working success with a slow pulse, idle neutral, sleeping
-dashed and muted), plus a **text label** under the name. Color is never the only signal: the label
-is text, and sleeping differs by dash style.
+Both options share the same base: a **ring around the avatar** (a 3px border with a gap of card
+color, so it never touches the avatar) whose color and style carry the mood, plus a **text label**
+under the name. Color is never the only signal: the label is text, sleeping is dashed and faded,
+working pulses.
+
+| Mood | Ring |
+|---|---|
+| Needs you | `warning` |
+| Error | `destructive` |
+| Working | `foreground` (ink), pulsing |
+| Idle | `muted-foreground` at 55%, solid |
+| Sleeping | `muted-foreground` at 55%, dashed, faded |
+
+#### Ring palette check against every default avatar color
+
+`mockup/ring-contrast-light.png` and `mockup/ring-contrast-dark.png` show all 11 default avatar
+colors with all five rings, drawn by the real component. Numbers are computed from the tokens and
+the avatars' light, base and dark stops:
+
+- Every colored ring is clearly visible against the card: contrast 4.5 to 7.7 against the card
+  background in both themes. The idle ring is intentionally quiet.
+- The other question is whether a ring blends into the avatar inside it. I measured perceptual
+  color distance (CIE ΔE; under about 25 reads as the same hue) from each ring color to each
+  avatar's three stops. My first palette used the app's existing blue `--status-working` for
+  Working, and it clashed with the blue avatar (ΔE 17 light, 10 dark) and the cyan avatar (24 and
+  19). **I changed Working to ink (`foreground`) with a pulse**, which also matches the app's
+  "primary is ink" rule and keeps status colors to warning and destructive.
+- Pairs that still sit close in hue, listed rather than hidden:
+
+  | Ring | Avatar | Theme | ΔE |
+  |---|---|---|---|
+  | Error | red | light | 10 |
+  | Needs you | yellow | dark | 11 |
+  | Needs you | brown | light | 22 |
+  | Needs you | orange | dark | 29 |
+  | Working (ink) | white | dark | 0 |
+
+  They stay readable because the gap of card color separates ring from avatar, the label names the
+  mood, and Needs you and Error also move to the top of the grid. If you want these removed too,
+  the remedy is a thicker 4px ring for Needs you and Error; I would add it after you pick.
 
 - **Option A (recommended): ring + text label, eyes dropped.** The label reads "Working",
   "Needs you", "Error", "Idle", "Sleeping". The eyes badge, its CSS and its brand-mark path
   slicing are deleted. Simplest, and the only one that follows "what can be removed" to its end.
 - **Option B: ring + label chip with the eyes inside it.** Same ring; the eyes leave the avatar and
-  sit as a small glyph in the label chip, keeping their per-mood shape and motion. Keeps the logo
+  sit as a small glyph in the label chip (the mockup draws two slanted ellipses; the real glyph would be the brand mark's eye paths), keeping their per-mood shape and motion. Keeps the logo
   tie-in, costs a chip's worth of chrome on every card.
 
 Recommendation: A. Under B the eyes add a second encoding of something the ring and label already
