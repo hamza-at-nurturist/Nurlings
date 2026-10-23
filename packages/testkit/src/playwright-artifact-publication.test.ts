@@ -104,6 +104,50 @@ describe("Playwright artifact publication boundary", () => {
     expect(workflow).not.toContain("working-directory:");
   });
 
+  describe("when Web E2E did not run for the change", () => {
+    const filter = /--jq '([^']*Web E2E \/ Web E2E[^']*)'\)"/.exec(workflow)?.[1] ?? "";
+    const run = (jobs: unknown[]) =>
+      execFileSync("jq", ["-r", filter], {
+        input: JSON.stringify({ jobs }),
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim();
+    const job = (name: string, conclusion: string) => ({ name, conclusion });
+
+    it("reads no job as none, one job as its conclusion, and refuses duplicates", () => {
+      expect(filter).not.toBe("");
+      expect(run([job("Lint", "success")])).toBe("none");
+      expect(run([job("Web E2E / Web E2E (1/4)", "success")])).toBe("none");
+      expect(run([job("Web E2E / Web E2E", "success")])).toBe("success");
+      expect(run([job("Web E2E / Web E2E", "skipped")])).toBe("skipped");
+      expect(() =>
+        run([job("Web E2E / Web E2E", "success"), job("Web E2E / Web E2E", "failure")]),
+      ).toThrow();
+    });
+
+    it("ends the report workflow with a notice, not a failure, and runs nothing after it", () => {
+      const read = workflow.slice(
+        workflow.indexOf("name: Read Playwright job result"),
+        workflow.indexOf("name: Resolve pull request"),
+      );
+      expect(read).toMatch(/none\|skipped\)[\s\S]*::notice::[\s\S]*ran=false[\s\S]*exit 0/);
+      const gated = [
+        "Resolve pull request",
+        "Check for Playwright artifact",
+        "Check screenshot gallery storage",
+      ];
+      for (const name of gated) {
+        const start = workflow.indexOf(`- name: ${name}`);
+        expect(workflow.slice(start, start + 260)).toContain(
+          "steps.playwright.outputs.ran == 'true'",
+        );
+      }
+      // The rest depend on those steps' outputs, so they are skipped with them.
+      expect(workflow).toContain("if: steps.artifact.outputs.exists == 'true'");
+      expect(workflow).toContain("if: steps.storage.outputs.configured == 'true'");
+    });
+  });
+
   it("skips the gallery with a notice, instead of failing, when its storage is not configured", () => {
     const check = workflow.indexOf("id: storage");
     const publish = workflow.indexOf("id: publish");
