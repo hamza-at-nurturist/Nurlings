@@ -203,6 +203,13 @@ One-time setup:
    and `COOLIFY_TEST_DEPLOY_TOKEN` (the token). Without both, the workflow skips the redeploy and
    says so.
 
-Check it after the first merge: the server's health endpoint reports the commit it runs, and it
-should match the merge commit. If it still shows the previous commit, Coolify did not pull the
-moved `edge` image; set the resource's image pull policy to always pull and redeploy.
+Check it after a merge: the public `/health` only answers `{"ok":true}`, so read the commit from
+inside the `api` container (on the server as root, or in Coolify's terminal for the `api` service;
+make sure the name filter matches one container):
+
+```bash
+docker exec "$(docker ps -qf name=api)" node -e "fetch('http://127.0.0.1:3100/internal/health').then(r=>r.json()).then(j=>console.log(j.revision))"
+```
+
+It should print the merge commit. If it prints the previous commit, Coolify did not pull the moved
+`edge` image: pull the `edge` images on the server and redeploy.
