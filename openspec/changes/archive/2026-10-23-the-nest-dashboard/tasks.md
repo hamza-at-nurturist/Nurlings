@@ -33,12 +33,12 @@
   extract run.
 - [x] 3.3 Poll every 3 s only while visible, skipping a tick while a request is in flight. Verify: web test with
   fake timers for hidden tab, focus refresh, and no overlapping requests.
-- [ ] 3.4 Add a Playwright spec that opens `/app/nest`, checks the card, the mood badge and the
+- [x] 3.4 Add a Playwright spec that opens `/app/nest`, checks the card, the mood badge and the
   Working state, and follows a card to its thread. Verify: CI web E2E passes and its screenshot
   is linked on the PR.
 
 ## 4. Checks and wrap-up
 
-- [ ] 4.1 Lint, typecheck, unit tests, brand and i18n guards, and
+- [x] 4.1 Lint, typecheck, unit tests, brand and i18n guards, and
   `openspec validate the-nest-dashboard --strict` pass locally and in CI.
-- [ ] 4.2 After merge, archive the change. Verify: archive output lists the `the-nest` capability.
+- [x] 4.2 After merge, archive the change. Verify: archive output lists the `the-nest` capability.
