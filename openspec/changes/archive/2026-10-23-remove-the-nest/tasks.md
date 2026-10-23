@@ -6,5 +6,5 @@
 ## 2. Verify and ship
 
 - [x] 2.1 Lint, typecheck, unit tests and i18n extraction clean
-- [ ] 2.2 PR, merge when green
-- [ ] 2.3 Archive this change with `--skip-specs` (the spec was removed directly)
+- [x] 2.2 PR, merge when green
+- [x] 2.3 Archive this change with `--skip-specs` (the spec was removed directly)
