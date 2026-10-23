@@ -133,6 +133,7 @@ import {
   getComposerEnterToSend,
   subscribeComposerEnterToSend,
 } from "../lib/composer-enter-to-send-pref";
+import { useComputerBootWatch } from "../lib/computer-boot-watch";
 import {
   bootComputerOnce,
   embeddableScreenUrl,
@@ -2804,6 +2805,17 @@ function SpaceShell() {
     ping();
     return () => window.clearInterval(timer);
   }, [panel, computerOpen, computerBot?.id, active?.id, computer?.state]);
+
+  // A start the bot began is never announced, so a view that read "booting" can stay there.
+  const bootWatchBotId = computerBot?.id ?? active?.id;
+  useComputerBootWatch(
+    bootWatchBotId,
+    (panel === "computer" || computerOpen) &&
+      computer?.botId === bootWatchBotId &&
+      computer?.state === "booting" &&
+      !booting,
+    (id) => (bootsInFlight.current.has(id) ? Promise.resolve() : refreshComputerFor(id)),
+  );
 
   /** Open the computer view. Only an explicit Take control asks for the lease. */
   async function openComputer(botId?: string, takeControl = false) {
