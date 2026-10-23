@@ -12,7 +12,7 @@
 
 - [x] 2.1 Add `scripts/ci-openspec-check.sh` (changed paths on stdin, labels in `PR_LABELS`) with a vitest file beside `ci-docs-only.test.ts`. Verify: tests cover code without a change, with a change, archive-only, `no-spec`, non-code paths and an empty list, and pass.
 - [x] 2.2 Add `.github/workflows/openspec-check.yml` (job `OpenSpec change`, on opened, reopened, synchronize, labeled, unlabeled; read-only permissions). Verify: a workflow test parses it and asserts the triggers and permissions; the check runs on this pull request.
-- [ ] 2.3 The maintainer creates the `no-spec` label and sets `OpenSpec change` as a required check after merge. Verify: reported to the maintainer in the PR.
+- [x] 2.3 The maintainer creates the `no-spec` label and sets `OpenSpec change` as a required check after merge. Verify: reported to the maintainer in the PR.
 
 ## 3. Template
 
@@ -21,5 +21,5 @@
 ## 4. Review and release
 
 - [x] 4.1 `openspec validate enforce-openspec-pipeline --strict`, `pnpm lint` and the updater tests pass. Verify: commands succeed.
-- [ ] 4.2 Open the PR from `chore/enforce-openspec-pipeline`, wait for CI and review bots, merge when green. Verify: PR merged with checks green.
-- [ ] 4.3 Archive the change after the merge in its own PR. Verify: `openspec/changes/archive/` holds it and `openspec/specs/contribution-workflow` exists.
+- [x] 4.2 Open the PR from `chore/enforce-openspec-pipeline`, wait for CI and review bots, merge when green. Verify: PR merged with checks green.
+- [x] 4.3 Archive the change after the merge in its own PR. Verify: `openspec/changes/archive/` holds it and `openspec/specs/contribution-workflow` exists.
