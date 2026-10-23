@@ -5,7 +5,8 @@
 # port-free SERVICE_URL_WEB / SERVICE_FQDN_WEB that Coolify derives from the same domain.
 #
 # Set NURLINGS_VERSION (a release tag such as v0.1.0, never latest or edge) and give the `web`
-# service its domain. Coolify generates every secret below (SERVICE_PASSWORD_*): back up
+# service its domain. NURLINGS_PULL_POLICY stays `missing` on client servers; only the test server,
+# which follows a moving `edge` tag, sets it to `always`. Coolify generates every secret below (SERVICE_PASSWORD_*): back up
 # ENCRYPTION_KEY from the resource's variables. Everything else is optional.
 #
 # No `ports:`: Coolify's proxy routes the `web` domain to port 5173. The service is named `web`
@@ -267,6 +268,7 @@ services:
   # else. Runs once and exits.
   computer:
     image: ghcr.io/hamza-at-nurturist/nurlings/computer:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    pull_policy: ${NURLINGS_PULL_POLICY:-missing}
     command: ["true"]
     network_mode: none
     restart: "no"
@@ -284,6 +286,7 @@ services:
   # is the only service with the Docker socket and its port is never published.
   supervisor:
     image: ghcr.io/hamza-at-nurturist/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    pull_policy: ${NURLINGS_PULL_POLICY:-missing}
     restart: unless-stopped
     command: ["pnpm", "--filter", "@rakazo/sandbox-supervisor", "start"]
     init: true
@@ -343,6 +346,7 @@ services:
 
   api:
     image: ghcr.io/hamza-at-nurturist/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    pull_policy: ${NURLINGS_PULL_POLICY:-missing}
     restart: unless-stopped
     # Node runs directly, not through pnpm, so a stop reaches it and in-flight work finishes.
     working_dir: /app/apps/api
@@ -425,6 +429,7 @@ services:
 
   worker:
     image: ghcr.io/hamza-at-nurturist/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    pull_policy: ${NURLINGS_PULL_POLICY:-missing}
     restart: unless-stopped
     working_dir: /app/apps/worker
     command: ["node", "--enable-source-maps", "dist/index.js"]
@@ -463,6 +468,7 @@ services:
   # screen traffic to the API, so the API itself is never exposed.
   web:
     image: ghcr.io/hamza-at-nurturist/nurlings/app:${NURLINGS_VERSION:?Set NURLINGS_VERSION to a release tag such as v0.1.0}
+    pull_policy: ${NURLINGS_PULL_POLICY:-missing}
     restart: unless-stopped
     working_dir: /app/apps/web
     command: ["node_modules/.bin/vite", "preview", "--host", "0.0.0.0", "--port", "5173"]

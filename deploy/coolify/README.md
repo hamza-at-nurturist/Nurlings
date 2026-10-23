@@ -93,6 +93,7 @@ Only `NURLINGS_VERSION` is mandatory. Everything else works empty.
 | Variable | Required | Secret | What it is |
 | --- | --- | --- | --- |
 | `NURLINGS_VERSION` | yes, you set it | no | Release tag for every image, for example `v0.1.0`. |
+| `NURLINGS_PULL_POLICY` | optional | no | `missing` (default) pulls an image only when the server lacks it. Only the test server sets `always`, so a redeploy also pulls a moved `edge` tag. |
 | `SERVICE_PASSWORD_POSTGRES` | generated | yes | Database owner password. |
 | `SERVICE_PASSWORD_APPDB` | generated | yes | The app's database login password. |
 | `SERVICE_PASSWORD_64_AUTH` | generated | yes | Session signing secret. |
@@ -194,7 +195,9 @@ asks Coolify to redeploy it. Client servers always run a release tag (section 7)
 
 One-time setup:
 
-1. On `nurlings-test`, set `NURLINGS_VERSION` to `edge` and redeploy once.
+1. On `nurlings-test`, set `NURLINGS_VERSION` to `edge` and `NURLINGS_PULL_POLICY` to `always`
+   (never on a client server), then redeploy once. Without `always`, a redeploy keeps the `edge`
+   image the server already has, so it can stay on an older commit.
 2. In Coolify, open the resource's **Webhooks** page and copy the **Deploy Webhook** address. It
    ends in `/api/v1/deploy?uuid=<resource-uuid>&force=false`.
 3. Create an API token under **Keys & Tokens → API tokens** with deploy permission. If the API is
@@ -211,5 +214,6 @@ make sure the name filter matches one container):
 docker exec "$(docker ps -qf name=api)" node -e "fetch('http://127.0.0.1:3100/internal/health').then(r=>r.json()).then(j=>console.log(j.revision))"
 ```
 
-It should print the merge commit. If it prints the previous commit, Coolify did not pull the moved
-`edge` image: pull the `edge` images on the server and redeploy.
+It should print the merge commit. If it prints the previous commit, the server did not pull the
+moved `edge` image: check that `NURLINGS_PULL_POLICY` is `always`, or pull the `edge` images on the
+server by hand and redeploy.
