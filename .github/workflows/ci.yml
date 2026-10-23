@@ -301,38 +301,47 @@ jobs:
           fi
           echo "publish=$publish" >> "$GITHUB_OUTPUT"
 
-      - name: Require Expo automation token
+      # Without the token there is no Expo project to publish to, so skip instead of failing main.
+      - name: Check Expo automation token
+        id: expo
         if: steps.ota.outputs.publish == 'true'
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          if [[ -z "$EXPO_TOKEN" ]]; then
-            echo "Add an EXPO_TOKEN repository secret with access to the inbox-zero/rakazo Expo project." >&2
-            exit 1
+          if [[ -n "$EXPO_TOKEN" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::EXPO_TOKEN is not set, so no mobile update was published."
+            {
+              echo "### Mobile OTA skipped"
+              echo
+              echo "The \`EXPO_TOKEN\` repository secret is not set, so there is no Expo project to publish to."
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
-        if: steps.ota.outputs.publish == 'true'
+        if: steps.expo.outputs.configured == 'true'
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
-        if: steps.ota.outputs.publish == 'true'
+        if: steps.expo.outputs.configured == 'true'
         with:
           node-version: 24
           cache: pnpm
       - name: Set up Expo
-        if: steps.ota.outputs.publish == 'true'
+        if: steps.expo.outputs.configured == 'true'
         uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
         with:
           eas-version: latest
           packager: pnpm
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
-        if: steps.ota.outputs.publish == 'true'
+        if: steps.expo.outputs.configured == 'true'
         run: pnpm install --frozen-lockfile
       - name: Verify mobile project
-        if: steps.ota.outputs.publish == 'true'
+        if: steps.expo.outputs.configured == 'true'
         run: pnpm --filter @rakazo/mobile check
       - name: Publish production update
-        if: steps.ota.outputs.publish == 'true'
+        if: steps.expo.outputs.configured == 'true'
         working-directory: apps/mobile
         run: |
           set -euo pipefail
