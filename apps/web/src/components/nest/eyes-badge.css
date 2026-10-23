@@ -1,0 +1,98 @@
+/* The eyes badge: two slanted eyes from the logo, one look and one subtle motion per mood. */
+.nest-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.nest-eyes[data-mood="working"] {
+  animation: nest-glance 3.2s ease-in-out infinite alternate;
+}
+
+.nest-eyes[data-mood="idle"] .nest-eye {
+  animation: nest-blink 6s ease-in-out infinite;
+}
+
+.nest-eyes[data-mood="sleeping"] .nest-eye {
+  transform: scaleY(0.16);
+  animation: nest-breathe 4s ease-in-out infinite;
+}
+
+.nest-eyes[data-mood="needs_you"] {
+  animation: nest-lift 1.4s ease-in-out 2;
+}
+
+.nest-eyes[data-mood="needs_you"] .nest-eye {
+  transform: scale(1.18);
+}
+
+.nest-eyes[data-mood="error"] {
+  animation: nest-shake 0.45s ease-in-out 1;
+}
+
+.nest-eyes[data-mood="error"] .nest-eye:first-of-type {
+  transform: rotate(32deg);
+}
+
+.nest-eyes[data-mood="error"] .nest-eye:last-of-type {
+  transform: rotate(-32deg);
+}
+
+@keyframes nest-glance {
+  from {
+    transform: translateX(-6px);
+  }
+  to {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes nest-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.12);
+  }
+}
+
+@keyframes nest-breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes nest-lift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes nest-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nest-eyes,
+  .nest-eyes .nest-eye {
+    animation: none;
+  }
+}

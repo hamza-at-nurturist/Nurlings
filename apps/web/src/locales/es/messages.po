@@ -821,6 +821,7 @@ msgstr "Avatares"
 
 #: src/pages/Auth.tsx
 #: src/pages/Board.tsx
+#: src/pages/Nest.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/RoutineEditor.tsx
 msgid "Back"
@@ -2344,6 +2345,7 @@ msgstr "Introduce una clave de API antes de probar."
 msgid "Environment variables"
 msgstr "Variables de entorno"
 
+#: src/components/nest/EyesBadge.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/sidebar-roster.tsx
 msgid "Error"
@@ -2679,6 +2681,10 @@ msgstr "Cómo comprobar"
 #: src/pages/shell/computer-release-actions.tsx
 msgid "I’m done"
 msgstr "Listo"
+
+#: src/components/nest/EyesBadge.tsx
+msgid "Idle"
+msgstr ""
 
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
@@ -3285,6 +3291,8 @@ msgstr "Necesita entrada"
 msgid "Needs takeover"
 msgstr "Necesita toma de control"
 
+#: src/components/nest/EyesBadge.tsx
+#: src/components/nest/NeedsYouTray.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/computer-overlay.tsx
 msgid "Needs you"
@@ -3326,6 +3334,10 @@ msgstr ""
 
 #: src/pages/SettingsOverlay.tsx
 msgid "Next settings sections"
+msgstr ""
+
+#: src/components/nest/NurlingGrid.tsx
+msgid "Next: {routine} · {time}"
 msgstr ""
 
 #: src/pages/MessagingSettingsOverlay.tsx
@@ -3534,6 +3546,7 @@ msgid "Only empty spaces can be deleted. Delete its bots and groups first."
 msgstr ""
 
 #: src/components/markdown-link-prompt.tsx
+#: src/components/nest/NeedsYouTray.tsx
 #: src/pages/ScratchpadSection.tsx
 #: src/pages/shell/computer-panel.tsx
 #: src/pages/shell/message-view.tsx
@@ -4588,6 +4601,10 @@ msgstr "Mensaje de Slack"
 msgid "Slack not enabled"
 msgstr ""
 
+#: src/components/nest/EyesBadge.tsx
+msgid "Sleeping"
+msgstr ""
+
 #: src/components/composer/HoldToTalk.tsx
 msgid "Slide up to lock"
 msgstr "Desliza hacia arriba para bloquear"
@@ -4814,6 +4831,11 @@ msgstr "Se agotó el tiempo de conexión."
 #: src/lib/run-error.ts
 msgid "The model provider returned an error."
 msgstr "El proveedor de modelos devolvió un error."
+
+#: src/components/SidebarFooter.tsx
+#: src/pages/Nest.tsx
+msgid "The Nest"
+msgstr ""
 
 #: src/lib/model-connection-preflight.ts
 msgid "The provider is rate-limiting requests."
@@ -5339,6 +5361,10 @@ msgstr "¿Dónde deben ejecutarse los bots?"
 
 #: src/lib/ticket-status.ts
 msgid "Won't do"
+msgstr ""
+
+#: src/components/nest/EyesBadge.tsx
+msgid "Working"
 msgstr ""
 
 #: src/lib/roster-status.ts
