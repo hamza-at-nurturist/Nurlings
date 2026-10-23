@@ -290,22 +290,29 @@ test("changes and recovers an email password", async ({ page }, testInfo) => {
   await expect(page.getByRole("heading", { name: "Reset your password" })).not.toBeVisible();
   await captureScreenshot(page, testInfo, "42-password-reset-requested");
 
+  // The inbox is shared by every test on this server, and sign-up and sign-in already put
+  // verification mail in it. The reset mail is also sent after the response returns, so wait for
+  // the message to this account that links to the reset page, never for "any mail" or the last one.
   const emailApi = process.env.API_URL ?? "http://127.0.0.1:3110";
+  let resetUrl: string | undefined;
   await expect
-    .poll(async () => {
-      const response = await page.request.get(`${emailApi}/__e2e/emails`);
-      return ((await response.json()) as unknown[]).length;
-    })
-    .toBeGreaterThan(0);
-  const messagesResponse = await page.request.get(`${emailApi}/__e2e/emails`);
-  expect(messagesResponse.headers()["cache-control"]).toBe("no-store");
-  const messages = (await messagesResponse.json()) as Array<{
-    text: string;
-  }>;
-  const resetUrl = messages.at(-1)?.text.match(/https?:\/\/\S+/)?.[0];
-  expect(resetUrl).toBeTruthy();
+    .poll(
+      async () => {
+        const response = await page.request.get(`${emailApi}/__e2e/emails`);
+        expect(response.headers()["cache-control"]).toBe("no-store");
+        const messages = (await response.json()) as Array<{ to: string; text: string }>;
+        resetUrl = messages
+          .filter((message) => message.to.toLowerCase() === email.toLowerCase())
+          .flatMap((message) => message.text.match(/https?:\/\/\S+/g) ?? [])
+          .filter((link) => new URL(link).pathname.includes("/reset-password"))
+          .at(-1);
+        return resetUrl;
+      },
+      { message: "the password reset email for this account must arrive" },
+    )
+    .toBeTruthy();
 
-  await page.goto(resetUrl!);
+  await page.goto(resetUrl as string);
   await expect(page.getByRole("heading", { name: "Choose a new password" })).toBeVisible();
   await page.getByLabel("New password").fill(resetPassword);
   await page.getByLabel("Confirm password").fill(resetPassword);
