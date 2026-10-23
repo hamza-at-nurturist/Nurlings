@@ -43,7 +43,7 @@ simply find the state already updated.
   existing thread refresh (which carries the computer status); otherwise the status request.
 - Stops when the state is anything other than `booting`, the view closes, the bot changes, the tab
   hides (and resumes when it shows), or an error that retrying cannot fix occurs.
-- Bounded: after 5 minutes of "booting" it stops asking. A start that long is not stuck on a missed
+- Bounded: after 5 minutes of asking (hidden-tab ticks do not count) it stops. A start that long is not stuck on a missed
   read, and the existing boot-failure handling covers it.
 - No overlapping requests: a tick is skipped while one is in flight.
 
