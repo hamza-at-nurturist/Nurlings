@@ -12,11 +12,3 @@ before.
 #### Scenario: Invalid prefix is rejected
 - **WHEN** the configured ticket prefix is empty, starts with a digit, contains a symbol, or is longer than a board prefix may be
 - **THEN** brand validation fails with a message naming `ticketPrefix`, and the build does not proceed
-
-#### Scenario: Existing boards
-- **WHEN** the migration runs on a board that still has the old `RAK` prefix
-- **THEN** the board's prefix becomes `NUR` and its next ticket is numbered from the same counter
-
-#### Scenario: Chosen prefix is kept
-- **WHEN** a board's prefix is anything other than `RAK`
-- **THEN** the migration leaves it unchanged

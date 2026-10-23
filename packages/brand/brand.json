@@ -20,6 +20,7 @@
   "native": {
     "bundleId": "com.nurturistai.nurlings"
   },
+  "ticketPrefix": "NUR",
   "mark": {
     "viewBox": "237 574 1584.9 898",
     "smallViewBox": "237 574 1369 898",

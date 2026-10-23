@@ -13,12 +13,10 @@ product shows, not in a database default.
 
 - `packages/brand/brand.json` gets a `ticketPrefix` entry, set to `NUR`. The brand schema validates
   it with the same rule the board rename already enforces (a letter, then letters or digits, at
-  most the existing maximum length), and normalises to upper case.
+  most the existing maximum length) and requires upper case, as the API stores prefixes.
 - `ensureBoard` (`packages/db/src/board.ts`), the only place a board is created, passes
   `brand.ticketPrefix` explicitly. All five server callers and the bot ticket tools go through it,
   so no caller changes.
-- Boards that already exist and still carry the untouched `RAK` default are moved to `NUR` by a
-  one-statement data migration (see Decision).
 - Renaming a board's prefix keeps working exactly as today.
 
 ### Not changed, on purpose
@@ -37,25 +35,13 @@ product shows, not in a database default.
 | `packages/db/package.json`, `pnpm-lock.yaml` | workspace dependency on `@nurlings/brand` |
 | `packages/brand/brand.json`, `packages/brand/src/schema.ts` | our own files |
 
-New: one migration directory, so it cannot conflict with upstream history.
+## Existing boards
 
-## Decision for the maintainer: migrate existing boards?
-
-The migration is `UPDATE boards SET "ticketPrefix" = 'NUR' WHERE "ticketPrefix" = 'RAK'`. It is
-trivial and additive in the deploy sense (old and new API code both read the column fine). Two
-caveats:
-
-- It cannot tell a board that kept the default from one whose owner chose `RAK` on purpose.
-  Boards were added about two weeks ago, so this is unlikely, but it is a guess.
-- Text that already mentions a ticket as `RAK-12` (comments, chat) stops resolving to the ticket.
-  Refs are parsed against the board's current prefix only.
-
-Recommendation: include the migration, since the boards feature is new and a mix of `NUR-` and
-`RAK-` boards in one deployment would be worse. If you would rather leave existing boards alone,
-drop task 2.3 and the "Existing boards" scenario; nothing else changes.
+No migration. No clients exist yet, so every board is created through `ensureBoard` and gets
+`NUR`. Approved by the maintainer.
 
 ## Impact
 
 - Capability: `brand-config` (new requirement).
 - No API or contract change. No new words on screen.
-- One data migration (optional, see above).
+- No migration.

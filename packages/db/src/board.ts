@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type { Board, Ticket, TicketComment, TicketPriority, TicketStatus } from "@rakazo/contracts";
 import {
   parseTicketRef,
@@ -22,7 +23,10 @@ export async function ensureBoard(prisma: PrismaClient, spaceId: string): Promis
     select: { name: true },
   });
   const name = space?.name.trim() || "Board";
-  await prisma.board.createMany({ data: [{ spaceId, name }], skipDuplicates: true });
+  await prisma.board.createMany({
+    data: [{ spaceId, name, ticketPrefix: brand.ticketPrefix }],
+    skipDuplicates: true,
+  });
   return prisma.board.findUniqueOrThrow({ where: { spaceId } });
 }
 
