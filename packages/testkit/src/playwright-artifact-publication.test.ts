@@ -104,6 +104,30 @@ describe("Playwright artifact publication boundary", () => {
     expect(workflow).not.toContain("working-directory:");
   });
 
+  it("skips the gallery with a notice, instead of failing, when its storage is not configured", () => {
+    const check = workflow.indexOf("id: storage");
+    const publish = workflow.indexOf("id: publish");
+    expect(check).toBeGreaterThan(-1);
+    expect(check).toBeLessThan(publish);
+    const checkStep = workflow.slice(check, publish);
+    for (const name of [
+      "secrets.S3_ACCESS_KEY_ID",
+      "secrets.S3_SECRET_ACCESS_KEY",
+      "vars.S3_BUCKET",
+      "vars.S3_ENDPOINT",
+      "vars.PLAYWRIGHT_PUBLIC_BASE_URL",
+    ]) {
+      expect(checkStep).toContain(name);
+    }
+    expect(checkStep).toContain("::notice::");
+    expect(checkStep).not.toContain("exit 1");
+    expect(workflow.slice(publish, publish + 120)).toContain(
+      "if: steps.storage.outputs.configured == 'true'",
+    );
+    // The pull request link only runs after a publish, so it is skipped with it.
+    expect(workflow).toContain("steps.publish.outputs.latest_pr_run == 'true'");
+  });
+
   it.each([
     ["../escape.txt", 0o100644],
     ["nested/../../escape.txt", 0o100644],
