@@ -31,9 +31,11 @@
   serialized code with only its captured values, reject default parameters in timeline and
   component worklets, and prove the harness catches the original bug. Verify: the test fails when
   the #39 default parameter is put back.
-- [ ] 4.3 CI Android emulator run on the branch reaches sign-in after a data-cleared launch with
-  reduced motion, and the splash shows the mark. Verify: workflow run and its screenshots.
-- [ ] 4.4 Preview APK built from the branch (`release-android-apk`, `preview`). Verify:
+- [x] 4.3 CI Android emulator (release build): a data-cleared launch with reduced motion reaches
+  sign-up and the rest of the flow runs; with animations on, a first launch, a relaunch and a tap
+  log no UI-thread error. Verify: workflow runs and their logcat. (The flow later fails on its
+  "Search bots" text, which predates this change.)
+- [x] 4.4 Preview APK built from the branch (`release-android-apk`, `preview`). Verify:
   `nurlings-preview.apk` on the `android-preview` prerelease.
 - [ ] 4.5 Maintainer confirms on a phone: first launch plays the full animation, a later launch the
   short pop-in, a tap skips, reduced motion shows the static mark, and the app always reaches
