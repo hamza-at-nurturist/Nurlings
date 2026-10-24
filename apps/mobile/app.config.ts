@@ -2,9 +2,9 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 // Expo loads this file with Node's type stripping, which needs the explicit extension that
 // TypeScript only allows with allowImportingTsExtensions.
 // @ts-expect-error TS5097
-import { brandExpoConfig, placeholderProblems } from "./lib/brand-expo-config.ts";
+import { brandExpoConfig, placeholderProblems, previewIdentity } from "./lib/brand-expo-config.ts";
 
-const RELEASE_PROFILES = new Set(["production", "android-apk"]);
+const RELEASE_PROFILES = new Set(["production", "android-apk", "android-preview-apk"]);
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   if (RELEASE_PROFILES.has(process.env.EAS_BUILD_PROFILE ?? "")) {
@@ -49,8 +49,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     };
   }
 
+  const preview = process.env.NURLINGS_PREVIEW === "1";
+  if (preview) result = previewIdentity(result);
+
   const googleServicesFile = process.env.GOOGLE_SERVICES_JSON;
-  if (googleServicesFile) {
+  if (googleServicesFile && !preview) {
     result = { ...result, android: { ...result.android, googleServicesFile } };
   }
 

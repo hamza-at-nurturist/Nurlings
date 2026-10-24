@@ -72,6 +72,19 @@ export function brandExpoConfig(config: ExpoConfig): ExpoConfig {
   return result;
 }
 
+/**
+ * The preview app: another Android package and name, so a test build of a branch installs next to
+ * the real app instead of replacing it. The Firebase file belongs to the real package, so a
+ * preview build does not use it.
+ */
+export function previewIdentity(config: ExpoConfig): ExpoConfig {
+  return {
+    ...config,
+    name: `${brand.name} Preview`,
+    android: { ...config.android, package: `${brand.native.bundleId}.preview` },
+  };
+}
+
 /** Release builds must not carry upstream's Expo account or an unfilled placeholder. */
 export function placeholderProblems(config: ExpoConfig): string[] {
   const projectId = (config.extra?.eas as { projectId?: string } | undefined)?.projectId;
