@@ -25,6 +25,16 @@
       "android": {
         "buildType": "apk"
       }
+    },
+    "android-preview-apk": {
+      "extends": "production",
+      "autoIncrement": false,
+      "env": {
+        "NURLINGS_PREVIEW": "1"
+      },
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {

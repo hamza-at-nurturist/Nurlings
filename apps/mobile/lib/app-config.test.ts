@@ -44,6 +44,25 @@ describe("mobile app config", () => {
     expect(config.android).not.toHaveProperty("googleServicesFile");
   });
 
+  it("builds the preview app as another package and name, without the Firebase file", () => {
+    vi.stubEnv("NURLINGS_PREVIEW", "1");
+    vi.stubEnv("GOOGLE_SERVICES_JSON", "/build/google-services.json");
+    const result = appConfig(context(config));
+
+    expect(result.name).toBe("Nurlings Preview");
+    expect(result.android?.package).toBe("com.nurturistai.nurlings.preview");
+    expect(result.android).not.toHaveProperty("googleServicesFile");
+    expect(result.ios?.bundleIdentifier).toBe("com.nurturistai.nurlings");
+  });
+
+  it("keeps the real package and name when it is not a preview", () => {
+    vi.stubEnv("NURLINGS_PREVIEW", undefined);
+    const result = appConfig(context(config));
+
+    expect(result.name).toBe("Nurlings");
+    expect(result.android?.package).toBe("com.nurturistai.nurlings");
+  });
+
   it("adds only the brand when no variable applies, and never mutates its input", () => {
     vi.stubEnv("EAS_BUILD_PROFILE", "development");
     vi.stubEnv("EXPO_PUBLIC_API_URL", undefined);

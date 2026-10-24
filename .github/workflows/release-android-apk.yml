@@ -2,24 +2,34 @@ name: release-android-apk
 
 on:
   workflow_dispatch:
+    inputs:
+      preview:
+        description: "Build this branch as the Nurlings Preview app (separate package, prerelease android-preview) and leave the main release untouched"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-android-apk
+  group: release-android-apk${{ inputs.preview && '-preview' || '' }}
   cancel-in-progress: false
 
 jobs:
   release:
     name: Build and publish the Android APK
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || inputs.preview
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     permissions:
       contents: write
     env:
-      RELEASE_TAG: android
+      # A preview run installs next to the real app (another package) and publishes to its own
+      # prerelease, so it can run from any branch without touching the main release.
+      PREVIEW: ${{ inputs.preview && 'true' || 'false' }}
+      RELEASE_TAG: ${{ inputs.preview && 'android-preview' || 'android' }}
+      APK_NAME: ${{ inputs.preview && 'nurlings-preview.apk' || 'nurlings.apk' }}
+      EAS_PROFILE: ${{ inputs.preview && 'android-preview-apk' || 'android-apk' }}
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
@@ -56,7 +66,7 @@ jobs:
         working-directory: apps/mobile
         run: |
           set -euo pipefail
-          eas build --platform android --profile android-apk --non-interactive --wait --json > "$RUNNER_TEMP/build.json"
+          eas build --platform android --profile "$EAS_PROFILE" --non-interactive --wait --json > "$RUNNER_TEMP/build.json"
           url="$(jq -r '.[0].artifacts.applicationArchiveUrl // .[0].artifacts.buildUrl' "$RUNNER_TEMP/build.json")"
           version="$(jq -r '.[0].appVersion' "$RUNNER_TEMP/build.json")"
           version_code="$(jq -r '.[0].appBuildVersion' "$RUNNER_TEMP/build.json")"
@@ -64,8 +74,8 @@ jobs:
             echo "EAS did not return an APK download URL." >&2
             exit 1
           fi
-          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/nurlings.apk" "$url"
-          if [[ "$(head -c 2 "$RUNNER_TEMP/nurlings.apk")" != "PK" ]]; then
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/$APK_NAME" "$url"
+          if [[ "$(head -c 2 "$RUNNER_TEMP/$APK_NAME")" != "PK" ]]; then
             echo "The downloaded artifact is not an APK." >&2
             exit 1
           fi
@@ -74,6 +84,7 @@ jobs:
 
       # One rolling release keeps a stable download URL:
       # https://github.com/<owner>/<repo>/releases/download/android/nurlings.apk
+      # (a preview run uses android-preview/nurlings-preview.apk and a prerelease)
       # It never becomes GitHub's "latest" release, which the desktop updater reads. An existing
       # release is updated in place: the new APK is uploaded under a temporary name before the old
       # one is removed, so a failed run leaves the previous download working.
@@ -85,25 +96,35 @@ jobs:
         run: |
           set -euo pipefail
           title="Nurlings for Android $VERSION ($VERSION_CODE)"
+          stem="${APK_NAME%.apk}"
+          stage_id="$VERSION_CODE"
+          release_flags=(--latest=false)
+          notes="Install $APK_NAME on your Android phone."
+          if [[ "$PREVIEW" == "true" ]]; then
+            title="Nurlings Preview for Android ($GITHUB_REF_NAME, build $GITHUB_RUN_NUMBER)"
+            stage_id="$GITHUB_RUN_NUMBER"
+            release_flags=(--latest=false --prerelease)
+            notes="Test build of a branch. It installs next to the real app and is replaced by the next preview build."
+          fi
           if ! gh release view "$RELEASE_TAG" --json tagName > /dev/null 2> "$RUNNER_TEMP/view.err"; then
             if ! grep -q "release not found" "$RUNNER_TEMP/view.err"; then
               cat "$RUNNER_TEMP/view.err" >&2
               exit 1
             fi
-            gh release create "$RELEASE_TAG" "$RUNNER_TEMP/nurlings.apk" \
+            gh release create "$RELEASE_TAG" "$RUNNER_TEMP/$APK_NAME" \
               --target "$GITHUB_SHA" \
               --title "$title" \
-              --notes "Install nurlings.apk on your Android phone." \
-              --latest=false
+              --notes "$notes" \
+              "${release_flags[@]}"
             exit 0
           fi
 
-          staged="nurlings-$VERSION_CODE.apk"
-          cp "$RUNNER_TEMP/nurlings.apk" "$RUNNER_TEMP/$staged"
+          staged="$stem-$stage_id.apk"
+          cp "$RUNNER_TEMP/$APK_NAME" "$RUNNER_TEMP/$staged"
           gh release upload "$RELEASE_TAG" "$RUNNER_TEMP/$staged" --clobber
           assets="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" --jq '.assets')"
           staged_id="$(jq -r --arg name "$staged" '.[] | select(.name == $name) | .id' <<< "$assets")"
-          old_id="$(jq -r '.[] | select(.name == "nurlings.apk") | .id' <<< "$assets")"
+          old_id="$(jq -r --arg apk "$APK_NAME" '.[] | select(.name == $apk) | .id' <<< "$assets")"
           if [[ -z "$staged_id" ]]; then
             echo "The uploaded $staged is missing from the release; leaving the previous APK in place." >&2
             exit 1
@@ -112,14 +133,14 @@ jobs:
             gh api -X DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$old_id"
           fi
           for attempt in 1 2 3; do
-            if gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/assets/$staged_id" -f name=nurlings.apk > /dev/null; then
+            if gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/assets/$staged_id" -f name="$APK_NAME" > /dev/null; then
               break
             fi
             if [[ "$attempt" == 3 ]]; then
-              echo "Could not rename $staged to nurlings.apk; rename it on the release page." >&2
+              echo "Could not rename $staged to $APK_NAME; rename it on the release page." >&2
               exit 1
             fi
             sleep 5
           done
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/$RELEASE_TAG" -f sha="$GITHUB_SHA" -F force=true > /dev/null
-          gh release edit "$RELEASE_TAG" --title "$title" --latest=false
+          gh release edit "$RELEASE_TAG" --title "$title" "${release_flags[@]}"
