@@ -975,12 +975,22 @@ export const builtinAgentTools: ConnectorTool[] = [
   },
   {
     name: "ticket_comment",
-    description: "Add a ticket comment.",
+    description:
+      "Add a ticket comment. To ask another Nurling for help on this ticket, or to call for the user, list them in mention_bots or mention_user and write @Name in the comment text.",
     inputSchema: {
       type: "object",
       properties: {
         id: { type: "string", description: "Ticket id." },
         body: { type: "string", description: "Comment text." },
+        mention_bots: {
+          type: "array",
+          items: { type: "string" },
+          description: "Ids of Nurlings from your teammate list to call in for this ticket.",
+        },
+        mention_user: {
+          type: "boolean",
+          description: "True to notify the user that this comment needs them.",
+        },
       },
       required: ["id", "body"],
     },

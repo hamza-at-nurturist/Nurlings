@@ -36,11 +36,13 @@ simply has no chip.
 ### The wake path
 
 `commentTicket` computes the set of bots to wake and passes it on `TicketChange.mentionBotIds`.
-`ticket-changes.ts` calls a new `wakeMentionedBots` (in `ticket-mentions.ts`) per bot:
+`ticket-changes.ts` calls a new `wakeMentionedBot` (in `ticket-mentions.ts`, which leaves
+`ticket-wake.ts` alone apart from exporting the owner's prompt) per bot, serialised per ticket with a row
+lock so the cap and the working check cannot be raced past:
 
 1. Skip the commenting bot itself.
-2. If the bot is the owner: the normal `wakeTicketAssignee` (a user comment already does this, so this
-   only adds the case of a non-owner Nurling asking the owner).
+2. If the bot is the owner: for a user's mention nothing (the comment already wakes it); for a
+   Nurling's mention a normal ticket run (`ticketWake = bot_mention_owner`), subject to the same guards.
 3. Otherwise, in one transaction: ticket still open; bot valid; coalesce with a queued run of the
    bot for this ticket; for a Nurling-started wake, no working run of the bot for this ticket and
    fewer than 10 `bot_mention` tasks for this ticket in the last hour. Then create the task with

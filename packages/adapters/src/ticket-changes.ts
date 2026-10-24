@@ -1,6 +1,10 @@
-import type { JobPublisher } from "@rakazo/adapter-kit";
+import type { JobPublisher, NotificationProvider } from "@rakazo/adapter-kit";
 import type { BoardEvents, PrismaClient } from "@rakazo/db";
+import { getLogger } from "@rakazo/logging";
+import { wakeMentionedBot } from "./ticket-mentions.js";
 import { wakeTicketAssignee } from "./ticket-wake.js";
+
+const MENTION_BODY_CHARS = 140;
 
 export type TicketChange = {
   spaceId: string;
@@ -8,6 +12,14 @@ export type TicketChange = {
   ticketId: string;
   assigneeBotId: string | null;
   wakeAssignee: boolean;
+  /** Nurlings a comment mentioned, already checked to belong to the commenting user. */
+  mentionBotIds?: string[];
+  /** The commenting user, whose Nurlings the mentions are. */
+  userId?: string;
+  /** The Nurling that commented, when it was one. */
+  commentBotId?: string;
+  /** Set when a Nurling's comment mentioned the user. */
+  mentionedUser?: { ref: string; body: string };
 };
 export type TicketChangeNotifier = (change: TicketChange) => Promise<void>;
 
@@ -16,6 +28,8 @@ export function createTicketChangeNotifier(deps: {
   prisma: PrismaClient;
   jobs: JobPublisher;
   ticketBoardEnabled?: boolean;
+  /** Read when needed: the provider is built after this notifier in both composition roots. */
+  notifications?: () => NotificationProvider | undefined;
 }): TicketChangeNotifier {
   return async (change) => {
     if (!deps.ticketBoardEnabled) return;
@@ -32,5 +46,59 @@ export function createTicketChangeNotifier(deps: {
         botId: change.assigneeBotId,
       });
     }
+    if (change.userId) {
+      for (const botId of change.mentionBotIds ?? []) {
+        await wakeMentionedBot(deps, {
+          spaceId: change.spaceId,
+          userId: change.userId,
+          ticketId: change.ticketId,
+          botId,
+          ...(change.commentBotId ? { byBotId: change.commentBotId } : {}),
+        }).catch((error) => getLogger().warn("ticket mention wake", error));
+      }
+    }
+    if (change.mentionedUser && change.commentBotId && change.userId) {
+      await notifyMentionedUser(deps, {
+        spaceId: change.spaceId,
+        userId: change.userId,
+        botId: change.commentBotId,
+        ...change.mentionedUser,
+      });
+    }
   };
+}
+
+/** The existing push channel, honouring the Nurling's own notify-on-finish setting. */
+async function notifyMentionedUser(
+  deps: { prisma: PrismaClient; notifications?: () => NotificationProvider | undefined },
+  input: { spaceId: string; userId: string; botId: string; ref: string; body: string },
+) {
+  const provider = deps.notifications?.();
+  if (!provider) return;
+  try {
+    const bot = await deps.prisma.bot.findFirst({
+      where: { id: input.botId, spaceId: input.spaceId, userId: input.userId },
+      select: { name: true, notifyOnFinish: true, thread: { select: { id: true } } },
+    });
+    if (!bot?.notifyOnFinish || !bot.thread) return;
+    await provider.send(
+      {
+        kind: "help",
+        title: `${bot.name} mentioned you on ${input.ref}`,
+        body: [...input.body.trim()].slice(0, MENTION_BODY_CHARS).join(""),
+        botId: input.botId,
+        threadId: bot.thread.id,
+      },
+      {
+        operationId: "notify",
+        traceId: input.botId,
+        spaceId: input.spaceId,
+        userId: input.userId,
+        botId: input.botId,
+        signal: new AbortController().signal,
+      },
+    );
+  } catch (error) {
+    getLogger().error("ticket mention notification", error);
+  }
 }

@@ -44,6 +44,7 @@ function comment(id: string, createdAt: string): TicketComment {
     authorBotId: null,
     authorUserId: "user-1",
     authorName: "Ada",
+    mentions: [],
     createdAt,
     updatedAt: createdAt,
   };

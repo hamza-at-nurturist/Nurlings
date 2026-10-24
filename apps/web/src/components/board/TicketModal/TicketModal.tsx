@@ -141,7 +141,12 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
               <ActivityFeed items={items} bots={bots} viewer={viewer} />
             </div>
             <div className="p-4 pt-0">
-              <ReplyBox ticketId={ticket.id} onSent={activity.addComment} onError={setError} />
+              <ReplyBox
+                ticketId={ticket.id}
+                bots={bots}
+                onSent={activity.addComment}
+                onError={setError}
+              />
             </div>
           </aside>
         </div>

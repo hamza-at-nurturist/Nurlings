@@ -63,8 +63,9 @@ the conversation happens, and tells you when a Nurling is asking for you.
 
 - `ticket_comments.mentions`: JSON list of `{ kind: "bot" | "user", id }`, default empty. Names and
   colors are resolved by the client from the bots it already has, so a rename follows.
-- `tasks.ticketWake`: nullable text, `"mention"` (a user asked) or `"bot_mention"` (a Nurling asked).
-  The loop cap and the comment-only run rules read it. `ticketId` from the previous change already
+- `tasks.ticketWake`: nullable text, `"mention"` (a user asked), `"bot_mention"` (a Nurling asked) or
+  `"bot_mention_owner"` (a Nurling woke the owner, which then runs as usual). The loop cap counts the
+  last two and the comment-only run rules read the first two. `ticketId` from the previous change already
   links a task to its ticket.
 - `CommentTicketInput` gains optional `mentions`; `TicketComment` gains `mentions`. Both are
   optional with empty defaults, so existing clients keep working.

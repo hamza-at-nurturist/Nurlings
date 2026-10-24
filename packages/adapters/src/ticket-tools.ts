@@ -1,9 +1,10 @@
-import type { TicketStatus } from "@rakazo/contracts";
+import type { TicketMention, TicketStatus } from "@rakazo/contracts";
 import {
   CommentTicketInput,
   CreateTicketInput,
   isTicketCompletedStatus,
   TicketStatusSchema,
+  ticketRef,
   UpdateTicketInput,
 } from "@rakazo/contracts";
 import type { PrismaClient } from "@rakazo/db";
@@ -17,6 +18,12 @@ import {
   toTicketDto,
 } from "@rakazo/db";
 import type { TicketChangeNotifier } from "./ticket-changes.js";
+import {
+  activeMentionTask,
+  MENTION_RUN_COMMENT_ERROR,
+  MENTION_RUN_STATUS_ERROR,
+  resolveMentions,
+} from "./ticket-mentions.js";
 
 type TicketToolDeps = {
   prisma: PrismaClient;
@@ -231,6 +238,20 @@ export async function updateTicket(
       where: { id: data.id, spaceId: input.spaceId, boardId: board.id },
     });
     if (!current) return null;
+    // A Nurling woken by a mention may reply, nothing more: it cannot move or hand over the ticket.
+    const changesStatus = data.status !== undefined && data.status !== current.status;
+    const changesOwner =
+      data.assigneeBotId !== undefined && data.assigneeBotId !== current.assigneeBotId;
+    if (
+      input.botId &&
+      (changesStatus || changesOwner) &&
+      (await activeMentionTask(tx, {
+        spaceId: input.spaceId,
+        botId: input.botId,
+        ticketId: current.id,
+      }))
+    )
+      return "comment-only" as const;
     const row = await tx.ticket.update({
       where: { id: current.id },
       data: {
@@ -265,6 +286,7 @@ export async function updateTicket(
     return { row, reassigned };
   });
   if (!result) return { error: "Ticket not found." };
+  if (result === "comment-only") return { error: MENTION_RUN_STATUS_ERROR };
   await deps.onTicketChange?.({
     spaceId: input.spaceId,
     boardId: board.id,
@@ -283,6 +305,10 @@ export async function commentTicket(
     userId?: string;
     id: string;
     body: string;
+    /** Mentions from a client, and from a Nurling's `mention_bots` / `mention_user`. */
+    mentions?: TicketMention[];
+    mentionBotIds?: string[];
+    mentionUser?: boolean;
   },
 ) {
   if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
@@ -291,6 +317,28 @@ export async function commentTicket(
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const ticket = await findTicket(deps.prisma, input.spaceId, board, { id: input.id });
   if (!ticket) return { error: "Ticket not found." };
+  if (input.botId) {
+    // A Nurling woken by a mention gets one reply on the ticket.
+    const mention = await activeMentionTask(deps.prisma, {
+      spaceId: input.spaceId,
+      botId: input.botId,
+      ticketId: ticket.id,
+    });
+    if (
+      mention &&
+      (await deps.prisma.ticketComment.count({
+        where: {
+          ticketId: ticket.id,
+          authorBotId: input.botId,
+          createdAt: { gte: mention.createdAt },
+        },
+      })) > 0
+    )
+      return { error: MENTION_RUN_COMMENT_ERROR };
+  }
+  const resolved = input.userId
+    ? await resolveMentions(deps.prisma, { ...input, userId: input.userId })
+    : { mentions: [], botIds: [] };
   const row = await deps.prisma.$transaction(async (tx) => {
     const comment = await tx.ticketComment.create({
       include: { authorBot: { select: { name: true } }, authorUser: { select: { name: true } } },
@@ -300,6 +348,7 @@ export async function commentTicket(
         authorBotId: input.botId ?? null,
         authorUserId: input.userId ?? null,
         body: parsed.data.body,
+        mentions: resolved.mentions,
       },
     });
     await tx.ticket.update({ where: { id: ticket.id }, data: { updatedAt: new Date() } });
@@ -313,6 +362,17 @@ export async function commentTicket(
     ticketId: ticket.id,
     assigneeBotId: ticket.assigneeBotId,
     wakeAssignee: !input.botId && Boolean(ticket.assigneeBotId),
+    mentionBotIds: resolved.botIds,
+    ...(input.userId ? { userId: input.userId } : {}),
+    ...(input.botId ? { commentBotId: input.botId } : {}),
+    ...(input.botId && resolved.mentions.some((item) => item.kind === "user")
+      ? {
+          mentionedUser: {
+            ref: ticketRef(board.ticketPrefix, ticket.number),
+            body: parsed.data.body,
+          },
+        }
+      : {}),
   });
   return { comment: toTicketCommentDto(row) };
 }

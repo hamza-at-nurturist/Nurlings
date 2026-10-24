@@ -145,6 +145,10 @@ describe("ticket tools", () => {
 
 function mutationDeps(ticketBoardEnabled = true) {
   let current = ticket();
+  const mentionTask = vi.fn(
+    async (_query: unknown): Promise<{ id: string; createdAt: Date } | null> => null,
+  );
+  const priorReplies = vi.fn(async (_query: unknown) => 0);
   const changes = vi.fn(async (_change: { wakeAssignee: boolean }) => {});
   const tx = {
     board: { update: vi.fn(async () => ({ nextNumber: 2 })) },
@@ -168,15 +172,23 @@ function mutationDeps(ticketBoardEnabled = true) {
         authorUser: null,
         ...data,
       })),
+      count: priorReplies,
     },
+    task: { findFirst: mentionTask },
     ticketEvent: { create: vi.fn(async (_args: { data: Record<string, unknown> }) => ({})) },
     $queryRaw: vi.fn(async () => []),
   };
   const prisma = {
     ...boardSpace(),
-    bot: { findFirst: vi.fn(async () => ({ id: "bot-2" })) },
+    bot: {
+      findFirst: vi.fn(async () => ({ id: "bot-2" })),
+      findMany: vi.fn(async ({ where }: { where: { id: { in: string[] } } }) =>
+        where.id.in.filter((id) => id !== "foreign").map((id) => ({ id })),
+      ),
+    },
     ticket: tx.ticket,
-    ticketComment: { findMany: vi.fn(async () => []) },
+    ticketComment: { findMany: vi.fn(async () => []), count: priorReplies },
+    task: { findFirst: mentionTask },
     $transaction: vi.fn(async (fn: (client: typeof tx) => Promise<unknown>) => fn(tx)),
   };
   return {
@@ -184,6 +196,8 @@ function mutationDeps(ticketBoardEnabled = true) {
     prisma,
     tx,
     changes,
+    mentionTask,
+    priorReplies,
   };
 }
 
@@ -401,5 +415,196 @@ describe("ticket mutations", () => {
       updateTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", ownerBotId: "foreign" }),
     ).resolves.toHaveProperty("error");
     expect(s.prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  describe("mentions", () => {
+    it("stores valid Nurlings and drops foreign, archived or unknown ids, then wakes only those", async () => {
+      const s = mutationDeps();
+      await commentTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        id: "t1",
+        body: "@Scout please look",
+        mentions: [
+          { kind: "bot", id: "bot-2" },
+          { kind: "bot", id: "foreign" },
+          { kind: "bot", id: "bot-2" },
+        ],
+      });
+      expect(s.prisma.bot.findMany).toHaveBeenCalledWith({
+        where: {
+          id: { in: ["bot-2", "foreign"] },
+          spaceId: "ws",
+          userId: "user-1",
+          archivedAt: null,
+        },
+        select: { id: true },
+      });
+      expect(s.tx.ticketComment.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ mentions: [{ kind: "bot", id: "bot-2" }] }),
+        }),
+      );
+      expect(s.changes).toHaveBeenLastCalledWith(
+        expect.objectContaining({ mentionBotIds: ["bot-2"], userId: "user-1" }),
+      );
+    });
+    it("ignores a user mention from a user, and forces a Nurling's user mention to its own user", async () => {
+      const s = mutationDeps();
+      await commentTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        id: "t1",
+        body: "hi",
+        mentions: [{ kind: "user", id: "someone-else" }],
+      });
+      expect(s.tx.ticketComment.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ mentions: [] }) }),
+      );
+      await commentTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        botId: "bot-1",
+        id: "t1",
+        body: "@Ada I need you",
+        mentionUser: true,
+        mentions: [{ kind: "user", id: "someone-else" }],
+      });
+      expect(s.tx.ticketComment.create).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ mentions: [{ kind: "user", id: "user-1" }] }),
+        }),
+      );
+      expect(s.changes).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          commentBotId: "bot-1",
+          mentionedUser: { ref: "RAK-1", body: "@Ada I need you" },
+        }),
+      );
+    });
+    it("stores a mention whose @Name is not in the text", async () => {
+      const s = mutationDeps();
+      await commentTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        botId: "bot-1",
+        id: "t1",
+        body: "Need a second opinion",
+        mentionBotIds: ["bot-2"],
+      });
+      expect(s.changes).toHaveBeenLastCalledWith(
+        expect.objectContaining({ mentionBotIds: ["bot-2"], commentBotId: "bot-1" }),
+      );
+    });
+    it("lets a mention-woken Nurling comment once and refuses the second", async () => {
+      const s = mutationDeps();
+      const task = { id: "task-1", createdAt: new Date("2026-01-01T00:00:00.000Z") };
+      s.mentionTask.mockResolvedValue(task);
+      const first = await commentTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        botId: "bot-2",
+        id: "t1",
+        body: "Here is my answer",
+      });
+      expect(first).toHaveProperty("comment");
+      expect(s.priorReplies).toHaveBeenCalledWith({
+        where: { ticketId: "t1", authorBotId: "bot-2", createdAt: { gte: task.createdAt } },
+      });
+      s.priorReplies.mockResolvedValue(1);
+      const second = await commentTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        botId: "bot-2",
+        id: "t1",
+        body: "One more thing",
+      });
+      expect(second).toEqual({ error: expect.stringContaining("already replied") });
+      expect(s.tx.ticketComment.create).toHaveBeenCalledTimes(1);
+    });
+    it("does not limit an ordinary run's comments", async () => {
+      const s = mutationDeps();
+      s.priorReplies.mockResolvedValue(3);
+      const result = await commentTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        botId: "bot-1",
+        id: "t1",
+        body: "Progress",
+      });
+      expect(result).toHaveProperty("comment");
+    });
+    it("looks for a running mention task of the calling Nurling for this ticket only", async () => {
+      const s = mutationDeps();
+      await commentTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        botId: "bot-2",
+        id: "t1",
+        body: "x",
+      });
+      expect(s.mentionTask).toHaveBeenCalledWith({
+        where: {
+          spaceId: "ws",
+          botId: "bot-2",
+          ticketId: "t1",
+          ticketWake: { in: ["mention", "bot_mention"] },
+          runs: { some: { status: { in: ["leased", "running"] } } },
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        select: { id: true, createdAt: true },
+      });
+    });
+    it("refuses a status or owner change in a mention run, and writes nothing", async () => {
+      const s = mutationDeps();
+      s.mentionTask.mockResolvedValue({ id: "task-1", createdAt: NOW });
+      for (const patch of [{ status: "done" }, { ownerBotId: "bot-2" }]) {
+        const result = await updateTicket(s.deps, {
+          spaceId: "ws",
+          userId: "user-1",
+          botId: "bot-2",
+          id: "t1",
+          ...patch,
+        });
+        expect(result).toEqual({ error: expect.stringContaining("only comment") });
+      }
+      expect(s.tx.ticket.update).not.toHaveBeenCalled();
+      expect(s.tx.ticketEvent.create).not.toHaveBeenCalled();
+      expect(s.changes).not.toHaveBeenCalled();
+    });
+    it("lets a mention run change other fields, set an unchanged status, and an ordinary run move the ticket", async () => {
+      const s = mutationDeps();
+      s.mentionTask.mockResolvedValue({ id: "task-1", createdAt: NOW });
+      const title = await updateTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        botId: "bot-2",
+        id: "t1",
+        title: "Clearer title",
+      });
+      expect(title).toHaveProperty("ticket");
+      const same = await updateTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        botId: "bot-2",
+        id: "t1",
+        status: "todo",
+      });
+      expect(same).toHaveProperty("ticket");
+      s.mentionTask.mockResolvedValue(null);
+      const moved = await updateTicket(s.deps, {
+        spaceId: "ws",
+        userId: "user-1",
+        botId: "bot-1",
+        id: "t1",
+        status: "doing",
+      });
+      expect(moved).toHaveProperty("ticket");
+    });
+    it("never checks for a mention run when a user updates a ticket", async () => {
+      const s = mutationDeps();
+      await updateTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", status: "doing" });
+      expect(s.mentionTask).not.toHaveBeenCalled();
+    });
   });
 });

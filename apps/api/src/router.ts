@@ -4347,6 +4347,7 @@ export function createRouter(deps: RouterDeps) {
         const result = await commentTicket(ticketDeps, {
           id: input.ticketId,
           body: input.body,
+          mentions: input.mentions,
           spaceId: context.actor.spaceId,
           userId: context.actor.userId,
         });

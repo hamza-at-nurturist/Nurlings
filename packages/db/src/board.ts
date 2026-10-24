@@ -6,12 +6,14 @@ import type {
   TicketComment,
   TicketEvent,
   TicketEventKind,
+  TicketMention,
   TicketPriority,
   TicketStatus,
 } from "@rakazo/contracts";
 import {
   parseTicketRef,
   TicketEventKindSchema,
+  TicketMentionSchema,
   TicketPrioritySchema,
   TicketStatusSchema,
   ticketRef,
@@ -138,6 +140,15 @@ export async function listTicketComments(
   });
 }
 
+/** A row written by hand or by a later release may hold anything; keep only well-formed mentions. */
+export function parseTicketMentions(value: unknown): TicketMention[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item: unknown) => {
+    const mention = TicketMentionSchema.safeParse(item);
+    return mention.success ? [mention.data] : [];
+  });
+}
+
 export function toTicketCommentDto(
   row: TicketCommentRow & {
     authorBot: { name: string } | null;
@@ -151,6 +162,7 @@ export function toTicketCommentDto(
     authorBotId: row.authorBotId,
     authorUserId: row.authorUserId,
     authorName: row.authorBot?.name ?? row.authorUser?.name ?? null,
+    mentions: parseTicketMentions(row.mentions),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
