@@ -27,7 +27,7 @@ rework and the reliability fixes, without losing any Nurlings branding or deploy
 | `infra/updater/src/publish-workflow.test.ts` | Test pins the guard on `build` and `publish`. | Keep our guard assertions, extend them to `build-depot`, keep upstream's new assertions. |
 | `apps/api/src/server-update.ts`, `server-update.test.ts` | Deleted upstream (#1915, server self-update and updater proxy removed); modified by us (`config.disabled`). | Accept the deletion. |
 | `apps/api/src/router.ts`, `router.test.ts` | Our `updaterConfig` / `mapUpdaterError` helpers and the "Self-update is switched off" test sit where upstream removed the whole updater proxy. | Take upstream; drop our helpers and test. Remove the now-unused `brand` import if nothing else uses it. |
-| `packages/brand` (`schema.ts`, `brand.json`, `schema.test.ts`) | Follow-on, not a git conflict: `updates.serverSelfUpdate` gated code that no longer exists. | Remove the flag so there is no dead switch. **Maintainer decision**: say so if you would rather keep the field. |
+| `packages/brand` (`schema.ts`, `brand.json`, `schema.test.ts`) | Follow-on, not a git conflict: `updates.serverSelfUpdate` gated code that no longer exists. | Remove the flag so there is no dead switch. Approved by the maintainer. |
 | `apps/desktop/package.json` | `productName` and `version`. | Keep `"productName": "Nurlings"`, take upstream `version` 0.3.3 (fewer future conflicts). |
 | `apps/desktop/e2e/setup.spec.ts` | Import lines. | Keep our `brand` import with upstream's split type import. |
 | `apps/mobile/app/_layout.tsx` | Upstream removed the `new` screen and the avatar-style provider wrapper (re-indent); ours still wraps in `AvatarStyleProvider` and registers `new`. | Take upstream's tree; keep our `brand.name` index title, and drop `AvatarStyleProvider` and `loadAvatarStyle` with their mobile files if upstream removed them, so nothing is left unreferenced. |
@@ -43,6 +43,23 @@ rework and the reliability fixes, without losing any Nurlings branding or deploy
 | `apps/web/e2e/new-bot-ux.spec.ts` | Imports. | Upstream's `organicAvatarFamily` import plus our `ui` where still used. |
 | `apps/web/e2e/readable-names.spec.ts` | Upstream accessibility-name selectors. | Upstream selectors with `ui("Bot")`. |
 | `apps/web/e2e/fixtures/marketing-shots.tsx` | Fixture drives the new dialog. | Upstream fixture; `ui()` on the placeholder text. |
+
+### Fixes the merge needed beyond the conflicts
+
+- **Web manifest brand seam.** Upstream deleted `public/site.webmanifest` and generates the manifest
+  in `pwa/plugin.ts` (it said "Rakazo"). `brandPlugin` now brands that generated manifest in dev and
+  after the build, and its test reads the generated manifest.
+- **Coolify compose.** The API no longer reads `RAKAZO_UPDATER_URL`, `RAKAZO_UPDATER_TOKEN` or
+  `RAKAZO_IMAGE_TAG`, and now reads optional `OBJECT_STORAGE_*`; the compose env allowlist tests
+  require the names to match, so those names changed in `deploy/coolify/docker-compose.yml`
+  (passthrough only, no values, no new service, volume or image).
+- **Dead code.** The unused `PUBLISHED_IMAGE_REPO` constant (it pulled upstream's repository name
+  into the built web bundle's source map, failing the built brand scan) and our orphaned
+  `SoftwareUpdateSection` test are removed; `docs/nurlings-deployment.md` no longer mentions the
+  removed flag.
+- **Tests that pin catalog text.** The mobile Japanese sign-in test expects the brand name, and the
+  reviewed `bot → Nurling` rule snapshots include upstream's new strings (Japanese now appears in
+  the locales that keep their own word for a bot, like Dutch and German).
 
 ## Risks to review before the merge lands
 
@@ -67,13 +84,14 @@ rework and the reliability fixes, without losing any Nurlings branding or deploy
    (`STRIPE_*` reshaped for model credits; billing stays off when unset). Removed:
    `RAKAZO_UPDATER_URL`, `RAKAZO_UPDATER_TOKEN`, and `RAKAZO_IMAGE_TAG` is no longer read by the
    API. Our Coolify compose still sets all three; harmless (ignored). Postgres pool and worker
-   concurrency comments changed (Graphile needs at least 6 connections), so check the Coolify pool
-   size is still at least 6.
+   concurrency comments changed (Graphile needs at least 6 connections). Checked: the Coolify compose
+   only passes `DB_POOL_MAX` through, unset, so the worker defaults to 8 (it refuses to start below
+   6) and the API to 4; no change needed unless an operator sets `DB_POOL_MAX` below 6 in Coolify.
 4. **Compose and image changes picked up automatically in `infra/compose`.** New app and worker
    healthchecks (`dist/health-check.js`), a `webassets` volume for the previous builds' hashed web
    assets, a new `check-image` and `audit-ship` tooling, and a Dockerfile directory for the asset
    archive. The Coolify compose lacks the healthcheck and the `webassets` volume. Not required to
-   run; I propose a **follow-up change** to mirror them rather than widening this sync.
+   run; The maintainer agreed these become **follow-up changes**, not part of this sync.
 5. **Dependencies.** `pnpm-lock.yaml` merges without conflict; I will regenerate nothing by hand
    and run `pnpm install --frozen-lockfile` to prove it still resolves.
 6. **Not a release.** No tag is created or pushed; I will tell the maintainer when it is ready to

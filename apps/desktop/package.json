@@ -1,7 +1,7 @@
 {
   "name": "@rakazo/desktop",
   "productName": "Nurlings",
-  "version": "0.3.1",
+  "version": "0.3.3",
   "author": {
     "name": "Nurturist AI"
   },
@@ -21,6 +21,8 @@
   "dependencies": {
     "@nurlings/brand": "workspace:*",
     "@rakazo/contracts": "workspace:*",
+    "@rakazo/logging": "workspace:*",
+    "@sentry/electron": "8.3.0",
     "electron-updater": "6.8.9",
     "koffi": "3.3.3"
   },
@@ -65,7 +67,7 @@
     "mac": {
       "icon": "../../packages/brand/assets/app-icon/Nurlings.icon",
       "category": "public.app-category.productivity",
-      "x64ArchFiles": "**/node_modules/@koromix/koffi-darwin-*/darwin_*/koffi.node",
+      "x64ArchFiles": "{**/node_modules/@koromix/koffi-darwin-*/darwin_*/koffi.node,**/node_modules/@oxc-parser/binding-darwin-*/parser.darwin-*.node}",
       "entitlements": "assets/entitlements.mac.plist",
       "entitlementsInherit": "assets/entitlements.mac.plist",
       "extendInfo": {

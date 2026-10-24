@@ -60,7 +60,7 @@ describe("brand.json", () => {
   });
 
   it("keeps every updater off", () => {
-    expect(brand.updates).toEqual({ desktop: false, mobileOta: false, serverSelfUpdate: false });
+    expect(brand.updates).toEqual({ desktop: false, mobileOta: false });
   });
 
   it("uses the brand colours: navy plate and splash, white blob, mint to violet orb", () => {

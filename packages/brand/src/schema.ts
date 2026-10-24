@@ -85,7 +85,7 @@ export interface Brand {
     favicon: string;
   };
   /** Every updater that could replace our build with an upstream one stays off. */
-  updates: { desktop: boolean; mobileOta: boolean; serverSelfUpdate: boolean };
+  updates: { desktop: boolean; mobileOta: boolean };
 }
 
 export class BrandConfigError extends Error {
@@ -251,7 +251,7 @@ export function parseBrand(input: unknown): Brand {
     "splash",
     "favicon",
   ]);
-  const updates = object(root.updates, "updates", ["desktop", "mobileOta", "serverSelfUpdate"]);
+  const updates = object(root.updates, "updates", ["desktop", "mobileOta"]);
   const hex = (key: string) => match(colors[key], `colors.${key}`, HEX_COLOR, "a #RRGGBB colour");
   const gradientStops = (value: unknown): [string, string, string] => {
     if (!Array.isArray(value) || value.length !== 3) {
@@ -364,7 +364,6 @@ export function parseBrand(input: unknown): Brand {
     updates: {
       desktop: flag(updates.desktop, "updates.desktop"),
       mobileOta: flag(updates.mobileOta, "updates.mobileOta"),
-      serverSelfUpdate: flag(updates.serverSelfUpdate, "updates.serverSelfUpdate"),
     },
   };
 }

@@ -125,10 +125,9 @@ moves when you decide. To roll back, set the previous tag and run the same two c
 
 ## Why the updater stays off
 
-Nurlings sets `updates.serverSelfUpdate` to `false` in `brand.json`. The API then reports an
-install that cannot update itself, rejects check and apply requests with "Self-update is switched
-off for this deployment", and makes no request to an updater sidecar. The settings screen shows no
-software-update section. Do not start the `updater` compose profile on a client server.
+The server has no self-update path: the API has no update route and reads no updater address. The
+desktop auto-updater and mobile over-the-air updates are off in `brand.json`. Do not start the
+`updater` compose profile on a client server.
 
 ## Passkeys for the Nurlings mobile app
 

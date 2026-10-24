@@ -1,5 +1,4 @@
 export { AppMarkStack } from "./app-mark-stack.js";
-export { type AvatarStyle, AvatarStyleProvider, useAvatarStyle } from "./avatar-style.js";
 export {
   BOT_AVATAR_COLORS,
   BOT_MASCOT_SHAPES,
@@ -9,7 +8,6 @@ export {
   defaultBotAvatarValue,
   parseBotAvatar,
   resolvePersonaColorDef,
-  resolvePersonaShape,
   Wordmark,
 } from "./bot-avatar.js";
 export { BrandAnimation } from "./brand-animation.js";
@@ -33,6 +31,7 @@ export * from "./components/ui/input-otp.js";
 export * from "./components/ui/kbd.js";
 export * from "./components/ui/label.js";
 export * from "./components/ui/native-select.js";
+export * from "./components/ui/option-select.js";
 export * from "./components/ui/popover.js";
 export * from "./components/ui/radio-group.js";
 export * from "./components/ui/scroll-area.js";

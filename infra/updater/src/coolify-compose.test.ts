@@ -68,10 +68,10 @@ describe("the Coolify compose file", () => {
       "web",
       "worker",
     ]);
-    // The API reads these names, so they stay listed; they must never carry a value here.
+    // The API has no updater address to read, so the names are gone.
     const api = environment(services.api ?? {});
-    expect(api.RAKAZO_UPDATER_URL).toBeNull();
-    expect(api.RAKAZO_UPDATER_TOKEN).toBeNull();
+    expect(api).not.toHaveProperty("RAKAZO_UPDATER_URL");
+    expect(api).not.toHaveProperty("RAKAZO_UPDATER_TOKEN");
     expect(source).not.toContain(`${brand.registry}/updater`);
   });
 
