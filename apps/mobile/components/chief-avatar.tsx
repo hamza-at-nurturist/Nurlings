@@ -76,11 +76,7 @@ export function ChiefAvatar({
 
   return (
     <Animated.View style={[{ width: size, height: size }, bodyStyle]}>
-      <Svg
-        width={size}
-        height={size}
-        viewBox="-60 -60 120 120"
-      >
+      <Svg width={size} height={size} viewBox="-60 -60 120 120">
         <Circle r={60} fill={brand.colors.iconBackground} />
         <G transform={`scale(${BLOB_SCALE}) translate(${BLOB_TX}, ${BLOB_TY})`}>
           <Path d={brand.mark.blobBody} fill={brand.colors.blob} />

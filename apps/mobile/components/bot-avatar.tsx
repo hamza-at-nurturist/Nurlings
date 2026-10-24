@@ -29,9 +29,9 @@ import Svg, { Ellipse, G, Path, Rect } from "react-native-svg";
 import type { AvatarLife } from "../lib/avatar-life";
 import { useAvatarOnScreen, useLife, usePoke, useSettling } from "../lib/avatar-life";
 import { mobileBotAvatarPresentation } from "../lib/bot-avatar";
-import { ChiefAvatar } from "./chief-avatar";
 import { useI18n } from "../lib/i18n";
 import { useMobileTokens } from "../lib/native";
+import { ChiefAvatar } from "./chief-avatar";
 import { NativeSymbol } from "./native-symbol";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);

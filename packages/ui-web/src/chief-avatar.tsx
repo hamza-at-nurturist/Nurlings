@@ -63,9 +63,7 @@ export function ChiefAvatar({
         width: size,
         height: size,
         flex: "none",
-        filter: isWorking
-          ? `drop-shadow(0 0 ${Math.round(size * 0.16)}px #4FFFDB)`
-          : undefined,
+        filter: isWorking ? `drop-shadow(0 0 ${Math.round(size * 0.16)}px #4FFFDB)` : undefined,
       }}
     >
       <circle r="60" fill={brand.colors.iconBackground} />
