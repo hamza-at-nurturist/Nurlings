@@ -35,12 +35,13 @@
 - [x] 6.1 Web e2e spec `apps/web/e2e/chief-avatar.spec.ts` renders the real avatars (Chief and
   regular shapes, idle and working, light and dark, 36/42/54/200) and the shape picker, and attaches
   the screenshot.
-- [ ] 6.2 `openspec validate brand-chief-nurling-avatar --strict` (tool not available here).
+- [x] 6.2 Add the `user-facing-branding` spec delta and run
+  `openspec validate brand-chief-nurling-avatar --strict`.
 
 ## 7. Pull request
 
-- [ ] 7.1 Maintainer approves the screenshot, then merge.
+- [x] 7.1 Maintainer approves the screenshot, then merge.
 
 ## 8. After merge
 
-- [ ] 8.1 Archive this change.
+- [x] 8.1 Archive this change.
