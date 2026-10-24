@@ -44,9 +44,8 @@ describe("brandExpoConfig", () => {
     expect(branded.ios?.bundleIdentifier).toBe(brand.native.bundleId);
   });
 
-  it("leaves the URL scheme, slug and every other upstream value alone", () => {
+  it("leaves the URL scheme and every other upstream value alone", () => {
     expect(branded.scheme).toBe("rakazo");
-    expect(branded.slug).toBe(upstream.slug);
     expect(branded.version).toBe(upstream.version);
     expect(branded.android?.versionCode).toBe(upstream.android?.versionCode);
     expect(branded.ios?.supportsTablet).toBe(upstream.ios?.supportsTablet);
@@ -136,6 +135,10 @@ describe("app.json and the Maestro flows", () => {
     expect(placeholderProblems(upstream)).toEqual([]);
   });
 
+  it("matches the Nurlings Expo project slug", () => {
+    expect(upstream.slug).toBe("nurlings");
+  });
+
   it("agrees with the brand on the bundle id and keeps the URL scheme", () => {
     expect(upstream.ios?.bundleIdentifier).toBe(brand.native.bundleId);
     expect(upstream.android?.package).toBe(brand.native.bundleId);
@@ -186,6 +189,7 @@ describe("through Expo's real config loader", () => {
     expect(config.ios?.bundleIdentifier).toBe("com.nurturistai.nurlings");
     expect(config.android?.package).toBe("com.nurturistai.nurlings");
     expect(config.scheme).toBe("rakazo");
+    expect(config.slug).toBe("nurlings");
     expect(config.updates).toEqual({ enabled: false });
     expect(JSON.stringify(config.ios?.infoPlist)).not.toContain("Rakazo");
   }, 120_000);

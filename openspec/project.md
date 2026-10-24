@@ -47,7 +47,7 @@ merge bigger?* Therefore:
    (`com.nurturistai.nurlings`). Out of scope: model prompts, bot User-Agent, `apps/www`, telemetry,
    README/docs/issue templates/`SECURITY.md`, and internal names (`@rakazo/*` package names,
    `RAKAZO_*` env vars, database / Docker names, storage keys, wire headers, code identifiers). The
-   `rakazo://` scheme, Expo slug and desktop `appId` also stay. Disable updaters; never re-point them.
+   `rakazo://` scheme and desktop `appId` also stay (the Expo slug is `nurlings`, matching the Expo project). Disable updaters; never re-point them.
 2. **Centralise branding.** One brand config (`packages/brand`) holds name, bot terms, tagline,
    URLs, colours, logo paths. Product code reads it instead of hardcoding "Nurlings"; upstream
    text is rebranded at well-defined seams (catalog load, config generation) rather than by editing

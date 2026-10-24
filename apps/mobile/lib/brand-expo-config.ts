@@ -49,7 +49,7 @@ function brandSplash(plugin: Json): Json {
 /**
  * Overlays the brand onto upstream's `app.json` so that file stays identical to upstream: display
  * name, permission prompts, splash colours, the iOS icon bundle, the bundle id / package, and no
- * over-the-air updates. The URL scheme and the slug are deliberately not touched.
+ * over-the-air updates. The URL scheme is deliberately not touched.
  */
 export function brandExpoConfig(config: ExpoConfig): ExpoConfig {
   const result: ExpoConfig = {

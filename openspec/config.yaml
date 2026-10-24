@@ -9,7 +9,7 @@ context: |
   disabled (never re-pointed), our own images/compose/installer, mobile bundle id
   com.nurturistai.nurlings. NOT in scope: model prompts, bot User-Agent, apps/www, telemetry,
   README/docs/templates/SECURITY.md, and internal names (@rakazo/*, RAKAZO_*, DB/Docker/code
-  identifiers, rakazo:// scheme, Expo slug, desktop appId). Read brand values from the central
+  identifiers, rakazo:// scheme, desktop appId). Read brand values from the central
   brand config (packages/brand) rather than hardcoding "Nurlings". Never touch LICENSE; NOTICE
   credits Rakazo by Elie Steinbock. Do not use the Rakazo name or logo in branding.
   Stack: TypeScript monorepo (pnpm/Turborepo), React, Electron, Expo, Hono, Postgres, Prisma,
