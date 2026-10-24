@@ -46,4 +46,4 @@
 
 ## 5. After merge
 
-- [ ] 5.1 Archive the change.
+- [x] 5.1 Archive the change.
