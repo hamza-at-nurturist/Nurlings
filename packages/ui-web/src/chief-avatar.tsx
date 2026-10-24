@@ -1,41 +1,9 @@
 import { brand } from "@nurlings/brand";
-import { tokens } from "@rakazo/ui-tokens";
+import { CHIEF_AVATAR_RADIUS, chiefAvatarGeometry } from "@nurlings/brand/chief-avatar";
 import { useSyncExternalStore } from "react";
 import { cn } from "./lib/utils.js";
 
-// Transform parameters that place the blob body in the -60..60 avatar viewport.
-const BLOB_SCALE = 0.0701;
-const BLOB_TX = -921.5;
-const BLOB_TY = -1003;
-
-/** Pre-compute eye rect corners from the brand mark coordinates. */
-function chiefEyeRects() {
-  const { chiefEyeLeft, chiefEyeRight, chiefEyeAngleDeg } = brand.mark;
-  const angle = (chiefEyeAngleDeg * Math.PI) / 180;
-  const cos = Math.cos(angle);
-  const sin = Math.sin(angle);
-  // Eye centres in the 120-unit avatar space.
-  const toAvatar = (cx: number, cy: number) => ({
-    ax: (cx + BLOB_TX) * BLOB_SCALE,
-    ay: (cy + BLOB_TY) * BLOB_SCALE,
-  });
-  // Un-rotate a point from the avatar frame into the rotate(angleDeg) group's local frame.
-  const unrotate = (ax: number, ay: number) => ({
-    lx: ax * cos + ay * sin,
-    ly: -ax * sin + ay * cos,
-  });
-  const left = toAvatar(chiefEyeLeft.cx, chiefEyeLeft.cy);
-  const right = toAvatar(chiefEyeRight.cx, chiefEyeRight.cy);
-  const lLocal = unrotate(left.ax, left.ay);
-  const rLocal = unrotate(right.ax, right.ay);
-  // Rect top-left: centre minus half-dimensions.
-  return {
-    left: { x: lLocal.lx - 3.5, yCenter: lLocal.ly },
-    right: { x: rLocal.lx - 3.5, yCenter: rLocal.ly },
-  };
-}
-
-const EYE_RECTS = chiefEyeRects();
+const { blobTransform, eyeTiltDeg, eyes } = chiefAvatarGeometry;
 
 export function ChiefAvatar({
   size = 36,
@@ -66,31 +34,26 @@ export function ChiefAvatar({
         filter: isWorking ? `drop-shadow(0 0 ${Math.round(size * 0.16)}px #4FFFDB)` : undefined,
       }}
     >
-      <circle r="60" fill={brand.colors.iconBackground} />
-      <g transform={`scale(${BLOB_SCALE}) translate(${BLOB_TX}, ${BLOB_TY})`}>
-        <path d={brand.mark.blobBody} fill={brand.colors.blob} />
-      </g>
-      <g transform={`rotate(${brand.mark.chiefEyeAngleDeg})`}>
+      <circle r={CHIEF_AVATAR_RADIUS} fill={brand.colors.iconBackground} />
+      <path d={brand.mark.blobBody} transform={blobTransform} fill={brand.colors.blob} />
+      <g transform={`rotate(${eyeTiltDeg})`}>
         {(["idle", "working"] as const).map((mode) => (
           <g
             key={mode}
             className={`rakazo-organic-avatar-eyes rakazo-organic-avatar-eyes-${mode}`}
-            fill={tokens.background}
+            fill={brand.colors.iconBackground}
+            style={{ transformBox: "fill-box", transformOrigin: "center" }}
           >
-            <rect
-              x={EYE_RECTS.left.x}
-              y={EYE_RECTS.left.yCenter - 12}
-              width="7"
-              height="24"
-              rx="3.5"
-            />
-            <rect
-              x={EYE_RECTS.right.x}
-              y={EYE_RECTS.right.yCenter - 12}
-              width="7"
-              height="24"
-              rx="3.5"
-            />
+            {eyes.map((eye) => (
+              <rect
+                key={eye.x}
+                x={eye.x}
+                y={eye.y}
+                width={eye.width}
+                height={eye.height}
+                rx={eye.radius}
+              />
+            ))}
           </g>
         ))}
       </g>
