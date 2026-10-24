@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chief avatar</title>
+    <style>
+      body {
+        margin: 0;
+        font: 12px ui-sans-serif, system-ui, sans-serif;
+      }
+      #root {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .panel {
+        display: flex;
+        flex-direction: column;
+        gap: 64px;
+        padding: 32px;
+        background: var(--background);
+        color: var(--muted-foreground);
+      }
+      .row {
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
+      }
+      .item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/e2e/fixtures/chief-avatar.tsx"></script>
+  </body>
+</html>
