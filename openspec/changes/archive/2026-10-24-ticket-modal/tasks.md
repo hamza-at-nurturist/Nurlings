@@ -42,7 +42,7 @@
 
 ## 4. Evidence
 
-- [ ] 4.1 Extend `apps/web/e2e/board.spec.ts`: open the modal, change status through the pill,
+- [x] 4.1 Extend `apps/web/e2e/board.spec.ts`: open the modal, change status through the pill,
   post a reply, see both in the feed; capture a screenshot. Verify: CI E2E passes and the
   screenshot is linked in the PR.
 
@@ -52,5 +52,5 @@
 
 ## 6. After merge
 
-- [ ] 6.1 Archive the change.
-- [ ] 6.2 Tell the maintainer change 2 (`ticket-mentions`) can start.
+- [x] 6.1 Archive the change.
+- [x] 6.2 Tell the maintainer change 2 (`ticket-mentions`) can start.
