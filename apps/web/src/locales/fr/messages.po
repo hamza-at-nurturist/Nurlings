@@ -3029,6 +3029,7 @@ msgstr "Chargement des règles…"
 msgid "Loading voice providers…"
 msgstr "Chargement des fournisseurs vocaux…"
 
+#: src/App.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/IntegrationSetup.tsx
 #: src/pages/Onboarding.tsx
