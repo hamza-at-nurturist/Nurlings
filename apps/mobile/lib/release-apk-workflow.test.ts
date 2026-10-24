@@ -11,10 +11,10 @@ const easConfig = JSON.parse(
 ) as { build: Record<string, { extends?: string; android?: { buildType?: string } }> };
 
 describe("Android APK release workflow", () => {
-  it("only runs on demand from main with release credentials", () => {
-    expect(workflow).toMatch(/^on:\n {2}workflow_dispatch:\n\n/m);
+  it("only runs on demand, from main or as an explicit preview, with release credentials", () => {
+    expect(workflow).toMatch(/^on:\n {2}workflow_dispatch:\n {4}inputs:\n {6}preview:/m);
     expect(workflow).toContain("permissions:\n  contents: read");
-    expect(workflow).toContain("if: github.ref == 'refs/heads/main'");
+    expect(workflow).toContain("if: github.ref == 'refs/heads/main' || inputs.preview");
     expect(workflow).toContain("persist-credentials: false");
     expect(workflow).not.toContain("cache: pnpm");
   });
@@ -32,7 +32,9 @@ describe("Android APK release workflow", () => {
       extends: "production",
       android: { buildType: "apk" },
     });
-    expect(workflow).toContain("--profile android-apk");
+    expect(workflow).toContain('--profile "$EAS_PROFILE"');
+    expect(workflow).toContain("inputs.preview && 'android-preview-apk' || 'android-apk'");
+    expect(workflow).toContain("inputs.preview && 'android-preview' || 'android'");
     expect(workflow).toContain("--latest=false");
     expect(workflow).not.toContain("gh release delete");
     expect(readFileSync(path.resolve(import.meta.dirname, "../app.config.ts"), "utf8")).toContain(
