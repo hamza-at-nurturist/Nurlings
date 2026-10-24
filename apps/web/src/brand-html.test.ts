@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
 import { brandIndexHtml, brandManifest, brandPlugin, isAppIndexHtml } from "./brand-html";
+import { webManifest } from "./pwa/plugin";
 
 const read = (relative: string) =>
   readFileSync(fileURLToPath(new URL(relative, import.meta.url)), "utf8");
@@ -80,7 +81,7 @@ describe("brandPlugin", () => {
 });
 
 describe("brandManifest", () => {
-  const upstream = JSON.parse(read("../public/site.webmanifest")) as Record<string, unknown>;
+  const upstream = webManifest();
 
   it("brands the names, description and colours and keeps the rest", () => {
     const manifest = brandManifest(upstream);

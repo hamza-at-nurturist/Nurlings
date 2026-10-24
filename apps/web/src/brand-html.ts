@@ -1,12 +1,13 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import brandData from "@nurlings/brand/brand.json" with { type: "json" };
 import { parseBrand } from "@nurlings/brand/schema";
 import type { Plugin } from "vite";
+import { webManifest } from "./pwa/plugin.js";
 
 /**
  * Brands the document title, home-screen title and web manifest at build and dev time, so
- * `index.html` and `public/site.webmanifest` stay identical to upstream. A pattern that no longer
+ * `index.html` and the manifest `pwa/plugin.ts` generates stay identical to upstream. A pattern that no longer
  * matches throws instead of silently shipping the upstream name.
  */
 type BrandIdentity = Pick<ReturnType<typeof parseBrand>, "name" | "description" | "colors">;
@@ -79,42 +80,33 @@ export function isAppIndexHtml(filename: string, root: string): boolean {
 
 const MANIFEST = "site.webmanifest";
 
-async function brandedManifestText(file: string): Promise<string> {
-  const manifest = JSON.parse(await readFile(file, "utf8")) as Record<string, unknown>;
-  return `${JSON.stringify(brandManifest(manifest), null, 2)}\n`;
+function brandedManifestText(): string {
+  return `${JSON.stringify(brandManifest(webManifest()), null, 2)}\n`;
 }
 
 export function brandPlugin(): Plugin {
   let root = "";
-  let publicDir = "";
   let outDir = "";
   return {
     name: "nurlings-brand-identity",
     configResolved(config) {
       root = config.root;
-      publicDir = config.publicDir;
       outDir = path.resolve(config.root, config.build.outDir);
     },
     transformIndexHtml: (html, context) =>
       isAppIndexHtml(context.filename, root) ? brandIndexHtml(html) : html,
+    // This plugin runs before the PWA plugin, so its dev response wins.
     configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
-        if (!publicDir || req.url?.split("?", 1)[0] !== `/${MANIFEST}`) return next();
-        try {
-          res.setHeader("content-type", "application/manifest+json");
-          res.end(await brandedManifestText(path.join(publicDir, MANIFEST)));
-        } catch (error) {
-          next(error);
-        }
+      server.middlewares.use((req, res, next) => {
+        if (req.url?.split("?", 1)[0] !== `/${MANIFEST}`) return next();
+        res.setHeader("content-type", "application/manifest+json");
+        res.end(brandedManifestText());
       });
     },
-    // Vite copies `public/` before it writes the bundle, so the manifest is already in `outDir`.
+    // The PWA plugin emits the manifest while it generates the bundle, so ours overwrites it
+    // after the bundle is written.
     async writeBundle() {
-      if (!publicDir) return;
-      await writeFile(
-        path.join(outDir, MANIFEST),
-        await brandedManifestText(path.join(publicDir, MANIFEST)),
-      );
+      await writeFile(path.join(outDir, MANIFEST), brandedManifestText());
     },
   };
 }

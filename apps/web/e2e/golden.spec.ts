@@ -310,13 +310,13 @@ test("takeover, routine, plugins, and export are reachable", async ({ page }, te
   await page.getByRole("button", { name: "Add Treg", exact: true }).click();
   await page.getByPlaceholder("Treg token").fill("fake-treg-browser-credential");
   await page.getByRole("button", { name: "Verify and add", exact: true }).click();
-  await expect(page.getByText(/MCP · https:\/\/treg\.to\/mcp\/ · credential saved/)).toBeVisible();
+  await expect(page.getByText(/MCP · https:\/\/treg\.to\/mcp\/ · Credential saved/)).toBeVisible();
 
   await page.getByRole("button", { name: "Add MCP server", exact: true }).click();
   await page.getByPlaceholder("Display name").fill("Browser MCP");
   await page.getByPlaceholder("https://example.com/mcp").fill("https://mcp.example.test/mcp");
   await page.getByRole("button", { name: "Verify and add", exact: true }).click();
-  await expect(page.getByText(/MCP · https:\/\/mcp\.example\.test\/mcp · no auth/)).toBeVisible();
+  await expect(page.getByText(/MCP · https:\/\/mcp\.example\.test\/mcp · No auth/)).toBeVisible();
 
   await page.getByRole("button", { name: "Add OpenAPI", exact: true }).click();
   await page.getByPlaceholder("Display name").fill("Browser API");
@@ -327,7 +327,7 @@ test("takeover, routine, plugins, and export are reachable", async ({ page }, te
   await page.getByPlaceholder("Credential").fill("fake-openapi-browser-credential");
   await page.getByRole("button", { name: "Verify and add", exact: true }).click();
   await expect(
-    page.getByText(/API · https:\/\/api\.example\.test\/v1 · credential saved/),
+    page.getByText(/API · https:\/\/api\.example\.test\/v1 · Credential saved/),
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Add Executor", exact: true }).click();
@@ -338,7 +338,7 @@ test("takeover, routine, plugins, and export are reachable", async ({ page }, te
   await page.getByPlaceholder("Executor token").fill("fake-executor-browser-credential");
   await page.getByRole("button", { name: "Verify and add", exact: true }).click();
   await expect(
-    page.getByText(/MCP · https:\/\/executor\.example\.test\/mcp · credential saved/),
+    page.getByText(/MCP · https:\/\/executor\.example\.test\/mcp · Credential saved/),
   ).toBeVisible();
   await captureScreenshot(page, testInfo, "11d-provider-emulators");
 
@@ -349,7 +349,7 @@ test("takeover, routine, plugins, and export are reachable", async ({ page }, te
     .fill("https://graphql.example.test/graphql");
   await page.getByRole("button", { name: "Verify and add", exact: true }).click();
   await expect(
-    page.getByText(/GRAPHQL · https:\/\/graphql\.example\.test\/graphql · no auth/),
+    page.getByText(/GRAPHQL · https:\/\/graphql\.example\.test\/graphql · No auth/),
   ).toBeVisible();
   await captureScreenshot(page, testInfo, "02-graphql-installed");
 
@@ -361,7 +361,10 @@ test("takeover, routine, plugins, and export are reachable", async ({ page }, te
     await page.getByRole("button", { name: "Agent computer", exact: true }).click();
   }
   await gear.click();
-  await expandAdvancedSection(page.getByTestId("bot-settings"));
+  await page
+    .getByTestId("bot-settings")
+    .getByRole("button", { name: "Advanced", exact: true })
+    .click();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Export" }).click();
   const download = await downloadPromise;
@@ -528,7 +531,7 @@ test("bot context menu pins, duplicates, edits, and confirms deletion", async ({
 
   await chief.click({ button: "right" });
   await page.getByRole("menuitem", { name: "Edit Profile" }).click();
-  await expect(page.locator("label:has-text('Name') input")).toHaveValue("Chief");
+  await expect(page.getByRole("button", { name: "Edit name", exact: true })).toHaveText("Chief");
   await captureScreenshot(page, testInfo, "19-edit-profile");
 });
 

@@ -73,7 +73,6 @@
   },
   "updates": {
     "desktop": false,
-    "mobileOta": false,
-    "serverSelfUpdate": false
+    "mobileOta": false
   }
 }
