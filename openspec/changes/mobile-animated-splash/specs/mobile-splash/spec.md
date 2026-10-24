@@ -26,6 +26,10 @@ as soon as the app is ready.
 - **WHEN** the system reduce-motion setting is on
 - **THEN** the splash shows the static mark for about 600 ms (longer only until the app is ready) and then the app, with no animation
 
+#### Scenario: The app is always reached
+- **WHEN** the app launches in any mode, including the first launch after an install and with reduced motion on
+- **THEN** the splash ends and the sign-in screen or the chats appear
+
 #### Scenario: Screen readers
 - **WHEN** a screen reader is on
 - **THEN** the splash exposes no content and adds no words on screen

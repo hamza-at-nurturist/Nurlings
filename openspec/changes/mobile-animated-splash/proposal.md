@@ -32,8 +32,8 @@ screen away into the app.
 ### Not changed, on purpose
 
 - App icon, adaptive icon, notification icon: untouched.
-- No tests for the animation's pixels. The maintainer checks it on a phone after the APK rebuild
-  and any fixes follow in a separate PR. The keyframe sampling, the phase planning and the mark
+- No tests for the animation's pixels. The maintainer checks it on a phone, from the preview APK,
+  before merge. The keyframe sampling, the phase planning and the mark
   geometry are pure and unit tested.
 - No dependency changes: `react-native-svg` and `react-native-reanimated` are already installed.
 
