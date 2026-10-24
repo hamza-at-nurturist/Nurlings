@@ -39,10 +39,10 @@
   `nurlings-preview.apk` on the `android-preview` prerelease.
 - [x] 4.5a Short run plays the whole pop-in before its exit, about 2.3 s in all, after the
   maintainer found it exited at once on a phone. Verify: `planSplash` and `exitTiming` tests.
-- [ ] 4.5 Maintainer confirms on a phone: first launch plays the full animation, a later launch the
+- [x] 4.5 Maintainer confirms on a phone: first launch plays the full animation, a later launch the
   short pop-in, a tap skips, reduced motion shows the static mark, and the app always reaches
   sign-in or the chats. Verify: maintainer's confirmation in the PR.
-- [ ] 4.6 `openspec validate mobile-animated-splash --strict`, mobile typecheck, lint, unit tests.
+- [x] 4.6 `openspec validate mobile-animated-splash --strict`, mobile typecheck, lint, unit tests.
 
 ## 5. After merge
 
