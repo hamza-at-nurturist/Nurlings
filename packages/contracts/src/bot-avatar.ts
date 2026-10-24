@@ -40,7 +40,9 @@ export function parseBotAvatarValue(raw: string): ParsedBotAvatar {
 /** True for values we persist on `bots.color` (hex, encoded shape, data image, or ::brand_chief). */
 export function isBotAvatarValue(raw: string): boolean {
   if (!raw || raw.length > BOT_AVATAR_VALUE_MAX_LENGTH) return false;
-  return raw === "::brand_chief" || HEX_COLOR.test(raw) || SHAPE_SUFFIX.test(raw) || DATA_IMAGE.test(raw);
+  return (
+    raw === "::brand_chief" || HEX_COLOR.test(raw) || SHAPE_SUFFIX.test(raw) || DATA_IMAGE.test(raw)
+  );
 }
 
 export const BotAvatarValueSchema = z
