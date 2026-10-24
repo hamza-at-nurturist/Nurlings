@@ -8,6 +8,7 @@ import {
   DEFAULT_BOT_AVATAR_COLOR,
   organicAvatarPath,
   resolvePersonaColorDef,
+  SHIPPED_BOT_AVATAR_CENTER,
   SHIPPED_BOT_AVATAR_SHAPE_KEYS,
   SHIPPED_BOT_AVATAR_SHAPES,
   SHIPPED_BOT_AVATAR_VIEWBOX,
@@ -27,6 +28,8 @@ export { BOT_AVATAR_COLORS, BOT_COLOR_LIST, DEFAULT_BOT_AVATAR_COLOR, resolvePer
 export const BOT_SHAPES = SHIPPED_BOT_AVATAR_SHAPES;
 export const SHIPPED_SHAPE_KEYS = SHIPPED_BOT_AVATAR_SHAPE_KEYS;
 const VIEWBOX = SHIPPED_BOT_AVATAR_VIEWBOX;
+// The organic eye keyframes are authored for a 120-unit box; shapes draw in a larger one.
+const EYE_UNIT = Number(VIEWBOX.split(" ")[2]) / 120;
 
 export const BOT_MASCOT_SHAPES = SHIPPED_SHAPE_KEYS.map(
   (k) => BOT_SHAPES[k] ?? FALLBACK_SHAPE_PATH,
@@ -146,6 +149,9 @@ export const BotAvatar = memo(function BotAvatar({
     );
   }
 
+  // Only the brand blob's pill eyes move like organic avatars' eyes for now.
+  const animatedEyes = shippedBotAvatarEyes(parsed.shapeIndex).kind === "pill";
+
   return (
     <div
       className={cn(
@@ -193,8 +199,11 @@ export const BotAvatar = memo(function BotAvatar({
         width={size}
         height={size}
         aria-hidden="true"
+        data-working={animatedEyes ? isWorking : undefined}
+        data-eye-pattern={animatedEyes ? avatarIdentitySeed(effectiveId) % 4 : undefined}
         className={cn(
           "overflow-visible transition-transform duration-300",
+          animatedEyes && "rakazo-shape-eyes",
           isWorking
             ? "animate-pulse scale-[1.04] motion-reduce:animate-none"
             : "hover:scale-[1.03] motion-reduce:hover:scale-100",
@@ -216,6 +225,7 @@ export const BotAvatar = memo(function BotAvatar({
           <ShapeEyes
             shapeIndex={parsed.shapeIndex}
             fill={colorDef.eyeColor}
+            animated={animatedEyes}
             className="bot-character-eyes"
           />
         </g>
@@ -224,34 +234,67 @@ export const BotAvatar = memo(function BotAvatar({
   );
 });
 
-/** The two eyes of a shipped shape: ellipses, or tilted pills for the brand blob. */
+/** The eyes of a shipped shape, in a frame centred on `origin` and scaled by `unit`. */
+function eyeShapes(eyes: ReturnType<typeof shippedBotAvatarEyes>, origin: number, unit: number) {
+  return [eyes.left, eyes.right].map(({ cx, cy }) => {
+    const x = (cx - origin) / unit;
+    const y = (cy - origin) / unit;
+    const rx = eyes.rx / unit;
+    const ry = eyes.ry / unit;
+    return eyes.kind === "pill" ? (
+      <rect
+        key={cx}
+        x={x - rx}
+        y={y - ry}
+        width={rx * 2}
+        height={ry * 2}
+        rx={rx}
+        transform={`rotate(${eyes.tiltDeg} ${x} ${y})`}
+      />
+    ) : (
+      <ellipse key={cx} cx={x} cy={y} rx={rx} ry={ry} />
+    );
+  });
+}
+
+/**
+ * The two eyes of a shipped shape: ellipses, or tilted pills for the brand blob. Animated eyes reuse
+ * the organic avatars' idle and working keyframes, so they sit in a wrapper scaled to the box those
+ * keyframes were written for.
+ */
 function ShapeEyes({
   shapeIndex,
   fill,
+  animated = false,
   className,
 }: {
   shapeIndex: number;
   fill: string;
+  animated?: boolean;
   className?: string;
 }) {
   const eyes = shippedBotAvatarEyes(shapeIndex);
+  if (!animated) {
+    return (
+      <g fill={fill} className={className}>
+        {eyeShapes(eyes, 0, 1)}
+      </g>
+    );
+  }
   return (
-    <g fill={fill} className={className}>
-      {[eyes.left, eyes.right].map(({ cx, cy }) =>
-        eyes.kind === "pill" ? (
-          <rect
-            key={cx}
-            x={cx - eyes.rx}
-            y={cy - eyes.ry}
-            width={eyes.rx * 2}
-            height={eyes.ry * 2}
-            rx={eyes.rx}
-            transform={`rotate(${eyes.tiltDeg} ${cx} ${cy})`}
-          />
-        ) : (
-          <ellipse key={cx} cx={cx} cy={cy} rx={eyes.rx} ry={eyes.ry} />
-        ),
-      )}
+    <g
+      className={className}
+      transform={`translate(${SHIPPED_BOT_AVATAR_CENTER} ${SHIPPED_BOT_AVATAR_CENTER}) scale(${EYE_UNIT})`}
+    >
+      {(["idle", "working"] as const).map((mode) => (
+        <g
+          key={mode}
+          className={`rakazo-organic-avatar-eyes rakazo-organic-avatar-eyes-${mode}`}
+          fill={fill}
+        >
+          {eyeShapes(eyes, SHIPPED_BOT_AVATAR_CENTER, EYE_UNIT)}
+        </g>
+      ))}
     </g>
   );
 }

@@ -202,7 +202,8 @@ describe("BotAvatar", () => {
     expect(html).toContain("bot-character-eyes");
     expect(html).toContain(`url(#bot-ink-`);
     expect(html).toContain(colorDef.light);
-    expect(html.match(/<rect/g)).toHaveLength(2);
+    // Two pills in each of the idle and working eye groups.
+    expect(html.match(/<rect/g)).toHaveLength(4);
     expect(html).not.toContain("<ellipse");
     expect(html).toContain("rotate(13.5 ");
   });
@@ -214,5 +215,44 @@ describe("BotAvatar", () => {
     );
     expect(html).toContain('aria-label="nurling"');
     expect(html.match(/<rect/g)).toHaveLength(2);
+  });
+
+  it("gives the brand blob the organic eye hooks, seeded per bot, and leaves the classic shapes alone", () => {
+    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const render = (color: string, identity: string, status?: string) =>
+      renderToString(<BotAvatar color={color} identity={identity} status={status} />);
+    const blob = render(`#8B5CF6::shape_${index}`, "chief", "running");
+    expect(blob).toContain("rakazo-shape-eyes");
+    expect(blob).toContain('data-working="true"');
+    expect(blob).toMatch(/data-eye-pattern="[0-3]"/);
+    expect(blob).toContain("rakazo-organic-avatar-eyes-idle");
+    expect(blob).toContain("rakazo-organic-avatar-eyes-working");
+    expect(blob.match(/<rect/g)).toHaveLength(4);
+    // Organic-only checks keep telling an organic body from a shape.
+    expect(blob).not.toContain('class="rakazo-organic-avatar ');
+    expect(blob).not.toMatch(/class="[^"]*\brakazo-organic-avatar\b(?!-)/);
+
+    const patterns = new Set(
+      ["a", "b", "c", "d", "e", "f", "g", "h"].map(
+        (id) => render(`#8B5CF6::shape_${index}`, id).match(/data-eye-pattern="(\d)"/)?.[1],
+      ),
+    );
+    expect(patterns.size).toBeGreaterThan(1);
+    expect(render(`#8B5CF6::shape_${index}`, "chief")).toBe(
+      render(`#8B5CF6::shape_${index}`, "chief"),
+    );
+
+    const classic = render("#8B5CF6::shape_3", "chief", "running");
+    expect(classic).not.toContain("rakazo-shape-eyes");
+    expect(classic).not.toContain("data-eye-pattern");
+    expect(classic).not.toContain("rakazo-organic-avatar-eyes");
+    expect(classic).toContain("<ellipse");
+  });
+
+  it("keeps the shape picker preview still", () => {
+    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const html = renderToString(<BotShapePreview shapeIndex={index} color="#8B5CF6" />);
+    expect(html).not.toContain("rakazo-organic-avatar-eyes");
+    expect(html).not.toContain("rakazo-shape-eyes");
   });
 });

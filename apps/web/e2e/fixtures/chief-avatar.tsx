@@ -33,6 +33,21 @@ function Row({ label, status }: { label: string; status?: string }) {
   );
 }
 
+function Compare({ label, status }: { label: string; status?: string }) {
+  return (
+    <div className="row" data-row={label}>
+      <div className="item">
+        <BotAvatar color={chief} identity="chief" size={120} status={status} />
+        <span>Chief</span>
+      </div>
+      <div className="item">
+        <BotAvatar color="#22C55E" identity="regular-hex" size={120} status={status} />
+        <span>Organic</span>
+      </div>
+    </div>
+  );
+}
+
 void bootstrapI18n("en").then(() => {
   createRoot(document.getElementById("root")!).render(
     <I18nProvider i18n={i18n}>
@@ -40,6 +55,10 @@ void bootstrapI18n("en").then(() => {
         <div className="panel" data-theme={theme} key={theme}>
           <Row label="idle" />
           <Row label="working" status="running" />
+          <div className="compare">
+            <Compare label="compare-idle" />
+            <Compare label="compare-working" status="running" />
+          </div>
           <div className="picker" data-picker={theme}>
             <BotLookPicker value={chief} identity="chief" onChange={() => undefined} />
           </div>
