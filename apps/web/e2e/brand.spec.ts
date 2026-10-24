@@ -7,6 +7,7 @@ import {
   openNewBot,
   openUserSettings,
   signup,
+  ui,
 } from "./helpers";
 
 const UPSTREAM_NAME = /rakazo/i;
@@ -57,8 +58,8 @@ test("the signed-in app and its settings carry the brand and no upstream name", 
 
   await createNamedBot(page, "Scout");
   await openNewBot(page);
-  await expect(page.getByTestId("side-panel")).toContainText(`New ${brand.bot.singular}`);
-  await expectNoUpstreamName(page, "new bot panel");
+  await expect(page.getByTestId("create-bot-dialog")).toContainText(ui("Create new Bot"));
+  await expectNoUpstreamName(page, "new bot dialog");
   await captureScreenshot(page, testInfo, "brand-new-bot");
 
   for (const section of ["general", "models", "memory", "usage"] as const) {
