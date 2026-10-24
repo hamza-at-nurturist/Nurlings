@@ -14,5 +14,5 @@
 
 ## 3. After merge
 
-- [ ] 3.1 Maintainer reruns `release-android-apk`. Verify: the "Build APK on EAS" step passes.
-- [ ] 3.2 Archive the change.
+- [x] 3.1 Maintainer reruns `release-android-apk`. Verify: the "Build APK on EAS" step passes (confirmed by the maintainer: workflow green).
+- [x] 3.2 Archive the change.
