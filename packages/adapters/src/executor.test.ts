@@ -3945,6 +3945,30 @@ describe("ticket board tool capability", () => {
   });
 });
 
+describe("ticket_comment mentions", () => {
+  it("lets a Nurling call in other Nurlings by id and the user by flag", () => {
+    const tool = selectBuiltinToolsForRun({
+      graphicalToolsAllowed: false,
+      groupId: null,
+      trigger: "tickets",
+      semanticMemoryEnabled: false,
+      messagingChannelRun: false,
+      ticketBoardEnabled: true,
+    }).find((candidate) => candidate.name === "ticket_comment");
+    const schema = tool?.inputSchema as {
+      properties: Record<string, { type: string; items?: { type: string } }>;
+      required: string[];
+    };
+    expect(schema.properties.mention_bots).toMatchObject({
+      type: "array",
+      items: { type: "string" },
+    });
+    expect(schema.properties.mention_user?.type).toBe("boolean");
+    expect(schema.required).toEqual(["id", "body"]);
+    expect(tool?.description).toContain("@Name");
+  });
+});
+
 describe("call_user availability", () => {
   const options = {
     graphicalToolsAllowed: false,

@@ -696,6 +696,9 @@ model Task {
   // The ticket this task was started for; lets the board find the files its runs attached.
   ticketId  String?
   ticket    Ticket?  @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+  /// Set when a mention started this task: mention (a user), bot_mention (a Nurling) or
+  /// bot_mention_owner (a Nurling woke the owner). Null for assignment and reply wakes.
+  ticketWake String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   runs      Run[]
@@ -1594,6 +1597,8 @@ model TicketComment {
   authorUserId String?
   authorUser   User?    @relation("TicketCommentAuthorUser", fields: [authorUserId], references: [id], onDelete: SetNull)
   body         String
+  /// [{ kind: "bot" | "user", id }]; names and colors are resolved by the reader.
+  mentions     Json     @default("[]")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

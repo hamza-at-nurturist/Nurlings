@@ -131,6 +131,7 @@ function comment(id: string, createdAt: string, patch: Partial<TicketComment>): 
     authorBotId: null,
     authorUserId: "user-1",
     authorName: "Ada",
+    mentions: [],
     createdAt,
     updatedAt: createdAt,
     ...patch,
@@ -460,6 +461,148 @@ it("lists attached files only when there are some", async () => {
     const card = q(page.container, '[data-testid="file-card"]');
     expect(card.textContent).toBe("comps.csv");
     expect(card.dataset.bot).toBe("bot-1");
+  } finally {
+    await page.cleanup();
+  }
+});
+
+const key = (el: HTMLElement, name: string) =>
+  el.dispatchEvent(new KeyboardEvent("keydown", { key: name, bubbles: true, cancelable: true }));
+const options = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll('[data-testid="mention-option"]')).map(
+    (node) => node.textContent,
+  );
+
+it("shows a comment's mentions as chips: tinted by each Nurling's own hex and neutral for a user", async () => {
+  api.tickets.comments.mockResolvedValue([
+    comment("m1", "2026-10-24T05:00:00.000Z", {
+      body: "Hi @Chief and @Scout, and @Ada\nsecond line",
+      mentions: [
+        { kind: "bot", id: "bot-1" },
+        { kind: "bot", id: "bot-2" },
+        { kind: "user", id: "user-1" },
+      ],
+    }),
+    comment("m2", "2026-10-24T05:01:00.000Z", { body: "**plain** comment" }),
+  ]);
+  const page = await open();
+  try {
+    const chips = Array.from(
+      page.container.querySelectorAll<HTMLElement>('[data-testid="mention-chip"]'),
+    );
+    expect(chips.map((chip) => chip.textContent)).toEqual(["Chief", "Scout", "Ada"]);
+    expect(chips.map((chip) => chip.dataset.mentionColor)).toEqual(["#7c3aed", "#22c55e", ""]);
+    expect(chips[0]?.style.color).toBe("rgb(124, 58, 237)");
+    expect(chips[0]?.style.backgroundColor).toContain("color-mix");
+    expect(chips[2]?.className).toContain("bg-accent");
+    const card = chips[0]!.closest("li")!;
+    expect(card.querySelector("p")?.textContent).toContain("second line");
+    expect(card.querySelector("p")?.className).toContain("whitespace-pre-wrap");
+    // A comment without mentions is still markdown.
+    const plain = Array.from(page.container.querySelectorAll("li")).find((row) =>
+      row.textContent?.includes("**plain** comment"),
+    )!;
+    expect(plain.querySelector('[data-testid="mention-chip"]')).toBeNull();
+    expect(plain.querySelector("p")).toBeNull();
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("opens a picker of the space's Nurlings on @, narrows it, and adds a chip and the @Name text", async () => {
+  const page = await open();
+  try {
+    const box = q(page.container, 'textarea[aria-label="Reply"]') as HTMLTextAreaElement;
+    expect(q(page.container, '[data-testid="mention-picker"]')).toBeNull();
+    await act(async () => type(box, "Hi @"));
+    expect(options(page.container)).toEqual(["Chief", "Scout"]);
+    const avatars = page.container.querySelectorAll(
+      '[data-testid="mention-option"] [data-testid="bot-avatar"]',
+    );
+    expect(Array.from(avatars).map((node) => (node as HTMLElement).dataset.identity)).toEqual([
+      "bot-1",
+      "bot-2",
+    ]);
+    await act(async () => type(box, "Hi @sc"));
+    expect(options(page.container)).toEqual(["Scout"]);
+    await act(async () => key(box, "Enter"));
+    expect(box.value).toBe("Hi @Scout ");
+    expect(q(page.container, '[data-testid="mention-picker"]')).toBeNull();
+    const chips = page.container.querySelectorAll('[data-testid="mention-chip"]');
+    expect(Array.from(chips).map((chip) => chip.textContent)).toEqual(["Scout"]);
+    expect(api.tickets.comment).not.toHaveBeenCalled();
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("moves through the picker with the arrow keys and closes it with Escape without closing the dialog", async () => {
+  const page = await open();
+  try {
+    const box = q(page.container, 'textarea[aria-label="Reply"]') as HTMLTextAreaElement;
+    await act(async () => type(box, "@"));
+    const selected = () => q(page.container, '[role="option"][aria-selected="true"]')?.textContent;
+    expect(selected()).toBe("Chief");
+    await act(async () => key(box, "ArrowDown"));
+    expect(selected()).toBe("Scout");
+    await act(async () => key(box, "ArrowDown"));
+    expect(selected()).toBe("Chief");
+    await act(async () => key(box, "ArrowUp"));
+    expect(selected()).toBe("Scout");
+    await act(async () => key(box, "Escape"));
+    expect(q(page.container, '[data-testid="mention-picker"]')).toBeNull();
+    expect(box.value).toBe("@");
+    // Enter now sends, as the picker is closed.
+    await act(async () => key(box, "Enter"));
+    expect(api.tickets.comment).toHaveBeenCalledWith({ ticketId: "t1", body: "@" });
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("sends the mentions that are still in the text, and none when the @Name was deleted or the chip removed", async () => {
+  const page = await open();
+  try {
+    const box = q(page.container, 'textarea[aria-label="Reply"]') as HTMLTextAreaElement;
+    const form = () => q(page.container, "form");
+    const submit = () =>
+      form().dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    await act(async () => type(box, "@sc"));
+    await act(async () => key(box, "Tab"));
+    await act(async () => type(box, `${box.value}can you check?`));
+    await act(async () => submit());
+    expect(api.tickets.comment).toHaveBeenLastCalledWith({
+      ticketId: "t1",
+      body: "@Scout can you check?",
+      mentions: [{ kind: "bot", id: "bot-2" }],
+    });
+    expect(page.container.querySelectorAll('[data-testid="mention-chip"]')).toHaveLength(0);
+
+    // The user deletes the @Name but leaves the chip: the mention is not sent.
+    await act(async () => type(box, "@sc"));
+    await act(async () => key(box, "Enter"));
+    await act(async () => type(box, "just a note"));
+    await act(async () => submit());
+    expect(api.tickets.comment).toHaveBeenLastCalledWith({ ticketId: "t1", body: "just a note" });
+
+    // Removing the chip drops the mention while the text stays.
+    await act(async () => type(box, "@ch"));
+    await act(async () => key(box, "Enter"));
+    await act(async () => q(page.container, 'button[aria-label="Remove mention Chief"]').click());
+    expect(page.container.querySelectorAll('[data-testid="mention-chip"]')).toHaveLength(0);
+    await act(async () => submit());
+    expect(api.tickets.comment).toHaveBeenLastCalledWith({ ticketId: "t1", body: "@Chief " });
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("does not open the picker for an @ inside a word", async () => {
+  const page = await open();
+  try {
+    const box = q(page.container, 'textarea[aria-label="Reply"]') as HTMLTextAreaElement;
+    await act(async () => type(box, "write to me@"));
+    expect(q(page.container, '[data-testid="mention-picker"]')).toBeNull();
   } finally {
     await page.cleanup();
   }

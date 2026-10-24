@@ -9,6 +9,7 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await signup(page, `board-${stamp}@rakazo.test`, "password12", "Board QA");
   await completeOnboarding(page);
   await createNamedBot(page, "Planner");
+  await createNamedBot(page, "Scout");
 
   await page.getByTestId("user-menu-trigger").click();
   await page.getByRole("button", { name: "Board", exact: true }).click();
@@ -64,4 +65,15 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await expect(activity).toContainText("Any update on this?");
   await expect(detail.getByLabel("Reply")).toHaveValue("");
   await captureScreenshot(page, testInfo, "board-ticket-modal");
+
+  // Calling in another Nurling: the picker lists the space's Nurlings and the feed shows a chip.
+  await detail.getByLabel("Reply").fill("@Sc");
+  await detail.getByRole("option", { name: "Scout", exact: true }).click();
+  await detail.getByLabel("Reply").pressSequentially("can you sanity-check this?");
+  await detail.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(activity).toContainText("can you sanity-check this?");
+  const chip = activity.getByTestId("mention-chip").filter({ hasText: "Scout" });
+  await expect(chip).toBeVisible();
+  await expect(chip).toHaveAttribute("data-mention-color", /^#[0-9a-f]{3,6}$/i);
+  await captureScreenshot(page, testInfo, "board-ticket-mention");
 });

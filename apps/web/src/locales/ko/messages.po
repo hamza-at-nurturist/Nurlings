@@ -4144,6 +4144,7 @@ msgid "Remove header"
 msgstr "헤더 삭제"
 
 #. placeholder {0}: mention.name
+#: src/components/board/TicketModal/MentionChip.tsx
 #: src/pages/shell/composer.tsx
 msgid "Remove mention {0}"
 msgstr "{0} 멘션 삭제"

@@ -6431,6 +6431,10 @@ export function createRunExecutor(deps: ExecutorDeps) {
                 userId: run.userId,
                 id: String(args.id ?? ""),
                 body: String(args.body ?? ""),
+                mentionBotIds: Array.isArray(args.mention_bots)
+                  ? args.mention_bots.map(String)
+                  : [],
+                mentionUser: args.mention_user === true,
               }),
             );
           }

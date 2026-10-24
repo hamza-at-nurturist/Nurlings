@@ -1,9 +1,10 @@
-import type { TicketStatus } from "@rakazo/contracts";
+import type { TicketMention, TicketStatus } from "@rakazo/contracts";
 import {
   CommentTicketInput,
   CreateTicketInput,
   isTicketCompletedStatus,
   TicketStatusSchema,
+  ticketRef,
   UpdateTicketInput,
 } from "@rakazo/contracts";
 import type { PrismaClient } from "@rakazo/db";
@@ -17,6 +18,12 @@ import {
   toTicketDto,
 } from "@rakazo/db";
 import type { TicketChangeNotifier } from "./ticket-changes.js";
+import {
+  activeMentionTask,
+  MENTION_RUN_COMMENT_ERROR,
+  MENTION_RUN_UPDATE_ERROR,
+  resolveMentions,
+} from "./ticket-mentions.js";
 
 type TicketToolDeps = {
   prisma: PrismaClient;
@@ -224,6 +231,16 @@ export async function updateTicket(
   const data = parsed.data;
   if (data.assigneeBotId && !(await ownBotInSpace(deps, input, data.assigneeBotId)))
     return { error: "Unknown bot." };
+  // A Nurling woken by a mention gets one comment and nothing else: no update of any field.
+  if (
+    input.botId &&
+    (await activeMentionTask(deps.prisma, {
+      spaceId: input.spaceId,
+      botId: input.botId,
+      ticketId: data.id,
+    }))
+  )
+    return { error: MENTION_RUN_UPDATE_ERROR };
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const result = await deps.prisma.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM tickets WHERE id = ${data.id} AND "spaceId" = ${input.spaceId} FOR UPDATE`;
@@ -283,6 +300,10 @@ export async function commentTicket(
     userId?: string;
     id: string;
     body: string;
+    /** Mentions from a client, and from a Nurling's `mention_bots` / `mention_user`. */
+    mentions?: TicketMention[];
+    mentionBotIds?: string[];
+    mentionUser?: boolean;
   },
 ) {
   if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
@@ -291,6 +312,28 @@ export async function commentTicket(
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const ticket = await findTicket(deps.prisma, input.spaceId, board, { id: input.id });
   if (!ticket) return { error: "Ticket not found." };
+  if (input.botId) {
+    // A Nurling woken by a mention gets one reply on the ticket.
+    const mention = await activeMentionTask(deps.prisma, {
+      spaceId: input.spaceId,
+      botId: input.botId,
+      ticketId: ticket.id,
+    });
+    if (
+      mention &&
+      (await deps.prisma.ticketComment.count({
+        where: {
+          ticketId: ticket.id,
+          authorBotId: input.botId,
+          createdAt: { gte: mention.createdAt },
+        },
+      })) > 0
+    )
+      return { error: MENTION_RUN_COMMENT_ERROR };
+  }
+  const resolved = input.userId
+    ? await resolveMentions(deps.prisma, { ...input, userId: input.userId })
+    : { mentions: [], botIds: [] };
   const row = await deps.prisma.$transaction(async (tx) => {
     const comment = await tx.ticketComment.create({
       include: { authorBot: { select: { name: true } }, authorUser: { select: { name: true } } },
@@ -300,6 +343,7 @@ export async function commentTicket(
         authorBotId: input.botId ?? null,
         authorUserId: input.userId ?? null,
         body: parsed.data.body,
+        mentions: resolved.mentions,
       },
     });
     await tx.ticket.update({ where: { id: ticket.id }, data: { updatedAt: new Date() } });
@@ -313,6 +357,17 @@ export async function commentTicket(
     ticketId: ticket.id,
     assigneeBotId: ticket.assigneeBotId,
     wakeAssignee: !input.botId && Boolean(ticket.assigneeBotId),
+    mentionBotIds: resolved.botIds,
+    ...(input.userId ? { userId: input.userId } : {}),
+    ...(input.botId ? { commentBotId: input.botId } : {}),
+    ...(input.botId && resolved.mentions.some((item) => item.kind === "user")
+      ? {
+          mentionedUser: {
+            ref: ticketRef(board.ticketPrefix, ticket.number),
+            body: parsed.data.body,
+          },
+        }
+      : {}),
   });
   return { comment: toTicketCommentDto(row) };
 }

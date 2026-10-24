@@ -206,6 +206,7 @@ async function main() {
     jobs,
     prisma,
     ticketBoardEnabled,
+    notifications: () => notifications,
   });
   // One provider instance so emulator launches and polls share the same Map.
   const cloudAgent = createCloudAgentConnection();

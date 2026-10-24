@@ -7,6 +7,8 @@ import { formatRelativeTime } from "../../../lib/relative-time";
 import { useTicketStatusLabels } from "../../../lib/ticket-status";
 import { FALLBACK_BOT_COLOR } from "../../../pages/shell/chat-shared";
 import type { ActivityItem } from "./activity";
+import { MentionText } from "./MentionText";
+import { resolveMentionTargets } from "./mentions";
 
 export type Viewer = { id: string; name: string; image?: string | null };
 
@@ -110,7 +112,14 @@ export function ActivityFeed({ items, bots, viewer }: Props) {
               <span className="min-w-0 flex-1 truncate font-medium">{name}</span>
               <Time at={item.at} />
             </div>
-            <ChatMarkdown>{item.comment.body}</ChatMarkdown>
+            {item.comment.mentions?.length ? (
+              <MentionText
+                body={item.comment.body}
+                targets={resolveMentionTargets(item.comment.mentions, bots, viewer)}
+              />
+            ) : (
+              <ChatMarkdown>{item.comment.body}</ChatMarkdown>
+            )}
           </li>
         );
       })}

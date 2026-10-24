@@ -67,6 +67,15 @@ export const RenameBoardInput = z
   });
 export type RenameBoardInput = z.infer<typeof RenameBoardInput>;
 
+export const TICKET_MENTION_KINDS = ["bot", "user"] as const;
+/** A Nurling or a user called in by a comment. Names and colors come from the reader's own lists. */
+export const TicketMentionSchema = z.object({
+  kind: z.enum(TICKET_MENTION_KINDS),
+  id: Id,
+});
+export type TicketMention = z.infer<typeof TicketMentionSchema>;
+export const TICKET_MENTIONS_MAX = 20;
+
 export const TicketCommentSchema = z.object({
   id: Id,
   ticketId: Id,
@@ -74,6 +83,7 @@ export const TicketCommentSchema = z.object({
   authorBotId: Id.nullable(),
   authorUserId: Id.nullable(),
   authorName: z.string().nullable(),
+  mentions: z.array(TicketMentionSchema).default([]),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -166,6 +176,7 @@ export type MoveTicketInput = z.infer<typeof MoveTicketInput>;
 export const CommentTicketInput = z.object({
   ticketId: Id,
   body: z.string().trim().min(1).max(TICKET_COMMENT_MAX_LENGTH),
+  mentions: z.array(TicketMentionSchema).max(TICKET_MENTIONS_MAX).optional(),
 });
 export type CommentTicketInput = z.infer<typeof CommentTicketInput>;
 

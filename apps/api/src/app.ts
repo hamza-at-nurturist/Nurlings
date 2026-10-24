@@ -329,6 +329,7 @@ async function buildApp(overrides: CreateAppOverrides): Promise<AppHandles> {
     jobs,
     prisma,
     ticketBoardEnabled,
+    notifications: () => notifications,
   });
   const sandbox: SandboxProvider =
     sandboxOverride ??

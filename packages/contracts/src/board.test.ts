@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  CommentTicketInput,
   CreateTicketInput,
   GetTicketInput,
   isTicketCompletedStatus,
@@ -7,6 +8,7 @@ import {
   TICKET_EVENT_KINDS,
   TICKET_PRIORITIES,
   TICKET_STATUSES,
+  TicketCommentSchema,
   TicketEventSchema,
   TicketSchema,
   UpdateTicketInput,
@@ -120,5 +122,44 @@ describe("ticket contracts", () => {
     expect(TicketEventSchema.parse(event).status).toBe("blocked");
     expect(() => TicketEventSchema.parse({ ...event, kind: "priority" })).toThrow();
     expect(() => TicketEventSchema.parse({ ...event, status: "archived" })).toThrow();
+  });
+
+  it("keeps comments without mentions working and accepts typed mentions", () => {
+    expect(CommentTicketInput.parse({ ticketId: "t1", body: "Hi" }).mentions).toBeUndefined();
+    expect(
+      CommentTicketInput.parse({
+        ticketId: "t1",
+        body: "@Scout hi",
+        mentions: [{ kind: "bot", id: "bot-2" }],
+      }).mentions,
+    ).toEqual([{ kind: "bot", id: "bot-2" }]);
+    expect(() =>
+      CommentTicketInput.parse({
+        ticketId: "t1",
+        body: "x",
+        mentions: [{ kind: "group", id: "g1" }],
+      }),
+    ).toThrow();
+    expect(() =>
+      CommentTicketInput.parse({
+        ticketId: "t1",
+        body: "x",
+        mentions: Array.from({ length: 21 }, (_, index) => ({ kind: "bot", id: `bot-${index}` })),
+      }),
+    ).toThrow();
+  });
+
+  it("reads a comment stored before mentions existed as having none", () => {
+    const comment = {
+      id: "c1",
+      ticketId: "t1",
+      body: "Ready",
+      authorBotId: null,
+      authorUserId: "user-1",
+      authorName: "Ada",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    };
+    expect(TicketCommentSchema.parse(comment).mentions).toEqual([]);
   });
 });

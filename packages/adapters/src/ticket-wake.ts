@@ -4,6 +4,11 @@ import { isTicketCompletedStatus, TicketStatusSchema } from "@rakazo/contracts";
 import type { PrismaClient } from "@rakazo/db";
 import { getLogger } from "@rakazo/logging";
 
+/** What the owner is told when it is woken for a ticket. */
+export function ticketWakePrompt(ref: string): string {
+  return `Work on ticket ${ref}. Read it with ticket_get, including any comments added since you last looked, and answer them. Keep progress in ticket comments and update its status with ticket_update. Use ask or approval cards when user input is needed.`;
+}
+
 /**
  * Assignment and a user's comment wake only the current owner, without posting a chat message.
  * A wake that is still queued will read everything when it starts, so it absorbs a newer one.
@@ -44,7 +49,7 @@ export async function wakeTicketAssignee(
         threadId: bot.thread.id,
         userId: bot.userId,
         ticketId: ticket.id,
-        prompt: `Work on ticket ${ticket.board.ticketPrefix}-${ticket.number}. Read it with ticket_get, including any comments added since you last looked, and answer them. Keep progress in ticket comments and update its status with ticket_update. Use ask or approval cards when user input is needed.`,
+        prompt: ticketWakePrompt(`${ticket.board.ticketPrefix}-${ticket.number}`),
         status: "queued",
       },
     });
