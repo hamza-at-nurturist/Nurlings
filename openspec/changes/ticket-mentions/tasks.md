@@ -2,7 +2,7 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal and the five decisions in it. Verify: explicit approval
+- [x] 1.1 Maintainer approves the proposal and the five decisions in it. Verify: explicit approval
   in the session.
 
 ## 2. Backend
@@ -20,11 +20,14 @@
   cap rules, the mention prompt and `ticketWake`; user mentions exempt from working and cap.
   Verify: unit tests for each scenario in the spec, including the cap boundary at 10 and 11 and the
   one-hour window.
-- [ ] 2.5 Comment-only runs: refuse `ticket_update` and a second `ticket_comment` for a run of a task
-  with `ticketWake` on its ticket. Verify: executor unit tests for both refusals and for an owner run
-  that is unaffected.
+- [ ] 2.5 Comment-only runs in the ticket tools, not `executor.ts`: `activeMentionTask` in
+  `ticket-mentions.ts`; `updateTicket` refuses a status or owner change and `commentTicket` refuses
+  a second comment while the bot has an active mention task for that ticket. Verify: unit tests for
+  both refusals, for other fields and other tickets being allowed, for an owner's ordinary run
+  being unaffected, and for a queued (not yet running) task not counting.
 - [ ] 2.6 `ticket_comment` gains `mention_bots` and `mention_user`; tool description tells the model
-  to write `@Name` in the text. Verify: tool schema test and an executor test mapping the arguments.
+  to write `@Name` in the text. Verify: tool schema test and an executor test that the two arguments reach `commentTicket`
+  (the only `executor.ts` change: two argument lines).
 - [ ] 2.7 User notification through the existing provider for `mention_user`, honouring
   notify-on-finish, never failing the comment. Verify: unit tests for sent, setting off, no provider,
   and provider failure.

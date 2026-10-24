@@ -28,8 +28,10 @@ the conversation happens, and tells you when a Nurling is asking for you.
 
 - A user's comment that mentions a Nurling that is **not the owner** wakes that Nurling for this
   ticket only: it reads the ticket, replies with **one** comment, and does not change the ticket's
-  status or owner. This is enforced by the tool layer, not only by the prompt: in such a run
-  `ticket_update` is refused, and a second `ticket_comment` is refused.
+  status or owner. This is enforced in the ticket tools, not only by the prompt: in such a run
+  `ticket_update` is refused when it changes the status or owner, and a second `ticket_comment` on
+  the ticket is refused. The tools find the run's task themselves, so `executor.ts` carries no
+  enforcement.
 - Mentioning the owner needs nothing new: a user's comment already wakes the owner.
 - One owner per ticket stays. No groups, no multi-assign.
 
@@ -88,17 +90,17 @@ doing, and the picker appears on the first `@`.
 ### Upstream merge safety
 
 New files wherever possible (`TicketModal/MentionPicker.tsx`, `TicketModal/MentionText.tsx`,
-`packages/adapters/src/ticket-mentions.ts`). Edits to existing files are small:
+`packages/adapters/src/ticket-mentions.ts`, which also holds the comment-only check). Edits to existing files are small:
 
 | File | Edit |
 |---|---|
 | `packages/db/prisma/schema.prisma` | `TicketComment.mentions`, `Task.ticketWake` |
 | `packages/contracts/src/board.ts` | `mentions` on the comment input and output |
-| `packages/adapters/src/ticket-tools.ts` | `commentTicket` stores mentions and passes them on |
+| `packages/adapters/src/ticket-tools.ts` | `commentTicket` stores mentions, passes them on and refuses a second comment in a mention run; `updateTicket` refuses status and owner changes in one |
 | `packages/adapters/src/ticket-changes.ts` | hands mentions to the new module, sends the user notification |
 | `packages/adapters/src/ticket-wake.ts` | optional wake kind, mention prompt, sets `ticketWake` |
 | `packages/adapters/src/builtin-tools.ts` | two optional arguments on `ticket_comment` |
-| `packages/adapters/src/executor.ts` | refuse `ticket_update` and a second comment in a mention run (a few lines in the existing ticket tool branches) |
+| `packages/adapters/src/executor.ts` | two argument lines in the existing `ticket_comment` branch (`mention_bots`, `mention_user`); no enforcement logic |
 | `apps/web/src/components/board/TicketModal/{ReplyBox,ActivityFeed}.tsx` | picker and chips (files from the previous change) |
 
 `Board.tsx` is not touched.
@@ -110,22 +112,23 @@ New files wherever possible (`TicketModal/MentionPicker.tsx`, `TicketModal/Menti
   see the decisions.
 - No multi-owner, no reassigning through a mention.
 
-## Decisions I need from you
+## Decisions (approved)
 
-1. **Mention storage.** Recommended: the `mentions` column plus `@Name` in the text (a Nurling reading
+1. **Mention storage.** Chosen: the `mentions` column plus `@Name` in the text (a Nurling reading
    `ticket_get` sees the name, plain clients degrade to text). Alternative: parse names from the body
    at wake time, which breaks on duplicate or renamed Nurlings.
-2. **Chips inside comments.** Recommended: comments with mentions render as plain text with chips, so
+2. **Chips inside comments.** Chosen: comments with mentions render as plain text with chips, so
    the shared markdown renderer in `packages/chat-ui` is not touched. Alternative: add a mention hook
    to the shared renderer to keep markdown in those comments (a change in a shared upstream package).
-3. **Notifying the user.** Recommended: push through the existing provider, honouring the Nurling's
+3. **Notifying the user.** Chosen: push through the existing provider, honouring the Nurling's
    "notify on finish" setting. Tapping it opens that Nurling's chat, because there is no board link
    target on mobile. The web app has no out-of-app channel for board changes; a browser notification
    for ticket mentions would be a separate change.
-4. **Guards.** Recommended: the three rules and the cap of 10 per hour above, with user mentions
-   exempt. Say if you want another number, or want user mentions capped too.
-5. **Comment-only runs enforced in code.** Recommended, because a prompt alone can be ignored by the
-   model. Cost: a few lines in the executor's ticket tool branches.
+4. **Guards.** Chosen: the three rules and the cap of 10 per hour above, with user mentions
+   exempt.
+5. **Comment-only runs** are enforced in the ticket tools (`ticket-tools.ts` and the new
+   `ticket-mentions.ts`), not in `executor.ts`, which is an upstream file. The tools read the run's
+   task themselves.
 
 ## Impact
 

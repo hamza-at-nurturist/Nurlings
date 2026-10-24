@@ -49,14 +49,26 @@ simply has no chip.
 The mention prompt: "You were mentioned on ticket X. You are not its owner. Read it with ticket_get,
 reply with one ticket_comment, and do not change its status, owner or other fields."
 
-### Comment-only runs are enforced
+### Comment-only runs are enforced in the ticket tools
 
-In the executor's `ticket_update` branch, a run whose task has `ticketWake` set is refused for that
-task's ticket (other tickets and `ticket_create` are unaffected). In `ticket_comment`, a second comment
-by the same bot on the ticket since the task was created is refused with a short error telling it to
-stop. Both checks read the task once per run.
+The executor does not hand a run or task id to the ticket tools, and `executor.ts` is an upstream
+file we keep free of our logic. So `ticket-mentions.ts` exports `activeMentionTask(prisma, { spaceId,
+botId, ticketId })`: the calling bot's task for this ticket with `ticketWake` set and a `leased` or
+`running` run, newest first. A Nurling's tool calls only happen inside a run, and a non-owner has no
+other run on the ticket at the same time, so a hit means "this call is from a mention wake".
 
-Alternative rejected: prompt only. The model can ignore it, and the requirement is a guarantee.
+- `updateTicket` (only when `botId` is set): inside the transaction, after reading the current row, if
+  the call changes the status or the owner and there is an active mention task for this ticket, it
+  returns an error and writes nothing. Other fields and other tickets are unaffected.
+- `commentTicket` (only when `botId` is set): if there is an active mention task and the bot has
+  already commented on this ticket since that task was created, it returns an error telling the
+  Nurling it has replied and should stop.
+
+Alternatives rejected: a check in `executor.ts` (upstream conflicts), and prompt only (the model can
+ignore it, and the requirement is a guarantee).
+
+The only `executor.ts` edit is passing the two new `ticket_comment` arguments (`mention_bots`,
+`mention_user`) through, two lines in the existing branch.
 
 ### The user notification
 
