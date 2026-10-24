@@ -42,7 +42,7 @@ test("create opens dialog, then empty chat; picker lists bots; sidebar collapses
   const createDialog = page.getByTestId("create-bot-dialog");
   await expect(createDialog).toBeVisible();
   await expect(page.getByTestId("side-panel")).toHaveAttribute("data-panel", "closed");
-  const name = createDialog.getByPlaceholder("Name your Bot");
+  const name = createDialog.getByPlaceholder(ui("Name your Bot"));
   await expect(name).toBeFocused();
   const create = createDialog.getByRole("button", { name: "Create", exact: true });
   await expect(create).toBeDisabled();
@@ -144,7 +144,7 @@ test("create opens dialog, then empty chat; picker lists bots; sidebar collapses
   const family = Number(
     await createDialog.locator(".rakazo-organic-avatar").first().getAttribute("data-shape-family"),
   );
-  await createDialog.getByPlaceholder("Name your Bot").fill("Organic Bot");
+  await createDialog.getByPlaceholder(ui("Name your Bot")).fill("Organic Bot");
   await createDialog.getByRole("button", { name: "Create", exact: true }).click();
   await expect(createDialog).toBeHidden();
   await expect(page.getByPlaceholder("Message Organic Bot")).toBeVisible();

@@ -189,7 +189,7 @@ export async function createBotFromPicker(
 ) {
   await openNewBot(page);
   const dialog = page.getByTestId("create-bot-dialog");
-  await dialog.getByPlaceholder("Name your Bot").fill(name);
+  await dialog.getByPlaceholder(ui("Name your Bot")).fill(name);
   await dialog.getByRole("button", { name: "Create", exact: true }).click();
   await page.waitForURL(/\/app\/[^/]+$/);
   await expect(dialog).toBeHidden();

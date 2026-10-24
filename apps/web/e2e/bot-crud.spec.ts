@@ -32,7 +32,7 @@ test("bot creation, editing, and deletion persist", async ({ page }, testInfo) =
   });
   await openNewBot(page);
   const dialog = page.getByTestId("create-bot-dialog");
-  await dialog.getByPlaceholder("Name your Bot").fill("New Bot");
+  await dialog.getByPlaceholder(ui("Name your Bot")).fill("New Bot");
   await dialog.getByRole("button", { name: "Create", exact: true }).click();
   await createAborted;
   // Failed create keeps the dialog open over the current bot chat.

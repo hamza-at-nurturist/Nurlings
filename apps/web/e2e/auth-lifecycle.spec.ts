@@ -7,6 +7,7 @@ import {
   showPasswordForm,
   signup,
   signupThroughForm,
+  ui,
 } from "./helpers";
 
 test("sign-up stays blank until session and sign-in options are ready", async ({
@@ -44,7 +45,7 @@ test("sign-up stays blank until session and sign-in options are ready", async ({
   await captureScreenshot(page, testInfo, "signup-options-pending");
 
   releaseCapabilities();
-  await expect(page.getByRole("heading", { name: "Create your Rakazo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: ui("Create your Rakazo") })).toBeVisible();
   await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
   await captureScreenshot(page, testInfo, "signup-ready");
 });

@@ -12,6 +12,7 @@ import {
   openUserSettings,
   rpc,
   signup,
+  ui,
 } from "./helpers";
 
 const LOCAL_MODEL_ID = "rakazo-e2e-local";
@@ -1076,7 +1077,7 @@ test("a Claude subscription folds the key form and bots move to the space defaul
   await page.getByRole("button", { name: /^Claude subscription/ }).click();
   await expect(page.locator("#model-api-key")).toHaveCount(0);
   const bots = page.getByTestId("space-bots-model");
-  await expect(bots).toContainText("2 bots have their own model: Archie, Inbox");
+  await expect(bots).toContainText(ui("2 bots have their own model: Archie, Inbox"));
   await captureScreenshot(page, testInfo, "subscription-key-folded-and-bot-models");
 
   await page.getByRole("button", { name: "Or paste an API key" }).click();
@@ -1086,10 +1087,10 @@ test("a Claude subscription folds the key form and bots move to the space defaul
   await bots.getByRole("button", { name: "Use space default" }).click();
   const confirm = page.getByRole("alertdialog");
   await expect(
-    confirm.getByRole("heading", { name: "Switch 2 bots to the space default?" }),
+    confirm.getByRole("heading", { name: ui("Switch 2 bots to the space default?") }),
   ).toBeVisible();
   await captureScreenshot(page, testInfo, "bot-models-confirm");
   await confirm.getByRole("button", { name: "Switch", exact: true }).click();
-  await expect(bots).toContainText("2 bots now use the space default.");
+  await expect(bots).toContainText(ui("2 bots now use the space default."));
   await expect(bots.getByRole("button", { name: "Use space default" })).toHaveCount(0);
 });

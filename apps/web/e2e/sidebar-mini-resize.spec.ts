@@ -153,7 +153,7 @@ test("sidebar snaps its layout during a held drag in both directions", async ({
     await sidebar.screenshot({ path, animations: "disabled" });
     await testInfo.attach(name, { contentType: "image/png", path });
   };
-  const handle = page.getByRole("separator", { name: "Resize bots sidebar" });
+  const handle = page.getByRole("separator", { name: ui("Resize bots sidebar") });
   const search = sidebar.getByRole("textbox", { name: "Search", exact: true });
   await page.getByTestId("minimize-bots-sidebar").click();
   await expect(sidebar).toHaveCSS("width", "72px");
