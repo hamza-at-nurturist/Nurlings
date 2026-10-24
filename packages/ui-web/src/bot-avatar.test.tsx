@@ -176,6 +176,17 @@ describe("BotAvatar", () => {
     expect(html).not.toContain("rakazo-organic-avatar");
   });
 
+  it("renders ChiefAvatar for ::brand_chief and does not fall back to an image or shape", () => {
+    const parsed = parseBotAvatar("::brand_chief");
+    expect(parsed.isImage).toBe(false);
+    expect(parsed.shapeIndex).toBeUndefined();
+    expect(parsed.isBrandChief).toBe(true);
+    const html = renderToString(<BotAvatar color="::brand_chief" identity="chief" />);
+    expect(html).toContain("rakazo-organic-avatar");
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("bot-character-eyes");
+  });
+
   it("keeps an encoded studio shape", () => {
     const html = renderToString(
       <BotAvatar color={`${DEFAULT_BOT_AVATAR_COLOR}::shape_3`} identity="maya" />,

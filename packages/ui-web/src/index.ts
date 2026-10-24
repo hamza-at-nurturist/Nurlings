@@ -1,4 +1,5 @@
 export { AppMarkStack } from "./app-mark-stack.js";
+export { ChiefAvatar } from "./chief-avatar.js";
 export {
   BOT_AVATAR_COLORS,
   BOT_MASCOT_SHAPES,

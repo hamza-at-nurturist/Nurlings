@@ -29,6 +29,7 @@ import Svg, { Ellipse, G, Path, Rect } from "react-native-svg";
 import type { AvatarLife } from "../lib/avatar-life";
 import { useAvatarOnScreen, useLife, usePoke, useSettling } from "../lib/avatar-life";
 import { mobileBotAvatarPresentation } from "../lib/bot-avatar";
+import { ChiefAvatar } from "./chief-avatar";
 import { useI18n } from "../lib/i18n";
 import { useMobileTokens } from "../lib/native";
 import { NativeSymbol } from "./native-symbol";
@@ -98,7 +99,7 @@ function useBodyStyle(life: AvatarLife, size: number) {
 }
 
 /** An eye's offset (motion units), its height and whether it shows. */
-function eyeState(life: AvatarLife) {
+export function eyeState(life: AvatarLife) {
   "worklet";
   const { frame, grow } = liveFrame(life);
   return { x: frame.eyeX, y: frame.eyeY, lid: frame.lid, hidden: grow >= 0.5 };
@@ -170,6 +171,8 @@ export const BotAvatar = memo(function BotAvatar({
       >
         <Image source={{ uri: parsed.imageUrl }} style={{ width: size, height: size }} />
       </View>
+    ) : parsed.kind === "brand-chief" ? (
+      <ChiefAvatar size={size} life={life} bodyStyle={bodyStyle} />
     ) : parsed.kind === "shape" ? (
       <ShippedShapeAvatar
         color={parsed.color}

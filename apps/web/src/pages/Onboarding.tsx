@@ -109,6 +109,7 @@ async function createOrReuseFirstBot(): Promise<{ id: string }> {
       instructions: "",
       notifyOnFinish: true,
       spawnKey: FIRST_BOT_SPAWN_KEY,
+      color: "::brand_chief",
     });
     return { id: created.id };
   } catch (error) {

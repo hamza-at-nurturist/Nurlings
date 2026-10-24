@@ -18,6 +18,7 @@ import { tokens } from "@rakazo/ui-tokens";
 import type { CSSProperties } from "react";
 import { memo, useId, useMemo, useSyncExternalStore } from "react";
 import { BrandMark } from "./brand-mark.js";
+import { ChiefAvatar } from "./chief-avatar.js";
 import { cn } from "./lib/utils.js";
 import "./styles.css";
 
@@ -43,8 +44,12 @@ export function parseBotAvatar(
   shapeIndex?: number;
   isImage: boolean;
   imageUrl?: string;
+  isBrandChief?: boolean;
 } {
   if (!rawColor) return { color: "#F97316", isImage: false };
+  if (rawColor === "::brand_chief") {
+    return { color: brand.colors.iconBackground, isImage: false, isBrandChief: true };
+  }
   // Only data: image URLs are rendered. Arbitrary http(s)/blob values in `color`
   // must not become <img src> (SSRF / tracking when other members view the bot).
   if (rawColor.startsWith("data:image/")) {
@@ -97,6 +102,10 @@ export const BotAvatar = memo(function BotAvatar({
     () => resolvePersonaColorDef(effectiveId, parsed.color),
     [effectiveId, parsed.color],
   );
+
+  if (parsed.isBrandChief) {
+    return <ChiefAvatar size={size} isWorking={isWorking} className={className} />;
+  }
 
   if (parsed.isImage && parsed.imageUrl) {
     return (
