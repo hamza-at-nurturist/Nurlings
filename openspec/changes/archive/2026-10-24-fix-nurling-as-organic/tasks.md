@@ -25,13 +25,13 @@
 
 ## 4. Evidence
 
-- [ ] 4.1 Web screenshot of Chief idle and working next to a teardrop bot idle and working, from the
+- [x] 4.1 Web screenshot of Chief idle and working next to a teardrop bot idle and working, from the
   real fixture, attached to the PR. Verify: maintainer sees them before merge.
 
 ## 5. Pull request
 
-- [ ] 5.1 Open the PR, wait for CI, merge when green after the maintainer has seen the screenshot.
+- [x] 5.1 Open the PR, wait for CI, merge when green after the maintainer has seen the screenshot.
 
 ## 6. After merge
 
-- [ ] 6.1 Archive this change.
+- [x] 6.1 Archive this change.
