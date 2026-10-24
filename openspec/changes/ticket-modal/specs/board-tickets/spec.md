@@ -14,8 +14,16 @@ and a reply box.
 - **WHEN** the user picks another status, owner or priority, or edits the title or description and leaves the field
 - **THEN** the ticket is updated and the modal shows the new value
 
+#### Scenario: Attached deliverable
+- **WHEN** the owning Nurling attaches a file with `attach_file` during a run started for the ticket
+- **THEN** the file is listed under the ticket's files, and a newer attachment of the same name replaces it in the list
+
+#### Scenario: Workspace-only file
+- **WHEN** the Nurling only writes a file in its workspace and does not attach it
+- **THEN** the file is not listed
+
 #### Scenario: No files
-- **WHEN** the owning Nurling produced no files for the ticket
+- **WHEN** the owning Nurling attached no files for the ticket
 - **THEN** no files section is shown
 
 #### Scenario: New ticket
@@ -68,11 +76,12 @@ by a Nurling SHALL NOT start any run. A comment on a done or closed ticket SHALL
 - **WHEN** a user comments again before the owner's queued run has started
 - **THEN** no second run is queued
 
-### Requirement: Blocked on the user is visible on the ticket
+### Requirement: Ticket run guidance covers blocking and deliverables
 When a Nurling working a ticket is blocked on the user, its instructions SHALL tell it to comment
 the question on the ticket, set the ticket to Blocked, and still send its normal ask or approval
-card.
+card. The instructions SHALL also tell it to attach anything the user should see or download, such
+as reports, CSVs and documents, with `attach_file`, and not to attach scratch or working files.
 
 #### Scenario: Guidance
 - **WHEN** a ticket run starts
-- **THEN** the run's guidance includes commenting the question, setting Blocked, and sending the ask card
+- **THEN** the run's guidance includes commenting the question, setting Blocked, and sending the ask card, and attaching deliverables but not scratch files

@@ -34,8 +34,8 @@ on the right, and makes replying actually reach the Nurling.
 - Every Nurling (owner, comment author) renders with the existing `BotAvatar`, including its
   idle/working state from the bot's run status. A user shows their profile picture, falling back to
   their initial.
-- **Files** lists what the owning Nurling produced while working on the ticket. The section is
-  hidden when there are none.
+- **Files** lists what the owning Nurling attached with `attach_file` while working on the ticket.
+  The section is hidden when there are none.
 - "New ticket" keeps the current small create dialog. Nothing in the mockup covers creation.
 
 ### Replying wakes the owner
@@ -45,10 +45,14 @@ on the right, and makes replying actually reach the Nurling.
 - Comments from a Nurling wake nobody.
 - The wake prompt tells the Nurling to read the new comments with `ticket_get`.
 
-### Blocked on the user
+### Ticket run guidance
 
 - When a Nurling is blocked on the user, its guidance now says: comment the question on the ticket,
-  set the ticket to Blocked, and still send its normal ask card. This is a prompt change only.
+  set the ticket to Blocked, and still send its normal ask card.
+- The guidance also says: anything the user should see or download (reports, CSVs, documents) is
+  attached with `attach_file`; scratch and working files are not. Files only written to the
+  workspace are not listed, because they are not artifacts.
+- Both are prompt changes only.
 
 ### Backend, minimal and additive
 
@@ -114,7 +118,7 @@ Everything else is new files. `Board.tsx` is not rewritten.
 
 1. **Status history storage.** Recommended: the `ticket_events` table above. The alternative is
    showing comments only, which drops the status lines from your mockup.
-2. **Files.** Recommended: only files the Nurling produced (via the task link). The mockup's
+2. **Files.** Decided: only files the Nurling attached with `attach_file` (via the task link), with a guidance line telling it to attach deliverables and not scratch files. The mockup's
    "attachments" need a way to attach a file to a ticket, which does not exist; adding it means a
    new upload path and storage link. I suggest a follow-up change if you want it.
 3. **Old tickets.** They have no recorded history, so the feed shows only a synthesised

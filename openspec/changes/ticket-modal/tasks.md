@@ -2,7 +2,7 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal and the three decisions in it. Verify: explicit approval
+- [x] 1.1 Maintainer approves the proposal and the three decisions in it. Verify: explicit approval
   in the session.
 
 ## 2. Backend
@@ -20,11 +20,15 @@
 - [ ] 2.5 `commentTicket` wakes the assignee for a user comment on an open ticket, never for a
   Nurling comment or a finished ticket; queued-run dedupe. Verify: unit tests for each scenario in
   the spec.
-- [ ] 2.6 `wakeTicketAssignee` sets `Task.ticketId` and uses the new prompt; add the blocked
-  sentence to `TICKET_SILENT_REPLY_GUIDANCE`. Verify: unit tests assert the stored `ticketId`, the
-  prompt reads the new comments, and the guidance carries the blocked instruction.
-- [ ] 2.7 Files: a read path that returns the latest artifact of each family produced by runs of
-  tasks with this `ticketId`. Verify: test with two tickets and a versioned artifact.
+- [ ] 2.6 `wakeTicketAssignee` sets `Task.ticketId` and uses the new prompt; add two sentences to
+  `TICKET_SILENT_REPLY_GUIDANCE`: (a) when blocked on the user, comment the question, set Blocked and
+  still send the ask card; (b) anything the user should see or download (reports, CSVs, documents)
+  is attached with `attach_file`, while scratch and working files are not. Verify: unit tests
+  assert the stored `ticketId`, the prompt reads the new comments, and the guidance carries both
+  instructions.
+- [ ] 2.7 Files: a read path that returns the latest artifact of each family attached by runs of
+  tasks with this `ticketId`. Verify: test with two tickets and a versioned artifact, and that a
+  file only written to the workspace is not listed.
 
 ## 3. Web
 

@@ -37,7 +37,11 @@ lines.
 ### Which files belong to a ticket: task link (chosen)
 
 `Task.ticketId` is set by `wakeTicketAssignee`. Files = artifacts whose `runId` is a run of a task
-with this `ticketId`, latest version of each family. Needs no new file store and works for change
+with this `ticketId`, latest version of each family. Only `attach_file` and media generation create
+artifacts; `write_file` and `shell` only touch the workspace, so a deliverable shows up only when the
+Nurling attaches it. The ticket guidance says to attach reports, CSVs and documents the user should
+see or download, and not scratch files. In ticket runs the chat message of an attachment is already
+dropped (background run), so nothing reaches the transcript. Needs no new file store and works for change
 2's mention wakes.
 
 Alternative rejected: match by name or by ticket ref in the prompt. Fragile and unreviewable.
@@ -57,11 +61,13 @@ The wake prompt becomes: work on ticket X, read it with `ticket_get`, and read a
 since you last looked. Existing wording about keeping progress in comments and using
 `ticket_update` stays.
 
-### Blocked on the user
+### Ticket run guidance
 
-One sentence is added to `TICKET_SILENT_REPLY_GUIDANCE`: when blocked on the user, post the
-question as a ticket comment, set the ticket to Blocked, and still send the ask or approval card.
-Tests assert the guidance contains the instruction. They do not judge the model's behaviour.
+Two sentences are added to `TICKET_SILENT_REPLY_GUIDANCE`: when blocked on the user, post the
+question as a ticket comment, set the ticket to Blocked, and still send the ask or approval card;
+and attach anything the user should see or download (reports, CSVs, documents) with `attach_file`,
+not scratch or working files. Tests assert the guidance contains the instructions. They do not
+judge the model's behaviour.
 
 ### Avatars
 
