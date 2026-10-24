@@ -13,4 +13,4 @@
 
 ## 3. After merge
 
-- [ ] 3.1 Archive the change.
+- [x] 3.1 Archive the change.

@@ -28,15 +28,16 @@ in system settings, permission descriptions, launcher and notification icons, an
 
 ### Requirement: Mobile bundle identifier
 The iOS bundle identifier and the Android package SHALL both be `com.nurturistai.nurlings`, taken
-from the brand configuration. The `rakazo://` URL scheme, the Expo slug, the desktop application id
-and the Linux executable name SHALL NOT change.
+from the brand configuration. The Expo slug SHALL be `nurlings`, matching the Nurlings Expo
+project. The `rakazo://` URL scheme, the desktop application id and the Linux executable name
+SHALL NOT change.
 
 #### Scenario: Resolved Expo config
 - **WHEN** the Expo configuration is resolved
-- **THEN** `ios.bundleIdentifier` and `android.package` are `com.nurturistai.nurlings` and `scheme` is `rakazo`
+- **THEN** `ios.bundleIdentifier` and `android.package` are `com.nurturistai.nurlings`, `slug` is `nurlings` and `scheme` is `rakazo`
 
 #### Scenario: Other identifiers preserved
-- **WHEN** the resolved Expo slug, the desktop builder `appId` and the Linux `executableName` are compared with upstream's
+- **WHEN** the desktop builder `appId` and the Linux `executableName` are compared with upstream's
 - **THEN** they are identical
 
 ### Requirement: Minimal server support for the bundle identifier
@@ -51,19 +52,6 @@ come from the `PASSKEY_APPLE_APP_IDS` setting.
 #### Scenario: Origins unchanged
 - **WHEN** a sign-in redirect uses the `rakazo://` scheme
 - **THEN** it is accepted exactly as before, and no origin derived from the bundle identifier is added
-
-### Requirement: Expo ownership placeholders
-The mobile configuration SHALL NOT name the upstream Expo owner or EAS project. `owner` and the EAS
-project id SHALL be clearly marked placeholders, and a release build SHALL fail while a placeholder
-is present.
-
-#### Scenario: Placeholders present
-- **WHEN** `app.json` is read
-- **THEN** `owner` and `extra.eas.projectId` are the documented `REPLACE_WITH_…` placeholders and no upstream owner, project id or update URL appears
-
-#### Scenario: Release build blocked
-- **WHEN** a production EAS build profile resolves the configuration with a placeholder still set
-- **THEN** resolution throws an error naming the placeholder
 
 ### Requirement: Web identity
 The web app SHALL show the configured product name in the document title, the
@@ -95,3 +83,16 @@ or mascot.
 #### Scenario: Marketing site untouched
 - **WHEN** the asset export command runs
 - **THEN** it writes no files under the marketing site
+
+### Requirement: Nurlings Expo account and project
+The mobile configuration SHALL NOT name the upstream Expo owner or EAS project. `owner` and the EAS
+project id SHALL be the Nurlings Expo account (`nurturist-ai`) and project, and a release build
+SHALL fail if either is ever a `REPLACE_WITH_…` placeholder.
+
+#### Scenario: Nurlings Expo project configured
+- **WHEN** `app.json` is read
+- **THEN** `owner` is `nurturist-ai`, `extra.eas.projectId` is the Nurlings EAS project id, no `REPLACE_WITH_…` placeholder remains, and no upstream owner, project id or update URL appears
+
+#### Scenario: Release build blocked
+- **WHEN** a production EAS build profile resolves a configuration in which a placeholder is set
+- **THEN** resolution throws an error naming the placeholder

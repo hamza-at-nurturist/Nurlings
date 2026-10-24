@@ -20,6 +20,6 @@
 
 ## 3. After merge
 
-- [ ] 3.1 Maintainer runs `release-android-apk` from `main`. Verify: the Actions run is green and
+- [x] 3.1 Maintainer runs `release-android-apk` from `main`. Verify: the Actions run is green and
   the `android` release carries `nurlings.apk`.
-- [ ] 3.2 Archive the change.
+- [x] 3.2 Archive the change.
