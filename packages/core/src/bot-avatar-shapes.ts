@@ -5,8 +5,9 @@ export const SHIPPED_BOT_AVATAR_CENTER = 114.2705;
 
 // The brand mark's blob outline: its bounding box centre and width in mark units. A test pins these to the path.
 const MARK_BODY = { cx: 922.27, cy: 1023.46, width: 1289.65 };
-// The other shapes are about 228 units wide.
-const MARK_SCALE = 228 / MARK_BODY.width;
+// The wide, short blob reads smaller than the other shapes (about 228 units wide), so it is drawn 13%
+// larger: the most that stays inside the shared view box without clipping.
+const MARK_SCALE = (228 * 1.13) / MARK_BODY.width;
 
 const markX = (x: number) => (x - MARK_BODY.cx) * MARK_SCALE + SHIPPED_BOT_AVATAR_CENTER;
 const markY = (y: number) => (y - MARK_BODY.cy) * MARK_SCALE + SHIPPED_BOT_AVATAR_CENTER;

@@ -21,8 +21,9 @@ The sign-up flow creates Chief with this shape in the default avatar colour.
 - `packages/brand/brand.json` gains explicit fields under `mark`: `blobBody` (the outer outline
   without the eye cut-outs), `eyeLeft` / `eyeRight` (eye centres), `eyeAngleDeg` (13.5), `eyeWidth`
   and `eyeLength` (the pill size). The schema validates them.
-- `packages/core/src/bot-avatar-shapes.ts` moves the blob outline into the shared shape box (about
-  228 units wide, centred like the other shapes) and adds a per-shape eye description. Shapes
+- `packages/core/src/bot-avatar-shapes.ts` moves the blob outline into the shared shape box (drawn
+  13% wider than the other shapes, about 258 units, because it is short and would otherwise look
+  smaller; that is the most that fits the shared view box without clipping; centred like the others) and adds a per-shape eye description. Shapes
   without one keep the current ellipse eyes; `nurling` has two pills tilted 13.5 degrees about their
   own centres.
 - `BOT_AVATAR_SHAPE_COUNT` in `packages/contracts` becomes 9, so `#hex::shape_8` is accepted and

@@ -64,9 +64,12 @@ describe("shipped bot avatar shapes", () => {
     const bounds = pathBounds(shippedBotAvatarShapePath(index));
     expect((bounds.minX + bounds.maxX) / 2).toBeCloseTo(SHIPPED_BOT_AVATAR_CENTER, 0);
     expect((bounds.minY + bounds.maxY) / 2).toBeCloseTo(SHIPPED_BOT_AVATAR_CENTER, 0);
-    expect(bounds.maxX - bounds.minX).toBeCloseTo(228, 0);
+    expect(bounds.maxX - bounds.minX).toBeCloseTo(228 * 1.13, 0);
+    // Inside the shared view box, so nothing clips on mobile or under the working ring.
     expect(bounds.minX).toBeGreaterThanOrEqual(-15);
     expect(bounds.maxX).toBeLessThanOrEqual(244);
+    expect(bounds.minY).toBeGreaterThanOrEqual(-15);
+    expect(bounds.maxY).toBeLessThanOrEqual(244);
   });
 
   it("keeps ellipse eyes on the old shapes and slanted pills on the brand blob", () => {
