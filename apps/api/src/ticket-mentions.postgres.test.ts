@@ -15,7 +15,7 @@ const describePostgres =
 const ORIGIN = "http://127.0.0.1:5173";
 
 describePostgres("ticket mentions (PostgreSQL)", () => {
-  it("wakes a mentioned non-owner for the ticket only, and keeps it to one reply", async () => {
+  it("wakes a mentioned non-owner for the ticket only, and keeps it to one reply and no updates", async () => {
     vi.stubEnv("TICKET_BOARD_ENABLED", "true");
     const dataDir = await mkdtemp(join(tmpdir(), "rakazo-mention-test-"));
     const handles = await createApp({
@@ -131,10 +131,18 @@ describePostgres("ticket mentions (PostgreSQL)", () => {
         botId: scout.id,
         id: ticket.id,
       };
-      const moved = await runAsTenant(tenant, () =>
-        updateTicket(deps, { ...asScout, status: "done" }),
-      );
-      expect(moved).toEqual({ error: expect.stringContaining("only comment") });
+      for (const patch of [
+        { status: "done" },
+        { title: "Renamed by a mention" },
+        { priority: "urgent" },
+      ]) {
+        const refused = await runAsTenant(tenant, () =>
+          updateTicket(deps, { ...asScout, ...patch }),
+        );
+        expect(refused).toEqual({
+          error: expect.stringContaining("may only reply with one comment"),
+        });
+      }
       const reply = await runAsTenant(tenant, () =>
         commentTicket(deps, { ...asScout, body: "Looks fine to me" }),
       );
@@ -143,9 +151,11 @@ describePostgres("ticket mentions (PostgreSQL)", () => {
         commentTicket(deps, { ...asScout, body: "And another thing" }),
       );
       expect(second).toEqual({ error: expect.stringContaining("already replied") });
-      expect(await call<{ status: string }>("tickets/get", { id: ticket.id })).toMatchObject({
-        status: "todo",
-      });
+      expect(
+        await call<{ status: string; title: string; priority: string }>("tickets/get", {
+          id: ticket.id,
+        }),
+      ).toMatchObject({ status: "todo", title: "Comp report", priority: "normal" });
 
       // Once the run is over, the Nurling is an ordinary commenter again.
       await system(() =>

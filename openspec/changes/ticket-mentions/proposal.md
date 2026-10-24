@@ -27,10 +27,10 @@ the conversation happens, and tells you when a Nurling is asking for you.
 ### Waking the mentioned Nurling
 
 - A user's comment that mentions a Nurling that is **not the owner** wakes that Nurling for this
-  ticket only: it reads the ticket, replies with **one** comment, and does not change the ticket's
-  status or owner. This is enforced in the ticket tools, not only by the prompt: in such a run
-  `ticket_update` is refused when it changes the status or owner, and a second `ticket_comment` on
-  the ticket is refused. The tools find the run's task themselves, so `executor.ts` carries no
+  ticket only: it reads the ticket, replies with **one** comment, and does not update the ticket at all
+  (no status, owner, title, description, priority or other field). This is enforced in the ticket
+  tools, not only by the prompt: in such a run `ticket_update` is refused whatever the field, and a
+  second `ticket_comment` on the ticket is refused. The tools find the run's task themselves, so `executor.ts` carries no
   enforcement.
 - Mentioning the owner needs nothing new: a user's comment already wakes the owner.
 - One owner per ticket stays. No groups, no multi-assign.
@@ -97,7 +97,7 @@ New files wherever possible (`TicketModal/MentionPicker.tsx`, `TicketModal/Menti
 |---|---|
 | `packages/db/prisma/schema.prisma` | `TicketComment.mentions`, `Task.ticketWake` |
 | `packages/contracts/src/board.ts` | `mentions` on the comment input and output |
-| `packages/adapters/src/ticket-tools.ts` | `commentTicket` stores mentions, passes them on and refuses a second comment in a mention run; `updateTicket` refuses status and owner changes in one |
+| `packages/adapters/src/ticket-tools.ts` | `commentTicket` stores mentions, passes them on and refuses a second comment in a mention run; `updateTicket` refuses every update in one |
 | `packages/adapters/src/ticket-changes.ts` | hands mentions to the new module, sends the user notification |
 | `packages/adapters/src/ticket-wake.ts` | optional wake kind, mention prompt, sets `ticketWake` |
 | `packages/adapters/src/builtin-tools.ts` | two optional arguments on `ticket_comment` |

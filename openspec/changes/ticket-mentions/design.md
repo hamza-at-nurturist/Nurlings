@@ -49,7 +49,7 @@ lock so the cap and the working check cannot be raced past:
    `ticketId` and `ticketWake` and a `tickets` run.
 
 The mention prompt: "You were mentioned on ticket X. You are not its owner. Read it with ticket_get,
-reply with one ticket_comment, and do not change its status, owner or other fields."
+reply with one ticket_comment, and do not update the ticket."
 
 ### Comment-only runs are enforced in the ticket tools
 
@@ -59,9 +59,9 @@ botId, ticketId })`: the calling bot's task for this ticket with `ticketWake` se
 `running` run, newest first. A Nurling's tool calls only happen inside a run, and a non-owner has no
 other run on the ticket at the same time, so a hit means "this call is from a mention wake".
 
-- `updateTicket` (only when `botId` is set): inside the transaction, after reading the current row, if
-  the call changes the status or the owner and there is an active mention task for this ticket, it
-  returns an error and writes nothing. Other fields and other tickets are unaffected.
+- `updateTicket` (only when `botId` is set): before anything else, if there is an active mention task
+  for this ticket it returns an error and writes nothing, whatever fields the call carries. Other
+  tickets and the owner's ordinary runs are unaffected.
 - `commentTicket` (only when `botId` is set): if there is an active mention task and the bot has
   already commented on this ticket since that task was created, it returns an error telling the
   Nurling it has replied and should stop.

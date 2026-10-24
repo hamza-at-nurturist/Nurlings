@@ -25,7 +25,7 @@ const COMMENT_ONLY_WAKES: MentionWake[] = ["mention", "bot_mention"];
 const BOT_STARTED_WAKES: MentionWake[] = ["bot_mention", "bot_mention_owner"];
 
 export function mentionWakePrompt(ref: string): string {
-  return `You were mentioned on ticket ${ref}. You are not its owner. Read it with ticket_get, then reply with exactly one ticket_comment. Do not change its status or owner.`;
+  return `You were mentioned on ticket ${ref}. You are not its owner. Read it with ticket_get, then reply with exactly one ticket_comment. Do not update the ticket.`;
 }
 
 /**
@@ -100,8 +100,8 @@ export async function activeMentionTask(
   });
 }
 
-export const MENTION_RUN_STATUS_ERROR =
-  "You were woken by a mention and may only comment. Do not change this ticket's status or owner.";
+export const MENTION_RUN_UPDATE_ERROR =
+  "You were woken by a mention and may only reply with one comment. Do not update this ticket.";
 export const MENTION_RUN_COMMENT_ERROR =
   "You have already replied on this ticket. Stop here; do not post another comment.";
 

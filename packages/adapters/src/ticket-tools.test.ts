@@ -555,10 +555,17 @@ describe("ticket mutations", () => {
         select: { id: true, createdAt: true },
       });
     });
-    it("refuses a status or owner change in a mention run, and writes nothing", async () => {
+    it("refuses every ticket update in a mention run, whatever the field, and writes nothing", async () => {
       const s = mutationDeps();
       s.mentionTask.mockResolvedValue({ id: "task-1", createdAt: NOW });
-      for (const patch of [{ status: "done" }, { ownerBotId: "bot-2" }]) {
+      for (const patch of [
+        { status: "done" },
+        { status: "todo" },
+        { ownerBotId: "bot-2" },
+        { title: "Clearer title" },
+        { description: "More detail" },
+        { priority: "urgent" },
+      ]) {
         const result = await updateTicket(s.deps, {
           spaceId: "ws",
           userId: "user-1",
@@ -566,40 +573,39 @@ describe("ticket mutations", () => {
           id: "t1",
           ...patch,
         });
-        expect(result).toEqual({ error: expect.stringContaining("only comment") });
+        expect(result).toEqual({
+          error: expect.stringContaining("may only reply with one comment"),
+        });
       }
+      expect(s.prisma.$transaction).not.toHaveBeenCalled();
       expect(s.tx.ticket.update).not.toHaveBeenCalled();
       expect(s.tx.ticketEvent.create).not.toHaveBeenCalled();
       expect(s.changes).not.toHaveBeenCalled();
     });
-    it("lets a mention run change other fields, set an unchanged status, and an ordinary run move the ticket", async () => {
+    it("only refuses the ticket the mention run belongs to, and never an ordinary run", async () => {
       const s = mutationDeps();
-      s.mentionTask.mockResolvedValue({ id: "task-1", createdAt: NOW });
-      const title = await updateTicket(s.deps, {
+      const task = { id: "task-1", createdAt: NOW };
+      s.mentionTask.mockImplementation(async (query) =>
+        (query as { where: { ticketId: string } }).where.ticketId === "t1" ? task : null,
+      );
+      const other = await updateTicket(s.deps, {
         spaceId: "ws",
         userId: "user-1",
         botId: "bot-2",
-        id: "t1",
-        title: "Clearer title",
+        id: "t2",
+        title: "Another ticket",
       });
-      expect(title).toHaveProperty("ticket");
-      const same = await updateTicket(s.deps, {
-        spaceId: "ws",
-        userId: "user-1",
-        botId: "bot-2",
-        id: "t1",
-        status: "todo",
-      });
-      expect(same).toHaveProperty("ticket");
+      expect(other).toHaveProperty("ticket");
       s.mentionTask.mockResolvedValue(null);
-      const moved = await updateTicket(s.deps, {
+      const ordinary = await updateTicket(s.deps, {
         spaceId: "ws",
         userId: "user-1",
         botId: "bot-1",
         id: "t1",
         status: "doing",
+        title: "Owner edit",
       });
-      expect(moved).toHaveProperty("ticket");
+      expect(ordinary).toHaveProperty("ticket");
     });
     it("never checks for a mention run when a user updates a ticket", async () => {
       const s = mutationDeps();

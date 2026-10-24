@@ -21,9 +21,9 @@
   Verify: unit tests for each scenario in the spec, including the cap boundary at 10 and 11 and the
   one-hour window.
 - [x] 2.5 Comment-only runs in the ticket tools, not `executor.ts`: `activeMentionTask` in
-  `ticket-mentions.ts`; `updateTicket` refuses a status or owner change and `commentTicket` refuses
+  `ticket-mentions.ts`; `updateTicket` refuses every update and `commentTicket` refuses
   a second comment while the bot has an active mention task for that ticket. Verify: unit tests for
-  both refusals, for other fields and other tickets being allowed, for an owner's ordinary run
+  both refusals (every field), for other tickets being allowed, for an owner's ordinary run
   being unaffected, and for a queued (not yet running) task not counting.
 - [x] 2.6 `ticket_comment` gains `mention_bots` and `mention_user`; tool description tells the model
   to write `@Name` in the text. Verify: tool schema test and an executor test that the two arguments reach `commentTicket`

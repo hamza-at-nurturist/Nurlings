@@ -86,7 +86,7 @@ describe("wakeMentionedBot", () => {
     });
     expect(mentionWakePrompt("NUR-7")).toContain("not its owner");
     expect(mentionWakePrompt("NUR-7")).toContain("exactly one ticket_comment");
-    expect(mentionWakePrompt("NUR-7")).toContain("Do not change its status or owner");
+    expect(mentionWakePrompt("NUR-7")).toContain("Do not update the ticket");
     expect(s.createRun).toHaveBeenCalledWith({
       data: expect.objectContaining({ trigger: "tickets", status: "queued" }),
     });

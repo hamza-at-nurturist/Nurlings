@@ -22,15 +22,15 @@ a hex value, or for a user, the chip SHALL be neutral.
 ### Requirement: A user mention wakes a non-owner for that ticket only
 A user's comment that mentions a Nurling that is not the ticket's owner SHALL start a run of that
 Nurling, whose prompt tells it to read the ticket and reply with one comment. In that run the Nurling
-SHALL NOT be able to change the ticket's status or owner, and SHALL NOT be able to post a second
-comment on the ticket. The ticket's owner SHALL remain unchanged.
+SHALL NOT be able to update the ticket in any way (status, owner, title, description, priority or
+any other field), and SHALL NOT be able to post a second comment on the ticket. The ticket's owner SHALL remain unchanged.
 
 #### Scenario: Ask another Nurling
 - **WHEN** a user comments on an open ticket mentioning a Nurling that is not the owner
 - **THEN** that Nurling starts a run for the ticket
 
 #### Scenario: Comment only
-- **WHEN** a Nurling woken by a mention calls `ticket_update` to change the ticket's status or owner
+- **WHEN** a Nurling woken by a mention calls `ticket_update` on the ticket, for any field
 - **THEN** the call is refused and the ticket is unchanged
 
 #### Scenario: Other tickets and an owner's own runs

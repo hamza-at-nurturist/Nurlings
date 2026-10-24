@@ -21,7 +21,7 @@ import type { TicketChangeNotifier } from "./ticket-changes.js";
 import {
   activeMentionTask,
   MENTION_RUN_COMMENT_ERROR,
-  MENTION_RUN_STATUS_ERROR,
+  MENTION_RUN_UPDATE_ERROR,
   resolveMentions,
 } from "./ticket-mentions.js";
 
@@ -231,6 +231,16 @@ export async function updateTicket(
   const data = parsed.data;
   if (data.assigneeBotId && !(await ownBotInSpace(deps, input, data.assigneeBotId)))
     return { error: "Unknown bot." };
+  // A Nurling woken by a mention gets one comment and nothing else: no update of any field.
+  if (
+    input.botId &&
+    (await activeMentionTask(deps.prisma, {
+      spaceId: input.spaceId,
+      botId: input.botId,
+      ticketId: data.id,
+    }))
+  )
+    return { error: MENTION_RUN_UPDATE_ERROR };
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const result = await deps.prisma.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM tickets WHERE id = ${data.id} AND "spaceId" = ${input.spaceId} FOR UPDATE`;
@@ -238,20 +248,6 @@ export async function updateTicket(
       where: { id: data.id, spaceId: input.spaceId, boardId: board.id },
     });
     if (!current) return null;
-    // A Nurling woken by a mention may reply, nothing more: it cannot move or hand over the ticket.
-    const changesStatus = data.status !== undefined && data.status !== current.status;
-    const changesOwner =
-      data.assigneeBotId !== undefined && data.assigneeBotId !== current.assigneeBotId;
-    if (
-      input.botId &&
-      (changesStatus || changesOwner) &&
-      (await activeMentionTask(tx, {
-        spaceId: input.spaceId,
-        botId: input.botId,
-        ticketId: current.id,
-      }))
-    )
-      return "comment-only" as const;
     const row = await tx.ticket.update({
       where: { id: current.id },
       data: {
@@ -286,7 +282,6 @@ export async function updateTicket(
     return { row, reassigned };
   });
   if (!result) return { error: "Ticket not found." };
-  if (result === "comment-only") return { error: MENTION_RUN_STATUS_ERROR };
   await deps.onTicketChange?.({
     spaceId: input.spaceId,
     boardId: board.id,
