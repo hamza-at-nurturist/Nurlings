@@ -37,6 +37,8 @@
   "Search bots" text, which predates this change.)
 - [x] 4.4 Preview APK built from the branch (`release-android-apk`, `preview`). Verify:
   `nurlings-preview.apk` on the `android-preview` prerelease.
+- [x] 4.5a Short run plays the whole pop-in before its exit, about 2.3 s in all, after the
+  maintainer found it exited at once on a phone. Verify: `planSplash` and `exitTiming` tests.
 - [ ] 4.5 Maintainer confirms on a phone: first launch plays the full animation, a later launch the
   short pop-in, a tap skips, reduced motion shows the static mark, and the app always reaches
   sign-in or the chats. Verify: maintainer's confirmation in the PR.

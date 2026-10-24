@@ -7,9 +7,13 @@ import {
   CHIEF_LOOK,
   EASE_IN_OUT,
   EXIT_MS,
+  exitTiming,
+  FADE_MS,
+  MS_PER_PERCENT,
   ORB_BODY,
   ORB_OPACITY,
   planSplash,
+  SHORT_END,
   sampleTrack,
 } from "./brand-splash-timeline";
 
@@ -61,12 +65,29 @@ describe("planSplash", () => {
     });
   });
 
-  it("exits the short run as soon as the app is ready, never earlier", () => {
+  it("always plays the short pop-in before exiting, even when the app was ready at once", () => {
     expect(planSplash({ ...base, ready: true, mode: "short", elapsedMs: 0 })).toEqual({
+      phase: "playing",
+      recheckInMs: 1740,
+    });
+    expect(planSplash({ ...base, ready: true, mode: "short", elapsedMs: 1740 })).toEqual({
       phase: "exit",
     });
     expect(planSplash({ ...base, mode: "short", elapsedMs: 500 }).phase).toBe("playing");
     expect(planSplash({ ...base, mode: "short", elapsedMs: 1800 })).toEqual({ phase: "idle" });
+    expect(planSplash({ ...base, ready: true, mode: "short", elapsedMs: 4000 })).toEqual({
+      phase: "exit",
+    });
+  });
+
+  it("keeps a ready short launch to about 2-2.3 s, and the full and static exits unchanged", () => {
+    const short = exitTiming("short");
+    const shortTotal =
+      SHORT_END * MS_PER_PERCENT + Math.max(short.exitMs, short.fadeAtMs + FADE_MS);
+    expect(shortTotal).toBeGreaterThanOrEqual(2000);
+    expect(shortTotal).toBeLessThanOrEqual(2300);
+    expect(exitTiming("full")).toEqual({ exitMs: 900, fadeAtMs: 900 });
+    expect(exitTiming("static")).toEqual({ exitMs: 0, fadeAtMs: 0 });
   });
 
   it("exits on a tap in every mode", () => {

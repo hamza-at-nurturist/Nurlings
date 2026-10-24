@@ -30,8 +30,8 @@ import {
   CHIEF_LOOK,
   CHIEF_OPACITY,
   CHIEF_WINK,
-  EXIT_MS,
   EXIT_SPAN,
+  exitTiming,
   FADE_MS,
   GRADIENT_RING,
   IDLE_BLINK_MS,
@@ -275,13 +275,13 @@ function useSplashRun(mode: SplashMode, ready: boolean, skipped: boolean, onDone
     exiting.current = true;
     cancelAnimation(idle);
     idle.value = 0;
-    const exitMs = mode === "static" ? 0 : EXIT_MS;
+    const { exitMs, fadeAtMs } = exitTiming(mode);
     if (exitMs > 0) exit.value = withTiming(EXIT_SPAN, { duration: exitMs, easing: Easing.linear });
     timers.current.push(
       setTimeout(() => {
         fade.value = withTiming(0, { duration: FADE_MS });
-      }, exitMs),
-      setTimeout(onDone, exitMs + FADE_MS),
+      }, fadeAtMs),
+      setTimeout(onDone, Math.max(exitMs, fadeAtMs + FADE_MS)),
     );
   }, [mode, ready, skipped, tick]);
 

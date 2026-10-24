@@ -21,8 +21,11 @@
    motion). The mode is chosen synchronously from a flag file in `Paths.document` (not the keychain,
    which survives an iOS uninstall), written when the full run starts. Unreadable storage counts as
    "seen". In `short` mode the base clock stops at 29% (Chief landed, orb settled, about 1.7 s) and
-   the exit starts the moment the app is ready, even mid-pop-in: the exit is a second clock that
-   multiplies the body scale, so it needs no particular base pose. A tap sets `skipped`, which
+   the exit starts there, or when the app is ready if that is later. (The first re-land exited the
+   moment the app was ready; on a phone the app is ready almost at once, so the pop-in was never
+   seen.) The short exit runs the exit clock at double speed (450 ms) and starts the fade once
+   Chief has popped (300 ms in), so a ready launch takes about 2.3 s. The exit is a second clock
+   that multiplies the body scale, so it needs no particular base pose. A tap sets `skipped`, which
    starts the exit immediately in any mode. A pure `planSplash` function decides playing / idle /
    exit from mode, elapsed time, `ready` and `skipped`.
    **Exit gating (full).** Timeline runs 0→82% unconditionally. At 82% it checks `ready`: if true it

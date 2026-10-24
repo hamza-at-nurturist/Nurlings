@@ -13,7 +13,7 @@ export type Ease = 0 | 1 | 2 | 3;
 
 export const FULL_MS = 6000;
 export const MS_PER_PERCENT = FULL_MS / 100;
-/** The short run stops once Chief has landed and the orb has settled. */
+/** The short run always plays until Chief has landed and the orb has settled, then exits. */
 export const SHORT_END = 29;
 /** A full run holds here until the app is ready, then idles. */
 export const GATE_PERCENT = 82;
@@ -22,6 +22,8 @@ export const EXIT_START_PERCENT = 84;
 export const EXIT_SPAN = 15;
 export const EXIT_MS = EXIT_SPAN * MS_PER_PERCENT;
 export const FADE_MS = 250;
+/** Chief has popped (exit clock at 10 of 15) at double speed. */
+export const SHORT_FADE_AT_MS = (10 * MS_PER_PERCENT) / 2;
 export const IDLE_BLINK_MS = 3200;
 export const STATIC_MS = 600;
 
@@ -174,6 +176,17 @@ export function sampleTrack(track: Track, percent: number, ease: Ease): number[]
 }
 
 export type SplashMode = "full" | "short" | "static";
+
+/**
+ * How long the exit clock runs, and when the fade into the app starts, from the start of the exit.
+ * The short run boops at double speed and fades once Chief has popped, so the whole launch stays
+ * around 2.3 s.
+ */
+export function exitTiming(mode: SplashMode): { exitMs: number; fadeAtMs: number } {
+  if (mode === "static") return { exitMs: 0, fadeAtMs: 0 };
+  if (mode === "short") return { exitMs: EXIT_MS / 2, fadeAtMs: SHORT_FADE_AT_MS };
+  return { exitMs: EXIT_MS, fadeAtMs: EXIT_MS };
+}
 export type SplashPhase = "playing" | "idle" | "exit";
 
 /**
@@ -194,9 +207,9 @@ export function planSplash(input: {
       : { phase: "playing", recheckInMs: Math.max(0, STATIC_MS - elapsedMs) };
   }
   if (mode === "short") {
-    if (ready) return { phase: "exit" };
     const end = SHORT_END * MS_PER_PERCENT;
-    return elapsedMs < end ? { phase: "playing", recheckInMs: end - elapsedMs } : { phase: "idle" };
+    if (elapsedMs < end) return { phase: "playing", recheckInMs: end - elapsedMs };
+    return ready ? { phase: "exit" } : { phase: "idle" };
   }
   const exitAt = EXIT_START_PERCENT * MS_PER_PERCENT;
   if (ready) {
