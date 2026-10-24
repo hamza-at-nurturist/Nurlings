@@ -124,6 +124,16 @@ Only `NURLINGS_VERSION` is mandatory. Everything else works empty.
 Other advanced settings (single sign-on, Stripe, messaging channels) are in the compose file;
 add an entry to the file, not just a Coolify variable, when a setting is not listed there.
 
+### Telegram
+
+1. Create a bot with @BotFather and copy the token.
+2. In Coolify, set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_WEBHOOK_SECRET_TOKEN` (letters and digits, 20 or more characters), then redeploy.
+3. Register the webhook once by opening this address in a browser, with your token, domain and secret filled in:
+
+   ```
+   https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://<domain>/api/v1/messaging/webhook/telegram&secret_token=<SECRET>
+   ```
+
 ## 7. Update a client
 
 Updates are explicit: the in-app updater is off.
