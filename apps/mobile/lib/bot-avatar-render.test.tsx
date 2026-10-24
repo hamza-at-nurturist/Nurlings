@@ -1,6 +1,11 @@
 // @vitest-environment jsdom
 
-import { avatarIdentitySeed, organicAvatarPath, shippedBotAvatarShapePath } from "@rakazo/core";
+import {
+  avatarIdentitySeed,
+  organicAvatarPath,
+  SHIPPED_BOT_AVATAR_SHAPE_KEYS,
+  shippedBotAvatarShapePath,
+} from "@rakazo/core";
 import type { ReactNode } from "react";
 import { act, createElement } from "react";
 import type { Root } from "react-dom/client";
@@ -98,5 +103,13 @@ describe("BotAvatar", () => {
     const view = render("#8B5CF6::shape_3");
     expect(bodies(view)).toEqual([shippedBotAvatarShapePath(3)]);
     expect(view.querySelectorAll("ellipse")).toHaveLength(2);
+  });
+
+  it("draws the brand blob like any shape, with slanted pill eyes", () => {
+    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const view = render(`#8B5CF6::shape_${index}`);
+    expect(bodies(view)).toEqual([shippedBotAvatarShapePath(index)]);
+    expect(view.querySelectorAll("ellipse")).toHaveLength(0);
+    expect(view.querySelectorAll("rect")).toHaveLength(2);
   });
 });

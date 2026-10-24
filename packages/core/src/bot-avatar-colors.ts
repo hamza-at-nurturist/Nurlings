@@ -164,7 +164,7 @@ export function chatUserBubbleColors(
   identity: string,
 ): { background: string; foreground: string } | undefined {
   const parsed = parseBotAvatarValue(avatarValue);
-  if (parsed.kind === "image" || parsed.kind === "brand-chief") return undefined;
+  if (parsed.kind === "image") return undefined;
   const def = resolvePersonaColorDef(identity, parsed.kind === "other" ? undefined : parsed.color);
   if (def.id === "white") return undefined;
   let background = `#${expandHex(def.hex)}`.toUpperCase();

@@ -28,17 +28,20 @@ export interface Brand {
     viewBox: string;
     smallViewBox: string;
     blob: string;
-    /** The outer sub-path of `blob` only, with the two eye cut-outs removed. Used by ChiefAvatar. */
+    /** The outer sub-path of `blob` only, with the two eye cut-outs removed. Drawn as an avatar shape. */
     blobBody: string;
     orb: string;
     /** User-space coordinates of the orb gradient, in the mark's own units. */
     orbGradient: { x1: number; y1: number; x2: number; y2: number };
-    /** Centre of the left eye cut-out in the mark's coordinate space, for ChiefAvatar eye placement. */
-    chiefEyeLeft: { cx: number; cy: number };
-    /** Centre of the right eye cut-out in the mark's coordinate space, for ChiefAvatar eye placement. */
-    chiefEyeRight: { cx: number; cy: number };
+    /** Centre of the left eye cut-out in the mark's coordinate space. */
+    eyeLeft: { cx: number; cy: number };
+    /** Centre of the right eye cut-out in the mark's coordinate space. */
+    eyeRight: { cx: number; cy: number };
     /** Clockwise tilt of the eye long-axis from vertical, in degrees. */
-    chiefEyeAngleDeg: number;
+    eyeAngleDeg: number;
+    /** Width of an eye pill, and its length including the round caps, in the mark's units. */
+    eyeWidth: number;
+    eyeLength: number;
   };
   /**
    * The wordmark's typeface (the product name beside the mark, nowhere else in the UI). The font
@@ -227,9 +230,11 @@ export function parseBrand(input: unknown): Brand {
     "blobBody",
     "orb",
     "orbGradient",
-    "chiefEyeLeft",
-    "chiefEyeRight",
-    "chiefEyeAngleDeg",
+    "eyeLeft",
+    "eyeRight",
+    "eyeAngleDeg",
+    "eyeWidth",
+    "eyeLength",
   ]);
   const font = object(root.wordmarkFont, "wordmarkFont", [
     "family",
@@ -331,21 +336,23 @@ export function parseBrand(input: unknown): Brand {
         x2: coordinate(gradient.x2, "mark.orbGradient.x2"),
         y2: coordinate(gradient.y2, "mark.orbGradient.y2"),
       },
-      chiefEyeLeft: (() => {
-        const eye = object(mark.chiefEyeLeft, "mark.chiefEyeLeft", ["cx", "cy"]);
+      eyeLeft: (() => {
+        const eye = object(mark.eyeLeft, "mark.eyeLeft", ["cx", "cy"]);
         return {
-          cx: coordinate(eye.cx, "mark.chiefEyeLeft.cx"),
-          cy: coordinate(eye.cy, "mark.chiefEyeLeft.cy"),
+          cx: coordinate(eye.cx, "mark.eyeLeft.cx"),
+          cy: coordinate(eye.cy, "mark.eyeLeft.cy"),
         };
       })(),
-      chiefEyeRight: (() => {
-        const eye = object(mark.chiefEyeRight, "mark.chiefEyeRight", ["cx", "cy"]);
+      eyeRight: (() => {
+        const eye = object(mark.eyeRight, "mark.eyeRight", ["cx", "cy"]);
         return {
-          cx: coordinate(eye.cx, "mark.chiefEyeRight.cx"),
-          cy: coordinate(eye.cy, "mark.chiefEyeRight.cy"),
+          cx: coordinate(eye.cx, "mark.eyeRight.cx"),
+          cy: coordinate(eye.cy, "mark.eyeRight.cy"),
         };
       })(),
-      chiefEyeAngleDeg: coordinate(mark.chiefEyeAngleDeg, "mark.chiefEyeAngleDeg"),
+      eyeAngleDeg: coordinate(mark.eyeAngleDeg, "mark.eyeAngleDeg"),
+      eyeWidth: coordinate(mark.eyeWidth, "mark.eyeWidth"),
+      eyeLength: coordinate(mark.eyeLength, "mark.eyeLength"),
     },
     wordmarkFont: {
       family: match(font.family, "wordmarkFont.family", FONT_NAME, "a font family name"),

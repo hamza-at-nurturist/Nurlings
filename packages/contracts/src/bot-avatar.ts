@@ -1,7 +1,7 @@
 import * as z from "zod";
 
-/** Matches the eight shipped mascot shapes in `@rakazo/core`. */
-export const BOT_AVATAR_SHAPE_COUNT = 8;
+/** Matches the shipped mascot shapes in `@rakazo/core`. */
+export const BOT_AVATAR_SHAPE_COUNT = 9;
 
 /**
  * 256x256 webp data URLs from Avatar Studio stay well under this. Cap writes so
@@ -17,11 +17,9 @@ export type ParsedBotAvatar =
   | { kind: "image"; imageUrl: string }
   | { kind: "shape"; color: string; shapeIndex: number }
   | { kind: "color"; color: string }
-  | { kind: "brand-chief" }
   | { kind: "other"; raw: string };
 
 export function parseBotAvatarValue(raw: string): ParsedBotAvatar {
-  if (raw === "::brand_chief") return { kind: "brand-chief" };
   if (raw.startsWith("data:image/")) {
     return { kind: "image", imageUrl: raw };
   }
@@ -37,12 +35,10 @@ export function parseBotAvatarValue(raw: string): ParsedBotAvatar {
   return { kind: "other", raw };
 }
 
-/** True for values we persist on `bots.color` (hex, encoded shape, data image, or ::brand_chief). */
+/** True for values we persist on `bots.color` (hex, encoded shape, or data image). */
 export function isBotAvatarValue(raw: string): boolean {
   if (!raw || raw.length > BOT_AVATAR_VALUE_MAX_LENGTH) return false;
-  return (
-    raw === "::brand_chief" || HEX_COLOR.test(raw) || SHAPE_SUFFIX.test(raw) || DATA_IMAGE.test(raw)
-  );
+  return HEX_COLOR.test(raw) || SHAPE_SUFFIX.test(raw) || DATA_IMAGE.test(raw);
 }
 
 export const BotAvatarValueSchema = z

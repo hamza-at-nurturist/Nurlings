@@ -15,8 +15,8 @@ import {
   avatarWorkingDot,
   isRunWorking,
   organicAvatarPath,
-  SHIPPED_BOT_AVATAR_CENTER,
   SHIPPED_BOT_AVATAR_VIEWBOX,
+  shippedBotAvatarEyes,
 } from "@rakazo/core";
 import { memo } from "react";
 import { Image, Pressable, View } from "react-native";
@@ -31,7 +31,6 @@ import { useAvatarOnScreen, useLife, usePoke, useSettling } from "../lib/avatar-
 import { mobileBotAvatarPresentation } from "../lib/bot-avatar";
 import { useI18n } from "../lib/i18n";
 import { useMobileTokens } from "../lib/native";
-import { ChiefAvatar } from "./chief-avatar";
 import { NativeSymbol } from "./native-symbol";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
@@ -99,7 +98,7 @@ function useBodyStyle(life: AvatarLife, size: number) {
 }
 
 /** An eye's offset (motion units), its height and whether it shows. */
-export function eyeState(life: AvatarLife) {
+function eyeState(life: AvatarLife) {
   "worklet";
   const { frame, grow } = liveFrame(life);
   return { x: frame.eyeX, y: frame.eyeY, lid: frame.lid, hidden: grow >= 0.5 };
@@ -171,12 +170,11 @@ export const BotAvatar = memo(function BotAvatar({
       >
         <Image source={{ uri: parsed.imageUrl }} style={{ width: size, height: size }} />
       </View>
-    ) : parsed.kind === "brand-chief" ? (
-      <ChiefAvatar size={size} life={life} bodyStyle={bodyStyle} />
     ) : parsed.kind === "shape" ? (
       <ShippedShapeAvatar
         color={parsed.color}
         eyeColor={parsed.eyeColor}
+        shapeIndex={parsed.shapeIndex}
         shapePath={parsed.shapePath}
         size={size}
         life={life}
@@ -295,6 +293,7 @@ type BodyStyle = ReturnType<typeof useAnimatedStyle>;
 function ShippedShapeAvatar({
   color,
   eyeColor,
+  shapeIndex,
   shapePath,
   size,
   life,
@@ -302,35 +301,83 @@ function ShippedShapeAvatar({
 }: {
   color: string;
   eyeColor: string;
+  shapeIndex: number;
   shapePath: string;
   size: number;
   life: AvatarLife;
   bodyStyle: BodyStyle;
 }) {
-  const center = SHIPPED_BOT_AVATAR_CENTER;
-  // Offsets are in motion units, scaled to the shape's view box.
-  const eyeProps = (cx: number) => () => {
-    "worklet";
-    const state = eyeState(life);
-    const scale = SHAPE_UNITS / AVATAR_MOTION_UNITS;
-    return {
-      cx: cx + state.x * scale,
-      cy: center - 8 + state.y * scale,
-      ry: state.hidden ? 0 : 7 * state.lid,
-    };
-  };
-  const leftEye = useAnimatedProps(eyeProps(center - 29));
-  const rightEye = useAnimatedProps(eyeProps(center + 29));
+  const eyes = shippedBotAvatarEyes(shapeIndex);
   return (
     <Animated.View style={[{ width: size, height: size }, bodyStyle]}>
       <Svg width={size} height={size} viewBox={SHIPPED_BOT_AVATAR_VIEWBOX}>
         <Path d={shapePath} fill={color} />
         <G fill={eyeColor}>
-          <AnimatedEllipse animatedProps={leftEye} rx={10} />
-          <AnimatedEllipse animatedProps={rightEye} rx={10} />
+          {eyes.kind === "pill" ? (
+            <PillEyes eyes={eyes} life={life} />
+          ) : (
+            <EllipseEyes eyes={eyes} life={life} />
+          )}
         </G>
       </Svg>
     </Animated.View>
+  );
+}
+
+type ShapeEyes = ReturnType<typeof shippedBotAvatarEyes>;
+
+function EllipseEyes({ eyes, life }: { eyes: ShapeEyes; life: AvatarLife }) {
+  // Offsets are in motion units, scaled to the shape's view box.
+  const eyeProps = (cx: number, cy: number) => () => {
+    "worklet";
+    const state = eyeState(life);
+    const scale = SHAPE_UNITS / AVATAR_MOTION_UNITS;
+    return {
+      cx: cx + state.x * scale,
+      cy: cy + state.y * scale,
+      ry: state.hidden ? 0 : eyes.ry * state.lid,
+    };
+  };
+  const leftEye = useAnimatedProps(eyeProps(eyes.left.cx, eyes.left.cy));
+  const rightEye = useAnimatedProps(eyeProps(eyes.right.cx, eyes.right.cy));
+  return (
+    <>
+      <AnimatedEllipse animatedProps={leftEye} rx={eyes.rx} />
+      <AnimatedEllipse animatedProps={rightEye} rx={eyes.rx} />
+    </>
+  );
+}
+
+/** Pill eyes are tilted about their own centre; blinking closes them along their length. */
+function PillEyes({ eyes, life }: { eyes: ShapeEyes; life: AvatarLife }) {
+  const eyeProps = (cx: number, cy: number) => () => {
+    "worklet";
+    const state = eyeState(life);
+    const scale = SHAPE_UNITS / AVATAR_MOTION_UNITS;
+    const height = state.hidden ? 0 : eyes.ry * 2 * state.lid;
+    return {
+      x: cx - eyes.rx + state.x * scale,
+      y: cy - height / 2 + state.y * scale,
+      height,
+    };
+  };
+  const leftEye = useAnimatedProps(eyeProps(eyes.left.cx, eyes.left.cy));
+  const rightEye = useAnimatedProps(eyeProps(eyes.right.cx, eyes.right.cy));
+  return (
+    <>
+      <AnimatedRect
+        animatedProps={leftEye}
+        width={eyes.rx * 2}
+        rx={eyes.rx}
+        transform={`rotate(${eyes.tiltDeg} ${eyes.left.cx} ${eyes.left.cy})`}
+      />
+      <AnimatedRect
+        animatedProps={rightEye}
+        width={eyes.rx * 2}
+        rx={eyes.rx}
+        transform={`rotate(${eyes.tiltDeg} ${eyes.right.cx} ${eyes.right.cy})`}
+      />
+    </>
   );
 }
 

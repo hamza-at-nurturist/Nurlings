@@ -1,4 +1,4 @@
-import { ACTIVE_RUN_STATUSES } from "@rakazo/core";
+import { ACTIVE_RUN_STATUSES, SHIPPED_BOT_AVATAR_SHAPE_KEYS } from "@rakazo/core";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
@@ -176,17 +176,6 @@ describe("BotAvatar", () => {
     expect(html).not.toContain("rakazo-organic-avatar");
   });
 
-  it("renders ChiefAvatar for ::brand_chief and does not fall back to an image or shape", () => {
-    const parsed = parseBotAvatar("::brand_chief");
-    expect(parsed.isImage).toBe(false);
-    expect(parsed.shapeIndex).toBeUndefined();
-    expect(parsed.isBrandChief).toBe(true);
-    const html = renderToString(<BotAvatar color="::brand_chief" identity="chief" />);
-    expect(html).toContain("rakazo-organic-avatar");
-    expect(html).not.toContain("<img");
-    expect(html).not.toContain("bot-character-eyes");
-  });
-
   it("keeps an encoded studio shape", () => {
     const html = renderToString(
       <BotAvatar color={`${DEFAULT_BOT_AVATAR_COLOR}::shape_3`} identity="maya" />,
@@ -201,5 +190,29 @@ describe("BotAvatar", () => {
     expect(html).toContain("rakazo-organic-avatar");
     expect(html).toContain(`fill="${fallback.hex}"`);
     expect(html).not.toContain("#zzzzzz");
+  });
+
+  it("draws the brand blob through the normal shape path, in the picked colour", () => {
+    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const colorDef = resolvePersonaColorDef("preview", DEFAULT_BOT_AVATAR_COLOR);
+    const html = renderToString(
+      <BotAvatar color={`${DEFAULT_BOT_AVATAR_COLOR}::shape_${index}`} identity="chief" />,
+    );
+    expect(html).toContain("rakazo-bot-avatar");
+    expect(html).toContain("bot-character-eyes");
+    expect(html).toContain(`url(#bot-ink-`);
+    expect(html).toContain(colorDef.light);
+    expect(html.match(/<rect/g)).toHaveLength(2);
+    expect(html).not.toContain("<ellipse");
+    expect(html).toContain("rotate(13.5 ");
+  });
+
+  it("lists the brand blob in the shape picker like any other shape", () => {
+    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const html = renderToString(
+      <BotShapePreview shapeIndex={index} color="#8B5CF6" selected onClick={() => undefined} />,
+    );
+    expect(html).toContain('aria-label="nurling"');
+    expect(html.match(/<rect/g)).toHaveLength(2);
   });
 });

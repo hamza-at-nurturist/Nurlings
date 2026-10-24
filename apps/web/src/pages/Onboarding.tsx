@@ -23,9 +23,11 @@ import {
   COMPATIBLE_THINKING_LEVELS,
   clampCatalogThinkingLevel,
   createModelProbe,
+  DEFAULT_BOT_AVATAR_COLOR,
   initialModelProbeState,
   pickCatalogModelId,
   popularModelProvidersFirst,
+  SHIPPED_BOT_AVATAR_SHAPE_KEYS,
 } from "@rakazo/core";
 import {
   Button,
@@ -82,6 +84,8 @@ function providerOptionValue(provider: string, auth?: ProviderAuth): string {
 }
 const FIRST_BOT_NAME = "Chief";
 const FIRST_BOT_SPAWN_KEY = "onboarding:first";
+/** Chief wears the brand blob in the default avatar colour. */
+const FIRST_BOT_AVATAR = `${DEFAULT_BOT_AVATAR_COLOR}::shape_${SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling")}`;
 const FIRST_BOT_LOCK = "rakazo:onboarding-first-bot";
 
 /** Survives StrictMode remounts; concurrent first-bot creates share one in-flight attempt. */
@@ -108,8 +112,8 @@ async function createOrReuseFirstBot(): Promise<{ id: string }> {
       description: "",
       instructions: "",
       notifyOnFinish: true,
+      color: FIRST_BOT_AVATAR,
       spawnKey: FIRST_BOT_SPAWN_KEY,
-      color: "::brand_chief",
     });
     return { id: created.id };
   } catch (error) {

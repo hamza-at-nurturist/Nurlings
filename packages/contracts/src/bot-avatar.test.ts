@@ -21,14 +21,6 @@ describe("bot avatar values", () => {
     });
   });
 
-  it("parses ::brand_chief as a brand-chief kind", () => {
-    expect(parseBotAvatarValue("::brand_chief")).toEqual({ kind: "brand-chief" });
-  });
-
-  it("accepts ::brand_chief as a valid persisted value", () => {
-    expect(isBotAvatarValue("::brand_chief")).toBe(true);
-  });
-
   it("does not treat remote URLs as images", () => {
     expect(parseBotAvatarValue("https://evil.example/track.png")).toEqual({
       kind: "other",
