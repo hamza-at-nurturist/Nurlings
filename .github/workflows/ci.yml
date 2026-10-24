@@ -414,7 +414,10 @@ jobs:
           eas update --platform all --channel production --environment production --message "$GITHUB_SHA" --non-interactive
 
   deploy-production:
+    # Upstream's own production host. The fork's only deploy is deploy-test in
+    # publish-nurlings-images.yml, so this never runs here.
     if: >-
+      github.repository == 'elie222/rakazo' &&
       github.event_name == 'push' &&
       github.ref == 'refs/heads/main' &&
       vars.PRODUCTION_DEPLOY_ENABLED == 'true'
