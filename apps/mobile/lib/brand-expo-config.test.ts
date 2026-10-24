@@ -61,10 +61,8 @@ describe("brandExpoConfig", () => {
     const splash = plugin(branded, "expo-splash-screen")?.[1];
     expect(splash?.backgroundColor).toBe(brand.colors.splashLight);
     expect(splash?.dark.backgroundColor).toBe(brand.colors.splashDark);
-    // A transparent image, so the native splash is plain colour and the app icon is untouched.
-    expect(splash?.image).toBe("./assets/splash-blank.png");
-    expect(branded.icon).toBe("./assets/icon.png");
-    // The width only matters to the (transparent) image.
+    expect(splash?.image).toBe("./assets/splash-icon.png");
+    // The mark fills most of the image, so it is shown wide enough to read.
     expect(splash?.imageWidth).toBe(240);
   });
 

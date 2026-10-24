@@ -31,11 +31,7 @@ function brandPrompts(value: Json, key = ""): Json {
 /** Width the splash image is shown at, in points: the mark fills most of the image. */
 export const SPLASH_IMAGE_WIDTH = 240;
 
-/**
- * Splash colours come from the brand. The native splash is plain colour: the animated splash in
- * the app draws the mark. The image is fully transparent because Android 12+ would otherwise put
- * the launcher icon on it.
- */
+/** Splash colours come from the brand; the splash image itself is `assets/splash-icon.png`. */
 function brandSplash(plugin: Json): Json {
   if (!Array.isArray(plugin) || plugin[0] !== "expo-splash-screen") return plugin;
   const options = (plugin[1] ?? {}) as { dark?: Record<string, Json> } & Record<string, Json>;
@@ -43,7 +39,6 @@ function brandSplash(plugin: Json): Json {
     "expo-splash-screen",
     {
       ...options,
-      image: "./assets/splash-blank.png",
       imageWidth: SPLASH_IMAGE_WIDTH,
       backgroundColor: brand.colors.splashLight,
       dark: { ...options.dark, backgroundColor: brand.colors.splashDark },
