@@ -235,6 +235,8 @@ import {
   listBoards,
   listSpaceBackupModels,
   listTicketComments,
+  listTicketEvents,
+  listTicketFiles,
   lockOwnedGroup,
   modelCredentialProviderFilter,
   newestModelCredentialOrder,
@@ -260,6 +262,7 @@ import {
   toBoardDto,
   toTicketCommentDto,
   toTicketDto,
+  toTicketEventDto,
   touchGroupUpdatedAt,
 } from "@rakazo/db";
 import { getLogger } from "@rakazo/logging";
@@ -4358,6 +4361,27 @@ export function createRouter(deps: RouterDeps) {
         if (!ticket) throw new IsolationError();
         const rows = await listTicketComments(deps.prisma, context.actor.spaceId, ticket.id);
         return rows.map(toTicketCommentDto);
+      }),
+      events: boardEnabled.tickets.events.handler(async ({ context, input }) => {
+        const board = await ensureBoard(deps.prisma, context.actor.spaceId);
+        const ticket = await deps.prisma.ticket.findFirst({
+          where: { id: input.ticketId, spaceId: context.actor.spaceId, boardId: board.id },
+        });
+        if (!ticket) throw new IsolationError();
+        const rows = await listTicketEvents(deps.prisma, context.actor.spaceId, ticket.id);
+        return rows.map(toTicketEventDto);
+      }),
+      files: boardEnabled.tickets.files.handler(async ({ context, input }) => {
+        const board = await ensureBoard(deps.prisma, context.actor.spaceId);
+        const ticket = await deps.prisma.ticket.findFirst({
+          where: { id: input.ticketId, spaceId: context.actor.spaceId, boardId: board.id },
+        });
+        if (!ticket) throw new IsolationError();
+        return listTicketFiles(deps.prisma, {
+          spaceId: context.actor.spaceId,
+          userId: context.actor.userId,
+          ticketId: ticket.id,
+        });
       }),
     },
     skills: {

@@ -9632,7 +9632,7 @@ export function runPromotesMidTurnNarration(trigger: string): boolean {
 }
 
 export const TICKET_SILENT_REPLY_GUIDANCE =
-  "Ticket work is reported on the board, not in chat. Put updates and results in ticket_comment and keep the ticket status current with ticket_update. Use the existing ask or approval mechanism when user input is needed. Leave the final reply empty.";
+  "Ticket work is reported on the board, not in chat. Put updates and results in ticket_comment and keep the ticket status current with ticket_update. Use the existing ask or approval mechanism when user input is needed. When you are blocked on the user, also comment the question on the ticket and set its status to blocked, and still send the ask or approval card. Anything the user should see or download (reports, CSVs, documents) must be attached with attach_file, which lists it on the ticket; scratch and working files stay in the workspace and are not attached. Leave the final reply empty.";
 
 export function runReplyGuidance(trigger: string): string {
   if (trigger === "reaction") return REACTION_SILENT_REPLY_GUIDANCE;

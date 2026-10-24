@@ -79,6 +79,25 @@ export const TicketCommentSchema = z.object({
 });
 export type TicketComment = z.infer<typeof TicketCommentSchema>;
 
+export const TICKET_EVENT_KINDS = ["created", "status", "owner"] as const;
+export const TicketEventKindSchema = z.enum(TICKET_EVENT_KINDS);
+export type TicketEventKind = z.infer<typeof TicketEventKindSchema>;
+
+/** One step in a ticket's history. `status` is set for status events, `assigneeBotId` for created and owner events. */
+export const TicketEventSchema = z.object({
+  id: Id,
+  ticketId: Id,
+  kind: TicketEventKindSchema,
+  actorBotId: Id.nullable(),
+  actorUserId: Id.nullable(),
+  actorName: z.string().nullable(),
+  status: TicketStatusSchema.nullable(),
+  assigneeBotId: Id.nullable(),
+  assigneeName: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type TicketEvent = z.infer<typeof TicketEventSchema>;
+
 export const TicketSchema = z.object({
   id: Id,
   boardId: Id,

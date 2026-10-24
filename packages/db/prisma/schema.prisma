@@ -50,6 +50,7 @@ model User {
   agentSecrets               AgentSecret[]
   createdTickets              Ticket[]                     @relation("TicketCreatorUser")
   ticketComments              TicketComment[]              @relation("TicketCommentAuthorUser")
+  ticketEvents                TicketEvent[]                @relation("TicketEventActorUser")
   signupSurvey                SignupSurvey?
 
   @@unique([email])
@@ -281,6 +282,7 @@ model Space {
   board                       Board?
   tickets                     Ticket[]
   ticketComments              TicketComment[]
+  ticketEvents                TicketEvent[]
 
   @@unique([id, organizationId])
   @@index([organizationId, createdAt])
@@ -523,6 +525,8 @@ model Bot {
   assignedTickets   Ticket[]          @relation("TicketAssigneeBot")
   createdTickets    Ticket[]          @relation("TicketCreatorBot")
   ticketComments    TicketComment[]   @relation("TicketCommentAuthorBot")
+  ticketEvents      TicketEvent[]     @relation("TicketEventActorBot")
+  ticketEventTargets TicketEvent[]    @relation("TicketEventTargetBot")
 
   externalConversations ExternalConversation[]
 
@@ -689,11 +693,15 @@ model Task {
   userId    String
   prompt    String
   status    String
+  // The ticket this task was started for; lets the board find the files its runs attached.
+  ticketId  String?
+  ticket    Ticket?  @relation(fields: [ticketId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   runs      Run[]
 
   @@index([spaceId, botId])
+  @@index([ticketId])
   @@map("tasks")
 }
 
@@ -1566,6 +1574,8 @@ model Ticket {
   updatedAt       DateTime  @updatedAt
   completedAt       DateTime?
   comments        TicketComment[]
+  events          TicketEvent[]
+  tasks           Task[]
 
   @@unique([boardId, number])
   @@index([spaceId, status])
@@ -1589,6 +1599,30 @@ model TicketComment {
 
   @@index([ticketId, createdAt])
   @@map("ticket_comments")
+}
+
+/// What happened to a ticket, in order: created, status changed, owner changed.
+model TicketEvent {
+  id            String   @id @default(cuid())
+  ticketId      String
+  ticket        Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  spaceId       String
+  space         Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  /// created | status | owner
+  kind          String
+  actorBotId    String?
+  actorBot      Bot?     @relation("TicketEventActorBot", fields: [actorBotId], references: [id], onDelete: SetNull)
+  actorUserId   String?
+  actorUser     User?    @relation("TicketEventActorUser", fields: [actorUserId], references: [id], onDelete: SetNull)
+  /// The new status, for status events.
+  status        String?
+  /// The new owner, for created and owner events.
+  assigneeBotId String?
+  assigneeBot   Bot?     @relation("TicketEventTargetBot", fields: [assigneeBotId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_events")
 }
 
 /// Wallet projection; financial deltas live in the append-only billing journal.

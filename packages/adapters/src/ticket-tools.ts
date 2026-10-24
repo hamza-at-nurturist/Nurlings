@@ -12,6 +12,7 @@ import {
   ensureBoard,
   findTicket,
   listTicketComments,
+  recordTicketEvents,
   toTicketCommentDto,
   toTicketDto,
 } from "@rakazo/db";
@@ -172,7 +173,7 @@ export async function createTicket(
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const row = await deps.prisma.$transaction(async (tx) => {
     const number = await allocateTicketNumber(tx, board.id);
-    return tx.ticket.create({
+    const created = await tx.ticket.create({
       data: {
         boardId: board.id,
         spaceId: input.spaceId,
@@ -185,6 +186,13 @@ export async function createTicket(
         createdByUserId: input.userId,
       },
     });
+    await recordTicketEvents(tx, {
+      spaceId: input.spaceId,
+      ticketId: created.id,
+      actor: input,
+      events: [{ kind: "created", assigneeBotId: created.assigneeBotId }],
+    });
+    return created;
   });
   await deps.onTicketChange?.({
     spaceId: input.spaceId,
@@ -240,10 +248,21 @@ export async function updateTicket(
           : {}),
       },
     });
-    return {
-      row,
-      reassigned: data.assigneeBotId !== undefined && data.assigneeBotId !== current.assigneeBotId,
-    };
+    const statusChanged = data.status !== undefined && data.status !== current.status;
+    const reassigned =
+      data.assigneeBotId !== undefined && data.assigneeBotId !== current.assigneeBotId;
+    await recordTicketEvents(tx, {
+      spaceId: input.spaceId,
+      ticketId: current.id,
+      actor: input,
+      events: [
+        ...(statusChanged && data.status ? [{ kind: "status" as const, status: data.status }] : []),
+        ...(reassigned
+          ? [{ kind: "owner" as const, assigneeBotId: data.assigneeBotId ?? null }]
+          : []),
+      ],
+    });
+    return { row, reassigned };
   });
   if (!result) return { error: "Ticket not found." };
   await deps.onTicketChange?.({
@@ -286,12 +305,14 @@ export async function commentTicket(
     await tx.ticket.update({ where: { id: ticket.id }, data: { updatedAt: new Date() } });
     return comment;
   });
+  // A user's comment wakes the owner; a Nurling's never wakes anyone, so two Nurlings cannot loop.
+  // The wake itself skips tickets that are done or closed.
   await deps.onTicketChange?.({
     spaceId: input.spaceId,
     boardId: board.id,
     ticketId: ticket.id,
     assigneeBotId: ticket.assigneeBotId,
-    wakeAssignee: false,
+    wakeAssignee: !input.botId && Boolean(ticket.assigneeBotId),
   });
   return { comment: toTicketCommentDto(row) };
 }

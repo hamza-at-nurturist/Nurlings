@@ -4,7 +4,10 @@ import { isTicketCompletedStatus, TicketStatusSchema } from "@rakazo/contracts";
 import type { PrismaClient } from "@rakazo/db";
 import { getLogger } from "@rakazo/logging";
 
-/** Assignment wakes only its current owner, without posting a chat message. */
+/**
+ * Assignment and a user's comment wake only the current owner, without posting a chat message.
+ * A wake that is still queued will read everything when it starts, so it absorbs a newer one.
+ */
 export async function wakeTicketAssignee(
   deps: { prisma: PrismaClient; jobs: JobPublisher; ticketBoardEnabled?: boolean },
   input: { spaceId: string; ticketId: string; botId: string },
@@ -18,6 +21,17 @@ export async function wakeTicketAssignee(
     if (!ticket) return null;
     const status = TicketStatusSchema.safeParse(ticket.status);
     if (!status.success || isTicketCompletedStatus(status.data)) return null;
+    const queued = await tx.run.findFirst({
+      where: {
+        spaceId: input.spaceId,
+        botId: input.botId,
+        trigger: "tickets",
+        status: "queued",
+        task: { ticketId: ticket.id },
+      },
+      select: { id: true },
+    });
+    if (queued) return null;
     const bot = await tx.bot.findFirst({
       where: { id: input.botId, spaceId: input.spaceId, archivedAt: null },
       select: { id: true, userId: true, thread: { select: { id: true } } },
@@ -29,7 +43,8 @@ export async function wakeTicketAssignee(
         botId: bot.id,
         threadId: bot.thread.id,
         userId: bot.userId,
-        prompt: `Work on ticket ${ticket.board.ticketPrefix}-${ticket.number}. Read it with ticket_get. Keep progress in ticket comments and update its status with ticket_update. Use ask or approval cards when user input is needed.`,
+        ticketId: ticket.id,
+        prompt: `Work on ticket ${ticket.board.ticketPrefix}-${ticket.number}. Read it with ticket_get, including any comments added since you last looked, and answer them. Keep progress in ticket comments and update its status with ticket_update. Use ask or approval cards when user input is needed.`,
         status: "queued",
       },
     });

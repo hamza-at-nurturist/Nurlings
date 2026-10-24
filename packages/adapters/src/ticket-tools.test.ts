@@ -169,6 +169,7 @@ function mutationDeps(ticketBoardEnabled = true) {
         ...data,
       })),
     },
+    ticketEvent: { create: vi.fn(async (_args: { data: Record<string, unknown> }) => ({})) },
     $queryRaw: vi.fn(async () => []),
   };
   const prisma = {
@@ -261,6 +262,79 @@ describe("ticket mutations", () => {
       botId: "bot-2",
     });
     expect(s.changes.mock.calls.map(([value]) => value.wakeAssignee)).toEqual([false, false]);
+  });
+  it("records a created event with the actor and the owner", async () => {
+    const s = mutationDeps();
+    await createTicket(s.deps, {
+      spaceId: "ws",
+      userId: "user-1",
+      title: "Ship",
+      ownerBotId: "bot-2",
+    });
+    expect(s.tx.ticketEvent.create).toHaveBeenCalledOnce();
+    expect(s.tx.ticketEvent.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        kind: "created",
+        actorUserId: "user-1",
+        actorBotId: null,
+        assigneeBotId: "bot-2",
+        status: null,
+      }),
+    });
+  });
+  it("records status and owner events only for what actually changed, attributed to the actor", async () => {
+    const s = mutationDeps();
+    await updateTicket(s.deps, {
+      spaceId: "ws",
+      userId: "user-1",
+      botId: "bot-1",
+      id: "t1",
+      status: "blocked",
+      ownerBotId: "bot-2",
+    });
+    expect(s.tx.ticketEvent.create.mock.calls.map(([arg]) => arg.data)).toEqual([
+      expect.objectContaining({
+        kind: "status",
+        status: "blocked",
+        actorBotId: "bot-1",
+        actorUserId: null,
+      }),
+      expect.objectContaining({ kind: "owner", assigneeBotId: "bot-2", actorBotId: "bot-1" }),
+    ]);
+    s.tx.ticketEvent.create.mockClear();
+    // Same status and owner again, and an edit that touches neither.
+    await updateTicket(s.deps, {
+      spaceId: "ws",
+      userId: "user-1",
+      id: "t1",
+      status: "blocked",
+      ownerBotId: "bot-2",
+    });
+    await updateTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", title: "Renamed" });
+    expect(s.tx.ticketEvent.create).not.toHaveBeenCalled();
+  });
+  it("attributes a user's status change to the user", async () => {
+    const s = mutationDeps();
+    await updateTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", status: "doing" });
+    expect(s.tx.ticketEvent.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ kind: "status", actorUserId: "user-1", actorBotId: null }),
+    });
+  });
+  it("wakes the owner for a user's comment and for nobody else's", async () => {
+    const s = mutationDeps();
+    await commentTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", body: "Any news?" });
+    expect(s.changes).toHaveBeenLastCalledWith(
+      expect.objectContaining({ wakeAssignee: true, assigneeBotId: "bot-1" }),
+    );
+    // A Nurling's comment carries its owner's user id too, but is not a user's comment.
+    await commentTicket(s.deps, {
+      spaceId: "ws",
+      userId: "user-1",
+      botId: "bot-1",
+      id: "t1",
+      body: "Looking",
+    });
+    expect(s.changes).toHaveBeenLastCalledWith(expect.objectContaining({ wakeAssignee: false }));
   });
   it("comments without waking the owner", async () => {
     const s = mutationDeps();

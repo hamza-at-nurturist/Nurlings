@@ -121,6 +121,23 @@ msgstr "{0}は直接のメンションには引き続き応答します。"
 msgid "{0}'s screen"
 msgstr "{0}の画面"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} assigned it to {owner}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this and assigned it to {owner}"
+msgstr ""
+
+#. placeholder {0}: statuses[event.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} moved it to {0}"
+msgstr ""
+
 #: src/lib/billing.ts
 msgid "{amount} / {period}"
 msgstr "{amount} / {period}"
@@ -916,6 +933,7 @@ msgstr "請求"
 msgid "Blocked"
 msgstr "ブロック中"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
 msgid "Board"
@@ -2211,6 +2229,7 @@ msgstr "拒否"
 msgid "Deployment default"
 msgstr "デプロイのデフォルト"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Description"
@@ -2567,6 +2586,10 @@ msgstr "比較するフィールド（例: id, modifiedTime）（任意）"
 #: src/pages/McpServersOverlay.tsx
 msgid "File"
 msgstr "ファイル"
+
+#: src/components/board/TicketModal/TicketFiles.tsx
+msgid "Files"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Files or folders on the computer"
@@ -3760,6 +3783,7 @@ msgstr "元のメッセージを表示できません"
 msgid "Other model…"
 msgstr "その他のモデル…"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/lib/identity-display.ts
 #: src/pages/Board.tsx
 msgid "Owner"
@@ -3901,6 +3925,7 @@ msgstr "このファイル形式はプレビューできません。ダウンロ
 msgid "Previous settings sections"
 msgstr "前の設定セクション"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/Board.tsx
 msgid "Priority"
 msgstr "優先度"
@@ -4187,6 +4212,7 @@ msgstr "キーを置き換え"
 msgid "Replace value"
 msgstr "値を置き換え"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/message-hover-actions.tsx
 msgid "Reply"
 msgstr "返信"
@@ -4493,6 +4519,7 @@ msgstr "検索中…"
 msgid "Select a bot"
 msgstr "ボットを選択"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Send"
 msgstr "送信"
@@ -4711,6 +4738,10 @@ msgstr "Slackが有効になっていません"
 msgid "Slide up to lock"
 msgstr "上にスライドしてロック"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Someone"
+msgstr ""
+
 #: src/App.tsx
 #: src/lib/user-error.ts
 msgid "Something went wrong. Try again."
@@ -4780,6 +4811,7 @@ msgstr "開始中"
 msgid "Starting…"
 msgstr "開始中…"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/ActivityList.tsx
 #: src/pages/Board.tsx
 msgid "Status"
@@ -5060,6 +5092,7 @@ msgstr "時刻"
 msgid "Timezone"
 msgstr "タイムゾーン"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Title"
@@ -5502,6 +5535,7 @@ msgstr "年"
 msgid "Yesterday"
 msgstr "昨日"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx

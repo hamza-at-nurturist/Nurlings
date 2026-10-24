@@ -24,6 +24,7 @@ import {
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useId, useState } from "react";
 import { Link } from "react-router-dom";
+import { TicketModal } from "../components/board/TicketModal/TicketModal";
 import { formatRelativeTime } from "../lib/relative-time";
 import { rpc } from "../lib/rpc";
 import { useTicketPriorityLabels } from "../lib/ticket-priority";
@@ -160,15 +161,21 @@ export function BoardPage() {
           </p>
         ) : null}
       </main>
-      {selected ? (
-        <TicketDialog
-          key={selected === "new" ? "new" : selected.id}
-          ticket={selected === "new" ? null : selected}
+      {selected && selected !== "new" ? (
+        <TicketModal
+          key={selected.id}
+          ticket={tickets.find((row) => row.id === selected.id) ?? selected}
           bots={bots}
-          commentRevision={
-            (commentRefresh["*"] ?? 0) +
-            (selected === "new" ? 0 : (commentRefresh[selected.id] ?? 0))
-          }
+          revision={(commentRefresh["*"] ?? 0) + (commentRefresh[selected.id] ?? 0)}
+          onClose={() => setSelected(null)}
+          onChanged={reload}
+        />
+      ) : null}
+      {selected === "new" ? (
+        <TicketDialog
+          key="new"
+          ticket={null}
+          bots={bots}
           onClose={() => setSelected(null)}
           onSaved={reload}
         />

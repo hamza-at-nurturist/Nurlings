@@ -121,6 +121,23 @@ msgstr "{0} ימשיך להגיב לאזכורים ישירים."
 msgid "{0}'s screen"
 msgstr "המסך של {0}"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} assigned it to {owner}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this and assigned it to {owner}"
+msgstr ""
+
+#. placeholder {0}: statuses[event.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} moved it to {0}"
+msgstr ""
+
 #: src/lib/billing.ts
 msgid "{amount} / {period}"
 msgstr "{amount} / {period}"
@@ -916,6 +933,7 @@ msgstr "חיוב"
 msgid "Blocked"
 msgstr "חסום"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
 msgid "Board"
@@ -2211,6 +2229,7 @@ msgstr "דחייה"
 msgid "Deployment default"
 msgstr "ברירת המחדל של ההתקנה"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Description"
@@ -2567,6 +2586,10 @@ msgstr ""
 #: src/pages/McpServersOverlay.tsx
 msgid "File"
 msgstr "קובץ"
+
+#: src/components/board/TicketModal/TicketFiles.tsx
+msgid "Files"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Files or folders on the computer"
@@ -3760,6 +3783,7 @@ msgstr "ההודעה המקורית אינה זמינה"
 msgid "Other model…"
 msgstr "מודל אחר…"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/lib/identity-display.ts
 #: src/pages/Board.tsx
 msgid "Owner"
@@ -3901,6 +3925,7 @@ msgstr "תצוגה מקדימה אינה זמינה לסוג הקובץ הזה �
 msgid "Previous settings sections"
 msgstr ""
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/Board.tsx
 msgid "Priority"
 msgstr "עדיפות"
@@ -4187,6 +4212,7 @@ msgstr "החלפת מפתח"
 msgid "Replace value"
 msgstr "החלפת ערך"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/message-hover-actions.tsx
 msgid "Reply"
 msgstr "תשובה"
@@ -4493,6 +4519,7 @@ msgstr "מחפש…"
 msgid "Select a bot"
 msgstr "בחירת בוט"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Send"
 msgstr "שליחה"
@@ -4711,6 +4738,10 @@ msgstr "Slack לא מופעל"
 msgid "Slide up to lock"
 msgstr ""
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Someone"
+msgstr ""
+
 #: src/App.tsx
 #: src/lib/user-error.ts
 msgid "Something went wrong. Try again."
@@ -4780,6 +4811,7 @@ msgstr "מתחיל"
 msgid "Starting…"
 msgstr "מתחיל…"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/ActivityList.tsx
 #: src/pages/Board.tsx
 msgid "Status"
@@ -5060,6 +5092,7 @@ msgstr "שעה ביום"
 msgid "Timezone"
 msgstr ""
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Title"
@@ -5502,6 +5535,7 @@ msgstr "שנה"
 msgid "Yesterday"
 msgstr "אתמול"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx

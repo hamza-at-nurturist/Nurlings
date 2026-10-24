@@ -121,6 +121,23 @@ msgstr ""
 msgid "{0}'s screen"
 msgstr ""
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} assigned it to {owner}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this and assigned it to {owner}"
+msgstr ""
+
+#. placeholder {0}: statuses[event.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} moved it to {0}"
+msgstr ""
+
 #: src/lib/billing.ts
 msgid "{amount} / {period}"
 msgstr ""
@@ -916,6 +933,7 @@ msgstr ""
 msgid "Blocked"
 msgstr ""
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
 msgid "Board"
@@ -2211,6 +2229,7 @@ msgstr "Negar"
 msgid "Deployment default"
 msgstr "Padrão de implantação"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Description"
@@ -2567,6 +2586,10 @@ msgstr "Campos para comparar, por exemplo id, modifiedTime (opcional)"
 #: src/pages/McpServersOverlay.tsx
 msgid "File"
 msgstr "Arquivo"
+
+#: src/components/board/TicketModal/TicketFiles.tsx
+msgid "Files"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Files or folders on the computer"
@@ -3760,6 +3783,7 @@ msgstr "Mensagem original indisponível"
 msgid "Other model…"
 msgstr "Outro modelo..."
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/lib/identity-display.ts
 #: src/pages/Board.tsx
 msgid "Owner"
@@ -3901,6 +3925,7 @@ msgstr ""
 msgid "Previous settings sections"
 msgstr ""
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/Board.tsx
 msgid "Priority"
 msgstr ""
@@ -4187,6 +4212,7 @@ msgstr "Substituir chave"
 msgid "Replace value"
 msgstr ""
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/message-hover-actions.tsx
 msgid "Reply"
 msgstr "Responder"
@@ -4493,6 +4519,7 @@ msgstr "Pesquisando…"
 msgid "Select a bot"
 msgstr "Selecione um bot"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Send"
 msgstr "Enviar"
@@ -4711,6 +4738,10 @@ msgstr ""
 msgid "Slide up to lock"
 msgstr ""
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Someone"
+msgstr ""
+
 #: src/App.tsx
 #: src/lib/user-error.ts
 msgid "Something went wrong. Try again."
@@ -4780,6 +4811,7 @@ msgstr "Iniciando"
 msgid "Starting…"
 msgstr "Iniciando…"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/ActivityList.tsx
 #: src/pages/Board.tsx
 msgid "Status"
@@ -5060,6 +5092,7 @@ msgstr "Hora do dia"
 msgid "Timezone"
 msgstr ""
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Title"
@@ -5502,6 +5535,7 @@ msgstr ""
 msgid "Yesterday"
 msgstr "Ontem"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx

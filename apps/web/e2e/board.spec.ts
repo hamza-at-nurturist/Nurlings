@@ -48,7 +48,20 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await card.click();
   const detail = page.getByRole("dialog", { name: title });
   await expect(detail.getByLabel("Title")).toHaveValue(title);
-  await expect(detail.getByTestId("ticket-description")).toHaveValue(description);
-  await expect(detail.getByTestId("ticket-comments")).toBeVisible();
-  await captureScreenshot(page, testInfo, "board-ticket-detail");
+  await expect(detail.getByLabel("Description")).toHaveValue(description);
+  await expect(detail.getByTestId("ticket-owner")).toContainText("Planner");
+  await expect(detail.getByTestId("ticket-status")).toContainText("To do");
+  const activity = detail.getByTestId("ticket-activity");
+  await expect(activity).toContainText("You created this and assigned it to Planner");
+
+  await detail.getByTestId("ticket-status").click();
+  await page.getByRole("menuitemradio", { name: "Blocked", exact: true }).click();
+  await expect(detail.getByTestId("ticket-status")).toContainText("Blocked");
+  await expect(activity).toContainText("You moved it to Blocked");
+
+  await detail.getByLabel("Reply").fill("Any update on this?");
+  await detail.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(activity).toContainText("Any update on this?");
+  await expect(detail.getByLabel("Reply")).toHaveValue("");
+  await captureScreenshot(page, testInfo, "board-ticket-modal");
 });
