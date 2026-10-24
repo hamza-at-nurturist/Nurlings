@@ -1,4 +1,8 @@
-import { ACTIVE_RUN_STATUSES, SHIPPED_BOT_AVATAR_SHAPE_KEYS } from "@rakazo/core";
+import {
+  ACTIVE_RUN_STATUSES,
+  organicBotAvatarFrame,
+  SHIPPED_BOT_AVATAR_SHAPE_KEYS,
+} from "@rakazo/core";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
@@ -192,20 +196,23 @@ describe("BotAvatar", () => {
     expect(html).not.toContain("#zzzzzz");
   });
 
-  it("draws the brand blob through the normal shape path, in the picked colour", () => {
+  it("draws the brand blob as an organic avatar with its own body and pill eyes", () => {
     const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
-    const colorDef = resolvePersonaColorDef("preview", DEFAULT_BOT_AVATAR_COLOR);
+    const colorDef = resolvePersonaColorDef("chief", DEFAULT_BOT_AVATAR_COLOR);
     const html = renderToString(
       <BotAvatar color={`${DEFAULT_BOT_AVATAR_COLOR}::shape_${index}`} identity="chief" />,
     );
-    expect(html).toContain("rakazo-bot-avatar");
-    expect(html).toContain("bot-character-eyes");
-    expect(html).toContain(`url(#bot-ink-`);
-    expect(html).toContain(colorDef.light);
+    expect(html).toContain("rakazo-organic-avatar");
+    expect(html).not.toContain("rakazo-bot-avatar");
+    expect(html).not.toContain("url(#bot-ink-");
+    expect(html).toContain(`fill="${colorDef.hex}"`);
+    expect(html).toContain(organicBotAvatarFrame(index)?.path);
     // Two pills in each of the idle and working eye groups.
     expect(html.match(/<rect/g)).toHaveLength(4);
     expect(html).not.toContain("<ellipse");
     expect(html).toContain("rotate(13.5 ");
+    // The blob keeps its outline, so there is nothing to morph between.
+    expect(html).not.toContain("<animate");
   });
 
   it("lists the brand blob in the shape picker like any other shape", () => {
@@ -217,20 +224,17 @@ describe("BotAvatar", () => {
     expect(html.match(/<rect/g)).toHaveLength(2);
   });
 
-  it("gives the brand blob the organic eye hooks, seeded per bot, and leaves the classic shapes alone", () => {
+  it("gives the brand blob the organic working state and eye patterns, and leaves the classic shapes alone", () => {
     const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
     const render = (color: string, identity: string, status?: string) =>
       renderToString(<BotAvatar color={color} identity={identity} status={status} />);
     const blob = render(`#8B5CF6::shape_${index}`, "chief", "running");
-    expect(blob).toContain("rakazo-shape-eyes");
     expect(blob).toContain('data-working="true"');
     expect(blob).toMatch(/data-eye-pattern="[0-3]"/);
     expect(blob).toContain("rakazo-organic-avatar-eyes-idle");
     expect(blob).toContain("rakazo-organic-avatar-eyes-working");
-    expect(blob.match(/<rect/g)).toHaveLength(4);
-    // Organic-only checks keep telling an organic body from a shape.
-    expect(blob).not.toContain('class="rakazo-organic-avatar ');
-    expect(blob).not.toMatch(/class="[^"]*\brakazo-organic-avatar\b(?!-)/);
+    expect(blob).toContain("rakazo-organic-avatar-body-working");
+    expect(blob).not.toContain("rakazo-bot-avatar-ring");
 
     const patterns = new Set(
       ["a", "b", "c", "d", "e", "f", "g", "h"].map(
@@ -243,9 +247,9 @@ describe("BotAvatar", () => {
     );
 
     const classic = render("#8B5CF6::shape_3", "chief", "running");
-    expect(classic).not.toContain("rakazo-shape-eyes");
+    expect(classic).not.toContain("rakazo-organic-avatar");
     expect(classic).not.toContain("data-eye-pattern");
-    expect(classic).not.toContain("rakazo-organic-avatar-eyes");
+    expect(classic).toContain("rakazo-bot-avatar-ring");
     expect(classic).toContain("<ellipse");
   });
 
@@ -253,6 +257,5 @@ describe("BotAvatar", () => {
     const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
     const html = renderToString(<BotShapePreview shapeIndex={index} color="#8B5CF6" />);
     expect(html).not.toContain("rakazo-organic-avatar-eyes");
-    expect(html).not.toContain("rakazo-shape-eyes");
   });
 });

@@ -6,9 +6,10 @@ import {
   BOT_AVATAR_COLORS,
   BOT_COLOR_LIST,
   DEFAULT_BOT_AVATAR_COLOR,
+  type OrganicBotAvatarFrame,
   organicAvatarPath,
+  organicBotAvatarFrame,
   resolvePersonaColorDef,
-  SHIPPED_BOT_AVATAR_CENTER,
   SHIPPED_BOT_AVATAR_SHAPE_KEYS,
   SHIPPED_BOT_AVATAR_SHAPES,
   SHIPPED_BOT_AVATAR_VIEWBOX,
@@ -28,8 +29,6 @@ export { BOT_AVATAR_COLORS, BOT_COLOR_LIST, DEFAULT_BOT_AVATAR_COLOR, resolvePer
 export const BOT_SHAPES = SHIPPED_BOT_AVATAR_SHAPES;
 export const SHIPPED_SHAPE_KEYS = SHIPPED_BOT_AVATAR_SHAPE_KEYS;
 const VIEWBOX = SHIPPED_BOT_AVATAR_VIEWBOX;
-// The organic eye keyframes are authored for a 120-unit box; shapes draw in a larger one.
-const EYE_UNIT = Number(VIEWBOX.split(" ")[2]) / 120;
 
 export const BOT_MASCOT_SHAPES = SHIPPED_SHAPE_KEYS.map(
   (k) => BOT_SHAPES[k] ?? FALLBACK_SHAPE_PATH,
@@ -137,20 +136,21 @@ export const BotAvatar = memo(function BotAvatar({
     );
   }
 
-  if (parsed.shapeIndex === undefined) {
+  // The brand blob is an organic avatar with its own body and eyes.
+  const frame =
+    parsed.shapeIndex === undefined ? undefined : organicBotAvatarFrame(parsed.shapeIndex);
+  if (parsed.shapeIndex === undefined || frame) {
     return (
       <OrganicAvatar
         color={colorDef.hex}
         identity={effectiveId}
         size={size}
         isWorking={isWorking}
+        frame={frame}
         className={className}
       />
     );
   }
-
-  // Only the brand blob's pill eyes move like organic avatars' eyes for now.
-  const animatedEyes = shippedBotAvatarEyes(parsed.shapeIndex).kind === "pill";
 
   return (
     <div
@@ -199,11 +199,8 @@ export const BotAvatar = memo(function BotAvatar({
         width={size}
         height={size}
         aria-hidden="true"
-        data-working={animatedEyes ? isWorking : undefined}
-        data-eye-pattern={animatedEyes ? avatarIdentitySeed(effectiveId) % 4 : undefined}
         className={cn(
           "overflow-visible transition-transform duration-300",
-          animatedEyes && "rakazo-shape-eyes",
           isWorking
             ? "animate-pulse scale-[1.04] motion-reduce:animate-none"
             : "hover:scale-[1.03] motion-reduce:hover:scale-100",
@@ -223,9 +220,8 @@ export const BotAvatar = memo(function BotAvatar({
         <g>
           <path d={shippedBotAvatarShapePath(parsed.shapeIndex)} fill={`url(#bot-ink-${id})`} />
           <ShapeEyes
-            shapeIndex={parsed.shapeIndex}
+            eyes={shippedBotAvatarEyes(parsed.shapeIndex)}
             fill={colorDef.eyeColor}
-            animated={animatedEyes}
             className="bot-character-eyes"
           />
         </g>
@@ -234,67 +230,33 @@ export const BotAvatar = memo(function BotAvatar({
   );
 });
 
-/** The eyes of a shipped shape, in a frame centred on `origin` and scaled by `unit`. */
-function eyeShapes(eyes: ReturnType<typeof shippedBotAvatarEyes>, origin: number, unit: number) {
-  return [eyes.left, eyes.right].map(({ cx, cy }) => {
-    const x = (cx - origin) / unit;
-    const y = (cy - origin) / unit;
-    const rx = eyes.rx / unit;
-    const ry = eyes.ry / unit;
-    return eyes.kind === "pill" ? (
-      <rect
-        key={cx}
-        x={x - rx}
-        y={y - ry}
-        width={rx * 2}
-        height={ry * 2}
-        rx={rx}
-        transform={`rotate(${eyes.tiltDeg} ${x} ${y})`}
-      />
-    ) : (
-      <ellipse key={cx} cx={x} cy={y} rx={rx} ry={ry} />
-    );
-  });
-}
-
-/**
- * The two eyes of a shipped shape: ellipses, or tilted pills for the brand blob. Animated eyes reuse
- * the organic avatars' idle and working keyframes, so they sit in a wrapper scaled to the box those
- * keyframes were written for.
- */
+/** The two eyes of a shape: ellipses, or tilted pills for the brand blob. */
 function ShapeEyes({
-  shapeIndex,
+  eyes,
   fill,
-  animated = false,
   className,
 }: {
-  shapeIndex: number;
-  fill: string;
-  animated?: boolean;
+  eyes: ReturnType<typeof shippedBotAvatarEyes>;
+  fill?: string;
   className?: string;
 }) {
-  const eyes = shippedBotAvatarEyes(shapeIndex);
-  if (!animated) {
-    return (
-      <g fill={fill} className={className}>
-        {eyeShapes(eyes, 0, 1)}
-      </g>
-    );
-  }
   return (
-    <g
-      className={className}
-      transform={`translate(${SHIPPED_BOT_AVATAR_CENTER} ${SHIPPED_BOT_AVATAR_CENTER}) scale(${EYE_UNIT})`}
-    >
-      {(["idle", "working"] as const).map((mode) => (
-        <g
-          key={mode}
-          className={`rakazo-organic-avatar-eyes rakazo-organic-avatar-eyes-${mode}`}
-          fill={fill}
-        >
-          {eyeShapes(eyes, SHIPPED_BOT_AVATAR_CENTER, EYE_UNIT)}
-        </g>
-      ))}
+    <g fill={fill} className={className}>
+      {[eyes.left, eyes.right].map(({ cx, cy }) =>
+        eyes.kind === "pill" ? (
+          <rect
+            key={cx}
+            x={cx - eyes.rx}
+            y={cy - eyes.ry}
+            width={eyes.rx * 2}
+            height={eyes.ry * 2}
+            rx={eyes.rx}
+            transform={`rotate(${eyes.tiltDeg} ${cx} ${cy})`}
+          />
+        ) : (
+          <ellipse key={cx} cx={cx} cy={cy} rx={eyes.rx} ry={eyes.ry} />
+        ),
+      )}
     </g>
   );
 }
@@ -304,12 +266,15 @@ function OrganicAvatar({
   identity,
   size,
   isWorking,
+  frame,
   className,
 }: {
   color: string;
   identity?: string;
   size: number;
   isWorking: boolean;
+  /** A fixed body and eyes to draw instead of the seeded organic ones. */
+  frame?: OrganicBotAvatarFrame;
   className?: string;
 }) {
   const reducedMotion = useSyncExternalStore(
@@ -319,8 +284,8 @@ function OrganicAvatar({
   );
   const seed = avatarIdentitySeed(identity || color || DEFAULT_BOT_AVATAR_COLOR);
   const duration = `${4.8 + (seed % 24) / 10}s`;
-  const shapeA = organicAvatarPath(seed);
-  const shapeB = organicAvatarPath(seed, 0.42);
+  const shapeA = frame?.path ?? organicAvatarPath(seed);
+  const shapeB = frame ? shapeA : organicAvatarPath(seed, 0.42);
 
   return (
     <svg
@@ -352,7 +317,7 @@ function OrganicAvatar({
             } as CSSProperties
           }
         >
-          {!reducedMotion ? (
+          {!reducedMotion && !frame ? (
             <animate
               attributeName="d"
               values={`${shapeA};${shapeB};${shapeA}`}
@@ -362,15 +327,23 @@ function OrganicAvatar({
           ) : null}
         </path>
       ))}
-      <g transform={`rotate(${(seed % 9) - 4})`}>
+      <g transform={frame ? undefined : `rotate(${(seed % 9) - 4})`}>
         {(["idle", "working"] as const).map((mode) => (
           <g
             key={mode}
             className={`rakazo-organic-avatar-eyes rakazo-organic-avatar-eyes-${mode}`}
             fill={tokens.background}
+            // Off-centre eyes blink about their own centre.
+            style={frame ? { transformBox: "fill-box", transformOrigin: "center" } : undefined}
           >
-            <rect x="-14" y="-12" width="7" height="24" rx="3.5" />
-            <rect x="7" y="-12" width="7" height="24" rx="3.5" />
+            {frame ? (
+              <ShapeEyes eyes={frame.eyes} />
+            ) : (
+              <>
+                <rect x="-14" y="-12" width="7" height="24" rx="3.5" />
+                <rect x="7" y="-12" width="7" height="24" rx="3.5" />
+              </>
+            )}
           </g>
         ))}
       </g>
@@ -430,7 +403,7 @@ export function BotShapePreview({
       ) : (
         <svg viewBox={VIEWBOX} className="size-8 overflow-visible" aria-hidden="true">
           <path d={shippedBotAvatarShapePath(shapeIndex)} fill={colorDef.light} />
-          <ShapeEyes shapeIndex={shapeIndex} fill={colorDef.eyeColor} />
+          <ShapeEyes eyes={shippedBotAvatarEyes(shapeIndex)} fill={colorDef.eyeColor} />
         </svg>
       )}
     </button>

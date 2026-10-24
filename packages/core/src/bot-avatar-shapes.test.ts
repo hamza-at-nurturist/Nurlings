@@ -1,6 +1,7 @@
 import { BOT_AVATAR_SHAPE_COUNT } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
 import {
+  organicBotAvatarFrame,
   SHIPPED_BOT_AVATAR_CENTER,
   SHIPPED_BOT_AVATAR_SHAPE_KEYS,
   SHIPPED_BOT_AVATAR_SHAPES,
@@ -83,6 +84,24 @@ describe("shipped bot avatar shapes", () => {
       expect(eye.cx).toBeGreaterThan(bounds.minX);
       expect(eye.cx).toBeLessThan(bounds.maxX);
       expect(eye.cy - eyes.ry).toBeGreaterThan(bounds.minY);
+    }
+  });
+
+  it("gives only the brand blob an organic frame, centred in the organic box with its eyes inside", () => {
+    expect(organicBotAvatarFrame(0)).toBeUndefined();
+    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const frame = organicBotAvatarFrame(index);
+    if (!frame) throw new Error("the brand blob has an organic frame");
+    const bounds = pathBounds(frame.path);
+    expect((bounds.minX + bounds.maxX) / 2).toBeCloseTo(0, 0);
+    expect((bounds.minY + bounds.maxY) / 2).toBeCloseTo(0, 0);
+    expect(bounds.maxX - bounds.minX).toBeCloseTo(108, 0);
+    expect(bounds.minX).toBeGreaterThanOrEqual(-60);
+    expect(bounds.maxX).toBeLessThanOrEqual(60);
+    expect(frame.eyes).toMatchObject({ kind: "pill", tiltDeg: 13.5 });
+    for (const eye of [frame.eyes.left, frame.eyes.right]) {
+      expect(eye.cx).toBeGreaterThan(bounds.minX);
+      expect(eye.cx).toBeLessThan(bounds.maxX);
     }
   });
 });
