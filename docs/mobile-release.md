@@ -41,18 +41,18 @@ and review account on a physical device.
 
 ## Android APK
 
-Until Rakazo is on Google Play, Android users can install an APK. Run the
+Until Nurlings is on Google Play, Android users can install an APK. Run the
 `release-android-apk` workflow from `main` in GitHub Actions when native code
 changes. It builds the `android-apk` EAS profile, signed with the project's
 managed keystore, and replaces the rolling `android` GitHub release, so the
 download link stays the same:
 
 ```text
-https://github.com/elie222/rakazo/releases/download/android/rakazo.apk
+https://github.com/hamza-at-nurturist/Nurlings/releases/download/android/nurlings.apk
 ```
 
-The APK uses the production update channel, so JavaScript changes reach it
-through the over-the-air updates below without a new APK. A Google Play install
+Over-the-air updates are off in Nurlings, so an installed APK changes only when
+you install a newer one. A Google Play install
 is signed with Play's key, so switching from the APK to Play means uninstalling
 the APK first.
 

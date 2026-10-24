@@ -128,12 +128,12 @@ describe("app.json and the Maestro flows", () => {
     }
   });
 
-  it("leaves obvious placeholders for the Expo owner and project", () => {
-    expect(upstream.owner).toBe("REPLACE_WITH_NURLINGS_EXPO_OWNER");
+  it("names the Nurlings Expo owner and project with no placeholder left", () => {
+    expect(upstream.owner).toBe("nurturist-ai");
     expect((upstream.extra as { eas: { projectId: string } }).eas.projectId).toBe(
-      "REPLACE_WITH_NURLINGS_EAS_PROJECT_ID",
+      "aa1a8375-7dea-4dc7-a6ba-d42968e9f40f",
     );
-    expect(placeholderProblems(upstream)).toHaveLength(2);
+    expect(placeholderProblems(upstream)).toEqual([]);
   });
 
   it("agrees with the brand on the bundle id and keeps the URL scheme", () => {
@@ -190,13 +190,15 @@ describe("through Expo's real config loader", () => {
     expect(JSON.stringify(config.ios?.infoPlist)).not.toContain("Rakazo");
   }, 120_000);
 
-  it("refuses a release build while an Expo placeholder is present", () => {
-    const attempt = () =>
-      resolved({
-        EAS_BUILD_PROFILE: "production",
-        EXPO_PUBLIC_API_URL: "https://api.example.test",
-      });
-    expect(attempt).toThrow(/Fill in the Nurlings Expo project/);
-    expect(attempt).toThrow(/REPLACE_WITH_NURLINGS_EXPO_OWNER/);
+  it("resolves a release build with the Nurlings Expo owner and project", () => {
+    const config = resolved({
+      EAS_BUILD_PROFILE: "production",
+      EXPO_PUBLIC_API_URL: "https://api.example.test",
+    });
+    expect(config.owner).toBe("nurturist-ai");
+    expect((config.extra as { eas: { projectId: string } }).eas.projectId).toBe(
+      "aa1a8375-7dea-4dc7-a6ba-d42968e9f40f",
+    );
+    expect(config.updates).toEqual({ enabled: false });
   }, 120_000);
 });
