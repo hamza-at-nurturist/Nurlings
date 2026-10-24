@@ -196,7 +196,10 @@ test("opening a computer refreshes a stale booting snapshot", async ({ page }, t
   await expect(
     page.getByTestId("computer-chrome").getByRole("button", { name: "Take control", exact: true }),
   ).toBeVisible();
-  await expect(page.locator('iframe[title="Bot screen"]')).toHaveAttribute("src", screenUrl);
+  await expect(page.locator(`iframe[title="${ui("Bot screen")}"]`)).toHaveAttribute(
+    "src",
+    screenUrl,
+  );
   expect(boots).toHaveLength(0);
   await captureScreenshot(page, testInfo, "computer-open-refreshed-boot");
   await page.unrouteAll({ behavior: "wait" });

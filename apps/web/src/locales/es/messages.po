@@ -3029,7 +3029,6 @@ msgstr "Cargando reglas…"
 msgid "Loading voice providers…"
 msgstr "Cargando proveedores de voz…"
 
-#: src/App.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/IntegrationSetup.tsx
 #: src/pages/Onboarding.tsx

@@ -144,9 +144,6 @@ function SessionApp() {
         data-rakazo-app-state="session-pending"
       >
         <BrandAnimation variant="intro" className="h-16" />
-        <span className="sr-only">
-          <Trans>Loading…</Trans>
-        </span>
       </div>
     );
   }
