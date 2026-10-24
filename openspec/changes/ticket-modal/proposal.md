@@ -58,7 +58,8 @@ on the right, and makes replying actually reach the Nurling.
 
 - **Ticket events**: one new table `ticket_events` (created, status changed, owner changed) written
   by the existing create/update paths, and one new read-only RPC `tickets.events`. Without it the
-  feed cannot show status changes, because nothing records them today.
+  feed cannot show status changes, because nothing records them today. A second read-only RPC,
+  `tickets.files`, lists the attached files and returns the existing artifact shape.
 - **Ticket link on tasks**: one nullable `ticketId` column on `tasks`, set by the ticket wake.
   It lets the modal list the files a Nurling produced for the ticket (artifacts of runs of those
   tasks) without a new file store. Change 2 reuses it for mention wakes and loop guards.
@@ -104,10 +105,12 @@ files are small:
 | `packages/adapters/src/ticket-wake.ts` | wake prompt text, set `ticketId` on the task |
 | `packages/adapters/src/executor.ts` | one guidance string |
 | `packages/db/prisma/schema.prisma` | `TicketEvent` model, `Task.ticketId` |
-| `packages/contracts/src/{board,rpc}.ts` | `TicketEvent` schema and `tickets.events` |
-| `apps/api/src/router.ts` | the `tickets.events` handler (a few lines, next to `tickets.comments`) |
+| `packages/contracts/src/{board,rpc}.ts` | `TicketEvent` schema, `tickets.events` and `tickets.files` |
+| `apps/api/src/router.ts` | the `tickets.events` and `tickets.files` handlers (next to `tickets.comments`) |
 
-Everything else is new files. `Board.tsx` is not rewritten.
+Everything else is new files. `Board.tsx` is not rewritten. `TicketDialog` keeps its
+edit-an-existing-ticket branches although only "New ticket" reaches it now; pruning them is left for
+after the next upstream sync so this diff stays small.
 
 ### Not changed, on purpose
 
@@ -129,7 +132,7 @@ Everything else is new files. `Board.tsx` is not rewritten.
 
 - Capability: new `board-tickets` spec.
 - Prisma migration: one new table and one new nullable column, both additive.
-- API: one new read-only RPC.
+- API: two new read-only RPCs, `tickets.events` and `tickets.files`.
 - Behaviour change: user comments now start a Nurling run, which costs model usage. Bounded by
   one run per user comment on an open ticket.
 - Contacts no Rakazo-owned infrastructure.

@@ -29,10 +29,13 @@ Alternative rejected: derive from `updatedAt`. It holds one timestamp, not a his
 
 ### Feed merge on the client
 
-The modal fetches `tickets.events` and `tickets.comments`, merges by `createdAt` (ties: event
-before comment, then id) and refetches both when a board event for this ticket arrives. It opens
-its own `boards.subscribe` stream rather than editing `Board.tsx`, so the page diff stays a few
-lines.
+The modal fetches `tickets.events`, `tickets.comments` and `tickets.files`, merges events and
+comments by `createdAt` (ties: event before comment, then id) and refetches when the board's live
+event counter for this ticket changes. `Board.tsx` already runs the one `boards.subscribe` stream
+and already counts events per ticket for the old dialog, so the modal receives that counter as a
+`revision` prop instead of opening a second stream, and the page diff stays a few lines. After the
+user's own change the modal also refetches by itself, because a deployment without realtime fanout
+sends no board events.
 
 ### Which files belong to a ticket: task link (chosen)
 

@@ -47,6 +47,28 @@ vi.mock("@rakazo/ui-web", async (importOriginal) => {
   };
 });
 
+vi.mock("../components/board/TicketModal/TicketModal", () => ({
+  TicketModal: (props: {
+    ticket: { id: string; status: string; assigneeBotId: string | null };
+    bots: unknown[];
+    revision: number;
+    onClose: () => void;
+    onChanged: () => Promise<void>;
+  }) => (
+    <div
+      data-testid="ticket-modal"
+      data-ticket={props.ticket.id}
+      data-status={props.ticket.status}
+      data-owner={props.ticket.assigneeBotId ?? ""}
+      data-bots={props.bots.length}
+      data-revision={props.revision}
+    >
+      <button type="button" data-testid="modal-close" onClick={props.onClose} />
+      <button type="button" data-testid="modal-changed" onClick={() => void props.onChanged()} />
+    </div>
+  ),
+}));
+
 import { BoardPage } from "./Board";
 
 function bot(id: string, name: string) {
@@ -107,55 +129,31 @@ async function renderBoard(stream?: AsyncIterable<{ ticketId?: string }>, refusa
   };
 }
 
-it("renders status columns and opens a ticket with comments", async () => {
+it("renders status columns and opens the ticket modal for the clicked ticket", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   api.bots.list.mockResolvedValue([bot("bot-1", "Helper")]);
   api.tickets.list.mockResolvedValue({
     tickets: [ticket("Ship", "ticket-1", "todo", "RAK-1", "bot-1", "Details")],
   });
-  api.tickets.comments.mockResolvedValue([
-    {
-      id: "comment-1",
-      body: "Ready",
-      authorName: "Board tester",
-      createdAt: "2026-10-10T10:00:00Z",
-    },
-    { id: "comment-2", body: "Reviewed", authorName: "Helper", createdAt: "2026-10-10T10:01:00Z" },
-  ]);
   const page = await renderBoard();
   try {
     expect(
       Array.from(page.container.querySelectorAll("h2")).map((node) => node.textContent),
     ).toEqual(["To do", "In progress", "In review", "Blocked", "Done", "Won't do"]);
+    expect(page.container.querySelector('[data-testid="ticket-modal"]')).toBeNull();
     await act(async () =>
       (
         page.container.querySelector('[data-testid="board-card-ticket-1"]') as HTMLButtonElement
       ).click(),
     );
-    expect(page.container.querySelector('[data-testid="ticket-description"]')?.textContent).toBe(
-      "Details",
+    const modal = page.container.querySelector('[data-testid="ticket-modal"]') as HTMLElement;
+    expect(modal.dataset.ticket).toBe("ticket-1");
+    expect(modal.dataset.bots).toBe("1");
+    expect(page.container.querySelector("form")).toBeNull();
+    await act(async () =>
+      (page.container.querySelector('[data-testid="modal-close"]') as HTMLButtonElement).click(),
     );
-    expect(page.container.querySelector('[data-testid="ticket-comments"]')?.textContent).toContain(
-      "Ready",
-    );
-    const comments = page.container.querySelector('[data-testid="ticket-comments"]')!;
-    expect(comments.textContent).toContain("Board tester");
-    expect(comments.textContent).toContain("Helper");
-    expect(Array.from(comments.querySelectorAll("time")).map((node) => node.textContent)).toEqual([
-      "5m ago",
-      "5m ago",
-    ]);
-    expect(
-      Array.from(page.container.querySelectorAll("select")).every(
-        (node) => node.className === "w-full",
-      ),
-    ).toBe(true);
-    const submitButtons = page.container.querySelectorAll('button[type="submit"]');
-    expect(Array.from(submitButtons).map((node) => node.parentElement?.className)).toEqual([
-      "flex justify-end",
-      "flex justify-end",
-    ]);
-    expect(api.tickets.comments).toHaveBeenCalledWith({ ticketId: "ticket-1" });
+    expect(page.container.querySelector('[data-testid="ticket-modal"]')).toBeNull();
   } finally {
     await page.cleanup();
   }
@@ -220,14 +218,12 @@ function liveStream() {
   };
 }
 
-it("saves only edits and refreshes comments for the open ticket", async () => {
+it("hands the open ticket its latest state and a revision for its own events only", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   api.bots.list.mockResolvedValue([bot("bot-1", "Helper"), bot("bot-2", "Other")]);
   api.tickets.list.mockResolvedValue({
     tickets: [ticket("Ship", "ticket-1", "todo", "RAK-1", "bot-1", "Details")],
   });
-  api.tickets.comments.mockReset().mockResolvedValue([{ id: "comment-1", body: "Ready" }]);
-  api.tickets.update.mockReset().mockResolvedValue({});
   const live = liveStream();
   const page = await renderBoard(live.stream);
   try {
@@ -236,31 +232,22 @@ it("saves only edits and refreshes comments for the open ticket", async () => {
         page.container.querySelector('[data-testid="board-card-ticket-1"]') as HTMLButtonElement
       ).click(),
     );
-    const calls = api.tickets.comments.mock.calls.length;
+    const modal = () => page.container.querySelector('[data-testid="ticket-modal"]') as HTMLElement;
+    const before = Number(modal().dataset.revision);
     await act(async () => live.event("ticket-2"));
-    expect(api.tickets.comments).toHaveBeenCalledTimes(calls);
-    api.tickets.comments.mockResolvedValue([{ id: "comment-2", body: "Bot progress" }]);
+    expect(Number(modal().dataset.revision)).toBe(before);
     api.tickets.list.mockResolvedValue({
       tickets: [ticket("Ship", "ticket-1", "doing", "RAK-1", "bot-2", "Details")],
     });
     await act(async () => live.event("ticket-1"));
-    expect(page.container.querySelector('[data-testid="ticket-comments"]')?.textContent).toContain(
-      "Bot progress",
-    );
-    const input = page.container.querySelector("input")!;
-    await act(async () => {
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
-        input,
-        "Ship today",
-      );
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    });
+    expect(Number(modal().dataset.revision)).toBe(before + 1);
+    expect(modal().dataset.status).toBe("doing");
+    expect(modal().dataset.owner).toBe("bot-2");
+    api.tickets.list.mockClear();
     await act(async () =>
-      page.container
-        .querySelector("form")!
-        .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+      (page.container.querySelector('[data-testid="modal-changed"]') as HTMLButtonElement).click(),
     );
-    expect(api.tickets.update).toHaveBeenCalledWith({ id: "ticket-1", title: "Ship today" });
+    expect(api.tickets.list).toHaveBeenCalledTimes(1);
   } finally {
     await page.cleanup();
   }

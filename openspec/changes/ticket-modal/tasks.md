@@ -32,12 +32,12 @@
 
 ## 3. Web
 
-- [ ] 3.1 `TicketModal/` components and `use-ticket-activity`; reuse `BotAvatar`, shadcn parts and
+- [x] 3.1 `TicketModal/` components and `use-ticket-activity`; reuse `BotAvatar`, shadcn parts and
   tokens, no hex. Verify: component tests for the properties edits, the merged feed order, live
   refresh on a board event, the file section hidden when empty, and avatar fallbacks.
-- [ ] 3.2 `Board.tsx`: open the new modal for an existing ticket, keep `TicketDialog` for new.
+- [x] 3.2 `Board.tsx`: open the new modal for an existing ticket, keep `TicketDialog` for new.
   Verify: the diff is a few lines; `Board.test.tsx` passes.
-- [ ] 3.3 Lingui: add the new strings, run `pnpm --filter @rakazo/web intl:extract` and compile.
+- [x] 3.3 Lingui: add the new strings, run `pnpm --filter @rakazo/web intl:extract` and compile.
   Verify: no missing-message warnings.
 
 ## 4. Evidence
@@ -48,7 +48,7 @@
 
 ## 5. Checks
 
-- [ ] 5.1 `openspec validate ticket-modal --strict`, typecheck, lint and the unit suites pass.
+- [x] 5.1 `openspec validate ticket-modal --strict`, typecheck, lint and the unit suites pass.
 
 ## 6. After merge
 
