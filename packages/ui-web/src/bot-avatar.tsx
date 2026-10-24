@@ -8,10 +8,10 @@ import {
   DEFAULT_BOT_AVATAR_COLOR,
   organicAvatarPath,
   resolvePersonaColorDef,
-  SHIPPED_BOT_AVATAR_CENTER,
   SHIPPED_BOT_AVATAR_SHAPE_KEYS,
   SHIPPED_BOT_AVATAR_SHAPES,
   SHIPPED_BOT_AVATAR_VIEWBOX,
+  shippedBotAvatarEyes,
   shippedBotAvatarShapePath,
 } from "@rakazo/core";
 import { tokens } from "@rakazo/ui-tokens";
@@ -27,7 +27,6 @@ export { BOT_AVATAR_COLORS, BOT_COLOR_LIST, DEFAULT_BOT_AVATAR_COLOR, resolvePer
 export const BOT_SHAPES = SHIPPED_BOT_AVATAR_SHAPES;
 export const SHIPPED_SHAPE_KEYS = SHIPPED_BOT_AVATAR_SHAPE_KEYS;
 const VIEWBOX = SHIPPED_BOT_AVATAR_VIEWBOX;
-const CENTER = SHIPPED_BOT_AVATAR_CENTER;
 
 export const BOT_MASCOT_SHAPES = SHIPPED_SHAPE_KEYS.map(
   (k) => BOT_SHAPES[k] ?? FALLBACK_SHAPE_PATH,
@@ -214,15 +213,48 @@ export const BotAvatar = memo(function BotAvatar({
         </defs>
         <g>
           <path d={shippedBotAvatarShapePath(parsed.shapeIndex)} fill={`url(#bot-ink-${id})`} />
-          <g fill={colorDef.eyeColor} className="bot-character-eyes">
-            <ellipse cx={CENTER - 29} cy={CENTER - 8} rx={10} ry={7} />
-            <ellipse cx={CENTER + 29} cy={CENTER - 8} rx={10} ry={7} />
-          </g>
+          <ShapeEyes
+            shapeIndex={parsed.shapeIndex}
+            fill={colorDef.eyeColor}
+            className="bot-character-eyes"
+          />
         </g>
       </svg>
     </div>
   );
 });
+
+/** The two eyes of a shipped shape: ellipses, or tilted pills for the brand blob. */
+function ShapeEyes({
+  shapeIndex,
+  fill,
+  className,
+}: {
+  shapeIndex: number;
+  fill: string;
+  className?: string;
+}) {
+  const eyes = shippedBotAvatarEyes(shapeIndex);
+  return (
+    <g fill={fill} className={className}>
+      {[eyes.left, eyes.right].map(({ cx, cy }) =>
+        eyes.kind === "pill" ? (
+          <rect
+            key={cx}
+            x={cx - eyes.rx}
+            y={cy - eyes.ry}
+            width={eyes.rx * 2}
+            height={eyes.ry * 2}
+            rx={eyes.rx}
+            transform={`rotate(${eyes.tiltDeg} ${cx} ${cy})`}
+          />
+        ) : (
+          <ellipse key={cx} cx={cx} cy={cy} rx={eyes.rx} ry={eyes.ry} />
+        ),
+      )}
+    </g>
+  );
+}
 
 function OrganicAvatar({
   color,
@@ -355,10 +387,7 @@ export function BotShapePreview({
       ) : (
         <svg viewBox={VIEWBOX} className="size-8 overflow-visible" aria-hidden="true">
           <path d={shippedBotAvatarShapePath(shapeIndex)} fill={colorDef.light} />
-          <g fill={colorDef.eyeColor}>
-            <ellipse cx={CENTER - 29} cy={CENTER - 8} rx={10} ry={7} />
-            <ellipse cx={CENTER + 29} cy={CENTER - 8} rx={10} ry={7} />
-          </g>
+          <ShapeEyes shapeIndex={shapeIndex} fill={colorDef.eyeColor} />
         </svg>
       )}
     </button>
