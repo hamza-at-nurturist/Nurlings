@@ -25,11 +25,15 @@ test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo
 
   const defaultLook = studio.getByTestId("avatar-studio-default");
   const wedge = studio.getByRole("button", { name: "wedge", exact: true });
-  await expect(defaultLook).toHaveAttribute("aria-pressed", "true");
+  // Sign-up gives Chief the brand blob shape, so the studio opens on it rather than on Default.
+  const nurling = studio.getByRole("button", { name: "nurling", exact: true });
+  await expect(nurling).toHaveAttribute("aria-pressed", "true");
+  await expect(defaultLook).toHaveAttribute("aria-pressed", "false");
   await expect(wedge).toHaveAttribute("aria-pressed", "false");
 
   await wedge.click();
   await expect(wedge).toHaveAttribute("aria-pressed", "true");
+  await expect(nurling).toHaveAttribute("aria-pressed", "false");
   await expect(defaultLook).toHaveAttribute("aria-pressed", "false");
   await expect(studio.locator(".rakazo-organic-avatar")).toHaveCount(0);
 
