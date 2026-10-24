@@ -176,58 +176,43 @@
   opacity: 0;
 }
 
-.rakazo-shape-eyes .rakazo-organic-avatar-eyes {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-working="true"]
-  .rakazo-organic-avatar-eyes-idle {
+.rakazo-organic-avatar[data-working="true"] .rakazo-organic-avatar-eyes-idle {
   opacity: 0;
 }
 
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-working="true"]
-  .rakazo-organic-avatar-eyes-working {
+.rakazo-organic-avatar[data-working="true"] .rakazo-organic-avatar-eyes-working {
   opacity: 1;
 }
 
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-eye-pattern="0"]
-  .rakazo-organic-avatar-eyes-idle {
+.rakazo-organic-avatar[data-eye-pattern="0"] .rakazo-organic-avatar-eyes-idle {
   animation: rakazo-eyes-idle-0 5.8s ease-in-out infinite;
 }
 
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-eye-pattern="1"]
-  .rakazo-organic-avatar-eyes-idle {
+.rakazo-organic-avatar[data-eye-pattern="1"] .rakazo-organic-avatar-eyes-idle {
   animation: rakazo-eyes-idle-1 6.4s ease-in-out -1.7s infinite;
 }
 
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-eye-pattern="2"]
-  .rakazo-organic-avatar-eyes-idle {
+.rakazo-organic-avatar[data-eye-pattern="2"] .rakazo-organic-avatar-eyes-idle {
   animation: rakazo-eyes-idle-2 5.2s ease-in-out -3.1s infinite;
 }
 
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-eye-pattern="3"]
-  .rakazo-organic-avatar-eyes-idle {
+.rakazo-organic-avatar[data-eye-pattern="3"] .rakazo-organic-avatar-eyes-idle {
   animation: rakazo-eyes-idle-3 6.8s ease-in-out -2.3s infinite;
 }
 
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-eye-pattern="0"]
-  .rakazo-organic-avatar-eyes-working {
+.rakazo-organic-avatar[data-eye-pattern="0"] .rakazo-organic-avatar-eyes-working {
   animation: rakazo-organic-eyes-loop-0 6.6s ease-in-out infinite;
 }
 
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-eye-pattern="1"]
-  .rakazo-organic-avatar-eyes-working {
+.rakazo-organic-avatar[data-eye-pattern="1"] .rakazo-organic-avatar-eyes-working {
   animation: rakazo-organic-eyes-loop-1 7.2s ease-in-out -1.4s infinite;
 }
 
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-eye-pattern="2"]
-  .rakazo-organic-avatar-eyes-working {
+.rakazo-organic-avatar[data-eye-pattern="2"] .rakazo-organic-avatar-eyes-working {
   animation: rakazo-organic-eyes-loop-2 6.1s ease-in-out -3.2s infinite;
 }
 
-:is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-eye-pattern="3"]
-  .rakazo-organic-avatar-eyes-working {
+.rakazo-organic-avatar[data-eye-pattern="3"] .rakazo-organic-avatar-eyes-working {
   animation: rakazo-organic-eyes-loop-3 7.8s ease-in-out -2.1s infinite;
 }
 
@@ -579,7 +564,7 @@
     transition: none;
   }
 
-  :is(.rakazo-organic-avatar, .rakazo-shape-eyes)[data-eye-pattern] .rakazo-organic-avatar-eyes {
+  .rakazo-organic-avatar[data-eye-pattern] .rakazo-organic-avatar-eyes {
     animation: none;
     transition: none;
   }

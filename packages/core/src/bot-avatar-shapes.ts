@@ -13,15 +13,15 @@ const markX = (x: number) => (x - MARK_BODY.cx) * MARK_SCALE + SHIPPED_BOT_AVATA
 const markY = (y: number) => (y - MARK_BODY.cy) * MARK_SCALE + SHIPPED_BOT_AVATAR_CENTER;
 const round = (value: number) => Number(value.toFixed(2));
 
-/** The brand blob outline moved into the shape box; the outline only uses absolute M, C and Z. */
-function markShapePath(d: string): string {
+/** The brand blob outline mapped into a box; the outline only uses absolute M, C and Z. */
+function markShapePath(d: string, mapX = markX, mapY = markY): string {
   if (/[^MCZ\d.,\-\s]/.test(d)) throw new Error("brand.mark.blobBody may only use M, C and Z");
   return (d.match(/[MCZ][^MCZ]*/g) ?? [])
     .map((segment) => {
       const numbers = (segment.slice(1).match(/-?\d*\.?\d+/g) ?? []).map(Number);
       const points: string[] = [];
       for (let i = 0; i < numbers.length; i += 2) {
-        points.push(`${round(markX(numbers[i] ?? 0))} ${round(markY(numbers[i + 1] ?? 0))}`);
+        points.push(`${round(mapX(numbers[i] ?? 0))} ${round(mapY(numbers[i + 1] ?? 0))}`);
       }
       return `${segment[0]}${points.join(" ")}`;
     })
@@ -105,4 +105,41 @@ function shippedShapeKey(shapeIndex: number) {
 /** Where a shape's two eyes sit and how they are drawn; most shapes share the default ellipses. */
 export function shippedBotAvatarEyes(shapeIndex: number): BotAvatarEyes {
   return SHIPPED_BOT_AVATAR_EYES[shippedShapeKey(shapeIndex)] ?? DEFAULT_EYES;
+}
+
+// Organic avatars are drawn in a 120-unit box centred on the origin, their widest bodies about 110 units
+// across; the brand blob is drawn about as wide as the widest of them.
+const ORGANIC_BLOB_SCALE = 108 / MARK_BODY.width;
+const organicX = (x: number) => (x - MARK_BODY.cx) * ORGANIC_BLOB_SCALE;
+const organicY = (y: number) => (y - MARK_BODY.cy) * ORGANIC_BLOB_SCALE;
+
+export interface OrganicBotAvatarFrame {
+  /** The body outline in the organic avatar box. */
+  path: string;
+  eyes: BotAvatarEyes;
+}
+
+/**
+ * The body and eyes an organic avatar draws for a shape that is rendered as one, in the organic
+ * avatar's box; undefined for the shapes that keep the classic renderer.
+ */
+export function organicBotAvatarFrame(shapeIndex: number): OrganicBotAvatarFrame | undefined {
+  if (shippedShapeKey(shapeIndex) !== "nurling") return undefined;
+  return {
+    path: markShapePath(brand.mark.blobBody, organicX, organicY),
+    eyes: {
+      kind: "pill",
+      left: {
+        cx: round(organicX(brand.mark.eyeLeft.cx)),
+        cy: round(organicY(brand.mark.eyeLeft.cy)),
+      },
+      right: {
+        cx: round(organicX(brand.mark.eyeRight.cx)),
+        cy: round(organicY(brand.mark.eyeRight.cy)),
+      },
+      rx: round((brand.mark.eyeWidth * ORGANIC_BLOB_SCALE) / 2),
+      ry: round((brand.mark.eyeLength * ORGANIC_BLOB_SCALE) / 2),
+      tiltDeg: brand.mark.eyeAngleDeg,
+    },
+  };
 }

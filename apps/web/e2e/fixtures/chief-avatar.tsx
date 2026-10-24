@@ -41,7 +41,7 @@ function Compare({ label, status }: { label: string; status?: string }) {
         <span>Chief</span>
       </div>
       <div className="item">
-        <BotAvatar color="#22C55E" identity="regular-hex" size={120} status={status} />
+        <BotAvatar color="#22C55E" identity="e" size={120} status={status} />
         <span>Organic</span>
       </div>
     </div>

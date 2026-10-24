@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { captureScreenshot } from "./helpers";
 
-test("Chief wears the brand blob as an ordinary avatar shape, idle and working, in both themes", async ({
+test("Chief wears the brand blob as an organic avatar, idle and working, in both themes", async ({
   page,
 }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -12,7 +12,7 @@ test("Chief wears the brand blob as an ordinary avatar shape, idle and working, 
   for (const theme of ["light", "dark"] as const) {
     for (const row of ["idle", "working"] as const) {
       const scope = page.locator(`.panel[data-theme="${theme}"] [data-row="${row}"]`);
-      const chief = scope.locator('[data-avatar="chief"]').last().locator(".rakazo-bot-avatar");
+      const chief = scope.locator('[data-avatar="chief"]').last().locator(".rakazo-organic-avatar");
       const regular = scope
         .locator('[data-avatar="regular"]')
         .first()
@@ -21,12 +21,12 @@ test("Chief wears the brand blob as an ordinary avatar shape, idle and working, 
       await expect(regular).toBeVisible();
       await expect(chief).toHaveAttribute("data-working", String(row === "working"));
       await expect(regular).toHaveAttribute("data-working", String(row === "working"));
-      // Same container, ring and eye group as any other shape; only the eyes' geometry differs.
-      // Two pills in each of the idle and working eye groups.
-      await expect(chief.locator(".bot-character-eyes rect")).toHaveCount(4);
+      // An organic avatar with the blob as its body: two pills in each of the idle and working eye
+      // groups, and no working ring. The classic shapes keep their ring and ellipse eyes.
+      await expect(chief.locator("rect")).toHaveCount(4);
+      await expect(chief.locator(".rakazo-bot-avatar-ring")).toHaveCount(0);
       await expect(regular.locator(".bot-character-eyes ellipse")).toHaveCount(2);
-      await expect(chief.locator(".rakazo-bot-avatar-ring")).toHaveCount(1);
-      await expect(chief.locator("circle[r='60']")).toHaveCount(0);
+      await expect(regular.locator(".rakazo-bot-avatar-ring")).toHaveCount(1);
     }
   }
   await captureScreenshot(page, testInfo, "chief-avatar-idle-working-light-dark");

@@ -14,7 +14,9 @@ import {
   avatarThinkingDot,
   avatarWorkingDot,
   isRunWorking,
+  type OrganicBotAvatarFrame,
   organicAvatarPath,
+  organicBotAvatarFrame,
   SHIPPED_BOT_AVATAR_VIEWBOX,
   shippedBotAvatarEyes,
 } from "@rakazo/core";
@@ -157,6 +159,8 @@ export const BotAvatar = memo(function BotAvatar({
   const life = useLife(state, clock, size, motion);
   const poke = usePoke(life, pokeable && clock === "running");
   const bodyStyle = useBodyStyle(life, size);
+  // The brand blob is an organic avatar with its own body and eyes.
+  const blobFrame = parsed.kind === "shape" ? organicBotAvatarFrame(parsed.shapeIndex) : undefined;
   const fillColor = parsed.kind === "shape" || parsed.kind === "color" ? parsed.color : color;
   const picture =
     parsed.kind === "image" && parsed.imageUrl ? (
@@ -170,7 +174,7 @@ export const BotAvatar = memo(function BotAvatar({
       >
         <Image source={{ uri: parsed.imageUrl }} style={{ width: size, height: size }} />
       </View>
-    ) : parsed.kind === "shape" ? (
+    ) : parsed.kind === "shape" && !blobFrame ? (
       <ShippedShapeAvatar
         color={parsed.color}
         eyeColor={parsed.eyeColor}
@@ -187,6 +191,7 @@ export const BotAvatar = memo(function BotAvatar({
         size={size}
         life={life}
         bodyStyle={bodyStyle}
+        frame={blobFrame}
       />
     );
   const avatar = (
@@ -313,16 +318,22 @@ function ShippedShapeAvatar({
       <Svg width={size} height={size} viewBox={SHIPPED_BOT_AVATAR_VIEWBOX}>
         <Path d={shapePath} fill={color} />
         <G fill={eyeColor}>
-          {eyes.kind === "pill" ? (
-            <PillEyes eyes={eyes} life={life} />
-          ) : (
-            <EllipseEyes eyes={eyes} life={life} />
-          )}
+          <EllipseEyes eyes={eyes} life={life} />
         </G>
       </Svg>
     </Animated.View>
   );
 }
+
+/** An organic avatar's upright eyes in its 120-unit box. */
+const ORGANIC_EYES: ShapeEyes = {
+  kind: "pill",
+  left: { cx: -10.5, cy: 0 },
+  right: { cx: 10.5, cy: 0 },
+  rx: 3.5,
+  ry: 12,
+  tiltDeg: 0,
+};
 
 type ShapeEyes = ReturnType<typeof shippedBotAvatarEyes>;
 
@@ -349,11 +360,20 @@ function EllipseEyes({ eyes, life }: { eyes: ShapeEyes; life: AvatarLife }) {
 }
 
 /** Pill eyes are tilted about their own centre; blinking closes them along their length. */
-function PillEyes({ eyes, life }: { eyes: ShapeEyes; life: AvatarLife }) {
+function PillEyes({
+  eyes,
+  life,
+  units,
+}: {
+  eyes: ShapeEyes;
+  life: AvatarLife;
+  /** The width of the box the eyes are drawn in. */
+  units: number;
+}) {
   const eyeProps = (cx: number, cy: number) => () => {
     "worklet";
     const state = eyeState(life);
-    const scale = SHAPE_UNITS / AVATAR_MOTION_UNITS;
+    const scale = units / AVATAR_MOTION_UNITS;
     const height = state.hidden ? 0 : eyes.ry * 2 * state.lid;
     return {
       x: cx - eyes.rx + state.x * scale,
@@ -387,31 +407,23 @@ function OrganicAvatar({
   size,
   life,
   bodyStyle,
+  frame,
 }: {
   color: string;
   identity?: string;
   size: number;
   life: AvatarLife;
   bodyStyle: BodyStyle;
+  /** A fixed body and eyes to draw instead of the seeded organic ones. */
+  frame?: OrganicBotAvatarFrame;
 }) {
   const seed = avatarIdentitySeed(identity || color || "#8B5CF6");
-  // Offsets are in motion units, scaled to this 120-unit box; eyes close about their centre.
-  const eyeProps = (x: number) => () => {
-    "worklet";
-    const state = eyeState(life);
-    const scale = 120 / AVATAR_MOTION_UNITS;
-    const height = state.hidden ? 0 : 24 * state.lid;
-    return { x: x + state.x * scale, y: -height / 2 + state.y * scale, height };
-  };
-  const leftEyeProps = useAnimatedProps(eyeProps(-14));
-  const rightEyeProps = useAnimatedProps(eyeProps(7));
   return (
     <Animated.View style={[{ width: size, height: size }, bodyStyle]}>
       <Svg width={size} height={size} viewBox="-60 -60 120 120">
-        <Path d={organicAvatarPath(seed)} fill={color} />
-        <G transform={`rotate(${(seed % 9) - 4})`}>
-          <AnimatedRect animatedProps={leftEyeProps} width={7} rx={3.5} fill="#101014" />
-          <AnimatedRect animatedProps={rightEyeProps} width={7} rx={3.5} fill="#101014" />
+        <Path d={frame?.path ?? organicAvatarPath(seed)} fill={color} />
+        <G transform={frame ? undefined : `rotate(${(seed % 9) - 4})`} fill="#101014">
+          <PillEyes eyes={frame?.eyes ?? ORGANIC_EYES} life={life} units={120} />
         </G>
       </Svg>
     </Animated.View>
