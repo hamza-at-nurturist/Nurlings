@@ -30,8 +30,8 @@
 
 ## 5. Pull request
 
-- [ ] 5.1 Maintainer approves the GIF, then merge.
+- [x] 5.1 Maintainer approves the GIF, then merge.
 
 ## 6. After merge
 
-- [ ] 6.1 Archive this change.
+- [x] 6.1 Archive this change.
