@@ -1,7 +1,17 @@
 import { brand } from "@nurlings/brand";
-import type { Board, Ticket, TicketComment, TicketPriority, TicketStatus } from "@rakazo/contracts";
+import type {
+  Artifact,
+  Board,
+  Ticket,
+  TicketComment,
+  TicketEvent,
+  TicketEventKind,
+  TicketPriority,
+  TicketStatus,
+} from "@rakazo/contracts";
 import {
   parseTicketRef,
+  TicketEventKindSchema,
   TicketPrioritySchema,
   TicketStatusSchema,
   ticketRef,
@@ -11,6 +21,7 @@ import type {
   Prisma,
   PrismaClient,
   TicketComment as TicketCommentRow,
+  TicketEvent as TicketEventRow,
   Ticket as TicketRow,
 } from "./client.js";
 
@@ -143,4 +154,118 @@ export function toTicketCommentDto(
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
+}
+
+/** A Nurling's own action is attributed to it; anything else to the signed-in user. */
+export function ticketActor(input: { botId?: string; userId?: string }) {
+  return input.botId
+    ? { actorBotId: input.botId, actorUserId: null }
+    : { actorBotId: null, actorUserId: input.userId ?? null };
+}
+
+export async function recordTicketEvents(
+  tx: Pick<Prisma.TransactionClient, "ticketEvent">,
+  input: {
+    spaceId: string;
+    ticketId: string;
+    actor: { botId?: string; userId?: string };
+    events: Array<{ kind: TicketEventKind; status?: TicketStatus; assigneeBotId?: string | null }>;
+  },
+): Promise<void> {
+  if (input.events.length === 0) return;
+  const actor = ticketActor(input.actor);
+  // One statement per event so each gets its own `createdAt`, which orders the feed.
+  for (const event of input.events) {
+    await tx.ticketEvent.create({
+      data: {
+        spaceId: input.spaceId,
+        ticketId: input.ticketId,
+        kind: event.kind,
+        ...actor,
+        status: event.status ?? null,
+        assigneeBotId: event.assigneeBotId ?? null,
+      },
+    });
+  }
+}
+
+type TicketEventWithNames = TicketEventRow & {
+  actorBot: { name: string } | null;
+  actorUser: { name: string } | null;
+  assigneeBot: { name: string } | null;
+};
+
+export async function listTicketEvents(
+  prisma: Pick<PrismaClient, "ticketEvent">,
+  spaceId: string,
+  ticketId: string,
+): Promise<TicketEventWithNames[]> {
+  return prisma.ticketEvent.findMany({
+    where: { ticketId, spaceId },
+    include: {
+      actorBot: { select: { name: true } },
+      actorUser: { select: { name: true } },
+      assigneeBot: { select: { name: true } },
+    },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+  });
+}
+
+export function toTicketEventDto(row: TicketEventWithNames): TicketEvent {
+  const kind = TicketEventKindSchema.safeParse(row.kind);
+  return {
+    id: row.id,
+    ticketId: row.ticketId,
+    kind: kind.success ? kind.data : "status",
+    actorBotId: row.actorBotId,
+    actorUserId: row.actorUserId,
+    actorName: row.actorBot?.name ?? row.actorUser?.name ?? null,
+    status: row.status ? coerceTicketStatus(row.status) : null,
+    assigneeBotId: row.assigneeBotId,
+    assigneeName: row.assigneeBot?.name ?? null,
+    createdAt: row.createdAt.toISOString(),
+  };
+}
+
+/**
+ * Files the ticket's owner attached while working on it: artifacts of runs whose task was
+ * started for this ticket, newest version of each family. A file that was only written to a
+ * workspace is not an artifact, so it is not listed.
+ */
+export async function listTicketFiles(
+  prisma: Pick<PrismaClient, "run" | "artifact">,
+  input: { spaceId: string; userId: string; ticketId: string },
+): Promise<Artifact[]> {
+  const runs = await prisma.run.findMany({
+    where: { spaceId: input.spaceId, task: { ticketId: input.ticketId } },
+    select: { id: true },
+  });
+  if (runs.length === 0) return [];
+  const rows = await prisma.artifact.findMany({
+    where: {
+      spaceId: input.spaceId,
+      userId: input.userId,
+      runId: { in: runs.map((run) => run.id) },
+    },
+    orderBy: [{ version: "desc" }, { createdAt: "desc" }, { id: "desc" }],
+  });
+  const latest = new Map<string, (typeof rows)[number]>();
+  for (const row of rows) {
+    const family = row.rootArtifactId ?? row.id;
+    if (!latest.has(family)) latest.set(family, row);
+  }
+  return [...latest.values()]
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id))
+    .map((row) => ({
+      id: row.id,
+      botId: row.botId,
+      groupId: row.groupId,
+      runId: row.runId,
+      name: row.name,
+      description: row.description,
+      mimeType: row.mimeType,
+      size: row.size,
+      version: row.version,
+      createdAt: row.createdAt.toISOString(),
+    }));
 }

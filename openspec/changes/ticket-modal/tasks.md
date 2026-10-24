@@ -7,26 +7,26 @@
 
 ## 2. Backend
 
-- [ ] 2.1 Prisma: add `TicketEvent` and `Task.ticketId` with one additive migration. Verify:
+- [x] 2.1 Prisma: add `TicketEvent` and `Task.ticketId` with one additive migration. Verify:
   `prisma validate` and the migration applies on an empty and an existing database; the previous
   release's queries still work (no drop or rename).
-- [ ] 2.2 Contracts: `TicketEventSchema` and `tickets.events` in `packages/contracts`. Verify:
+- [x] 2.2 Contracts: `TicketEventSchema` and `tickets.events` in `packages/contracts`. Verify:
   contract unit test round-trips the schema.
-- [ ] 2.3 Record `created`, `status` and `owner` events inside the `createTicket` and
+- [x] 2.3 Record `created`, `status` and `owner` events inside the `createTicket` and
   `updateTicket` transactions; only on a real change. Verify: unit tests for each kind, for no
   event when nothing changed, and for the actor (user or Nurling).
-- [ ] 2.4 `tickets.events` handler in `router.ts`, space-isolated like `tickets.comments`. Verify:
+- [x] 2.4 `tickets.events` handler in `router.ts`, space-isolated like `tickets.comments`. Verify:
   router test for results, order and cross-space isolation.
-- [ ] 2.5 `commentTicket` wakes the assignee for a user comment on an open ticket, never for a
+- [x] 2.5 `commentTicket` wakes the assignee for a user comment on an open ticket, never for a
   Nurling comment or a finished ticket; queued-run dedupe. Verify: unit tests for each scenario in
   the spec.
-- [ ] 2.6 `wakeTicketAssignee` sets `Task.ticketId` and uses the new prompt; add two sentences to
+- [x] 2.6 `wakeTicketAssignee` sets `Task.ticketId` and uses the new prompt; add two sentences to
   `TICKET_SILENT_REPLY_GUIDANCE`: (a) when blocked on the user, comment the question, set Blocked and
   still send the ask card; (b) anything the user should see or download (reports, CSVs, documents)
   is attached with `attach_file`, while scratch and working files are not. Verify: unit tests
   assert the stored `ticketId`, the prompt reads the new comments, and the guidance carries both
   instructions.
-- [ ] 2.7 Files: a read path that returns the latest artifact of each family attached by runs of
+- [x] 2.7 Files: a read path that returns the latest artifact of each family attached by runs of
   tasks with this `ticketId`. Verify: test with two tickets and a versioned artifact, and that a
   file only written to the workspace is not listed.
 

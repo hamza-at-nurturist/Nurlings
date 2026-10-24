@@ -246,6 +246,16 @@ describe("background ticket runs", () => {
     expect(runReplyGuidance("tickets")).toContain("ticket_comment");
   });
 
+  it("tells a ticket run to surface a blocking question and to attach deliverables, not scratch files", () => {
+    const guidance = runReplyGuidance("tickets");
+    expect(guidance).toContain("blocked on the user");
+    expect(guidance).toContain("comment the question on the ticket");
+    expect(guidance).toContain("set its status to blocked");
+    expect(guidance).toContain("still send the ask or approval card");
+    expect(guidance).toContain("attached with attach_file");
+    expect(guidance).toContain("scratch and working files");
+  });
+
   it("drops a tool-only ticket final so the transcript gets no bubble", () => {
     const steps = [{ kind: "steps" as const, steps: [{ label: "Ticket comment", count: 1 }] }];
     const blocks = finalBlocksAfterMidTurnProgress(steps, runAllowsSilentEmpty("tickets"));

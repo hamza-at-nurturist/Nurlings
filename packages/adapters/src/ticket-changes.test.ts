@@ -10,7 +10,7 @@ const change: TicketChange = {
   assigneeBotId: "bot-1",
   wakeAssignee: true,
 };
-function setup(ticketBoardEnabled: boolean, status = "todo") {
+function setup(ticketBoardEnabled: boolean, status = "todo", queuedRun = false) {
   const notify = vi.fn(async () => {});
   const enqueue = vi.fn(async () => {});
   const createRun = vi.fn(async () => ({ id: "run-1" }));
@@ -28,7 +28,10 @@ function setup(ticketBoardEnabled: boolean, status = "todo") {
       findFirst: vi.fn(async () => ({ id: "bot-1", userId: "user-1", thread: { id: "thread-1" } })),
     },
     task: { create: createTask },
-    run: { create: createRun },
+    run: {
+      create: createRun,
+      findFirst: vi.fn(async () => (queuedRun ? { id: "run-0" } : null)),
+    },
   };
   const transaction = vi.fn(async (fn: (client: typeof tx) => Promise<unknown>) => fn(tx));
   const changes = createTicketChangeNotifier({
@@ -37,7 +40,7 @@ function setup(ticketBoardEnabled: boolean, status = "todo") {
     jobs: { enqueue } as never,
     boardEvents: { notify } as never,
   });
-  return { changes, notify, enqueue, createRun, createTask, transaction };
+  return { changes, notify, enqueue, createRun, createTask, transaction, tx };
 }
 
 describe("ticket changes", () => {
@@ -78,6 +81,38 @@ describe("ticket changes", () => {
       expect(s.enqueue).not.toHaveBeenCalled();
     },
   );
+  it("starts the run for the ticket and tells the owner to read the new comments", async () => {
+    const s = setup(true);
+    await s.changes(change);
+    expect(s.createTask).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        ticketId: "ticket-1",
+        prompt: expect.stringContaining("Work on ticket RAK-1."),
+      }),
+    });
+    const prompt = (s.createTask.mock.calls[0] as unknown as [{ data: { prompt: string } }])[0].data
+      .prompt;
+    expect(prompt).toContain("ticket_get");
+    expect(prompt).toContain("comments added since you last looked");
+  });
+  it("does not queue a second run while one for the ticket is still queued", async () => {
+    const s = setup(true, "doing", true);
+    await s.changes(change);
+    expect(s.tx.run.findFirst).toHaveBeenCalledWith({
+      where: {
+        spaceId: "space-1",
+        botId: "bot-1",
+        trigger: "tickets",
+        status: "queued",
+        task: { ticketId: "ticket-1" },
+      },
+      select: { id: true },
+    });
+    expect(s.createTask).not.toHaveBeenCalled();
+    expect(s.createRun).not.toHaveBeenCalled();
+    expect(s.enqueue).not.toHaveBeenCalled();
+    expect(s.notify).toHaveBeenCalledTimes(1);
+  });
   it("only publishes changes for comments or status edits", async () => {
     const s = setup(true);
     await s.changes({ ...change, wakeAssignee: false });

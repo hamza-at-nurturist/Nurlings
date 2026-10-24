@@ -7112,6 +7112,161 @@ describe("boards.tickets.list", () => {
   });
 });
 
+describe("tickets.events and tickets.files", () => {
+  const actor = {
+    spaceId: "workspace-1",
+    userId: "user-1",
+    email: "user@rakazo.test",
+    isDeploymentOwner: true,
+  } satisfies Actor;
+  const at = (minute: number) => new Date(`2026-06-01T00:0${minute}:00.000Z`);
+
+  function setup(ticketRow: unknown) {
+    const eventFindMany = vi.fn(async (_args: unknown) => [
+      {
+        id: "e1",
+        ticketId: "t1",
+        spaceId: "workspace-1",
+        kind: "created",
+        actorBotId: null,
+        actorUserId: "user-1",
+        status: null,
+        assigneeBotId: "bot-1",
+        createdAt: at(1),
+        actorBot: null,
+        actorUser: { name: "Ada" },
+        assigneeBot: { name: "Chief" },
+      },
+      {
+        id: "e2",
+        ticketId: "t1",
+        spaceId: "workspace-1",
+        kind: "status",
+        actorBotId: "bot-1",
+        actorUserId: null,
+        status: "blocked",
+        assigneeBotId: null,
+        createdAt: at(2),
+        actorBot: { name: "Chief" },
+        actorUser: null,
+        assigneeBot: null,
+      },
+    ]);
+    const artifact = (
+      id: string,
+      version: number,
+      rootArtifactId: string | null,
+      minute: number,
+    ) => ({
+      id,
+      botId: "bot-1",
+      groupId: null,
+      runId: "run-1",
+      name: "comps.csv",
+      description: null,
+      mimeType: "text/csv",
+      size: 10,
+      version,
+      rootArtifactId,
+      createdAt: at(minute),
+    });
+    const artifactFindMany = vi.fn(async (_args: unknown) => [
+      artifact("a2", 2, "a1", 4),
+      artifact("a1", 1, null, 3),
+    ]);
+    const runFindMany = vi.fn(async (_args: unknown) => [{ id: "run-1" }]);
+    const prisma = {
+      board: {
+        findUnique: vi.fn(async () => ({
+          id: "board-1",
+          spaceId: "workspace-1",
+          name: "Personal",
+          ticketPrefix: "RAK",
+          nextNumber: 2,
+          createdAt: at(0),
+          updatedAt: at(0),
+        })),
+      },
+      ticket: { findFirst: vi.fn(async () => ticketRow) },
+      ticketEvent: { findMany: eventFindMany },
+      run: { findMany: runFindMany },
+      artifact: { findMany: artifactFindMany },
+    } as unknown as PrismaClient;
+    const deps = { prisma, env: { ticketBoardEnabled: true } } as unknown as RouterDeps;
+    const handler = new RPCHandler(createRouter(deps));
+    const call = (procedure: string) =>
+      handler.handle(
+        new Request(`http://127.0.0.1/rpc/tickets/${procedure}`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ json: { ticketId: "t1" } }),
+        }),
+        { prefix: "/rpc", context: { actor } },
+      );
+    return { call, eventFindMany, artifactFindMany, runFindMany, prisma };
+  }
+
+  it("returns a ticket's events oldest first with names, scoped to the space", async () => {
+    const s = setup({ id: "t1" });
+    const { response } = await s.call("events");
+    expect(response?.status).toBe(200);
+    const body = (await response?.json()) as { json: Array<Record<string, unknown>> };
+    expect(body.json.map((event) => event.id)).toEqual(["e1", "e2"]);
+    expect(body.json[0]).toMatchObject({
+      kind: "created",
+      actorName: "Ada",
+      assigneeName: "Chief",
+    });
+    expect(body.json[1]).toMatchObject({ kind: "status", status: "blocked", actorName: "Chief" });
+    expect(s.eventFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { ticketId: "t1", spaceId: "workspace-1" },
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      }),
+    );
+    expect(s.prisma.ticket.findFirst).toHaveBeenCalledWith({
+      where: { id: "t1", spaceId: "workspace-1", boardId: "board-1" },
+    });
+  });
+
+  it("does not reveal events or files of a ticket outside the space", async () => {
+    const s = setup(null);
+    for (const procedure of ["events", "files"]) {
+      const { response } = await s.call(procedure);
+      expect(response?.status).not.toBe(200);
+    }
+    expect(s.eventFindMany).not.toHaveBeenCalled();
+    expect(s.runFindMany).not.toHaveBeenCalled();
+    expect(s.artifactFindMany).not.toHaveBeenCalled();
+  });
+
+  it("lists the newest version of each file attached by runs started for the ticket", async () => {
+    const s = setup({ id: "t1" });
+    const { response } = await s.call("files");
+    expect(response?.status).toBe(200);
+    const body = (await response?.json()) as { json: Array<{ id: string; version: number }> };
+    expect(body.json.map((file) => [file.id, file.version])).toEqual([["a2", 2]]);
+    expect(s.runFindMany).toHaveBeenCalledWith({
+      where: { spaceId: "workspace-1", task: { ticketId: "t1" } },
+      select: { id: true },
+    });
+    expect(s.artifactFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { spaceId: "workspace-1", userId: "user-1", runId: { in: ["run-1"] } },
+      }),
+    );
+  });
+
+  it("lists no files without reading artifacts when no run belongs to the ticket", async () => {
+    const s = setup({ id: "t1" });
+    s.runFindMany.mockResolvedValueOnce([]);
+    const { response } = await s.call("files");
+    const body = (await response?.json()) as { json: unknown[] };
+    expect(body.json).toEqual([]);
+    expect(s.artifactFindMany).not.toHaveBeenCalled();
+  });
+});
+
 describe("export.bot", () => {
   const actor = {
     spaceId: "workspace-1",

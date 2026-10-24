@@ -4,8 +4,10 @@ import {
   GetTicketInput,
   isTicketCompletedStatus,
   parseTicketRef,
+  TICKET_EVENT_KINDS,
   TICKET_PRIORITIES,
   TICKET_STATUSES,
+  TicketEventSchema,
   TicketSchema,
   UpdateTicketInput,
 } from "./board.js";
@@ -99,5 +101,24 @@ describe("ticket contracts", () => {
       "bot-2",
     );
     expect(() => UpdateTicketInput.parse({ id: "ticket-1", assigneeBotId: null })).toThrow();
+  });
+
+  it("describes a ticket event by kind, actor and the value it set", () => {
+    const event = {
+      id: "event-1",
+      ticketId: "ticket-1",
+      kind: "status",
+      actorBotId: "bot-1",
+      actorUserId: null,
+      actorName: "Chief",
+      status: "blocked",
+      assigneeBotId: null,
+      assigneeName: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+    };
+    expect(TICKET_EVENT_KINDS).toEqual(["created", "status", "owner"]);
+    expect(TicketEventSchema.parse(event).status).toBe("blocked");
+    expect(() => TicketEventSchema.parse({ ...event, kind: "priority" })).toThrow();
+    expect(() => TicketEventSchema.parse({ ...event, status: "archived" })).toThrow();
   });
 });
