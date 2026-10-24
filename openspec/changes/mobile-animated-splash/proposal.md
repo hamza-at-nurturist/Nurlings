@@ -20,9 +20,10 @@ screen away into the app.
   own storage, so a reinstall plays it again). Its exit ("boop", from 84%) only plays when the app
   is ready; if the app is not ready by 82% the splash idles calmly (both characters blink every few
   seconds, fireflies keep rising) and exits when it is.
-- Every later launch plays the short version: Chief pops in and the orb rises (about 1.7 s), and the
-  boop exit plays as soon as the app is ready, never later than that. The app is never held back
-  for the animation. If the app is slower than the pop-in, the same calm idle covers the wait.
+- Every later launch plays the short version: Chief pops in and the orb rises (about 1.7 s), always
+  in full even when the app is ready sooner, then a quick boop exit and fade, about 2.3 s in all.
+  If the app is slower than the pop-in, the same calm idle covers the wait and the boop plays as
+  soon as it is ready.
 - Tapping anywhere skips straight to the exit.
 - Either way the splash then fades straight into the app.
 - With reduced motion on, the splash is the static mark for about 600 ms, then the app.
@@ -32,8 +33,8 @@ screen away into the app.
 ### Not changed, on purpose
 
 - App icon, adaptive icon, notification icon: untouched.
-- No tests for the animation's pixels. The maintainer checks it on a phone after the APK rebuild
-  and any fixes follow in a separate PR. The keyframe sampling, the phase planning and the mark
+- No tests for the animation's pixels. The maintainer checks it on a phone, from the preview APK,
+  before merge. The keyframe sampling, the phase planning and the mark
   geometry are pure and unit tested.
 - No dependency changes: `react-native-svg` and `react-native-reanimated` are already installed.
 
@@ -56,6 +57,6 @@ Nothing here contacts Rakazo-owned infrastructure.
 
 - Capability: new `mobile-splash` spec.
 - The first launch after an install shows the splash for about 6 s even when the app is ready
-  sooner; every later launch is as short as the app's own readiness allows.
+  sooner; every later launch shows it for about 2.3 s, or until the app is ready if that is later.
 - Needs a new native build (the native splash configuration changes); it cannot ship over the air,
   and OTA is off anyway. Maintainer rebuilds the APK after merge.

@@ -26,6 +26,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AppErrorBoundary } from "../components/app-error-boundary";
+import { BrandSplash } from "../components/brand-splash";
 import { CallCard } from "../components/CallCard";
 import { CodeCopyButton } from "../components/code-copy-button";
 import { ComputerUpdateProgress } from "../components/computer-update-progress";
@@ -89,7 +90,7 @@ configureForegroundNotifications();
 registerSessionDiskCache(clearSavedChats);
 installClientUpdates();
 registerSessionDiskCache(() => void clearAppBadge());
-// Keep the splash up until the saved appearance applies, so the first frame isn't in the OS scheme.
+// Keep the native splash up until the animated splash is on screen (it hides it itself).
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 // Screens that take the whole window even when it is wide enough for the chat list beside them.
@@ -450,6 +451,7 @@ function LayoutContent() {
           <View style={{ flex: 1, backgroundColor: String(native.page) }} />
         )}
       </KeyboardProvider>
+      <BrandSplash ready={ready && appearanceReady} />
     </GestureHandlerRootView>
   );
 }

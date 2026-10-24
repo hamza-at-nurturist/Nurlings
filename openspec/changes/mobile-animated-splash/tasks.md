@@ -17,8 +17,33 @@
   Verify: `brand-expo-config` test passes; resolved config icon is unchanged.
 - [x] 2.5 `openspec validate mobile-animated-splash --strict`, mobile typecheck, lint, unit tests.
 
-## 3. After merge
+## 3. First landing (#39), reverted (#40)
 
-- [ ] 3.1 Maintainer rebuilds the APK (native splash configuration changed) and checks the first
-  launch, a later launch, tap to skip and reduced motion on a phone; fixes go in a follow-up.
-- [ ] 3.2 Archive the change.
+- [x] 3.1 Root cause found on the CI Android emulator (release build, data cleared): a default
+  parameter in the `sampleTrack` worklet threw a `ReferenceError` on the UI thread and React Native
+  tore down the app (navy, no mark, then grey). Verify: logcat from the emulator run.
+
+## 4. Re-land
+
+- [x] 4.1 Worklets take every argument explicitly; the animated-style math moves into the timeline
+  module as worklets. Verify: typecheck, lint and splash unit tests pass.
+- [x] 4.2 Worklet test: compile with the app's worklets Babel plugin, run each worklet from its
+  serialized code with only its captured values, reject default parameters in timeline and
+  component worklets, and prove the harness catches the original bug. Verify: the test fails when
+  the #39 default parameter is put back.
+- [x] 4.3 CI Android emulator (release build): a data-cleared launch with reduced motion reaches
+  sign-up and the rest of the flow runs; with animations on, a first launch, a relaunch and a tap
+  log no UI-thread error. Verify: workflow runs and their logcat. (The flow later fails on its
+  "Search bots" text, which predates this change.)
+- [x] 4.4 Preview APK built from the branch (`release-android-apk`, `preview`). Verify:
+  `nurlings-preview.apk` on the `android-preview` prerelease.
+- [x] 4.5a Short run plays the whole pop-in before its exit, about 2.3 s in all, after the
+  maintainer found it exited at once on a phone. Verify: `planSplash` and `exitTiming` tests.
+- [x] 4.5 Maintainer confirms on a phone: first launch plays the full animation, a later launch the
+  short pop-in, a tap skips, reduced motion shows the static mark, and the app always reaches
+  sign-in or the chats. Verify: maintainer's confirmation in the PR.
+- [x] 4.6 `openspec validate mobile-animated-splash --strict`, mobile typecheck, lint, unit tests.
+
+## 5. After merge
+
+- [ ] 5.1 Archive the change.
