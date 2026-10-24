@@ -53,6 +53,10 @@ rework and the reliability fixes, without losing any Nurlings branding or deploy
   `RAKAZO_IMAGE_TAG`, and now reads optional `OBJECT_STORAGE_*`; the compose env allowlist tests
   require the names to match, so those names changed in `deploy/coolify/docker-compose.yml`
   (passthrough only, no values, no new service, volume or image).
+- **CI jobs that target upstream's infrastructure.** `deploy-production` (SSH to upstream's host) and
+  `publish-mobile-update` (upstream's Expo project) now require `github.repository == 'elie222/rakazo'`.
+  The fork deploys only through `deploy-test` in `publish-nurlings-images.yml` and ships new APKs
+  instead of OTA updates. Approved by the maintainer.
 - **Dead code.** The unused `PUBLISHED_IMAGE_REPO` constant (it pulled upstream's repository name
   into the built web bundle's source map, failing the built brand scan) and our orphaned
   `SoftwareUpdateSection` test are removed; `docs/nurlings-deployment.md` no longer mentions the

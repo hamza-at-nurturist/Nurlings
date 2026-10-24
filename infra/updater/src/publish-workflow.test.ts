@@ -87,6 +87,7 @@ describe("server image publish workflow", () => {
     expect(publish?.uses).toBe("./.github/workflows/publish-server-image.yml");
     expect(publish?.if).toBe("github.event_name == 'push' && github.ref == 'refs/heads/main'");
     expect(ci.jobs["deploy-production"]?.if).toContain(upstreamOnly);
+    expect(ci.jobs["publish-mobile-update"]?.if).toContain(upstreamOnly);
     expect(ci.jobs["deploy-production"]?.needs).toEqual([
       "lint",
       "check",

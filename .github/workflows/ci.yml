@@ -224,7 +224,8 @@ jobs:
 
   publish-mobile-update:
     name: Publish compatible mobile update
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Upstream's Expo project. The fork turns OTA off and ships new APKs instead.
+    if: github.repository == 'elie222/rakazo' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [lint, check, build, test, test-integration, test-e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 20
