@@ -2,7 +2,7 @@
   "expo": {
     "name": "Rakazo",
     "slug": "rakazo",
-    "owner": "REPLACE_WITH_NURLINGS_EXPO_OWNER",
+    "owner": "nurturist-ai",
     "scheme": "rakazo",
     "version": "1.0.6",
     "orientation": "default",
@@ -93,7 +93,7 @@
       "router": {},
       "supportsRTL": true,
       "eas": {
-        "projectId": "REPLACE_WITH_NURLINGS_EAS_PROJECT_ID"
+        "projectId": "aa1a8375-7dea-4dc7-a6ba-d42968e9f40f"
       }
     },
     "runtimeVersion": {

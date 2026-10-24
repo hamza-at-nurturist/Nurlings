@@ -2,20 +2,20 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves this proposal. Verify: explicit approval in the session.
+- [x] 1.1 Maintainer approves this proposal. Verify: explicit approval in the session.
 
 ## 2. Config and workflow
 
-- [ ] 2.1 Fill `owner` and `extra.eas.projectId` in `apps/mobile/app.json`, and update the
+- [x] 2.1 Fill `owner` and `extra.eas.projectId` in `apps/mobile/app.json`, and update the
   placeholder test to expect the real values and no placeholders. Verify: `vitest` on
   `brand-expo-config.test.ts` passes.
-- [ ] 2.2 In `release-android-apk.yml`, rename the APK and release title to Nurlings, fix the
+- [x] 2.2 In `release-android-apk.yml`, rename the APK and release title to Nurlings, fix the
   missing-token message, and drop the over-the-air claims from the notes and comments. Extend
   `release-apk-workflow.test.ts` to pin the name, title, message and absence of `rakazo` /
   `inbox-zero`. Verify: `vitest` on `release-apk-workflow.test.ts` passes.
-- [ ] 2.3 Update the Android APK section of `docs/mobile-release.md`. Verify: read-through; the
+- [x] 2.3 Update the Android APK section of `docs/mobile-release.md`. Verify: read-through; the
   link and file name match the workflow.
-- [ ] 2.4 `openspec validate android-apk-build --strict`, lint, mobile typecheck
+- [x] 2.4 `openspec validate android-apk-build --strict`, lint, mobile typecheck
   (`pnpm --filter @rakazo/mobile check`) and the mobile unit tests pass.
 
 ## 3. After merge

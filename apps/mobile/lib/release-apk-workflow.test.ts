@@ -39,4 +39,13 @@ describe("Android APK release workflow", () => {
       '"android-apk"',
     );
   });
+
+  it("publishes a Nurlings-named APK without upstream names or OTA claims", () => {
+    expect(workflow).toContain("nurlings.apk");
+    expect(workflow).toContain('title="Nurlings for Android $VERSION ($VERSION_CODE)"');
+    expect(workflow).toContain("nurturist-ai/nurlings Expo project");
+    for (const forbidden of ["rakazo.apk", "Rakazo for", "inbox-zero", "over the air"]) {
+      expect(workflow, forbidden).not.toContain(forbidden);
+    }
+  });
 });
