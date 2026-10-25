@@ -61,6 +61,7 @@ test("a ticket opens as a two-tab sheet on a phone", async ({ page }, testInfo) 
   await sheet.getByTestId("ticket-status").click();
   await page.getByRole("menuitemradio", { name: "In review", exact: true }).click();
   await expect(sheet.getByTestId("ticket-status")).toContainText("In review");
+  await expect(page.getByRole("menu")).toHaveCount(0);
   const approve = sheet.getByTestId("ticket-approve");
   await expect(approve).toBeVisible();
   const approveBox = await approve.boundingBox();

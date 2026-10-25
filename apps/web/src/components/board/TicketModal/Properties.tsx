@@ -77,7 +77,12 @@ export function Properties({ ticket, bots, timeZone, disabled, layout = "grid", 
           onValueChange={(value) => onChange({ status: value as TicketStatus })}
         >
           {TICKET_STATUSES.map((value) => (
-            <DropdownMenuRadioItem key={value} value={value} className={chips ? ITEM : undefined}>
+            <DropdownMenuRadioItem
+              key={value}
+              value={value}
+              className={chips ? ITEM : undefined}
+              closeOnClick={chips}
+            >
               <span aria-hidden="true" className={`size-1.5 rounded-full ${STATUS_DOT[value]}`} />
               {statuses[value]}
             </DropdownMenuRadioItem>
@@ -105,7 +110,12 @@ export function Properties({ ticket, bots, timeZone, disabled, layout = "grid", 
           onValueChange={(value) => onChange({ assigneeBotId: value })}
         >
           {bots.map((bot) => (
-            <DropdownMenuRadioItem key={bot.id} value={bot.id} className={chips ? ITEM : undefined}>
+            <DropdownMenuRadioItem
+              key={bot.id}
+              value={bot.id}
+              className={chips ? ITEM : undefined}
+              closeOnClick={chips}
+            >
               <BotAvatar color={bot.color} identity={bot.id} status={bot.status} size={18} />
               {bot.name}
             </DropdownMenuRadioItem>
@@ -130,7 +140,12 @@ export function Properties({ ticket, bots, timeZone, disabled, layout = "grid", 
           onValueChange={(value) => onChange({ priority: value as TicketPriority })}
         >
           {TICKET_PRIORITIES.map((value) => (
-            <DropdownMenuRadioItem key={value} value={value} className={chips ? ITEM : undefined}>
+            <DropdownMenuRadioItem
+              key={value}
+              value={value}
+              className={chips ? ITEM : undefined}
+              closeOnClick={chips}
+            >
               {priorities[value]}
             </DropdownMenuRadioItem>
           ))}
