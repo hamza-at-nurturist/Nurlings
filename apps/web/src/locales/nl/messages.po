@@ -138,7 +138,7 @@ msgstr ""
 msgid "{actor} created this and assigned it to {owner}"
 msgstr ""
 
-#. placeholder {0}: statuses[event.status]
+#. placeholder {0}: statuses[line.status]
 #: src/components/board/TicketModal/ActivityFeed.tsx
 msgid "{actor} moved it to {0}"
 msgstr ""
@@ -3444,7 +3444,7 @@ msgstr "Verplaats ze naar je gedeelde geheugen."
 msgid "Move to"
 msgstr "Verplaatsen naar"
 
-#. placeholder {0}: statuses[event.status]
+#. placeholder {0}: statuses[line.status]
 #: src/components/board/TicketModal/ActivityFeed.tsx
 msgid "Moved back to {0}"
 msgstr ""
