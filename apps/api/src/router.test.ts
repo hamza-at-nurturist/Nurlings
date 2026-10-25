@@ -7309,13 +7309,35 @@ describe("tickets.events and tickets.files", () => {
 
   it("does not reveal events or files of a ticket outside the space", async () => {
     const s = setup(null);
-    for (const procedure of ["events", "files"]) {
+    for (const procedure of ["events", "runs", "files"]) {
       const { response } = await s.call(procedure);
       expect(response?.status).not.toBe(200);
     }
     expect(s.eventFindMany).not.toHaveBeenCalled();
     expect(s.runFindMany).not.toHaveBeenCalled();
     expect(s.artifactFindMany).not.toHaveBeenCalled();
+  });
+
+  it("returns each Nurling's latest run started for the ticket", async () => {
+    const s = setup({ id: "t1" });
+    s.runFindMany.mockImplementationOnce(
+      async () =>
+        [
+          { botId: "bot-1", status: "running", completedAt: null },
+          { botId: "bot-1", status: "failed", completedAt: at(2) },
+          { botId: "bot-2", status: "failed", completedAt: at(3) },
+        ] as never,
+    );
+    const { response } = await s.call("runs");
+    expect(response?.status).toBe(200);
+    const body = (await response?.json()) as { json: unknown[] };
+    expect(body.json).toEqual([
+      { botId: "bot-1", status: "running", finishedAt: null },
+      { botId: "bot-2", status: "failed", finishedAt: at(3).toISOString() },
+    ]);
+    expect(s.runFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { spaceId: "workspace-1", task: { ticketId: "t1" } } }),
+    );
   });
 
   it("lists the newest version of each file attached by runs started for the ticket", async () => {

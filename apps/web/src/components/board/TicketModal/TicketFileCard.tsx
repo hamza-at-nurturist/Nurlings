@@ -29,8 +29,11 @@ export function shortFileType(name: string, mimeType: string): string {
  */
 export function TicketFileCard({
   file,
+  producer,
 }: {
   file: { id: string; botId: string; name: string; mimeType: string; size: number };
+  /** Who added the file, leading the meta line: "Runway · 7.3 KB". */
+  producer?: string;
 }) {
   const { t } = useLingui();
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +45,7 @@ export function TicketFileCard({
         name={file.name}
         mimeType={file.mimeType}
         size={file.size}
+        meta={producer}
       />
     );
   return (
@@ -58,7 +62,7 @@ export function TicketFileCard({
       >
         <div className="font-medium">{file.name}</div>
         <div className="mt-1 text-muted-foreground">
-          {shortFileType(file.name, file.mimeType)} · {formatFileSize(file.size)}
+          {producer ?? shortFileType(file.name, file.mimeType)} · {formatFileSize(file.size)}
         </div>
       </button>
       {error ? (

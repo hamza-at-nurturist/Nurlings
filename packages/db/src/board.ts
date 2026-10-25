@@ -9,6 +9,7 @@ import type {
   TicketEventKind,
   TicketMention,
   TicketPriority,
+  TicketRun,
   TicketStatus,
 } from "@rakazo/contracts";
 import {
@@ -256,6 +257,29 @@ export function toTicketEventDto(row: TicketEventWithNames): TicketEvent {
     assigneeName: row.assigneeBot?.name ?? null,
     createdAt: row.createdAt.toISOString(),
   };
+}
+
+/** Each Nurling's latest run among the tasks started for the ticket, newest run first. */
+export async function listTicketRuns(
+  prisma: Pick<PrismaClient, "run">,
+  spaceId: string,
+  ticketId: string,
+): Promise<TicketRun[]> {
+  const rows = await prisma.run.findMany({
+    where: { spaceId, task: { ticketId } },
+    select: { botId: true, status: true, completedAt: true },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+  });
+  const latest = new Map<string, TicketRun>();
+  for (const row of rows) {
+    if (latest.has(row.botId)) continue;
+    latest.set(row.botId, {
+      botId: row.botId,
+      status: row.status as TicketRun["status"],
+      finishedAt: row.completedAt?.toISOString() ?? null,
+    });
+  }
+  return [...latest.values()];
 }
 
 /**

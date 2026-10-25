@@ -127,6 +127,10 @@ msgid "{actor} assigned it to {owner}"
 msgstr ""
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} attached {name}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
 msgid "{actor} created this"
 msgstr ""
 
@@ -195,6 +199,10 @@ msgstr "{name} pergunta"
 msgid "{name} asked: {text}"
 msgstr "{name} pergunta: {text}"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} couldn't finish, reply to retry"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
 msgid "{name} failed"
@@ -204,6 +212,10 @@ msgstr "{name} falhou"
 #: src/lib/browser-notifications.ts
 msgid "{name} finished"
 msgstr "{name} terminou"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} is working…"
+msgstr ""
 
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
@@ -1316,6 +1328,10 @@ msgstr "Código"
 msgctxt "email sign-in"
 msgid "Code"
 msgstr "Código"
+
+#: src/components/board/TicketModal/TicketModal.tsx
+msgid "Collapse"
+msgstr ""
 
 #. placeholder {0}: group.title
 #: src/pages/shell/sidebar-roster.tsx
@@ -2535,6 +2551,7 @@ msgstr "A cada semana"
 msgid "Executor token"
 msgstr "Token do Executor"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Expand"
 msgstr "Expandir"
@@ -3403,6 +3420,11 @@ msgstr "Mova-os para a sua memória compartilhada."
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "Mover para"
+
+#. placeholder {0}: statuses[event.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Moved back to {0}"
+msgstr ""
 
 #: src/components/call/CallCard.tsx
 msgid "Mute"
@@ -5618,6 +5640,10 @@ msgstr "Ontem"
 #: src/pages/shell/message-view.tsx
 msgid "You"
 msgstr "Você"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "You attached {name}"
+msgstr ""
 
 #: src/pages/McpOAuthCallback.tsx
 msgid "You can close this tab if it does not redirect automatically."

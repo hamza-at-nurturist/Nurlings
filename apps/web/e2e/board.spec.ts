@@ -66,8 +66,15 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await expect(detail.getByLabel("Reply")).toHaveValue("");
   // A reply to a blocked ticket sends it back to work.
   await expect(detail.getByTestId("ticket-status")).toContainText("In progress");
-  await expect(activity).toContainText("You moved it to In progress");
+  await expect(activity).toContainText("Moved back to In progress");
+  await expect(activity.getByTestId("time-separator").first()).toBeVisible();
   await captureScreenshot(page, testInfo, "board-ticket-modal");
+
+  // Full screen fills the window, and collapsing returns to the normal size.
+  await detail.getByRole("button", { name: "Expand", exact: true }).click();
+  await captureScreenshot(page, testInfo, "board-ticket-fullscreen");
+  await detail.getByRole("button", { name: "Collapse", exact: true }).click();
+  await expect(detail.getByRole("button", { name: "Expand", exact: true })).toBeVisible();
 
   // Calling in another Nurling: the picker lists the space's Nurlings and the feed shows a chip.
   await detail.getByLabel("Reply").fill("@Sc");

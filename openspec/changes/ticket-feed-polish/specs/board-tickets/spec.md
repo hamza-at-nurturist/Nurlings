@@ -73,6 +73,19 @@ MAY have files and no text. Only files of the same space, user and owning Nurlin
 - **WHEN** a comment names a file of another user or Nurling
 - **THEN** the comment is refused
 
+### Requirement: Ticket files show a short type
+On a comment's files, a file card that shows a type SHALL show a short extension such as "TXT"
+instead of the MIME type. On the ticket's Files, the card's meta line SHALL lead with who added the
+file instead. Chat file cards SHALL be unchanged.
+
+#### Scenario: Text file
+- **WHEN** a comment carries a 22-byte `notes.txt`
+- **THEN** its card reads "TXT · 22 B"
+
+#### Scenario: Text file in Files
+- **WHEN** the user attached a 22-byte `notes.txt`
+- **THEN** its card in Files reads "You · 22 B"
+
 ## ADDED Requirements
 
 ### Requirement: Files appear in the activity

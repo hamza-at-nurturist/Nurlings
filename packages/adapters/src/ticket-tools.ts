@@ -439,8 +439,9 @@ export async function commentTicket(
       await recordTicketEvents(tx, {
         spaceId: input.spaceId,
         ticketId: ticket.id,
-        actor: input,
-        events: [{ kind: "status", status: "doing" }],
+        // Nobody moved it by hand, so the move has no actor.
+        actor: {},
+        events: [{ kind: "resumed", status: "doing" }],
       });
     return comment;
   });

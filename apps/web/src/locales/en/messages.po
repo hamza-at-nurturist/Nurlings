@@ -127,6 +127,10 @@ msgid "{actor} assigned it to {owner}"
 msgstr "{actor} assigned it to {owner}"
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} attached {name}"
+msgstr "{actor} attached {name}"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
 msgid "{actor} created this"
 msgstr "{actor} created this"
 
@@ -195,6 +199,10 @@ msgstr "{name} asked"
 msgid "{name} asked: {text}"
 msgstr "{name} asked: {text}"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} couldn't finish, reply to retry"
+msgstr "{name} couldn't finish, reply to retry"
+
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
 msgid "{name} failed"
@@ -204,6 +212,10 @@ msgstr "{name} failed"
 #: src/lib/browser-notifications.ts
 msgid "{name} finished"
 msgstr "{name} finished"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} is working…"
+msgstr "{name} is working…"
 
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
@@ -1316,6 +1328,10 @@ msgstr "Code"
 msgctxt "email sign-in"
 msgid "Code"
 msgstr "Code"
+
+#: src/components/board/TicketModal/TicketModal.tsx
+msgid "Collapse"
+msgstr "Collapse"
 
 #. placeholder {0}: group.title
 #: src/pages/shell/sidebar-roster.tsx
@@ -2535,6 +2551,7 @@ msgstr "Every week"
 msgid "Executor token"
 msgstr "Executor token"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Expand"
 msgstr "Expand"
@@ -3403,6 +3420,11 @@ msgstr "Move them to your shared memory."
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "Move to"
+
+#. placeholder {0}: statuses[event.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Moved back to {0}"
+msgstr "Moved back to {0}"
 
 #: src/components/call/CallCard.tsx
 msgid "Mute"
@@ -5618,6 +5640,10 @@ msgstr "Yesterday"
 #: src/pages/shell/message-view.tsx
 msgid "You"
 msgstr "You"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "You attached {name}"
+msgstr "You attached {name}"
 
 #: src/pages/McpOAuthCallback.tsx
 msgid "You can close this tab if it does not redirect automatically."

@@ -87,3 +87,43 @@ it("keeps a recorded created event instead of deriving another", () => {
   const items = mergeActivity(ticket, [recorded], []);
   expect(items.map((item) => item.id)).toEqual(["e0"]);
 });
+
+it("adds files and a failed latest run, in time order before a comment at the same time", () => {
+  const file = {
+    id: "a1",
+    botId: "bot-1",
+    groupId: null,
+    runId: "r1",
+    name: "comps.pdf",
+    description: null,
+    mimeType: "application/pdf",
+    size: 10,
+    version: 1,
+    createdAt: "2026-10-24T04:00:00.000Z",
+  };
+  const items = mergeActivity(
+    ticket,
+    [],
+    [
+      {
+        id: "c1",
+        ticketId: "t1",
+        body: "Here",
+        authorBotId: null,
+        authorUserId: "user-1",
+        authorName: "Ada",
+        mentions: [],
+        attachments: [],
+        createdAt: "2026-10-24T04:00:00.000Z",
+        updatedAt: "2026-10-24T04:00:00.000Z",
+      } satisfies TicketComment,
+    ],
+    [file, { ...file, id: "orphan", botId: null }],
+    [
+      { botId: "bot-1", status: "failed", finishedAt: "2026-10-24T05:00:00.000Z" },
+      { botId: "bot-2", status: "failed", finishedAt: null },
+      { botId: "bot-3", status: "running", finishedAt: null },
+    ],
+  );
+  expect(items.map((item) => item.id)).toEqual(["created-t1", "file-a1", "c1", "failed-bot-1"]);
+});

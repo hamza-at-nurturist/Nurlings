@@ -194,3 +194,19 @@ it("keeps controls when automatic playback is rejected", async () => {
   expect(container.querySelector("audio")?.hasAttribute("controls")).toBe(true);
   expect(container.querySelector('[role="alert"]')).toBeNull();
 });
+
+it("leads the meta line with who added a previewable file", async () => {
+  await act(async () =>
+    root?.render(
+      <ArtifactFileCard
+        target={{ botId: "bot-1" }}
+        artifactId="a1"
+        name="Finance best practices.pdf"
+        mimeType="application/pdf"
+        size={7_500}
+        meta="Runway"
+      />,
+    ),
+  );
+  expect(container.textContent).toContain("Runway · 7.3 KB");
+});

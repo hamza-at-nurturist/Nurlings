@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { ATTACHMENT_MAX_COUNT } from "./attachments.js";
-import { Id } from "./ids.js";
+import { Id, RunStatus } from "./ids.js";
 
 export const TICKET_STATUSES = ["todo", "doing", "review", "blocked", "done", "closed"] as const;
 export const TicketStatusSchema = z.enum(TICKET_STATUSES);
@@ -104,11 +104,11 @@ export const TicketCommentSchema = z.object({
 });
 export type TicketComment = z.infer<typeof TicketCommentSchema>;
 
-export const TICKET_EVENT_KINDS = ["created", "status", "owner", "approved"] as const;
+export const TICKET_EVENT_KINDS = ["created", "status", "owner", "approved", "resumed"] as const;
 export const TicketEventKindSchema = z.enum(TICKET_EVENT_KINDS);
 export type TicketEventKind = z.infer<typeof TicketEventKindSchema>;
 
-/** One step in a ticket's history. `status` is set for status and approved events, `assigneeBotId` for created and owner events. */
+/** One step in a ticket's history. `status` is set for status, approved and resumed events (a resumed event has no actor), `assigneeBotId` for created and owner events. */
 export const TicketEventSchema = z.object({
   id: Id,
   ticketId: Id,
@@ -122,6 +122,14 @@ export const TicketEventSchema = z.object({
   createdAt: z.string(),
 });
 export type TicketEvent = z.infer<typeof TicketEventSchema>;
+
+/** A Nurling's latest run started for a ticket, which the feed shows as working or failed. */
+export const TicketRunSchema = z.object({
+  botId: Id,
+  status: RunStatus,
+  finishedAt: z.string().nullable(),
+});
+export type TicketRun = z.infer<typeof TicketRunSchema>;
 
 export const TicketSchema = z.object({
   id: Id,

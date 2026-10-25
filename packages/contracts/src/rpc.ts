@@ -20,6 +20,7 @@ import {
   RenameBoardInput,
   TicketCommentSchema,
   TicketEventSchema,
+  TicketRunSchema,
   TicketSchema,
   UpdateTicketInput,
 } from "./board.js";
@@ -704,6 +705,8 @@ export const appContract = {
     comment: oc.input(CommentTicketInput).output(TicketCommentSchema),
     comments: oc.input(z.object({ ticketId: Id })).output(z.array(TicketCommentSchema)),
     events: oc.input(z.object({ ticketId: Id })).output(z.array(TicketEventSchema)),
+    /** Each Nurling's latest run started for the ticket. */
+    runs: oc.input(z.object({ ticketId: Id })).output(z.array(TicketRunSchema)),
     /** The latest version of each file the owner attached while working on the ticket. */
     files: oc.input(z.object({ ticketId: Id })).output(z.array(ArtifactSchema)),
   },
