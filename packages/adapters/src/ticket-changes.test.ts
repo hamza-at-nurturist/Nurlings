@@ -125,4 +125,24 @@ describe("ticket changes", () => {
     await s.changes({ ...change, assigneeBotId: null });
     expect(s.transaction).not.toHaveBeenCalled();
   });
+  it("tells the board after the wake, so its reload sees the queued run", async () => {
+    const s = setup(true);
+    await s.changes(change);
+    expect(s.createRun.mock.invocationCallOrder[0]).toBeLessThan(
+      s.notify.mock.invocationCallOrder[0]!,
+    );
+  });
+  it("still tells the board when the wake fails", async () => {
+    const s = setup(true);
+    s.transaction.mockRejectedValueOnce(new Error("down"));
+    await expect(s.changes(change)).rejects.toThrow("down");
+    expect(s.notify).toHaveBeenCalledTimes(1);
+  });
+  it("wakes with the given prompt instead of the usual one", async () => {
+    const s = setup(true);
+    await s.changes({ ...change, wakePrompt: "Triage RAK-1." });
+    expect(s.createTask).toHaveBeenCalledWith({
+      data: expect.objectContaining({ prompt: "Triage RAK-1." }),
+    });
+  });
 });

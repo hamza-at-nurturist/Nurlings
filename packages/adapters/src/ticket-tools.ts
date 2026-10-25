@@ -31,6 +31,7 @@ import {
   MENTION_RUN_UPDATE_ERROR,
   resolveMentions,
 } from "./ticket-mentions.js";
+import { ticketTriagePrompt } from "./ticket-wake.js";
 
 type TicketToolDeps = {
   prisma: PrismaClient;
@@ -58,6 +59,22 @@ async function ownBotInSpace(
       select: { id: true },
     }),
   );
+}
+/** The spawn key onboarding gives the user's first Nurling, Chief. */
+const CHIEF_SPAWN_KEY = "onboarding:first";
+
+/** The user's Chief in the space, which takes a user's tickets that name no owner. */
+async function findChief(deps: TicketToolDeps, input: { spaceId: string; userId: string }) {
+  const chief = await deps.prisma.bot.findFirst({
+    where: {
+      spaceId: input.spaceId,
+      userId: input.userId,
+      spawnKey: CHIEF_SPAWN_KEY,
+      archivedAt: null,
+    },
+    select: { id: true },
+  });
+  return chief?.id;
 }
 const NO_DATES = {
   startAt: null,
@@ -211,7 +228,11 @@ export async function createTicket(
   });
   if (!parsed.success) return { error: invalidTicketError(parsed.error) };
   const data = parsed.data;
-  if (!(await ownBotInSpace(deps, input, data.assigneeBotId))) return { error: "Unknown bot." };
+  // A user's ticket without an owner goes to Chief to hand on, or stays unowned without one.
+  const triage = data.assigneeBotId === undefined;
+  const assigneeBotId = data.assigneeBotId ?? (await findChief(deps, input));
+  if (data.assigneeBotId && !(await ownBotInSpace(deps, input, data.assigneeBotId)))
+    return { error: "Unknown bot." };
   const dates = await resolveTicketDateInput(deps.prisma, input.userId, data);
   const orderError = ticketDateOrderError(dates, NO_DATES);
   if (orderError) return { error: orderError };
@@ -228,7 +249,7 @@ export async function createTicket(
         title: data.title,
         description: data.description ?? null,
         priority: data.priority,
-        assigneeBotId: data.assigneeBotId,
+        assigneeBotId: assigneeBotId ?? null,
         createdByBotId: input.botId ?? null,
         createdByUserId: input.userId,
         ...dated,
@@ -249,6 +270,9 @@ export async function createTicket(
     assigneeBotId: row.assigneeBotId,
     // A start still to come wakes the owner then, not now.
     wakeAssignee: row.assigneeBotId !== input.botId && !isTicketStartPending(row, now),
+    ...(triage
+      ? { wakePrompt: ticketTriagePrompt(ticketRef(board.ticketPrefix, row.number)) }
+      : {}),
   });
   return { ticket: toTicketDto(row, board.ticketPrefix) };
 }

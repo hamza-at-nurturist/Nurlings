@@ -5,6 +5,7 @@ import {
   CreateTicketInput,
   GetTicketInput,
   isTicketCompletedStatus,
+  ListTicketsOutput,
   parseTicketRef,
   TICKET_EVENT_KINDS,
   TICKET_PRIORITIES,
@@ -95,8 +96,35 @@ describe("ticket contracts", () => {
     expect(() => GetTicketInput.parse({ id: "ticket-1", ref: "RAK-1" })).toThrow();
   });
 
-  it("requires an owner bot when creating a ticket", () => {
-    expect(() => CreateTicketInput.parse({ title: "Ship" })).toThrow();
+  it("lets a ticket be created without an owner, for the server to pick", () => {
+    expect(CreateTicketInput.parse({ title: "Ship" }).assigneeBotId).toBeUndefined();
+  });
+
+  it("reads a ticket list from an older server without the card fields", () => {
+    const [ticket] = ListTicketsOutput.parse({
+      tickets: [
+        {
+          id: "t1",
+          boardId: "b1",
+          spaceId: "s1",
+          number: 1,
+          ref: "NUR-1",
+          title: "Ship",
+          description: null,
+          status: "todo",
+          priority: "normal",
+          assigneeBotId: null,
+          createdByBotId: null,
+          createdByUserId: null,
+          createdAt: "2026-10-25T00:00:00.000Z",
+          updatedAt: "2026-10-25T00:00:00.000Z",
+          completedAt: null,
+        },
+      ],
+    }).tickets;
+    expect(ticket).toEqual(
+      expect.objectContaining({ lastComment: null, fileCount: 0, workingBotId: null }),
+    );
   });
 
   it("changes the owner without allowing it to be cleared", () => {

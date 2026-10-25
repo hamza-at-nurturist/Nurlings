@@ -7,16 +7,25 @@ type Props = {
   highlighted: number;
   onHighlight: (index: number) => void;
   onPick: (bot: Bot) => void;
+  /** Where it opens from the box: above, as the reply box needs, or below. */
+  side?: "above" | "below";
 };
 
-/** The Nurlings matching the `@` being typed, above the reply box. */
-export function MentionPicker({ id, options, highlighted, onHighlight, onPick }: Props) {
+/** The Nurlings matching the `@` being typed, next to the box. */
+export function MentionPicker({
+  id,
+  options,
+  highlighted,
+  onHighlight,
+  onPick,
+  side = "above",
+}: Props) {
   return (
     <div
       id={id}
       role="listbox"
       data-testid="mention-picker"
-      className="absolute inset-x-0 bottom-full z-10 mb-1 max-h-48 overflow-y-auto rounded-xl bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10"
+      className={`absolute inset-x-0 z-10 max-h-48 ${side === "above" ? "bottom-full mb-1" : "top-full mt-1"} overflow-y-auto rounded-xl bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10`}
     >
       {options.map((bot, index) => (
         <div

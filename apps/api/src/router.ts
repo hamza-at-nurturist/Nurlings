@@ -237,6 +237,7 @@ import {
   issueMessagingLinkCode,
   listBoards,
   listSpaceBackupModels,
+  listTicketCards,
   listTicketComments,
   listTicketEvents,
   listTicketFiles,
@@ -4321,7 +4322,17 @@ export function createRouter(deps: RouterDeps) {
           where,
           orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
         });
-        return { tickets: rows.map((row) => toTicketDto(row, board.ticketPrefix)) };
+        const cards = await listTicketCards(deps.prisma, {
+          spaceId: context.actor.spaceId,
+          userId: context.actor.userId,
+          tickets: rows,
+        });
+        return {
+          tickets: rows.map((row) => ({
+            ...toTicketDto(row, board.ticketPrefix),
+            ...cards.get(row.id),
+          })),
+        };
       }),
       get: boardEnabled.tickets.get.handler(async ({ context, input }) => {
         const board = await ensureBoard(deps.prisma, context.actor.spaceId);
@@ -4336,7 +4347,7 @@ export function createRouter(deps: RouterDeps) {
       }),
       create: boardEnabled.tickets.create.handler(async ({ context, input }) => {
         await resolveSpaceBoard(deps.prisma, context.actor.spaceId, input.boardId);
-        await repos.getBot(context.actor, input.assigneeBotId);
+        if (input.assigneeBotId) await repos.getBot(context.actor, input.assigneeBotId);
         const result = await createTicket(ticketDeps, {
           ...input,
           spaceId: context.actor.spaceId,

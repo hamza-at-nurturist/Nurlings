@@ -71,7 +71,7 @@ vi.mock("../components/board/TicketModal/TicketModal", () => ({
   ),
 }));
 
-import { BoardPage } from "./Board";
+import { UpstreamBoardPage as BoardPage } from "./Board";
 
 function bot(id: string, name: string) {
   return { id, name };

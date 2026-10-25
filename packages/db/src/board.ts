@@ -22,6 +22,7 @@ import {
   TicketStatusSchema,
   ticketRef,
 } from "@rakazo/contracts";
+import { WORKING_RUN_STATUSES } from "@rakazo/core";
 import type {
   Board as BoardRow,
   Prisma,
@@ -330,4 +331,82 @@ export async function listTicketFiles(
       version: row.version,
       createdAt: row.createdAt.toISOString(),
     }));
+}
+
+/** How much of the newest comment a card gets; it clamps to two lines anyway. */
+const CARD_COMMENT_CHARS = 280;
+
+export type TicketCard = {
+  lastComment: string | null;
+  fileCount: number;
+  workingBotId: string | null;
+};
+
+/**
+ * What each board card shows beyond the ticket, for the whole list in three queries: the newest
+ * comment with text, the files `listTicketFiles` would list (counted), and a working Nurling.
+ */
+export async function listTicketCards(
+  prisma: Pick<PrismaClient, "$queryRaw" | "run">,
+  input: {
+    spaceId: string;
+    userId: string;
+    tickets: Array<{ id: string; assigneeBotId: string | null }>;
+  },
+): Promise<Map<string, TicketCard>> {
+  const cards = new Map<string, TicketCard>(
+    input.tickets.map((ticket) => [
+      ticket.id,
+      { lastComment: null, fileCount: 0, workingBotId: null },
+    ]),
+  );
+  if (input.tickets.length === 0) return cards;
+  const ids = input.tickets.map((ticket) => ticket.id);
+  const comments = await prisma.$queryRaw<Array<{ ticketId: string; body: string }>>`
+    SELECT DISTINCT ON ("ticketId") "ticketId", left(body, ${CARD_COMMENT_CHARS}::int) AS body
+    FROM ticket_comments
+    WHERE "spaceId" = ${input.spaceId} AND "ticketId" = ANY(${ids}::text[]) AND body <> ''
+    ORDER BY "ticketId", "createdAt" DESC, id DESC`;
+  for (const row of comments) {
+    const card = cards.get(row.ticketId);
+    if (card) card.lastComment = row.body;
+  }
+  // A family is one file across its versions, as `listTicketFiles` keeps only the newest of each.
+  const files = await prisma.$queryRaw<Array<{ ticketId: string; count: number }>>`
+    SELECT "ticketId", count(DISTINCT family)::int AS count FROM (
+      SELECT t."ticketId", COALESCE(a."rootArtifactId", a.id) AS family
+      FROM tasks t
+      JOIN runs r ON r."taskId" = t.id AND r."spaceId" = ${input.spaceId}
+      JOIN artifacts a ON a."runId" = r.id
+      WHERE t."ticketId" = ANY(${ids}::text[])
+        AND a."spaceId" = ${input.spaceId} AND a."userId" = ${input.userId}
+      UNION ALL
+      SELECT c."ticketId", COALESCE(a."rootArtifactId", a.id) AS family
+      FROM ticket_comments c
+      CROSS JOIN LATERAL jsonb_array_elements(c.attachments) AS block
+      JOIN artifacts a ON a.id = block->>'artifactId'
+      WHERE c."spaceId" = ${input.spaceId} AND c."ticketId" = ANY(${ids}::text[])
+        AND a."spaceId" = ${input.spaceId} AND a."userId" = ${input.userId}
+    ) AS files
+    GROUP BY "ticketId"`;
+  for (const row of files) {
+    const card = cards.get(row.ticketId);
+    if (card) card.fileCount = row.count;
+  }
+  const runs = await prisma.run.findMany({
+    where: {
+      spaceId: input.spaceId,
+      status: { in: [...WORKING_RUN_STATUSES] },
+      task: { ticketId: { in: ids } },
+    },
+    select: { botId: true, task: { select: { ticketId: true } } },
+  });
+  const owners = new Map(input.tickets.map((ticket) => [ticket.id, ticket.assigneeBotId]));
+  for (const run of runs) {
+    const ticketId = run.task.ticketId;
+    const card = ticketId ? cards.get(ticketId) : undefined;
+    if (!card || !ticketId) continue;
+    if (!card.workingBotId || run.botId === owners.get(ticketId)) card.workingBotId = run.botId;
+  }
+  return cards;
 }

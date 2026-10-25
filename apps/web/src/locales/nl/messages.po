@@ -365,6 +365,10 @@ msgstr "{title}, {label}"
 msgid "{toolCount, plural, one {# tool} other {# tools}}"
 msgstr "{toolCount, plural, one {# tool} other {# tools}}"
 
+#: src/components/board/BoardView/BoardCard.tsx
+msgid "{workerName} is working…"
+msgstr ""
+
 #. placeholder {0}: mention.name
 #: src/pages/shell/composer.tsx
 msgid "@{0}"
@@ -460,6 +464,7 @@ msgstr "Actief model"
 msgid "Activity"
 msgstr "Activiteit"
 
+#: src/components/board/BoardView/QuickAdd.tsx
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/ScratchpadSection.tsx
@@ -631,6 +636,10 @@ msgstr "Agentverbindingen"
 msgid "Agents:"
 msgstr "Agents:"
 
+#: src/components/board/BoardView/NurlingFilter.tsx
+msgid "All"
+msgstr ""
+
 #: src/pages/Artifacts.tsx
 msgid "All bots"
 msgstr "Alle bots"
@@ -778,6 +787,7 @@ msgstr "Toepassen"
 msgid "Approval boundaries"
 msgstr "Goedkeuringsgrenzen"
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
@@ -912,6 +922,7 @@ msgstr "Beschikbaar voor de shellcommando's van deze bot als {commandVariable}"
 msgid "Avatar Studio"
 msgstr "Avatarstudio"
 
+#: src/components/board/BoardView/BoardView.tsx
 #: src/pages/Auth.tsx
 #: src/pages/Board.tsx
 #: src/pages/PluginsOverlay.tsx
@@ -953,6 +964,7 @@ msgstr "Facturatie"
 msgid "Blocked"
 msgstr "Geblokkeerd"
 
+#: src/components/board/BoardView/BoardView.tsx
 #: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
@@ -2630,6 +2642,7 @@ msgstr "Te vergelijken velden, bijv. id, modifiedTime (optioneel)"
 msgid "File"
 msgstr "Bestand"
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/components/board/TicketModal/TicketFiles.tsx
 msgid "Files"
 msgstr ""
@@ -3417,6 +3430,7 @@ msgstr "{full} omhoog verplaatsen"
 msgid "Move them to your shared memory."
 msgstr "Verplaats ze naar je gedeelde geheugen."
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "Verplaatsen naar"
@@ -4688,6 +4702,10 @@ msgstr "Gedeelde chat met {GROUP_MEMBER_MIN}-{GROUP_MEMBER_MAX} bots. Ze antwoor
 msgid "Shared documents"
 msgstr "Gedeelde documenten"
 
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Show {hidden} older"
+msgstr ""
+
 #: src/pages/GroupPanel.tsx
 msgid "Show all"
 msgstr "Alles tonen"
@@ -5003,6 +5021,10 @@ msgstr "Teams-bericht"
 #: src/pages/RoutineEditor.tsx
 msgid "Teams not enabled"
 msgstr "Teams is niet ingeschakeld"
+
+#: src/components/board/BoardView/QuickAdd.tsx
+msgid "Tell a {noun} what to do…"
+msgstr ""
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Test"
@@ -5697,6 +5719,10 @@ msgstr ""
 #: src/pages/Welcome.tsx
 msgid "Your team of always-on agents<0/>that you can give real work to."
 msgstr "Je team van altijd actieve agents<0/>dat je echt werk kunt geven."
+
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Your turn"
+msgstr ""
 
 #: src/lib/user-error.ts
 msgid "Your voice provider is out of credit."

@@ -24,6 +24,7 @@ import {
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useId, useState } from "react";
 import { Link } from "react-router-dom";
+import { BoardView } from "../components/board/BoardView/BoardView";
 import { CardDates } from "../components/board/TicketModal/CardDates";
 import { NeedsYou } from "../components/board/TicketModal/NeedsYou";
 import { TicketModal } from "../components/board/TicketModal/TicketModal";
@@ -35,6 +36,11 @@ import { errorText } from "../lib/user-error";
 import { WindowChrome } from "./WindowChrome";
 
 export function BoardPage() {
+  return <BoardView />;
+}
+
+/** Upstream's board, kept unchanged so its edits keep merging; the route shows `BoardView`. */
+export function UpstreamBoardPage() {
   const { t } = useLingui();
   const statuses = useTicketStatusLabels();
   const [tickets, setTickets] = useState<Ticket[]>([]);

@@ -14,7 +14,7 @@ import { useTicketStatusLabels } from "../../../lib/ticket-status";
 import { DatePicker } from "./DatePicker";
 import { isTicketOverdue } from "./dates";
 
-const STATUS_DOT: Record<TicketStatus, string> = {
+export const STATUS_DOT: Record<TicketStatus, string> = {
   todo: "bg-muted-foreground",
   doing: "bg-primary",
   review: "bg-warning",

@@ -781,6 +781,7 @@ model Run {
   @@index([sourceMessageId])
   @@index([threadId, status, createdAt])
   @@index([routineId])
+  @@index([taskId])
   @@map("runs")
 }
 
@@ -1187,6 +1188,7 @@ model Artifact {
   @@index([spaceId, botId])
   @@index([groupId])
   @@index([rootArtifactId])
+  @@index([runId])
   // artifacts_family_version_key is raw SQL: Prisma cannot express COALESCE indexes.
   @@map("artifacts")
 }

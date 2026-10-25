@@ -365,6 +365,10 @@ msgstr "{title}, {label}"
 msgid "{toolCount, plural, one {# tool} other {# tools}}"
 msgstr ""
 
+#: src/components/board/BoardView/BoardCard.tsx
+msgid "{workerName} is working…"
+msgstr ""
+
 #. placeholder {0}: mention.name
 #: src/pages/shell/composer.tsx
 msgid "@{0}"
@@ -460,6 +464,7 @@ msgstr "현재 모델"
 msgid "Activity"
 msgstr "활동"
 
+#: src/components/board/BoardView/QuickAdd.tsx
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/ScratchpadSection.tsx
@@ -631,6 +636,10 @@ msgstr "Agent 연결"
 msgid "Agents:"
 msgstr "사용 Bot:"
 
+#: src/components/board/BoardView/NurlingFilter.tsx
+msgid "All"
+msgstr ""
+
 #: src/pages/Artifacts.tsx
 msgid "All bots"
 msgstr ""
@@ -778,6 +787,7 @@ msgstr "적용"
 msgid "Approval boundaries"
 msgstr "승인이 필요한 범위"
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
@@ -912,6 +922,7 @@ msgstr "이 봇의 셸 명령에서 {commandVariable}(으)로 사용 가능"
 msgid "Avatar Studio"
 msgstr "아바타 스튜디오"
 
+#: src/components/board/BoardView/BoardView.tsx
 #: src/pages/Auth.tsx
 #: src/pages/Board.tsx
 #: src/pages/PluginsOverlay.tsx
@@ -953,6 +964,7 @@ msgstr ""
 msgid "Blocked"
 msgstr ""
 
+#: src/components/board/BoardView/BoardView.tsx
 #: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
@@ -2630,6 +2642,7 @@ msgstr "비교할 필드, 예: id, modifiedTime (선택 사항)"
 msgid "File"
 msgstr "파일"
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/components/board/TicketModal/TicketFiles.tsx
 msgid "Files"
 msgstr ""
@@ -3417,6 +3430,7 @@ msgstr "{full} 위로 이동"
 msgid "Move them to your shared memory."
 msgstr "공용 기억으로 옮깁니다."
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "섹션으로 이동"
@@ -4688,6 +4702,10 @@ msgstr ""
 msgid "Shared documents"
 msgstr "공유 문서"
 
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Show {hidden} older"
+msgstr ""
+
 #: src/pages/GroupPanel.tsx
 msgid "Show all"
 msgstr ""
@@ -5002,6 +5020,10 @@ msgstr "Teams 메시지"
 
 #: src/pages/RoutineEditor.tsx
 msgid "Teams not enabled"
+msgstr ""
+
+#: src/components/board/BoardView/QuickAdd.tsx
+msgid "Tell a {noun} what to do…"
 msgstr ""
 
 #: src/components/teach/SkillDraftCard.tsx
@@ -5697,6 +5719,10 @@ msgstr ""
 #: src/pages/Welcome.tsx
 msgid "Your team of always-on agents<0/>that you can give real work to."
 msgstr "언제든 실제 작업을 맡길 수 있는<0/>나만의 Agent 팀"
+
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Your turn"
+msgstr ""
 
 #: src/lib/user-error.ts
 msgid "Your voice provider is out of credit."
