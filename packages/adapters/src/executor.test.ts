@@ -3978,6 +3978,20 @@ describe("ticket_comment mentions", () => {
     }).find((candidate) => candidate.name === "ticket_get");
     // The Nurling learns from the description that a ticket carries files it can open.
     expect(read?.description).toContain("files");
+    for (const name of ["ticket_create", "ticket_update"]) {
+      const dated = selectBuiltinToolsForRun({
+        graphicalToolsAllowed: false,
+        groupId: null,
+        trigger: "tickets",
+        semanticMemoryEnabled: false,
+        messagingChannelRun: false,
+        ticketBoardEnabled: true,
+      }).find((candidate) => candidate.name === name)?.inputSchema as {
+        properties: Record<string, { type?: string; description?: string }>;
+      };
+      expect(dated.properties.start?.type).toBe("string");
+      expect(dated.properties.due?.description).toContain("YYYY-MM-DD");
+    }
   });
 });
 

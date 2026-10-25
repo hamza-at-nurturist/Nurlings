@@ -77,6 +77,13 @@ export const DELEGATION_TOOL_NAMES = new Set<string>([
   ...FLEET_TOOL_NAMES,
 ]);
 
+const ticketDateDescription = (what: string) =>
+  `${what} as a local date (YYYY-MM-DD) or date-time (YYYY-MM-DDTHH:mm) in the user's timezone. A date alone means ${what === "Start" ? "9 AM" : "the end of that day"}. An empty string clears it.`;
+const TICKET_DATE_PROPERTY = {
+  start: { type: "string", description: ticketDateDescription("Start") },
+  due: { type: "string", description: ticketDateDescription("Due") },
+} as const;
+
 const scheduleCreateProperties = {
   name: { type: "string", description: "Short label shown in Routines." },
   prompt: {
@@ -954,6 +961,8 @@ export const builtinAgentTools: ConnectorTool[] = [
           type: "string",
           description: "Bot in this space to own it. Defaults to you.",
         },
+        start: TICKET_DATE_PROPERTY.start,
+        due: TICKET_DATE_PROPERTY.due,
       },
       required: ["title"],
     },
@@ -970,6 +979,8 @@ export const builtinAgentTools: ConnectorTool[] = [
         priority: { type: "string", enum: TICKET_PRIORITIES },
         status: { type: "string", enum: TICKET_STATUSES },
         ownerBotId: { type: "string" },
+        start: TICKET_DATE_PROPERTY.start,
+        due: TICKET_DATE_PROPERTY.due,
       },
       required: ["id"],
     },

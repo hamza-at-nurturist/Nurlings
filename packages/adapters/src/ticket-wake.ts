@@ -15,7 +15,13 @@ export function ticketWakePrompt(ref: string): string {
  */
 export async function wakeTicketAssignee(
   deps: { prisma: PrismaClient; jobs: JobPublisher; ticketBoardEnabled?: boolean },
-  input: { spaceId: string; ticketId: string; botId: string },
+  input: {
+    spaceId: string;
+    ticketId: string;
+    botId: string;
+    /** Replaces the usual wake prompt, as the due heads-up does. */
+    prompt?: string;
+  },
 ): Promise<void> {
   if (!deps.ticketBoardEnabled) return;
   const run = await deps.prisma.$transaction(async (tx) => {
@@ -49,7 +55,7 @@ export async function wakeTicketAssignee(
         threadId: bot.thread.id,
         userId: bot.userId,
         ticketId: ticket.id,
-        prompt: ticketWakePrompt(`${ticket.board.ticketPrefix}-${ticket.number}`),
+        prompt: input.prompt ?? ticketWakePrompt(`${ticket.board.ticketPrefix}-${ticket.number}`),
         status: "queued",
       },
     });

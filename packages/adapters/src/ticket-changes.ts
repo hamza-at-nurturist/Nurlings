@@ -58,20 +58,29 @@ export function createTicketChangeNotifier(deps: {
       }
     }
     if (change.mentionedUser && change.commentBotId && change.userId) {
-      await notifyMentionedUser(deps, {
+      const { ref, body } = change.mentionedUser;
+      await notifyTicketUser(deps, {
         spaceId: change.spaceId,
         userId: change.userId,
         botId: change.commentBotId,
-        ...change.mentionedUser,
+        title: (name) => `${name} mentioned you on ${ref}`,
+        body: [...body.trim()].slice(0, MENTION_BODY_CHARS).join(""),
       });
     }
   };
 }
 
 /** The existing push channel, honouring the Nurling's own notify-on-finish setting. */
-async function notifyMentionedUser(
+export async function notifyTicketUser(
   deps: { prisma: PrismaClient; notifications?: () => NotificationProvider | undefined },
-  input: { spaceId: string; userId: string; botId: string; ref: string; body: string },
+  input: {
+    spaceId: string;
+    userId: string;
+    botId: string;
+    /** Given the Nurling's name. */
+    title: (botName: string) => string;
+    body: string;
+  },
 ) {
   const provider = deps.notifications?.();
   if (!provider) return;
@@ -84,8 +93,8 @@ async function notifyMentionedUser(
     await provider.send(
       {
         kind: "help",
-        title: `${bot.name} mentioned you on ${input.ref}`,
-        body: [...input.body.trim()].slice(0, MENTION_BODY_CHARS).join(""),
+        title: input.title(bot.name),
+        body: input.body,
         botId: input.botId,
         threadId: bot.thread.id,
       },
@@ -99,6 +108,6 @@ async function notifyMentionedUser(
       },
     );
   } catch (error) {
-    getLogger().error("ticket mention notification", error);
+    getLogger().error("ticket notification", error);
   }
 }

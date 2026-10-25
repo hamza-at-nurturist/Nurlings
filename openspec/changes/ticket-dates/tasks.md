@@ -2,21 +2,21 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal and the decisions in `design.md`. Verify: explicit
+- [x] 1.1 Maintainer approves the proposal and the decisions in `design.md`. Verify: explicit
   approval in the session.
 
 ## 2. Data and contracts
 
-- [ ] 2.1 Prisma: the ticket date columns, reminder flags and indexed `scheduleAt`, in one additive
+- [x] 2.1 Prisma: the ticket date columns, reminder flags and indexed `scheduleAt`, in one additive
   migration. Verify: applies on an empty and an existing database; row-security coverage still passes.
-- [ ] 2.2 Contracts: `start` / `due` (local date or date-time, or null) on create and update input,
+- [x] 2.2 Contracts: `start` / `due` (local date or date-time, or null) on create and update input,
   with the start-before-due refine; `startAt`, `startHasTime`, `dueAt`, `dueHasTime` on
   `TicketSchema` with defaults. Verify: contract tests for old and new shapes and bad input.
-- [ ] 2.3 `toTicketDto` returns the dates. Verify: unit test.
+- [x] 2.3 `toTicketDto` returns the dates. Verify: unit test.
 
 ## 3. Backend
 
-- [ ] 3.1 `ticket-dates.ts`:
+- [x] 3.1 `ticket-dates.ts`:
   - `resolveTicketDate`, which applies 9 AM or 23:59 in the timezone and is DST-safe;
   - the reminder times;
   - `nextTicketScheduleAt`;
@@ -24,12 +24,12 @@
 
   Verify: unit tests for date-only and timed input, a DST day, UTC fallback, and a past reminder
   that is skipped.
-- [ ] 3.2 `createTicket` / `updateTicket` resolve and save dates in the acting user's timezone,
+- [x] 3.2 `createTicket` / `updateTicket` resolve and save dates in the acting user's timezone,
   check start before due against stored values, and recompute `scheduleAt`. The assignment wake is
   deferred while the start is in the future, and the owner is woken when a pending future start is
   cleared or moved to the past. Verify: unit tests for each case, including that a Nurling editing
   its own ticket is not woken.
-- [ ] 3.3 The `ticket.dates` job (adapter-kit name, payload schema and builder) and its handler,
+- [x] 3.3 The `ticket.dates` job (adapter-kit name, payload schema and builder) and its handler,
   which runs as the ticket's tenant:
   - it locks and re-reads the ticket, and does nothing when `scheduleAt` is later or null;
   - it fires the start wake, the heads-up (with its prompt) and the overdue push only for an open
@@ -38,15 +38,15 @@
 
   Verify: unit tests for each reminder, a stale job, a closed ticket, and start and heads-up at the
   same time (one wake).
-- [ ] 3.4 `wakeTicketAssignee` takes an optional prompt; the mention push helper is generalised and
+- [x] 3.4 `wakeTicketAssignee` takes an optional prompt; the mention push helper is generalised and
   reused for the overdue push. Verify: existing wake and mention tests still pass; a new push test.
-- [ ] 3.5 The reconciler hook `reconcileTicketDates` (the routine lookahead pattern) wired in the
+- [x] 3.5 The reconciler hook `reconcileTicketDates` (the routine lookahead pattern) wired in the
   worker and in the API's in-memory mode, plus the handler in both. Verify: reconciler unit test
   that a ticket inside the lookahead is enqueued with its time, and one outside it or without an
   owner is not.
-- [ ] 3.6 `ticket_create` / `ticket_update` take `start` and `due` (`builtin-tools.ts` schema, four
+- [x] 3.6 `ticket_create` / `ticket_update` take `start` and `due` (`builtin-tools.ts` schema, four
   lines in `executor.ts`). Verify: tool schema test; executor test that the args reach the ticket.
-- [ ] 3.7 Postgres test through the app:
+- [x] 3.7 Postgres test through the app:
   1. set a due with a time;
   2. run the reconciler and the job at the heads-up time, and check that the owner's run is queued;
   3. move the due, and check that the old job does nothing;

@@ -19,6 +19,13 @@ import {
 } from "@rakazo/db";
 import type { TicketChangeNotifier } from "./ticket-changes.js";
 import {
+  isTicketDateOpen,
+  isTicketStartPending,
+  resolveTicketDateInput,
+  ticketDateChanges,
+  ticketDateOrderError,
+} from "./ticket-dates.js";
+import {
   activeMentionTask,
   MENTION_RUN_COMMENT_ERROR,
   MENTION_RUN_UPDATE_ERROR,
@@ -51,6 +58,30 @@ async function ownBotInSpace(
       select: { id: true },
     }),
   );
+}
+const NO_DATES = {
+  startAt: null,
+  startHasTime: false,
+  dueAt: null,
+  dueHasTime: false,
+  startWokenAt: null,
+  dueWarnedAt: null,
+  overdueNotifiedAt: null,
+};
+/** A Nurling clears a date with an empty string; clients send null. */
+function clearableDates(input: { start?: unknown; due?: unknown }) {
+  return {
+    start: input.start === "" ? null : input.start,
+    due: input.due === "" ? null : input.due,
+  };
+}
+/** A bad date gets its own message, so a Nurling can correct it; anything else stays generic. */
+function invalidTicketError(error: { issues: Array<{ path: PropertyKey[]; message: string }> }) {
+  const issue = error.issues.find(
+    (item) => item.path.length === 0 || item.path[0] === "start" || item.path[0] === "due",
+  );
+  if (!issue) return "Invalid ticket.";
+  return issue.path.length ? `${String(issue.path[0])}: ${issue.message}` : issue.message;
 }
 const LIST_TICKETS_LIMIT = 50;
 const LIST_DESCRIPTION_CHARS = 200;
@@ -167,16 +198,25 @@ export async function createTicket(
     description?: string;
     priority?: string;
     ownerBotId?: string;
+    /** Local date or date-time in the user's timezone; see `TicketDateInputSchema`. */
+    start?: unknown;
+    due?: unknown;
   },
 ) {
   if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
   const parsed = CreateTicketInput.safeParse({
     ...input,
+    ...clearableDates(input),
     assigneeBotId: input.ownerBotId ?? input.botId,
   });
-  if (!parsed.success) return { error: "Invalid ticket." };
+  if (!parsed.success) return { error: invalidTicketError(parsed.error) };
   const data = parsed.data;
   if (!(await ownBotInSpace(deps, input, data.assigneeBotId))) return { error: "Unknown bot." };
+  const dates = await resolveTicketDateInput(deps.prisma, input.userId, data);
+  const orderError = ticketDateOrderError(dates, NO_DATES);
+  if (orderError) return { error: orderError };
+  const now = new Date();
+  const dated = ticketDateChanges(NO_DATES, dates, now).data;
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const row = await deps.prisma.$transaction(async (tx) => {
     const number = await allocateTicketNumber(tx, board.id);
@@ -191,6 +231,7 @@ export async function createTicket(
         assigneeBotId: data.assigneeBotId,
         createdByBotId: input.botId ?? null,
         createdByUserId: input.userId,
+        ...dated,
       },
     });
     await recordTicketEvents(tx, {
@@ -206,7 +247,8 @@ export async function createTicket(
     boardId: board.id,
     ticketId: row.id,
     assigneeBotId: row.assigneeBotId,
-    wakeAssignee: row.assigneeBotId !== input.botId,
+    // A start still to come wakes the owner then, not now.
+    wakeAssignee: row.assigneeBotId !== input.botId && !isTicketStartPending(row, now),
   });
   return { ticket: toTicketDto(row, board.ticketPrefix) };
 }
@@ -223,11 +265,18 @@ export async function updateTicket(
     priority?: string | null;
     status?: string;
     ownerBotId?: string;
+    /** Null clears; omitted leaves the date as it is. */
+    start?: unknown;
+    due?: unknown;
   },
 ) {
   if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
-  const parsed = UpdateTicketInput.safeParse({ ...input, assigneeBotId: input.ownerBotId });
-  if (!parsed.success) return { error: "Invalid ticket." };
+  const parsed = UpdateTicketInput.safeParse({
+    ...input,
+    ...clearableDates(input),
+    assigneeBotId: input.ownerBotId,
+  });
+  if (!parsed.success) return { error: invalidTicketError(parsed.error) };
   const data = parsed.data;
   if (data.assigneeBotId && !(await ownBotInSpace(deps, input, data.assigneeBotId)))
     return { error: "Unknown bot." };
@@ -241,6 +290,7 @@ export async function updateTicket(
     }))
   )
     return { error: MENTION_RUN_UPDATE_ERROR };
+  const dates = await resolveTicketDateInput(deps.prisma, input.userId, data);
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const result = await deps.prisma.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM tickets WHERE id = ${data.id} AND "spaceId" = ${input.spaceId} FOR UPDATE`;
@@ -248,6 +298,10 @@ export async function updateTicket(
       where: { id: data.id, spaceId: input.spaceId, boardId: board.id },
     });
     if (!current) return null;
+    const orderError = ticketDateOrderError(dates, current);
+    if (orderError) return orderError;
+    const now = new Date();
+    const dated = ticketDateChanges(current, dates, now);
     const statusChanged = data.status !== undefined && data.status !== current.status;
     const row = await tx.ticket.update({
       where: { id: current.id },
@@ -266,6 +320,7 @@ export async function updateTicket(
                 : null,
             }
           : {}),
+        ...dated.data,
       },
     });
     const reassigned =
@@ -281,15 +336,20 @@ export async function updateTicket(
           : []),
       ],
     });
-    return { row, reassigned };
+    // Assigning waits for a start still to come; ending that wait wakes the owner now.
+    const wake =
+      (reassigned && !isTicketStartPending(row, now)) ||
+      (dated.startReleased && isTicketDateOpen(row.status));
+    return { row, wake };
   });
   if (!result) return { error: "Ticket not found." };
+  if (typeof result === "string") return { error: result };
   await deps.onTicketChange?.({
     spaceId: input.spaceId,
     boardId: board.id,
     ticketId: result.row.id,
     assigneeBotId: result.row.assigneeBotId,
-    wakeAssignee: result.reassigned && result.row.assigneeBotId !== input.botId,
+    wakeAssignee: result.wake && result.row.assigneeBotId !== input.botId,
   });
   return { ticket: toTicketDto(result.row, board.ticketPrefix) };
 }

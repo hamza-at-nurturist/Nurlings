@@ -116,6 +116,7 @@ export function createJobReconciler(
     reconcileRoutineRetryNotices?: () => Promise<void>;
     reconcileSecurityEventRetention?: () => Promise<void>;
     reconcileHomeStorage?: () => Promise<void>;
+    reconcileTicketDates?: () => Promise<void>;
   },
   options: { intervalMs?: number; batchSize?: number } = {},
 ) {
@@ -144,6 +145,7 @@ export function createJobReconciler(
           deps.reconcileRoutineRetryNotices,
           deps.reconcileSecurityEventRetention,
           deps.reconcileHomeStorage,
+          deps.reconcileTicketDates,
         ].map(async (reconcile) => reconcile?.()),
       );
       for (const result of auxiliary) {

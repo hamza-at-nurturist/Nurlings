@@ -1578,6 +1578,17 @@ model Ticket {
   completedAt       DateTime?
   /// The latest comment is a Nurling's that calls for the user; cleared by a reply or a status change.
   needsUser       Boolean   @default(false)
+  startAt           DateTime?
+  /// False when the start is a date only (resolved to 9 AM); dueHasTime likewise (end of day).
+  startHasTime      Boolean   @default(false)
+  dueAt             DateTime?
+  dueHasTime        Boolean   @default(false)
+  /// When each date reminder was handled, fired or skipped; reset when its date changes.
+  startWokenAt      DateTime?
+  dueWarnedAt       DateTime?
+  overdueNotifiedAt DateTime?
+  /// The earliest pending date reminder, found by the job reconciler.
+  scheduleAt        DateTime?
   comments        TicketComment[]
   events          TicketEvent[]
   tasks           Task[]
@@ -1585,6 +1596,7 @@ model Ticket {
   @@unique([boardId, number])
   @@index([spaceId, status])
   @@index([boardId, status])
+  @@index([scheduleAt])
   @@map("tickets")
 }
 
