@@ -51,6 +51,7 @@ function ticket(overrides: Record<string, unknown> = {}) {
     createdAt: NOW,
     updatedAt: NOW,
     completedAt: null,
+    needsUser: false,
     ...overrides,
   };
 }
@@ -198,6 +199,10 @@ function mutationDeps(ticketBoardEnabled = true) {
     changes,
     mentionTask,
     priorReplies,
+    setTicket: (overrides: Record<string, unknown>) => {
+      current = { ...current, ...overrides };
+    },
+    current: () => current,
   };
 }
 
@@ -612,5 +617,134 @@ describe("ticket mutations", () => {
       await updateTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", status: "doing" });
       expect(s.mentionTask).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("replies on a ticket in review or blocked", () => {
+  const reply = (body = "Change the title") => ({
+    spaceId: "ws",
+    userId: "user-1",
+    id: "t1",
+    body,
+  });
+
+  it.each(["review", "blocked"])(
+    "moves a %s ticket to In progress and wakes the owner",
+    async (status) => {
+      const s = mutationDeps();
+      s.setTicket({ status });
+      await commentTicket(s.deps, reply());
+      expect(s.tx.$queryRaw).toHaveBeenCalled();
+      expect(s.current().status).toBe("doing");
+      expect(s.tx.ticketEvent.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          kind: "status",
+          status: "doing",
+          actorUserId: "user-1",
+          actorBotId: null,
+        }),
+      });
+      expect(s.changes).toHaveBeenLastCalledWith(expect.objectContaining({ wakeAssignee: true }));
+    },
+  );
+
+  it.each(["todo", "doing"])("leaves a %s ticket's status alone", async (status) => {
+    const s = mutationDeps();
+    s.setTicket({ status });
+    await commentTicket(s.deps, reply());
+    expect(s.current().status).toBe(status);
+    expect(s.tx.ticketEvent.create).not.toHaveBeenCalled();
+    expect(s.changes).toHaveBeenLastCalledWith(expect.objectContaining({ wakeAssignee: true }));
+  });
+
+  it("never moves a ticket for a Nurling's comment", async () => {
+    const s = mutationDeps();
+    s.setTicket({ status: "review" });
+    await commentTicket(s.deps, { ...reply(), botId: "bot-1" });
+    expect(s.current().status).toBe("review");
+    expect(s.tx.ticketEvent.create).not.toHaveBeenCalled();
+  });
+
+  it("treats a comment that mentions only other Nurlings as addressed to them", async () => {
+    const s = mutationDeps();
+    s.setTicket({ status: "review" });
+    await commentTicket(s.deps, {
+      ...reply("@Scout thoughts?"),
+      mentions: [{ kind: "bot", id: "bot-2" }],
+    });
+    expect(s.current().status).toBe("review");
+    expect(s.tx.ticketEvent.create).not.toHaveBeenCalled();
+    expect(s.changes).toHaveBeenLastCalledWith(
+      expect.objectContaining({ wakeAssignee: false, mentionBotIds: ["bot-2"] }),
+    );
+  });
+
+  it("keeps the owner out of a comment to others in any status", async () => {
+    const s = mutationDeps();
+    s.setTicket({ status: "doing" });
+    await commentTicket(s.deps, { ...reply("@Scout"), mentions: [{ kind: "bot", id: "bot-2" }] });
+    expect(s.changes).toHaveBeenLastCalledWith(expect.objectContaining({ wakeAssignee: false }));
+  });
+
+  it("counts a comment that mentions the owner among others as a reply", async () => {
+    const s = mutationDeps();
+    s.setTicket({ status: "review" });
+    await commentTicket(s.deps, {
+      ...reply("@Planner @Scout"),
+      mentions: [
+        { kind: "bot", id: "bot-2" },
+        { kind: "bot", id: "bot-1" },
+      ],
+    });
+    expect(s.current().status).toBe("doing");
+    expect(s.changes).toHaveBeenLastCalledWith(expect.objectContaining({ wakeAssignee: true }));
+  });
+
+  it("counts a comment whose only mentions were dropped as a reply", async () => {
+    const s = mutationDeps();
+    s.setTicket({ status: "review" });
+    await commentTicket(s.deps, { ...reply("@Ghost"), mentions: [{ kind: "bot", id: "foreign" }] });
+    expect(s.current().status).toBe("doing");
+  });
+});
+
+describe("needs you", () => {
+  const nurling = { spaceId: "ws", userId: "user-1", botId: "bot-1", id: "t1" };
+
+  it("is raised by a Nurling's comment that calls for the user and cleared by the next ones", async () => {
+    const s = mutationDeps();
+    s.setTicket({ status: "blocked" });
+    await commentTicket(s.deps, { ...nurling, body: "Which region?", mentionUser: true });
+    expect(s.current().needsUser).toBe(true);
+    await commentTicket(s.deps, { ...nurling, body: "Still checking" });
+    expect(s.current().needsUser).toBe(false);
+    await commentTicket(s.deps, { ...nurling, body: "Which region?", mentionUser: true });
+    await commentTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", body: "EU" });
+    expect(s.current().needsUser).toBe(false);
+  });
+
+  it("is cleared when the user changes the status, and kept for other edits or a Nurling's move", async () => {
+    const s = mutationDeps();
+    s.setTicket({ needsUser: true, status: "blocked" });
+    await updateTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", title: "Renamed" });
+    expect(s.current().needsUser).toBe(true);
+    await updateTicket(s.deps, { ...nurling, status: "doing" });
+    expect(s.current().needsUser).toBe(true);
+    await updateTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", status: "doing" });
+    expect(s.current().needsUser).toBe(true);
+    await updateTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", status: "todo" });
+    expect(s.current().needsUser).toBe(false);
+  });
+
+  it("is reported only while the ticket is open", async () => {
+    const s = mutationDeps();
+    s.setTicket({ needsUser: true, status: "blocked" });
+    const open = await getTicket(s.deps, { spaceId: "ws", ref: "RAK-1" });
+    expect(open).toHaveProperty("ticket.needsUser", true);
+    for (const status of ["done", "closed"]) {
+      s.setTicket({ status });
+      const finished = await getTicket(s.deps, { spaceId: "ws", ref: "RAK-1" });
+      expect(finished).toHaveProperty("ticket.needsUser", false);
+    }
   });
 });

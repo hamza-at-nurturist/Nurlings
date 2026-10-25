@@ -9,6 +9,7 @@ const api = vi.hoisted(() => ({
   bots: { list: vi.fn() },
   tickets: {
     update: vi.fn(),
+    approve: vi.fn(),
     comment: vi.fn(),
     comments: vi.fn(),
     events: vi.fn(),
@@ -49,6 +50,7 @@ vi.mock("@rakazo/ui-web", () => {
         data-status={props.status}
       />
     ),
+    Badge: (props: ComponentProps<"span">) => <span {...props} />,
     Button: (props: ComponentProps<"button"> & { size?: string }) => {
       const { size: _size, ...rest } = props;
       return <button {...rest} />;
@@ -103,6 +105,7 @@ function makeTicket(patch: Partial<Ticket> = {}): Ticket {
     createdAt: "2026-10-24T03:41:00.000Z",
     updatedAt: "2026-10-24T03:41:00.000Z",
     completedAt: null,
+    needsUser: false,
     ...patch,
   };
 }
@@ -167,6 +170,7 @@ function setup() {
   api.tickets.comments.mockResolvedValue(comments);
   api.tickets.files.mockResolvedValue([]);
   api.tickets.update.mockResolvedValue({});
+  api.tickets.approve.mockResolvedValue({});
   api.tickets.comment.mockImplementation(async ({ body }: { body: string }) =>
     comment("sent", "2026-10-24T05:00:00.000Z", { body }),
   );
@@ -603,6 +607,75 @@ it("does not open the picker for an @ inside a word", async () => {
     const box = q(page.container, 'textarea[aria-label="Reply"]') as HTMLTextAreaElement;
     await act(async () => type(box, "write to me@"));
     expect(q(page.container, '[data-testid="mention-picker"]')).toBeNull();
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("offers Approve only while the ticket is in review", async () => {
+  const page = await open();
+  try {
+    expect(text(page.container, '[data-testid="ticket-approve"]')).toBe("Approve");
+    for (const status of ["todo", "doing", "blocked", "done", "closed"] as const) {
+      await page.render({ ticket: makeTicket({ status }) });
+      expect(q(page.container, '[data-testid="ticket-approve"]')).toBeNull();
+    }
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("approves the ticket and reads it again", async () => {
+  const page = await open();
+  try {
+    const before = api.tickets.events.mock.calls.length;
+    await act(async () => q(page.container, '[data-testid="ticket-approve"]').click());
+    expect(api.tickets.approve).toHaveBeenCalledWith({ id: "t1" });
+    expect(api.tickets.update).not.toHaveBeenCalled();
+    expect(page.onChanged).toHaveBeenCalledOnce();
+    expect(api.tickets.events.mock.calls.length).toBeGreaterThan(before);
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("shows a refused approval and still refreshes the ticket", async () => {
+  api.tickets.approve.mockRejectedValue(new Error("Only a ticket in review can be approved."));
+  const page = await open();
+  try {
+    await act(async () => q(page.container, '[data-testid="ticket-approve"]').click());
+    expect(text(page.container, '[role="alert"]')).toContain("Only a ticket in review");
+    expect(page.onChanged).toHaveBeenCalledOnce();
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("says who approved it in the feed", async () => {
+  api.tickets.events.mockResolvedValue([
+    ...events,
+    event("e4", "2026-10-24T05:00:00.000Z", {
+      kind: "approved",
+      status: "done",
+      actorBotId: null,
+      actorUserId: "user-1",
+      actorName: "Ada",
+    }),
+  ]);
+  const page = await open();
+  try {
+    expect(text(page.container, '[data-testid="ticket-activity"]')).toContain("You approved it");
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("shows Needs you only while the ticket needs the user", async () => {
+  const page = await open({ ticket: makeTicket({ needsUser: true }) });
+  try {
+    expect(text(page.container, '[data-testid="ticket-needs-you"]')).toBe("Needs you");
+    await page.render({ ticket: makeTicket({ needsUser: false }) });
+    expect(q(page.container, '[data-testid="ticket-needs-you"]')).toBeNull();
   } finally {
     await page.cleanup();
   }

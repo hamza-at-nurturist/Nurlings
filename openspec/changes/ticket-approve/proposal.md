@@ -25,21 +25,24 @@ This change makes the three moments one action each: approve it, reply to change
   move in the feed (as the actor's usual "moved it to In progress" line), and wakes the owner as
   replies already do. The comment, the move and the wake happen together on the server, so a
   client cannot send the comment and forget the move.
+- A user's comment whose stored mentions are only other Nurlings (none of them the owner) is
+  addressed to them, not the owner: it neither moves the ticket nor wakes the owner, in any status.
+  The mentioned Nurlings are still woken. Every other user comment counts as a reply.
 - A Nurling's own comments never move a ticket.
 
 ### Needs you
 
 - When a Nurling's latest comment on a ticket calls for the user (`mention_user`), the ticket
-  shows a small **Needs you** badge on its card and in the modal. It clears when the user replies,
-  when the Nurling's next comment does not call for the user, and while the ticket is Done or
-  Won't do.
+  shows a small **Needs you** badge on its card and in the modal. It clears when the user replies
+  (any comment), when the user changes the ticket's status by hand or approves it, when the
+  Nurling's next comment does not call for the user, and while the ticket is Done or Won't do.
 - The `ticket_comment` tool's `mention_user` description tells a Nurling to use it when it needs
   the user's answer or decision. That is what raises the badge; no text is parsed.
 
 ### Backend, additive only
 
 - `tickets.needsUser`: boolean, default false, set by `commentTicket` in the same transaction as
-  the comment.
+  the comment, and cleared by a user's status change in `updateTicket` and by approval.
 - `ticket_events.kind` (text) gains the value `approved`. `TicketEventKind` gains it.
 - `tickets.approve({ id })` RPC and an `approveTicket` function in a new `ticket-approve.ts`: under
   the ticket row lock, refuses unless the ticket is In review, then sets Done, stamps completion and
@@ -62,15 +65,15 @@ The reply move reuses `{actor} moved it to {status}`. No explainer text, no conf
 
 ### Upstream merge safety
 
-New files: `packages/adapters/src/ticket-approve.ts`, `TicketModal/ApproveButton.tsx`,
-`TicketModal/NeedsYou.tsx`. Small edits to existing files:
+New files: `packages/adapters/src/ticket-approve.ts`, `TicketModal/NeedsYou.tsx`. Small edits to
+existing files:
 
 | File | Edit |
 |---|---|
 | `packages/db/prisma/schema.prisma` + one migration | `Ticket.needsUser` |
 | `packages/db/src/board.ts` | `needsUser` in `toTicketDto`; `approved` event kind |
 | `packages/contracts/src/board.ts`, `rpc.ts` | `needsUser`, `approved` kind, `ApproveTicketInput`, `tickets.approve` |
-| `packages/adapters/src/ticket-tools.ts` | `commentTicket` locks the ticket, applies the reply move, sets `needsUser` |
+| `packages/adapters/src/ticket-tools.ts` | `commentTicket` locks the ticket, applies the reply move, skips the owner for comments addressed only to others, sets `needsUser`; `updateTicket` clears it on a user's status change |
 | `packages/adapters/src/builtin-tools.ts` | `mention_user` description only |
 | `apps/api/src/router.ts` | one `approve` handler |
 | `apps/web/src/components/board/TicketModal/{TicketModal,ActivityFeed}.tsx` | button, badge, one event line |
@@ -84,11 +87,17 @@ New files: `packages/adapters/src/ticket-approve.ts`, `TicketModal/ApproveButton
 - No new notification for approval or for Needs you; the push on `mention_user` already exists.
 - Dragging a card or using the status menu is unchanged and does not log "approved".
 
+## Decisions (approved)
+
+As in `design.md`, with two maintainer changes: a comment addressed only to other Nurlings is not
+a reply, and a user's status change clears Needs you.
+
 ## Impact
 
 - Capability: extends `board-tickets`.
 - Prisma migration: one defaulted boolean column on `tickets`, additive.
 - API: one new RPC, `tickets.approve`; `Ticket` gains `needsUser`; the event kind enum gains
   `approved`. An old client that does not know `approved` would drop that event line.
-- Behaviour change: a user reply on an In review or Blocked ticket now changes its status.
+- Behaviour change: a user reply on an In review or Blocked ticket now changes its status, and a
+  user comment that mentions only other Nurlings no longer wakes the owner.
 - Contacts no Rakazo-owned infrastructure.

@@ -7267,6 +7267,91 @@ describe("tickets.events and tickets.files", () => {
   });
 });
 
+describe("tickets.approve", () => {
+  const actor = {
+    spaceId: "workspace-1",
+    userId: "user-1",
+    email: "user@rakazo.test",
+    isDeploymentOwner: true,
+  } satisfies Actor;
+  const at = new Date("2026-06-01T00:00:00.000Z");
+
+  function setup(status: string) {
+    let row = {
+      id: "t1",
+      boardId: "board-1",
+      spaceId: "workspace-1",
+      number: 4,
+      title: "Ship",
+      description: null,
+      status,
+      priority: null,
+      assigneeBotId: "bot-1",
+      createdByBotId: null,
+      createdByUserId: "user-1",
+      createdAt: at,
+      updatedAt: at,
+      completedAt: null,
+      needsUser: false,
+    };
+    const tx = {
+      $queryRaw: vi.fn(async () => []),
+      ticket: {
+        findFirst: vi.fn(async () => row),
+        update: vi.fn(async ({ data }: { data: Record<string, unknown> }) => {
+          row = { ...row, ...data };
+          return row;
+        }),
+      },
+      ticketEvent: { create: vi.fn(async () => ({})) },
+    };
+    const prisma = {
+      board: {
+        findUnique: vi.fn(async () => ({
+          id: "board-1",
+          spaceId: "workspace-1",
+          name: "Personal",
+          ticketPrefix: "RAK",
+          nextNumber: 5,
+          createdAt: at,
+          updatedAt: at,
+        })),
+      },
+      $transaction: vi.fn(async (fn: (client: typeof tx) => Promise<unknown>) => fn(tx)),
+    } as unknown as PrismaClient;
+    const deps = { prisma, env: { ticketBoardEnabled: true } } as unknown as RouterDeps;
+    const handler = new RPCHandler(createRouter(deps));
+    const call = () =>
+      handler.handle(
+        new Request("http://127.0.0.1/rpc/tickets/approve", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ json: { id: "t1" } }),
+        }),
+        { prefix: "/rpc", context: { actor } },
+      );
+    return { call, tx };
+  }
+
+  it("approves a ticket in review as the signed-in user", async () => {
+    const s = setup("review");
+    const { response } = await s.call();
+    expect(response?.status).toBe(200);
+    const body = (await response?.json()) as { json: Record<string, unknown> };
+    expect(body.json).toMatchObject({ ref: "RAK-4", status: "done", needsUser: false });
+    expect(s.tx.ticketEvent.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ kind: "approved", actorUserId: "user-1" }),
+    });
+  });
+
+  it("refuses a ticket that is not in review", async () => {
+    const s = setup("doing");
+    const { response } = await s.call();
+    expect(response?.status).toBe(400);
+    expect(s.tx.ticket.update).not.toHaveBeenCalled();
+  });
+});
+
 describe("export.bot", () => {
   const actor = {
     spaceId: "workspace-1",

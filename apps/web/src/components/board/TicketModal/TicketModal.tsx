@@ -1,7 +1,7 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot, Ticket, TicketPriority, TicketStatus } from "@rakazo/contracts";
 import { TICKET_DESCRIPTION_MAX_LENGTH, TICKET_TITLE_MAX_LENGTH } from "@rakazo/contracts";
-import { Dialog, DialogContent, DialogTitle, Textarea } from "@rakazo/ui-web";
+import { Button, Dialog, DialogContent, DialogTitle, Textarea } from "@rakazo/ui-web";
 import { useMemo, useState } from "react";
 import { authClient } from "../../../lib/auth";
 import { rpc } from "../../../lib/rpc";
@@ -9,6 +9,7 @@ import { errorText } from "../../../lib/user-error";
 import type { Viewer } from "./ActivityFeed";
 import { ActivityFeed } from "./ActivityFeed";
 import { mergeActivity } from "./activity";
+import { NeedsYou } from "./NeedsYou";
 import { Properties } from "./Properties";
 import { ReplyBox } from "./ReplyBox";
 import { TicketFiles } from "./TicketFiles";
@@ -44,7 +45,22 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  async function update(
+  async function save(change: () => Promise<unknown>) {
+    setBusy(true);
+    setError("");
+    try {
+      await change();
+    } catch (cause) {
+      setError(errorText(cause));
+    } finally {
+      // A refused approve means the ticket moved on, so refresh either way.
+      await onChanged().catch(() => undefined);
+      activity.refresh();
+      setBusy(false);
+    }
+  }
+
+  function update(
     patch: Partial<{
       title: string;
       description: string;
@@ -53,17 +69,7 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
       priority: TicketPriority;
     }>,
   ) {
-    setBusy(true);
-    setError("");
-    try {
-      await rpc.tickets.update({ id: ticket.id, ...patch });
-      await onChanged();
-      activity.refresh();
-    } catch (cause) {
-      setError(errorText(cause));
-    } finally {
-      setBusy(false);
-    }
+    return save(() => rpc.tickets.update({ id: ticket.id, ...patch }));
   }
 
   const failure = error || activity.error;
@@ -82,6 +88,18 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
           <Trans>Board</Trans>
           <span aria-hidden="true">/</span>
           <span className="font-medium text-foreground">{ticket.ref}</span>
+          {ticket.needsUser ? <NeedsYou /> : null}
+          {ticket.status === "review" ? (
+            <Button
+              size="sm"
+              data-testid="ticket-approve"
+              className="ml-auto"
+              disabled={busy}
+              onClick={() => void save(() => rpc.tickets.approve({ id: ticket.id }))}
+            >
+              <Trans>Approve</Trans>
+            </Button>
+          ) : null}
         </header>
         <div className="grid min-h-0 overflow-y-auto md:grid-cols-[minmax(0,1fr)_22rem] md:overflow-hidden">
           <section className="space-y-6 p-6 md:min-h-0 md:overflow-y-auto">

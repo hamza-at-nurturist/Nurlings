@@ -89,11 +89,11 @@ export const TicketCommentSchema = z.object({
 });
 export type TicketComment = z.infer<typeof TicketCommentSchema>;
 
-export const TICKET_EVENT_KINDS = ["created", "status", "owner"] as const;
+export const TICKET_EVENT_KINDS = ["created", "status", "owner", "approved"] as const;
 export const TicketEventKindSchema = z.enum(TICKET_EVENT_KINDS);
 export type TicketEventKind = z.infer<typeof TicketEventKindSchema>;
 
-/** One step in a ticket's history. `status` is set for status events, `assigneeBotId` for created and owner events. */
+/** One step in a ticket's history. `status` is set for status and approved events, `assigneeBotId` for created and owner events. */
 export const TicketEventSchema = z.object({
   id: Id,
   ticketId: Id,
@@ -124,6 +124,8 @@ export const TicketSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   completedAt: z.string().nullable(),
+  /** A Nurling's latest comment calls for the user and the ticket is still open. */
+  needsUser: z.boolean().default(false),
 });
 export type Ticket = z.infer<typeof TicketSchema>;
 
@@ -172,6 +174,10 @@ export const MoveTicketInput = z.object({
   status: TicketStatusSchema,
 });
 export type MoveTicketInput = z.infer<typeof MoveTicketInput>;
+
+/** Only a ticket that is In review can be approved; it moves to Done. */
+export const ApproveTicketInput = z.object({ id: Id });
+export type ApproveTicketInput = z.infer<typeof ApproveTicketInput>;
 
 export const CommentTicketInput = z.object({
   ticketId: Id,

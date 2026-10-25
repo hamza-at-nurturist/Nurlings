@@ -28,14 +28,17 @@ as one status is skipped. A dedicated RPC also keeps "approve" out of the Nurlin
 
 When the comment has no `botId` and the ticket is In review or Blocked, the same transaction sets
 `doing` and records a `status` event for the user. The existing wake follows unchanged. Doing it in
-the server function (not the modal) makes it hold for every client. Any user comment counts, including
-one that only mentions another Nurling; narrowing it would need a judgment about what a reply means.
+the server function (not the modal) makes it hold for every client. A comment whose stored, validated
+mentions are non-empty and do not include the owner is addressed to those Nurlings: it does not move
+the ticket and does not wake the owner, in any status. The check reads `mentions`, never the text.
+Every other user comment is a reply.
 
 ### Needs you is a stored flag
 
 `tickets.needsUser` is set to "this comment is a Nurling's and mentions the user" on every comment
 in the same transaction, so a user reply or a Nurling's next plain comment clears it with no extra
-rule. The DTO masks it for Done and Won't do. Alternative: derive it from the latest comment on every
+rule. A user's status change (`updateTicket` without `botId`, status actually changed) and approval
+clear it too. The DTO masks it for Done and Won't do. Alternative: derive it from the latest comment on every
 list call, which needs a per-ticket latest-comment query on each board load.
 
 ### Needs you comes from `mention_user`, not from text
@@ -47,5 +50,3 @@ description. A Nurling that is Blocked but never sets `mention_user` simply show
 ## Risks
 
 - A Nurling blocked on the user that forgets `mention_user` shows no badge. It still shows Blocked.
-- A user who changes a Blocked ticket's status by hand keeps the badge until they reply or the
-  Nurling comments again.
