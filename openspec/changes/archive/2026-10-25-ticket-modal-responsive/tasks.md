@@ -40,6 +40,6 @@
 
 - [x] 6.1 `apps/web/e2e/ticket-mobile.spec.ts` at 390×844 with the two screenshots. Verify: passes
   locally and in CI.
-- [ ] 6.2 Open the PR with Why/What/Testing, the copy table and links to both phone screenshots.
+- [x] 6.2 Open the PR with Why/What/Testing, the copy table and links to both phone screenshots.
   Verify: CI green.
-- [ ] 6.3 After merge, archive the change on its own PR. Verify: `openspec validate --strict`.
+- [x] 6.3 After merge, archive the change on its own PR. Verify: `openspec validate --strict`.
