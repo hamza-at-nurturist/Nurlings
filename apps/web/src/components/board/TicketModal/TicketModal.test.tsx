@@ -795,6 +795,33 @@ it("stages picked files, uploads them for the owner on send, then posts the comm
   }
 });
 
+it("keeps picked files when the input is cleared before the staged list updates", async () => {
+  const page = await open();
+  try {
+    const input = q(page.container, '[data-testid="reply-file-input"]') as HTMLInputElement;
+    // As in a browser, clearing the input empties the list the change event carried.
+    let current: File[] = [];
+    Object.defineProperty(input, "files", { get: () => current, configurable: true });
+    Object.defineProperty(input, "value", {
+      get: () => "",
+      set: () => {
+        current.length = 0;
+      },
+      configurable: true,
+    });
+    // Two picks in one batch: the second update is not applied right away.
+    await act(async () => {
+      for (const name of ["first.txt", "second.txt"]) {
+        current = [fileOf(name)];
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+    expect(staged(page.container)).toEqual(["first.txt", "second.txt"]);
+  } finally {
+    await page.cleanup();
+  }
+});
+
 it("skips files over the count or of unknown types, and removes a staged one", async () => {
   const page = await open();
   try {
