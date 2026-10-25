@@ -30,26 +30,30 @@ export function shortFileType(name: string, mimeType: string): string {
 export function TicketFileCard({
   file,
   producer,
+  className,
 }: {
   file: { id: string; botId: string; name: string; mimeType: string; size: number };
   /** Who added the file, leading the meta line: "Runway · 7.3 KB". */
   producer?: string;
+  className?: string;
 }) {
   const { t } = useLingui();
   const [error, setError] = useState<string | null>(null);
   if (PREVIEWED_BY_SHARED_CARD.has(file.mimeType) || isAttachmentAudioMimeType(file.mimeType))
     return (
-      <ArtifactFileCard
-        target={{ botId: file.botId }}
-        artifactId={file.id}
-        name={file.name}
-        mimeType={file.mimeType}
-        size={file.size}
-        meta={producer}
-      />
+      <div className={className}>
+        <ArtifactFileCard
+          target={{ botId: file.botId }}
+          artifactId={file.id}
+          name={file.name}
+          mimeType={file.mimeType}
+          size={file.size}
+          meta={producer}
+        />
+      </div>
     );
   return (
-    <div>
+    <div className={className}>
       <button
         type="button"
         onClick={() => {
@@ -58,7 +62,7 @@ export function TicketFileCard({
             () => setError(t`Could not download ${file.name}. Try again.`),
           );
         }}
-        className="rounded-2xl border border-border bg-card px-4 py-3 text-left text-[14px] text-foreground hover:bg-accent"
+        className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-left text-[14px] text-foreground hover:bg-accent"
       >
         <div className="font-medium">{file.name}</div>
         <div className="mt-1 text-muted-foreground">
