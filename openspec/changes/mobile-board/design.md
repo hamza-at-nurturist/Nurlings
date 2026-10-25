@@ -2,7 +2,7 @@
 
 ## Where the code goes
 
-### Shared: `packages/core/src/tickets/` (exported from `@rakazo/core`)
+### Shared: `packages/core/src/nurlings-board/` (exported from `@rakazo/core`)
 
 `@rakazo/core` is already what web and mobile share for chat logic (`time-separators`,
 `composer-mentions`, `botHexColor`), has no DOM or React Native dependency, and already depends on
@@ -30,43 +30,52 @@ What stays per platform, on purpose:
   `@rakazo/core` avatar logic.
 
 Moving code means moving its tests: `columns.test.ts`, `quick-add.test.ts`, `activity.test.ts`,
-`dates.test.ts` and `mentions.test.ts` go to `packages/core/src/tickets/`, assertions unchanged.
+`dates.test.ts` and `mentions.test.ts` go to `packages/core/src/nurlings-board/`, assertions unchanged.
 The web components keep their own render tests and are the proof that behaviour did not move.
 
 ### Mobile
 
+Everything is in fork-owned folders. Routes sit in an Expo Router group, `(nurlings)`, which does
+not appear in the URL and needs no `_layout.tsx`: its screens join the root stack and inherit its
+header options, and each screen sets its own options like `thread.tsx` does. The root `_layout.tsx`
+is not edited.
+
 ```
 apps/mobile/
-  app/board.tsx                    Board screen (stack route)
-  app/ticket.tsx                   Ticket screen (stack route, ?ticketId=&spaceId=)
-  components/board/
-    board-pages.tsx                horizontal pager of columns
-    board-column.tsx               header + vertical list
-    board-card.tsx                 card + long-press menu
-    nurling-filter.tsx             All + avatars
-    quick-add.tsx                  pinned input + @ picker
-    ticket-properties.tsx          chips + native menus and date picker
-    ticket-files.tsx               image grid + file cards
-    activity-feed.tsx              rows, separators, working line, mention text
-    reply-composer.tsx             pinned input, attach, @ picker
-  components/mention-picker.tsx    option list + icons, extracted from thread-composer.tsx
-  lib/board-live.ts                tickets + bots + timezone, stream, refetch
-  lib/ticket-activity.ts           comments, events, files, runs for one ticket
-  lib/ticket-labels.ts             status and priority labels via t()
-  lib/board-enabled.ts             flag cache + hook
+  app/(nurlings)/board.tsx            Board screen            -> /board
+  app/(nurlings)/ticket.tsx           Ticket screen           -> /ticket?ticketId=&spaceId=
+  components/nurlings-board/
+    board-pages.tsx                   horizontal pager of columns
+    board-column.tsx                  header + vertical list
+    board-card.tsx                    card + long-press menu
+    nurling-filter.tsx                All + avatars
+    quick-add.tsx                     pinned input + @ picker
+    mention-options.tsx               option list, using the chat's exported icons
+    ticket-properties.tsx             chips + native menus and date picker
+    ticket-files.tsx                  image grid + file cards
+    activity-feed.tsx                 rows, separators, working line, mention text
+    reply-composer.tsx                pinned input, attach, @ picker
+  lib/nurlings-board/
+    enabled.ts                        flag cache + hook (reads `me` itself)
+    event-stream.ts                   small SSE reader + subscribeBoard
+    live.ts                           tickets + bots + timezone, stream, refetch
+    ticket-activity.ts                comments, events, files, runs for one ticket
+    labels.ts                         status and priority labels via t()
+    notification.ts                   ticket payload / link -> route
 ```
 
-Existing files touched (small):
+Existing upstream files touched, and nothing else:
 
 | File | Change |
 |---|---|
-| `app/index.tsx` | Board header item and `HeaderButton`, shown from `me.ticketBoardEnabled` |
-| `app/_layout.tsx` | Two `Stack.Screen` entries |
-| `lib/api.ts` | `MobileMe` also picks `ticketBoardEnabled`; `subscribeBoard`, built on a shared SSE reader pulled out of `subscribeThread` |
-| `lib/notification-open.ts` | `ticketId` routes to `/ticket`; `rakazo://ticket` links |
-| `components/thread-composer.tsx` | Mention list and icons move to `components/mention-picker.tsx`; no behaviour change |
-| `lib/locales/*.ts` | New copy from the proposal |
+| `app/index.tsx` | One header button (iOS 26 item and `HeaderButton`) shown when `useNurlingsBoardEnabled()` is true |
+| `lib/notification-open.ts` | One early branch: a payload or `rakazo://ticket` link with a `ticketId` returns the route built by `lib/nurlings-board/notification.ts` |
+| `components/thread-composer.tsx` | `export` added to `MentionOptionIcon` and `MentionChipIcon`; no other change |
 | `packages/adapter-kit/src/types.ts`, `packages/adapters/src/expo-push.ts`, `ticket-changes.ts`, `ticket-dates.ts` | Optional `ticketId` on the notification |
+
+Not touched: `app/_layout.tsx`, `lib/api.ts` (`MobileMe` stays as is; `enabled.ts` reads
+`ticketBoardEnabled` from its own `rpc<{ ticketBoardEnabled?: boolean }>("me")`), `subscribeThread`,
+the locale maps (see decision 11).
 
 ## Decisions
 
@@ -81,8 +90,8 @@ never use the board. Recommended: header item. The maintainer can flip this befo
 
 ### 2. Flag handling
 
-`me` already returns `ticketBoardEnabled`; home loads `me` on every focus, so the entry follows
-it. `lib/board-enabled.ts` keeps the last value in memory for the routes. A route reached cold
+`me` already returns `ticketBoardEnabled`. `useNurlingsBoardEnabled()` fetches `me` itself and
+caches the value, so home's own loading code and `MobileMe` stay untouched. `lib/nurlings-board/enabled.ts` keeps the last value in memory for the routes. A route reached cold
 (a notification tap, a link) fetches `me` first, and if the flag is off `router.replace("/")`
 without showing a board. The server enforces the flag independently, so a stale client gets an
 error, never data.
@@ -101,10 +110,11 @@ first column that has cards.
 Same sources as web, in the same order:
 
 1. `tickets.list` for the board, `bots.list` for avatars, `me` for the timezone.
-2. `boards.subscribe` for events. Mobile has no oRPC event-iterator client, but
-   `subscribeThread` already reads Server-Sent Events from `/rpc/threads/subscribe` with
-   idle-timeout and reconnect. The frame reader is extracted into one helper that
-   `subscribeThread` and the new `subscribeBoard` share, so there is one SSE parser, not two.
+2. `boards.subscribe` for events. Mobile has no oRPC event-iterator client.
+   `lib/nurlings-board/event-stream.ts` is a small fork-owned SSE reader (POST to
+   `/rpc/boards/subscribe`, the same headers via the exported `captureApiRequestContext`, `data:`
+   frames, idle timeout, abort). `subscribeThread` is left exactly as upstream has it; the cost is
+   about 60 duplicated lines in our own file, which is cheaper than a conflict in `api.ts`.
 3. Each event refetches the list, and bumps a revision that makes the open ticket refetch its
    comments, events, files and runs. Reconnect uses the shared `isRetryableError` and
    `retryDelayMs` web uses.
@@ -112,7 +122,7 @@ Same sources as web, in the same order:
    `POLL_MS`), with `useForegroundPoll` so nothing runs in the background.
 
 The stream is closed when the app leaves the foreground and reopened with a full refetch on
-return. The board and ticket screens share one subscription through `lib/board-live.ts`.
+return. The board and ticket screens share one subscription through `lib/nurlings-board/live.ts`.
 
 ### 5. Long-press menu
 
@@ -128,8 +138,9 @@ button is.
 
 Both are pinned to the bottom with the thread screen's keyboard handling
 (`react-native-keyboard-controller`, `lib/keyboard-layout.ts`), not a modal. Typing `@` filters
-`mentionOptions` from core and shows the same option list the chat composer shows, extracted
-into `components/mention-picker.tsx`. Picking inserts `@Name` with `applyMention` and records the
+`mentionOptions` from core and shows an option list in `mention-options.tsx`, styled like the
+chat composer's and using its `MentionOptionIcon` and `MentionChipIcon`, which `thread-composer.tsx`
+now exports. The chat composer's own list stays inline where upstream has it. Picking inserts `@Name` with `applyMention` and records the
 Nurling in the same way as web (`mentioned()` drops a Nurling whose `@Name` was deleted).
 `quickAddTicket` decides title, description and owner; no `@` leaves the owner out so Chief
 triages. The reply composer sends `tickets.comment` with `mentions` and `artifactIds`.
@@ -185,6 +196,29 @@ No drag and drop, no create dialog beyond quick-add, no board rename, no search 
 no new-activity count, no delete. No offline queue: like the web board, a failed write shows an
 error and keeps what the user typed.
 
+### 11. Copy without touching the locale maps
+
+`t()` returns the source string when a locale has no entry, so new copy ships in English and
+the five typed locale maps (upstream files) stay unchanged. Translations can be added in a later
+change; the existing i18n tests do not require every key in every locale.
+
+## Upstream overlap
+
+Upstream Rakazo may ship its own mobile board. Everything here is in fork-owned paths, so a sync
+cannot conflict with it except in the two touched areas (home header button, push `ticketId`).
+When a sync brings a mobile board (look for new `app/board*`, `app/ticket*`, a board entry on
+home, or a `tickets/` module in core):
+
+1. Diff both implementations against the `mobile-board` spec scenarios.
+2. Either **keep ours**: hide their entry (do not mount it on home) and leave their routes
+   unreferenced, or **adopt theirs**: delete the `(nurlings)` routes and `nurlings-board` folders,
+   remove our header button, and port what ours has that theirs lacks as a new change.
+3. Same for the push payload: if upstream adds its own ticket field to the notification, keep one
+   field and make `notification-open.ts` read it.
+
+The choice is made at that sync, with both in front of us, not now. Upstream also may add
+`packages/core/src/tickets/`; ours is `nurlings-board/` so the two coexist.
+
 ## Risks
 
 - **Header crowding on small phones / large Dynamic Type.** The header items are system
@@ -209,7 +243,7 @@ error and keeps what the user typed.
 - **Adapters / API**: `expoPushData` with and without `ticketId`; `notifyTicketUser` passes the
   ticket id for the mention and the overdue push (existing postgres tests extended).
 - **Mobile lib** (Vitest, existing React Native test setup under `apps/mobile/lib`):
-  `notification-open` for `ticketId` and `rakazo://ticket`; `board-enabled`; board components
+  `notification-open` for `ticketId` and `rakazo://ticket`; `enabled`; board components
   render fields and the long-press action list per status (Approve only In review); the entry is
   absent when the flag is off; quick-add posts the parsed ticket; reply posts mentions and
   artifact ids.

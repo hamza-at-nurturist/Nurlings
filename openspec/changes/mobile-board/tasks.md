@@ -2,13 +2,13 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal, the decisions in `design.md` (header entry, bottom
+- [x] 1.1 Maintainer approves the proposal, the decisions in `design.md` (header entry, bottom
   pinned composers, no inline Approve, shared logic in `@rakazo/core`, the additive push
   `ticketId`) and the copy table. Verify: explicit approval in the session. No code before this.
 
 ## 2. Shared logic in `@rakazo/core`
 
-- [ ] 2.1 Create `packages/core/src/tickets/` and move `columns`, `dates`, `quick-add`,
+- [ ] 2.1 Create `packages/core/src/nurlings-board/` and move `columns`, `dates`, `quick-add`,
   `mentions` (pure parts) and `mergeActivity` from the web board with their tests, then export
   them from the package index. Verify: the moved tests pass unchanged in `@rakazo/core`.
 - [ ] 2.2 Re-point the web board and modal imports to core and delete the moved web files. Verify:
@@ -33,30 +33,30 @@
 
 ## 4. Mobile foundations
 
-- [ ] 4.1 `lib/board-enabled.ts`: flag cache, hook, and a cold-start fetch of `me`; add
-  `ticketBoardEnabled` to `MobileMe`. Verify: unit tests for on, off, unknown-then-fetched.
-- [ ] 4.2 Extract the SSE frame reader from `subscribeThread` into a shared helper and add
-  `subscribeBoard`. Verify: the existing `subscribeThread` tests pass unchanged; a new test feeds
-  frames, a heartbeat and an idle timeout to `subscribeBoard`.
+- [ ] 4.1 `lib/nurlings-board/enabled.ts`: flag cache and hook that fetch `me` themselves. Verify:
+  unit tests for on, off, unknown-then-fetched.
+- [ ] 4.2 `lib/nurlings-board/event-stream.ts`: a small SSE reader and `subscribeBoard`, leaving
+  `subscribeThread` untouched. Verify: a test feeds frames, a heartbeat and an idle timeout.
 - [ ] 4.3 Confirm `@expo/ui` 57 ships the date picker on iOS and Android and read how
   `MenuPickerMenu`, `NativeSegmentedControl` and `MenuView` are used. Verify: a short note in the
   PR; if a platform lacks a date picker, stop and ask the maintainer before adding anything.
-- [ ] 4.4 `lib/board-live.ts` and `lib/ticket-activity.ts`: load, stream, refetch on event,
+- [ ] 4.4 `lib/nurlings-board/live.ts` and `ticket-activity.ts`: load, stream, refetch on event,
   4-second refetch while a run is active, foreground-only, reconnect with the shared retry
   helpers. Verify: hook tests with fake timers and a fake stream (event refetches, backgrounding
   stops it, working run polls, reconnect after a retryable error).
-- [ ] 4.5 `lib/ticket-labels.ts` (status and priority labels). Verify: unit test covers every
+- [ ] 4.5 `lib/nurlings-board/labels.ts` (status and priority labels). Verify: unit test covers every
   status and priority.
-- [ ] 4.6 Extract the mention option list and icons from `thread-composer.tsx` into
-  `components/mention-picker.tsx`. Verify: existing `thread-composer.test.tsx` and
-  `thread-mention-catalog.test.tsx` pass unchanged.
-- [ ] 4.7 `notification-open.ts`: `ticketId` routes to `/ticket` (ahead of the bot thread), keeps
-  `spaceId`; `rakazo://ticket` links. Verify: unit tests for payload, prefixed keys, link, and
+- [ ] 4.6 Add `export` to `MentionOptionIcon` and `MentionChipIcon` in `thread-composer.tsx`
+  and nothing else. Verify: `git diff` of that file is two words; existing
+  `thread-composer.test.tsx` passes unchanged.
+- [ ] 4.7 `lib/nurlings-board/notification.ts` builds the `/ticket` route (keeps `spaceId`);
+  `notification-open.ts` gets one early branch for a payload or `rakazo://ticket` link with a
+  `ticketId`. Verify: unit tests for payload, prefixed keys, link, and
   that a chat payload still opens the thread.
 
 ## 5. Board screen
 
-- [ ] 5.1 `app/board.tsx`, `board-pages`, `board-column`: paged columns, header with dot, name,
+- [ ] 5.1 `app/(nurlings)/board.tsx`, `board-pages`, `board-column`: paged columns, header with dot, name,
   count, Your turn, tint, Show N older, opens on the first column with cards. Verify: component
   tests for the columns from `boardColumns`, the counts, the older row and the initial page.
 - [ ] 5.2 `board-card` with the long-press `MenuView`: fields from `ticketCard`, overdue colour,
@@ -66,13 +66,13 @@
   Verify: tests that the filter narrows and recounts, `@` lists and picks, send posts the
   `quickAddTicket` result, no `@` sends no owner, failure keeps the text.
 - [ ] 5.4 Home entry: header item (iOS 26) and `HeaderButton` (Android, older iOS), only from
-  `ticketBoardEnabled`; register both routes in `_layout.tsx`; pull to refresh. Verify: home
+  `useNurlingsBoardEnabled()`; `_layout.tsx` is not edited; pull to refresh. Verify: home
   tests for the entry present with the flag on and absent with it off; route test that a
   disabled flag replaces to home.
 
 ## 6. Ticket screen
 
-- [ ] 6.1 `app/ticket.tsx` with the native segmented control, header ref, both segments kept
+- [ ] 6.1 `app/(nurlings)/ticket.tsx` with the native segmented control, header ref, both segments kept
   mounted, space switch for a ticket in another space. Verify: tests that switching keeps a
   draft and that the space helper is used.
 - [ ] 6.2 Ticket segment: title and description editing, clamp with Show more, chips with native
@@ -91,12 +91,13 @@
 
 ## 7. Copy
 
-- [ ] 7.1 Add the proposal's copy to the five mobile locale maps (the same wording as the web
-  catalogs where it exists). Verify: `apps/mobile/lib/i18n.test.ts` passes; no string outside
-  the proposal table is added.
+- [ ] 7.1 Copy is English source strings in the components, with the web catalogs' wording; the
+  upstream locale maps are not edited. Verify: `apps/mobile/lib/i18n.test.ts` passes; no string
+  outside the proposal table is added.
 
 ## 8. Checks and PR
 
+- [ ] 8.0 Check the diff against `design.md` "Existing upstream files touched". Verify: `git diff --stat origin/main` lists no upstream file outside that table.
 - [ ] 8.1 Typecheck, Biome, unit tests for core, adapters, web and mobile. Verify: `pnpm
   --filter @rakazo/core test`, `@rakazo/web test`, `@rakazo/mobile test`, `@rakazo/mobile
   check`, and the repo lint all pass. The desktop Playwright suite is not run locally.

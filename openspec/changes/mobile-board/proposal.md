@@ -62,7 +62,7 @@ data carries it.
 
 ### Shared logic
 
-Everything that is not rendering moves into `@rakazo/core` (`packages/core/src/tickets/`) and
+Everything that is not rendering moves into `@rakazo/core` (`packages/core/src/nurlings-board/`) and
 both clients import it: board columns and the 7-day Done rule, card fields and date labels
 (including overdue), quick-add parsing, mention parsing and picker options, and activity
 merging with its time-separator rows. The web files that hold those today become imports of the
@@ -116,18 +116,22 @@ mobile has no per-device read state yet).
 
 ### Upstream merge safety
 
-New code is in new files: `apps/mobile/app/board.tsx`, `apps/mobile/app/ticket.tsx`,
-`apps/mobile/components/board/`, `apps/mobile/lib/board-*.ts`, `packages/core/src/tickets/`.
-Edits to existing upstream-owned files are small and listed in `design.md` (home header,
-`_layout.tsx` stack entries, `notification-open.ts`, `api.ts`, `NotificationMessage`,
-`expo-push.ts`, `ticket-changes.ts`, `ticket-dates.ts`, locale maps). Web board files are
-fork-owned already; their pure logic moves to core.
+All new code lives in fork-owned folders, named so upstream is unlikely to create them:
+`apps/mobile/app/(nurlings)/` (routes), `apps/mobile/components/nurlings-board/`,
+`apps/mobile/lib/nurlings-board/` and `packages/core/src/nurlings-board/`. Upstream mobile files
+are not refactored. The only upstream-owned files touched are the home header button
+(`app/index.tsx`) and the push `ticketId` path (`NotificationMessage`, `expo-push.ts`,
+`ticket-changes.ts`, `ticket-dates.ts`, and a few lines in `notification-open.ts`), plus the
+one-word `export` on two private helpers in `thread-composer.tsx`. `design.md` lists each edit and
+has an "Upstream overlap" section for what to do if upstream ships its own mobile board. Web
+board files are fork-owned already; their pure logic moves to core.
 
 ## Impact
 
 - New capability `mobile-board`; `board-tickets` gains "Ticket notifications carry the ticket".
-- Mobile app: two routes, ~12 components, locale entries in the five typed mobile locale maps.
-- `@rakazo/core`: new `tickets/` module, exported from the package index.
+- Mobile app: two routes, ~12 components. Copy is added in English only: `t()` falls back to the
+  source string for locales without it, and the typed locale maps are upstream files left alone.
+- `@rakazo/core`: new `nurlings-board/` module, exported from the package index.
 - Web: imports re-pointed to core; no behaviour change (the existing web tests keep passing).
 - API and adapters: additive optional `ticketId` on the notification message and Expo data. No
   schema, migration or contract change. Old and new API/clients interoperate in both directions.
