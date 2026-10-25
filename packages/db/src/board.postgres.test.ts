@@ -4,6 +4,7 @@ import {
   listTicketComments,
   listTicketEvents,
   listTicketFiles,
+  listTicketRuns,
   recordTicketEvents,
   toTicketCommentDto,
   toTicketEventDto,
@@ -202,6 +203,15 @@ describePostgres("board creation (PostgreSQL)", () => {
     expect(
       await runAsTenant(tenant, () =>
         listTicketFiles(prisma, { spaceId, userId: "someone-else", ticketId: ticket.id }),
+      ),
+    ).toEqual([]);
+    // One row per Nurling, from the tenant's context: its latest run for this ticket only.
+    expect(await runAsTenant(tenant, () => listTicketRuns(prisma, spaceId, ticket.id))).toEqual([
+      expect.objectContaining({ botId: bot.id, status: "completed", finishedAt: null }),
+    ]);
+    expect(
+      await runAsTenant({ spaceId: "someone-else", userId }, () =>
+        listTicketRuns(prisma, spaceId, ticket.id),
       ),
     ).toEqual([]);
   });

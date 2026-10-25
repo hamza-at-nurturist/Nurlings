@@ -7324,7 +7324,6 @@ describe("tickets.events and tickets.files", () => {
       async () =>
         [
           { botId: "bot-1", status: "running", completedAt: null },
-          { botId: "bot-1", status: "failed", completedAt: at(2) },
           { botId: "bot-2", status: "failed", completedAt: at(3) },
         ] as never,
     );
@@ -7335,8 +7334,14 @@ describe("tickets.events and tickets.files", () => {
       { botId: "bot-1", status: "running", finishedAt: null },
       { botId: "bot-2", status: "failed", finishedAt: at(3).toISOString() },
     ]);
+    // One row per Nurling, newest first, and never more than a bounded number of Nurlings.
     expect(s.runFindMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { spaceId: "workspace-1", task: { ticketId: "t1" } } }),
+      expect.objectContaining({
+        where: { spaceId: "workspace-1", task: { ticketId: "t1" } },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        distinct: ["botId"],
+        take: 20,
+      }),
     );
   });
 

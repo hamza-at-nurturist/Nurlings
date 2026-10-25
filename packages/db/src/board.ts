@@ -259,7 +259,10 @@ export function toTicketEventDto(row: TicketEventWithNames): TicketEvent {
   };
 }
 
-/** Each Nurling's latest run among the tasks started for the ticket, newest run first. */
+/** Most Nurlings one ticket's runs are read for; the feed polls this while one is working. */
+const TICKET_RUN_BOTS_MAX = 20;
+
+/** Each Nurling's latest run among the tasks started for the ticket: one row per Nurling. */
 export async function listTicketRuns(
   prisma: Pick<PrismaClient, "run">,
   spaceId: string,
@@ -269,17 +272,14 @@ export async function listTicketRuns(
     where: { spaceId, task: { ticketId } },
     select: { botId: true, status: true, completedAt: true },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    distinct: ["botId"],
+    take: TICKET_RUN_BOTS_MAX,
   });
-  const latest = new Map<string, TicketRun>();
-  for (const row of rows) {
-    if (latest.has(row.botId)) continue;
-    latest.set(row.botId, {
-      botId: row.botId,
-      status: row.status as TicketRun["status"],
-      finishedAt: row.completedAt?.toISOString() ?? null,
-    });
-  }
-  return [...latest.values()];
+  return rows.map((row) => ({
+    botId: row.botId,
+    status: row.status as TicketRun["status"],
+    finishedAt: row.completedAt?.toISOString() ?? null,
+  }));
 }
 
 /**
