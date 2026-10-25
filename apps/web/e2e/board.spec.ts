@@ -127,8 +127,9 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await expect(
     files.getByTestId("ticket-file").filter({ hasText: "listing-notes.txt" }),
   ).toContainText("You");
-  // Ticket file cards show a short type, not the MIME type.
-  await expect(files.getByTestId("ticket-file")).toContainText("TXT · 22 B");
+  // A file in Files leads its meta line with who added it; the comment's card keeps the short type.
+  await expect(files.getByTestId("ticket-file")).toContainText("You · 22 B");
+  await expect(activity).toContainText("You attached listing-notes.txt");
   await captureScreenshot(page, testInfo, "board-ticket-files");
 
   // Dates: one picker for start and due, shown short in the modal and on the card.
