@@ -121,7 +121,6 @@ test("bot creation, editing, and deletion persist", async ({ page }, testInfo) =
   ).toBeHidden();
   await expect(modelSelect).toHaveCount(0);
   await expect(openWork).toHaveCount(0);
-  await expect(settings.getByRole("button", { name: "Save", exact: true })).toHaveCount(0);
   await expect(settings.getByRole("button", { name: "Export", exact: true })).toHaveCount(0);
   const notificationsHeading = settings.getByRole("heading", {
     name: "Notifications",

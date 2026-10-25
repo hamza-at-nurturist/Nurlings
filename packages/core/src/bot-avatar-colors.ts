@@ -123,6 +123,18 @@ export function shippedRandom(seed: number): () => number {
   };
 }
 
+const HEX_COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+/**
+ * The `#hex` part of a bot's color, before `::shape_N`; nothing when it is not a hex value (a
+ * data: image, or a palette name). A bot's color can carry a shape or a photo, so name or tint
+ * UI with this rather than the raw value.
+ */
+export function botHexColor(color: string | undefined | null): string | undefined {
+  const hex = color?.split("::")[0]?.trim();
+  return hex && HEX_COLOR.test(hex) ? hex : undefined;
+}
+
 export function resolvePersonaColorDef(
   identity: string,
   explicitColor?: string | null,

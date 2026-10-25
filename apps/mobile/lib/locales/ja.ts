@@ -96,6 +96,8 @@ export const JA_MESSAGES: Record<string, string> = {
     "{provider}の応答に時間がかかりすぎました。もう一度お試しください。",
   "{provider} is overloaded right now. Try again in a moment.":
     "{provider}は現在混み合っています。しばらくしてからもう一度お試しください。",
+  "{provider} couldn't be reached. Check that it's running.":
+    "{provider}に接続できませんでした。起動しているか確認してください。",
   "This conversation is too long for the model. Retrying won't help. Start a new chat or shorten your message.":
     "この会話はモデルにとって長すぎます。再試行しても解決しません。新しいチャットを開始するか、メッセージを短くしてください。",
   "{provider} key hit its limit.": "{provider}のキーが上限に達しました。",
@@ -223,8 +225,6 @@ export const JA_MESSAGES: Record<string, string> = {
     "このサーバーを承認すると、エージェントがそのツールを使用できるようになります。",
   "Answered: {answer}": "回答済み: {answer}",
   Archive: "アーカイブ",
-  "Archived. Chat, memory, and files kept.":
-    "アーカイブしました。チャット、メモリ、ファイルは保持されます。",
   Attach: "添付",
   "Attach file": "ファイルを添付",
   Attachment: "添付ファイル",
@@ -280,14 +280,11 @@ export const JA_MESSAGES: Record<string, string> = {
   "Messaged {peer}": "{peer}にメッセージを送信しました",
   "Message…": "メッセージ…",
   "No longer active": "無効になりました",
-  "Opened its thread.": "スレッドを開きました。",
   "Photo library": "フォトライブラリ",
   "Pull request": "プルリクエスト",
   React: "リアクション",
   "Remove mention {name}": "メンション{name}を削除",
   "Remove skill {name}": "スキル{name}を削除",
-  "Removed with chat, computer, and memory.":
-    "チャット、コンピューター、メモリとともに削除されました。",
   Reply: "返信",
   "Replying to": "返信先",
   "Return to inbox": "受信トレイに戻る",
@@ -634,6 +631,7 @@ export const JA_MESSAGES: Record<string, string> = {
   "Scheduled tasks": "スケジュール済みのタスク",
   "Sign out": "ログアウト",
   "Stream replies": "返信をストリーミング",
+  "Run actions without asking": "確認せずにアクションを実行",
   "Load web images automatically": "Web画像を自動で読み込む",
   System: "システム",
   "This permanently deletes your account, bots, conversations, memories, files, and saved connections. This cannot be undone.":
@@ -642,6 +640,7 @@ export const JA_MESSAGES: Record<string, string> = {
   Usage: "使用量",
   "Your account": "あなたのアカウント",
   "{runs} runs · {tokens} tokens": "{runs}回の実行 · {tokens}トークン",
+  "{calls} calls · {tokens} tokens": "{calls}回の呼び出し · {tokens}トークン",
   "Confirm password": "パスワードを確認",
   "Could not change password": "パスワードを変更できませんでした",
   "New password": "新しいパスワード",

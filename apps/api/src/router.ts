@@ -36,6 +36,7 @@ import type {
   MemoryProviderResolver,
   PiOAuthLogins,
   ProviderCatalogCache,
+  PushTokenStore,
   RemoteConnectorDependencies,
   TicketChangeNotifier,
 } from "@rakazo/adapters";
@@ -65,7 +66,6 @@ import {
   createFaviconResolver,
   createTicket,
   defaultCatalogModelId,
-  deletePushToken,
   deploymentAutoReviewDefault,
   destroyBot,
   displayBotWorkspacePath,
@@ -92,6 +92,7 @@ import {
   modelCredentialDto,
   normalizeSecretDestination,
   PushSessionEndedError,
+  pageUrlOrigin,
   parseModelSecret,
   parseRoutineWatch,
   parseRoutineWatchState,
@@ -120,7 +121,6 @@ import {
   routineRunModelPin,
   sanitizeComposioError,
   savedCatalogSelections,
-  savePushToken,
   scheduleComputerControlExpiry,
   scheduleComputerSleep,
   screenLeaseIdForRun,
@@ -203,6 +203,7 @@ import type {
   ThreadEvents,
 } from "@rakazo/db";
 import {
+  AnswerTooLongError,
   appendEventInTransaction,
   BotSectionNameConflictError,
   botProfileLabelsChanged,
@@ -245,7 +246,6 @@ import {
   newestVoiceCredentialOrder,
   Prisma,
   parseComputerMode,
-  pushSessionExpiresAt,
   recordSecurityEvent,
   releaseSpaceDeletionClaim,
   renameSpaceForMember,
@@ -661,6 +661,7 @@ function mcpAssignmentDto(row: {
 }
 
 export interface RouterDeps {
+  pushTokens: PushTokenStore;
   analytics?: ProductAnalytics;
   cloudAgent?: CloudAgentConnection | null;
   prisma: PrismaClient;
@@ -773,15 +774,22 @@ const BOT_SECRET_INPUT_ERRORS = [
   "Credential limit reached",
 ];
 
-/** Map credential validation failures to a bad request without echoing the submitted value. */
-function mapBotSecretStoreError(error: unknown): unknown {
-  if (error instanceof ORPCError) return error;
+/** A credential the user typed that cannot be stored, as a bad request. Never echoes the value. */
+function mapBotSecretInputError(error: unknown): unknown {
   if (
     error instanceof Error &&
     BOT_SECRET_INPUT_ERRORS.some((prefix) => error.message.startsWith(prefix))
   ) {
     return new ORPCError("BAD_REQUEST", { message: error.message });
   }
+  return error;
+}
+
+/** Map credential validation failures to a bad request without echoing the submitted value. */
+function mapBotSecretStoreError(error: unknown): unknown {
+  if (error instanceof ORPCError) return error;
+  const mapped = mapBotSecretInputError(error);
+  if (mapped !== error) return mapped;
   // Login decoding failures: a JSON parse message can quote the submitted value, so never forward it.
   if (error instanceof SyntaxError || (error instanceof Error && error.name === "ZodError")) {
     return new ORPCError("BAD_REQUEST", {
@@ -2913,17 +2921,24 @@ export function createRouter(deps: RouterDeps) {
       }),
       answer: authed.threads.answer.handler(async ({ context, input }) => {
         const target = await resolveThreadTarget(deps.prisma, context.actor, input);
-        const answered = await deps.events.answerRunInput({
-          spaceId: context.actor.spaceId,
-          threadId: target.threadId,
-          runId: input.runId,
-          messageId: input.messageId,
-          answeredByUserId: context.actor.userId,
-          answer: input.answer,
-          clientNonce: input.clientNonce,
-          username: input.username,
-          dismiss: input.dismiss,
-        });
+        const answered = await deps.events
+          .answerRunInput({
+            spaceId: context.actor.spaceId,
+            threadId: target.threadId,
+            runId: input.runId,
+            messageId: input.messageId,
+            answeredByUserId: context.actor.userId,
+            answer: input.answer,
+            clientNonce: input.clientNonce,
+            username: input.username,
+            dismiss: input.dismiss,
+          })
+          .catch((error: unknown) => {
+            if (error instanceof AnswerTooLongError)
+              throw new ORPCError("BAD_REQUEST", { message: error.message });
+            // A typed credential its destination cannot carry (e.g. a header with a line break).
+            throw mapBotSecretInputError(error);
+          });
         if (!answered) {
           throw new ORPCError("CONFLICT", {
             message: "This prompt is no longer awaiting an answer",
@@ -2999,6 +3014,10 @@ export function createRouter(deps: RouterDeps) {
         } catch (error) {
           if (error instanceof ComputerBusyError) {
             throw new ORPCError("CONFLICT", { message: "Computer is busy" });
+          }
+          // The bot was deleted or moved to another computer while this boot waited.
+          if (isRecordNotFound(error)) {
+            throw new ORPCError("NOT_FOUND", { message: "Computer no longer exists" });
           }
           throw error;
         } finally {
@@ -6493,13 +6512,19 @@ export function createRouter(deps: RouterDeps) {
       put: authed.botSecrets.put.handler(async ({ context, input }) => {
         const bot = await repos.getBot(context.actor, input.botId);
         const scope = botSecretScope(context.actor, bot.id);
+        // A pasted page URL is saved under its site. One with a username or password is left
+        // as typed, so the origin rule turns it down and the person can fix it.
+        const site = pageUrlOrigin(input.destination.origin, {
+          allowUserinfo: false,
+          maxLength: 2048,
+        });
         let row: Awaited<ReturnType<typeof getBotSecretMetadata>>;
         try {
           row = await storeBotSecret({
             prisma: deps.prisma,
             secretStore: deps.secrets,
             scope,
-            destination: input.destination,
+            destination: site ? { ...input.destination, origin: site } : input.destination,
             plaintext: input.value,
           });
         } catch (error) {
@@ -6585,9 +6610,10 @@ export function createRouter(deps: RouterDeps) {
           create: {
             spaceId: context.actor.spaceId,
             userId: context.actor.userId,
-            enabled: input.enabled,
+            enabled: input.enabled ?? deploymentAutoReviewDefault(process.env),
+            skipApprovals: input.skipApprovals ?? false,
           },
-          update: { enabled: input.enabled },
+          update: { enabled: input.enabled, skipApprovals: input.skipApprovals },
         });
         return loadAutoReviewSettings(deps, context.actor);
       }),
@@ -6710,27 +6736,53 @@ export function createRouter(deps: RouterDeps) {
         }));
       }),
       summary: authed.usage.summary.handler(async ({ context }) => {
-        const [result, runGroups] = await Promise.all([
-          deps.prisma.usageRecord.aggregate({
-            where: { spaceId: context.actor.spaceId, userId: context.actor.userId },
-            _sum: { inputTokens: true, outputTokens: true, totalTokens: true },
-            _count: { _all: true, inputTokens: true, outputTokens: true, totalTokens: true },
-          }),
+        const where = { spaceId: context.actor.spaceId, userId: context.actor.userId };
+        const sums = {
+          inputTokens: true,
+          outputTokens: true,
+          totalTokens: true,
+          costUsd: true,
+        } as const;
+        const counts = { _all: true, ...sums } as const;
+        const [result, modelGroups, runGroups] = await Promise.all([
+          deps.prisma.usageRecord.aggregate({ where, _sum: sums, _count: counts }),
           deps.prisma.usageRecord.groupBy({
-            by: ["runId", "parentRunId"],
-            where: { spaceId: context.actor.spaceId, userId: context.actor.userId },
+            by: ["provider", "model"],
+            where,
+            _sum: sums,
+            _count: counts,
           }),
+          deps.prisma.usageRecord.groupBy({ by: ["runId", "parentRunId"], where }),
         ]);
         const runs = new Set(runGroups.map((row) => row.parentRunId ?? row.runId).filter(Boolean))
           .size;
-        const completeSum = (field: "inputTokens" | "outputTokens" | "totalTokens") =>
-          result._count[field] === result._count._all ? (result._sum[field] ?? 0) : null;
+        // A total that skips rows without a count would understate spend, so it reads as unknown.
+        const completeSums = (group: {
+          _sum: Record<keyof typeof sums, number | null>;
+          _count: Record<keyof typeof counts, number>;
+        }) => {
+          const complete = (field: keyof typeof sums) =>
+            group._count[field] === group._count._all ? (group._sum[field] ?? 0) : null;
+          return {
+            inputTokens: complete("inputTokens"),
+            outputTokens: complete("outputTokens"),
+            totalTokens: complete("totalTokens"),
+            costUsd: complete("costUsd"),
+            modelCalls: group._count._all,
+          };
+        };
         return {
-          inputTokens: completeSum("inputTokens"),
-          outputTokens: completeSum("outputTokens"),
-          totalTokens: completeSum("totalTokens"),
-          modelCalls: result._count._all,
+          ...completeSums(result),
           runs,
+          models: modelGroups
+            .map((group) => ({
+              provider: group.provider,
+              model: group.model,
+              ...completeSums(group),
+            }))
+            .sort(
+              (a, b) => (b.totalTokens ?? 0) - (a.totalTokens ?? 0) || b.modelCalls - a.modelCalls,
+            ),
         };
       }),
     },
@@ -6794,12 +6846,7 @@ export function createRouter(deps: RouterDeps) {
         const sessionId = context.sessionId;
         if (!sessionId) throw new ORPCError("UNAUTHORIZED");
         try {
-          await savePushToken(deps.dataDir, context.actor.userId, input.token, sessionId, {
-            sessionActive: async () => {
-              const expiresAt = await pushSessionExpiresAt(deps.prisma, sessionId);
-              return expiresAt !== null && expiresAt.getTime() > Date.now();
-            },
-          });
+          await deps.pushTokens.save(context.actor.userId, input.token, sessionId);
         } catch (error) {
           if (error instanceof PushSessionEndedError) throw new ORPCError("UNAUTHORIZED");
           throw error;
@@ -6807,7 +6854,7 @@ export function createRouter(deps: RouterDeps) {
         return { ok: true as const };
       }),
       unregisterPush: authed.notifications.unregisterPush.handler(async ({ context }) => {
-        await deletePushToken(deps.dataDir, context.actor.userId);
+        await deps.pushTokens.remove(context.actor.userId);
         return { ok: true as const };
       }),
     },
@@ -7089,7 +7136,7 @@ async function loadAutoReviewSettings(deps: RouterDeps, actor: Actor) {
           userId: actor.userId,
         },
       },
-      select: { enabled: true },
+      select: { enabled: true, skipApprovals: true },
     }),
     requiredUserProvider
       ? deps.prisma.userModelCredential.findFirst({
@@ -7100,7 +7147,7 @@ async function loadAutoReviewSettings(deps: RouterDeps, actor: Actor) {
   ]);
   const enabled = preference?.enabled ?? deploymentAutoReviewDefault(process.env);
   const checkerAvailable = environmentAvailable || Boolean(credential);
-  return { enabled, checkerAvailable };
+  return { enabled, checkerAvailable, skipApprovals: preference?.skipApprovals ?? false };
 }
 
 function hostCredentials(active: boolean, provider: string) {

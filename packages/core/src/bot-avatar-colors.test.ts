@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BOT_COLOR_LIST,
+  botHexColor,
   chatUserBubbleColors,
   contrastRatio,
   resolvePersonaColorDef,
@@ -44,5 +45,15 @@ describe("chatUserBubbleColors", () => {
   it("keeps the neutral bubble for a photo or the white bot", () => {
     expect(chatUserBubbleColors("data:image/png;base64,AAAA", "bot-1")).toBeUndefined();
     expect(chatUserBubbleColors("#FFFFFF", "bot-1")).toBeUndefined();
+  });
+});
+
+describe("botHexColor", () => {
+  it("keeps only the hex part of a bot color", () => {
+    expect(botHexColor("#7C3AED::shape_8")).toBe("#7C3AED");
+    expect(botHexColor("#abc")).toBe("#abc");
+    expect(botHexColor("data:image/png;base64,AAAA")).toBeUndefined();
+    expect(botHexColor("violet")).toBeUndefined();
+    expect(botHexColor(undefined)).toBeUndefined();
   });
 });

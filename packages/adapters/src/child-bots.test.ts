@@ -23,6 +23,7 @@ import type {
 } from "@rakazo/adapter-kit";
 import { browserProfilePathForScreen } from "@rakazo/core/node/desktop-runtime";
 import type { createRepos, PrismaClient } from "@rakazo/db";
+import { createLogger, createTestSink, installLogger } from "@rakazo/logging";
 import { describe, expect, it, vi } from "vitest";
 import {
   archiveBot,
@@ -379,6 +380,65 @@ describe("destroyBot", () => {
     expect(removeArtifact).toHaveBeenCalledWith("stored-artifact", context);
   });
 
+  it("deletes the waiting one-time answer of a run it cancels", async () => {
+    const deleteSecrets = vi.fn().mockResolvedValue({ count: 1 });
+    const transaction = vi.fn(async (callback: (tx: unknown) => Promise<void>) =>
+      callback({
+        $queryRaw: vi.fn().mockResolvedValue([]),
+        chatGroup: {
+          findMany: vi.fn().mockResolvedValue([]),
+          deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+        },
+        artifact: {
+          findMany: vi.fn().mockResolvedValue([]),
+          deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
+        },
+        computerExecutionLease: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        computer: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        $executeRaw: vi.fn().mockResolvedValue(1),
+        botDeletion: { create: vi.fn().mockResolvedValue({}) },
+        bot: { delete: vi.fn().mockResolvedValue({}) },
+      }),
+    );
+    const prisma = {
+      computer: { findUnique: vi.fn().mockResolvedValue(null) },
+      run: {
+        findMany: vi
+          .fn()
+          .mockResolvedValueOnce([{ id: "run-1" }])
+          .mockResolvedValueOnce([{ id: "run-1", userId: "user-1", spaceId: "workspace-1" }]),
+        updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+      },
+      externalEffect: { deleteMany: vi.fn().mockResolvedValue({ count: 0 }) },
+      secret: { deleteMany: deleteSecrets },
+      routine: { findMany: vi.fn().mockResolvedValue([]) },
+      $transaction: transaction,
+    } as unknown as PrismaClient;
+
+    await destroyBot(
+      {
+        prisma,
+        sandbox: {} as SandboxProvider,
+        home: {} as AgentHomeStore,
+        jobs: { cancel: vi.fn() } as unknown as JobPublisher,
+        artifacts: { remove: vi.fn() } as unknown as ArtifactStore,
+      },
+      {
+        id: "bot-1",
+        spaceId: "workspace-1",
+        userId: "user-1",
+        name: "Researcher",
+        archivedAt: null,
+      },
+      context,
+      { deleteMemories: false },
+    );
+
+    expect(deleteSecrets).toHaveBeenCalledWith({
+      where: { OR: [{ userId: "user-1", spaceId: "workspace-1", kind: "run-secret:run-1" }] },
+    });
+  });
+
   it("dissolves groups with fewer than two active members after deleting the bot", async () => {
     const deleteGroups = vi.fn().mockResolvedValue({ count: 1 });
     const deleteMemberships = vi.fn().mockResolvedValue({ count: 1 });
@@ -442,6 +502,7 @@ describe("destroyBot", () => {
         },
         attempt: { updateMany: cancelAttempts },
         task: { updateMany: cancelTasks },
+        secret: { deleteMany: vi.fn() },
         chatGroupMember: { deleteMany: deleteMemberships },
         artifact: {
           findMany: vi.fn().mockResolvedValue([]),
@@ -1261,6 +1322,82 @@ describe("destroyBot", () => {
     }
   });
 
+  describe("when Chromium still holds the profile open", () => {
+    const busy = "rm: cannot remove '.browser-profiles/x/Default/Cookies': Device or resource busy";
+    const team = {
+      id: "team-computer",
+      homeKey: "team-workspace-1",
+      kind: "docker",
+      providerRef: "container-1",
+      scope: "team",
+      state: "running",
+    };
+
+    async function deleteWithBusyProfile(busyAttempts: number) {
+      const sink = createTestSink();
+      installLogger(createLogger({ service: "rakazo-api", sinks: [sink] }));
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+      let profileAttempts = 0;
+      const execute = vi.fn(async function* (_computer: unknown, request: CommandRequest) {
+        if (request.argv.includes(".browser-profiles")) {
+          profileAttempts += 1;
+          if (profileAttempts <= busyAttempts) {
+            yield { type: "stderr" as const, data: busy };
+            yield { type: "exit" as const, code: 1 };
+            return;
+          }
+        }
+        yield { type: "exit" as const, code: 0 };
+      });
+      try {
+        const deleting = destroyBot(
+          {
+            prisma: deletionPrisma(team),
+            sandbox: {
+              releaseScreen: vi.fn().mockResolvedValue(undefined),
+              execute,
+            } as unknown as SandboxProvider,
+            home: new LocalAgentHomeStore(path.join(tmpdir(), "rakazo-unused-home")),
+            jobs: { cancel: vi.fn() } as unknown as JobPublisher,
+          },
+          {
+            id: "bot-1",
+            spaceId: "workspace-1",
+            userId: "user-1",
+            name: "Researcher",
+            archivedAt: null,
+            computerId: team.id,
+          },
+          context,
+          { deleteMemories: true },
+        );
+        await vi.advanceTimersByTimeAsync(5_000);
+        await expect(deleting).resolves.toBeUndefined();
+        return { profileAttempts, events: sink.events };
+      } finally {
+        vi.useRealTimers();
+        installLogger(createLogger({ service: "rakazo-api", level: "off", sinks: [] }));
+      }
+    }
+
+    it("retries removal once the browser lets go", async () => {
+      const { profileAttempts, events } = await deleteWithBusyProfile(1);
+
+      expect(profileAttempts).toBe(2);
+      expect(events.filter((event) => event.level === "error")).toEqual([]);
+    });
+
+    it("leaves a profile that stays open for the next boot without reporting an error", async () => {
+      const { profileAttempts, events } = await deleteWithBusyProfile(Number.POSITIVE_INFINITY);
+
+      expect(profileAttempts).toBe(3);
+      expect(events.filter((event) => event.level === "error")).toEqual([]);
+      expect(events.map((event) => event.message)).toContain(
+        "team browser profile still open; removed on next boot",
+      );
+    });
+  });
+
   it("reports deletion success when the Team Computer lookup fails after the bot is deleted", async () => {
     const team = { id: "team-computer", homeKey: "team-workspace-1", scope: "team" };
     const prisma = deletionPrisma(team);
@@ -1679,12 +1816,19 @@ describe("archiveBot", () => {
     const updateBot = vi.fn().mockResolvedValue({});
     const disableRoutines = vi.fn().mockResolvedValue({ count: 2 });
     const groupCleanup = noGroupMemberships();
+    const deleteSecrets = vi.fn().mockResolvedValue({ count: 1 });
     const transaction = vi.fn(async (callback: (tx: unknown) => Promise<void>) =>
       callback({
         externalEffect: { deleteMany: vi.fn(async () => ({ count: 0 })) },
         ...groupCleanup,
-        run: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+        run: {
+          updateMany: vi.fn().mockResolvedValue({ count: 1 }),
+          findMany: vi
+            .fn()
+            .mockResolvedValue([{ id: "run-1", userId: "user-1", spaceId: "workspace-1" }]),
+        },
         task: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+        secret: { deleteMany: deleteSecrets },
         routine: { updateMany: disableRoutines },
         computerExecutionLease: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
         computer: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
@@ -1734,6 +1878,10 @@ describe("archiveBot", () => {
     expect(groupCleanup.$queryRaw).not.toHaveBeenCalled();
     expect(groupCleanup.chatGroup.deleteMany).not.toHaveBeenCalled();
     expect(groupCleanup.chatGroupMember.deleteMany).not.toHaveBeenCalled();
+    // The archived bot's cancelled run never reads a waiting one-time answer.
+    expect(deleteSecrets).toHaveBeenCalledWith({
+      where: { OR: [{ userId: "user-1", spaceId: "workspace-1", kind: "run-secret:run-1" }] },
+    });
     expect(cancel).toHaveBeenCalledWith("run:run-1");
   });
 

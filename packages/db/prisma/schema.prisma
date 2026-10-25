@@ -51,6 +51,7 @@ model User {
   createdTickets              Ticket[]                     @relation("TicketCreatorUser")
   ticketComments              TicketComment[]              @relation("TicketCommentAuthorUser")
   ticketEvents                TicketEvent[]                @relation("TicketEventActorUser")
+  pushToken                   PushToken?
   signupSurvey                SignupSurvey?
 
   @@unique([email])
@@ -85,6 +86,19 @@ model Session {
   @@unique([token])
   @@index([userId])
   @@map("session")
+}
+
+/// One current device registration per account, matching the notification API contract.
+/// No session FK: password changes delete a session before the replacement is created.
+model PushToken {
+  userId String @id
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ciphertext String
+  tokenDigest String @unique
+  sessionId String
+  updatedAt DateTime @updatedAt
+
+  @@map("push_tokens")
 }
 
 model Account {
@@ -205,14 +219,15 @@ model ActionApprovalRule {
 }
 
 model ActionAutoReviewPreference {
-  id        String   @id @default(cuid())
-  spaceId   String
-  space     Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  enabled   Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String   @id @default(cuid())
+  spaceId       String
+  space         Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled       Boolean  @default(false)
+  skipApprovals Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@unique([spaceId, userId])
   @@map("action_auto_review_preferences")

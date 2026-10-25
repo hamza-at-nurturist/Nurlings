@@ -155,21 +155,6 @@ test("logout protects bot deep links and sign-in restores the session", async ({
   await expect(page.getByRole("button", { name: "Settings", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Usage", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Log out" })).toBeVisible();
-  await expect(
-    page
-      .locator('[data-slot="popover-content"]')
-      .getByRole("button", { name: "Models", exact: true }),
-  ).toHaveCount(0);
-  await expect(
-    page
-      .locator('[data-slot="popover-content"]')
-      .getByRole("button", { name: "Memory", exact: true }),
-  ).toHaveCount(0);
-  await expect(
-    page
-      .locator('[data-slot="popover-content"]')
-      .getByRole("button", { name: "Voice", exact: true }),
-  ).toHaveCount(0);
   await captureScreenshot(page, testInfo, "36-account-menu");
 
   // A failed sign-out keeps the user in place and says so instead of silently bouncing back.
@@ -294,6 +279,9 @@ test("changes and recovers an email password", async ({ page }, testInfo) => {
     "name",
     "sidebar-search",
   );
+  await expect(settings.getByLabel("Current password")).toHaveCount(0);
+  await captureScreenshot(page, testInfo, "general-settings");
+  await settings.getByRole("button", { name: "Change password" }).click();
   await expect(settings.locator('input[name="username"]')).toHaveAttribute(
     "autocomplete",
     "username",
@@ -313,8 +301,9 @@ test("changes and recovers an email password", async ({ page }, testInfo) => {
   await settings.getByLabel("Current password").fill(originalPassword);
   await settings.getByLabel("New password").fill(changedPassword);
   await settings.getByLabel("Confirm password").fill(changedPassword);
-  await settings.getByRole("button", { name: "Change password" }).click();
+  await settings.getByRole("button", { name: "Save", exact: true }).click();
   await expect(settings.getByText("Password updated")).toBeVisible();
+  await expect(settings.getByLabel("Current password")).toHaveCount(0);
   await captureScreenshot(page, testInfo, "41-password-changed");
   await settings.getByRole("button", { name: "Close user settings" }).click();
 

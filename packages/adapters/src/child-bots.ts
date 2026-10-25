@@ -4,6 +4,7 @@ import type {
   AdapterContext,
   AgentHomeStore,
   ArtifactStore,
+  ComputerRef,
   JobPublisher,
   SandboxProvider,
 } from "@rakazo/adapter-kit";
@@ -17,7 +18,7 @@ import {
 import { ACTIVE_RUN_STATUSES } from "@rakazo/core";
 import {
   cancelRunsInTransaction,
-  clearRunTurnCheckpoints,
+  clearEndedRunState,
   computerScopeKey,
   createRepos,
   createThreadMessageInTransaction,
@@ -322,7 +323,7 @@ export async function archiveBot(
       where: { id: { in: runIds } },
       data: { status: "cancelled", completedAt: now },
     });
-    await clearRunTurnCheckpoints(tx, runIds);
+    await clearEndedRunState(tx, runIds);
     await tx.task.updateMany({
       where: { runs: { some: { id: { in: runIds } } } },
       data: { status: "cancelled" },
@@ -400,7 +401,7 @@ export async function destroyBot(
     where: { id: { in: runIds } },
     data: { status: "cancelled", completedAt: new Date() },
   });
-  await clearRunTurnCheckpoints(deps.prisma, runIds);
+  await clearEndedRunState(deps.prisma, runIds);
   await Promise.allSettled([
     ...activeRuns.map((run) => deps.jobs.cancel(runJobKey(run.id))),
     ...routines.map((routine) => deps.jobs.cancel(routineJobKey(routine.id))),
@@ -553,6 +554,8 @@ async function detachBotFromGroups(tx: Prisma.TransactionClient, botId: string) 
         select: {
           id: true,
           taskId: true,
+          userId: true,
+          spaceId: true,
           botId: true,
           bot: {
             select: {
@@ -696,14 +699,13 @@ async function removeTeamBrowserProfile(
   // the server. See removeTeamBotWorkspace.
   if (computer.providerRef && deps.sandbox.releaseScreen && computer.state === "running") {
     await withCleanupDeadline(profileContext, LIVE_CLEANUP_BUDGET_MS, (cleanupContext) =>
-      removeComputerWorkspaceDirectories(
-        deps.sandbox,
-        toComputerRef(computer),
-        ".browser-profiles",
-        [name],
-        cleanupContext,
-      ),
+      removeProfileOnceClosed(deps.sandbox, toComputerRef(computer), name, cleanupContext),
     ).catch((error) => {
+      // Chromium's helpers can hold the profile's databases open briefly after the stop.
+      if (isBusyError(error)) {
+        getLogger().warn("team browser profile still open; removed on next boot");
+        return;
+      }
       getLogger().error("team browser profile cleanup", error);
     });
   }
@@ -712,6 +714,41 @@ async function removeTeamBrowserProfile(
   await removeContainedDirectory(homeDir, ".browser-profiles", name).catch((error) => {
     getLogger().error("team browser profile cleanup", error);
   });
+}
+
+const PROFILE_BUSY_ATTEMPTS = 3;
+const PROFILE_BUSY_RETRY_MS = 1_000;
+
+function isBusyError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  return (
+    (error as NodeJS.ErrnoException).code === "EBUSY" ||
+    error.message.includes("Device or resource busy")
+  );
+}
+
+async function removeProfileOnceClosed(
+  sandbox: SandboxProvider,
+  computer: ComputerRef,
+  name: string,
+  context: AdapterContext,
+) {
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      await removeComputerWorkspaceDirectories(
+        sandbox,
+        computer,
+        ".browser-profiles",
+        [name],
+        context,
+      );
+      return;
+    } catch (error) {
+      if (!isBusyError(error) || attempt >= PROFILE_BUSY_ATTEMPTS) throw error;
+      await new Promise((resolve) => setTimeout(resolve, PROFILE_BUSY_RETRY_MS));
+      context.signal.throwIfAborted();
+    }
+  }
 }
 
 /** A Team Computer that is not running removes the folder when it next boots. */

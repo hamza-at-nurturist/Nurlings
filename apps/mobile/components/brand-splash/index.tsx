@@ -48,6 +48,7 @@ import {
   SHORT_END,
   WHITE_RING,
 } from "../../lib/brand-splash-timeline";
+import { markSplashGone } from "../../lib/splash-gate";
 import { hasSeenFullSplash, markFullSplashSeen } from "../../lib/splash-seen";
 import { Fireflies } from "./fireflies";
 
@@ -302,7 +303,10 @@ export function BrandSplash({ ready }: { ready: boolean }) {
   );
   const [done, setDone] = useState(false);
   const [skipped, setSkipped] = useState(false);
-  const { base, exit, idle, flies, fade } = useSplashRun(mode, ready, skipped, () => setDone(true));
+  const { base, exit, idle, flies, fade } = useSplashRun(mode, ready, skipped, () => {
+    setDone(true);
+    markSplashGone();
+  });
   const clocks = useMemo<Clocks>(() => ({ base, exit, idle }), [base, exit, idle]);
   const { width, height } = useWindowDimensions();
 

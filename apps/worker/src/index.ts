@@ -12,6 +12,7 @@ import {
   ChatSdkMessagingSurface,
   CodexCatalogCache,
   createAgentHomeStore,
+  createArtifactStore,
   createBackgroundJobHandlers,
   createCloudAgentConnection,
   createConnectorStack,
@@ -38,7 +39,6 @@ import {
   isComposioEnabled,
   isMessagingSurfaceEnabled,
   isPipedreamEnabled,
-  LocalArtifactStore,
   McpConnector,
   McpOAuthBroker,
   mcpStdioOptionsFromEnv,
@@ -47,6 +47,7 @@ import {
   PiAgentRuntime,
   PipedreamConnector,
   PostgresRealtimeFanout,
+  PrismaPushTokenStore,
   pipedreamConfigFromEnv,
   RunJobPublisher,
   RunWorkerHost,
@@ -64,7 +65,6 @@ import {
 } from "@rakazo/adapters";
 import { resolveEncryptionKey, resolveSupervisorToken, uploadSizeFromEnv } from "@rakazo/core";
 import {
-  contentEncryptionOf,
   createBoardEvents,
   createDb,
   createSecurityEventPruner,
@@ -198,7 +198,7 @@ async function main() {
   integrationSettings.warmDirectories();
   const memoryProviders = new SpaceMemoryProviderResolver(prisma, secrets);
   const home = createAgentHomeStore(dataDir, prisma);
-  const artifacts = new LocalArtifactStore(dataDir, contentEncryptionOf(prisma)?.ring);
+  const artifacts = createArtifactStore(dataDir, prisma);
   const inMemoryJobs = process.env.WAKEUP_DRIVER === "memory" ? new InMemoryJobQueue() : undefined;
   const jobs: JobPublisher =
     inMemoryJobs ?? new RunJobPublisher(prisma, realtime, new GraphileJobPublisher(pool, prisma));
@@ -212,7 +212,8 @@ async function main() {
   // One provider instance so emulator launches and polls share the same Map.
   const cloudAgent = createCloudAgentConnection();
   // Shared with the reconciler so a stuck wait uses the same push path as a finish notice.
-  const notifications = new ExpoPushProvider(dataDir, {
+  const pushTokens = new PrismaPushTokenStore(prisma, resolveEncryptionKey(process.env));
+  const notifications = new ExpoPushProvider(pushTokens, {
     sessionExpiresAt: (sessionId) => pushSessionExpiresAt(prisma, sessionId),
     jobs,
     accessToken: process.env.EXPO_ACCESS_TOKEN,
