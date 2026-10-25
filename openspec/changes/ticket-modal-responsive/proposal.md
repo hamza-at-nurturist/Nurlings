@@ -35,8 +35,7 @@ width follows the window):
 ### Narrow header
 
 Back arrow (closes), then `Board / NUR-7` on the Ticket tab or the ticket title (one line,
-truncated) on the Activity tab. No Expand, no close X (back closes). See the open question on the
-more menu below.
+truncated) on the Activity tab. No Expand, no close X (back closes), no more menu.
 
 ### Ticket tab
 
@@ -98,12 +97,10 @@ Reused unchanged: `Back`, `Board`, status, priority and date labels, `Approve`, 
 file`, `Send`, `{name} is working…`. The count badge is a number. Removed on narrow: Expand/Collapse
 and the close X.
 
-### Open question: the more menu
+### No more menu
 
 The mockup puts `···` in the header, but the modal has no actions that aren't already a chip or a
-button (there is no delete, no deep link to copy). Recommendation: **leave it out** until a real
-action exists, rather than ship a menu with nothing in it. If you want it now, the candidate is a
-`Won't do` shortcut, which the status chip already covers.
+button (there is no delete, no deep link to copy). It is left out until a real action exists.
 
 ### Upstream merge safety
 

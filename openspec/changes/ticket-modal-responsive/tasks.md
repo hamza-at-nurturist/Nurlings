@@ -2,8 +2,8 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal, the decisions in `design.md` and the more-menu
-  question. Verify: explicit approval in the session.
+- [x] 1.1 Maintainer approves the proposal, the decisions in `design.md` and the more-menu
+  question (left out). Verify: explicit approval in the session.
 
 ## 2. Shared pieces
 
