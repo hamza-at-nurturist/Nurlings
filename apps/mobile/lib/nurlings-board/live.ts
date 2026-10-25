@@ -1,4 +1,5 @@
 import type { BoardEvent, Bot } from "@rakazo/contracts";
+import type { Viewer } from "@rakazo/core/nurlings-board";
 import { useIsFocused } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { rpc } from "../api";
@@ -51,21 +52,28 @@ export function useBoardBots(revision: number): Bot[] {
   return bots;
 }
 
-/** The user's saved timezone, which dates are shown and picked in. */
-export function useBoardTimeZone(): string {
-  const [timeZone, setTimeZone] = useState("UTC");
+/** The user's saved timezone, which dates are shown and picked in, and who they are. */
+export function useBoardMe(): { timeZone: string; viewer: Viewer } {
+  const [me, setMe] = useState<{ timeZone: string; viewer: Viewer }>({
+    timeZone: "UTC",
+    viewer: { id: "", name: "" },
+  });
   useEffect(() => {
     let active = true;
-    void rpc<{ timezone?: string | null }>("me")
-      .then((me) => {
-        if (active) setTimeZone(me.timezone ?? "UTC");
+    void rpc<{ userId: string; name: string; timezone?: string | null }>("me")
+      .then((row) => {
+        if (active)
+          setMe({
+            timeZone: row.timezone ?? "UTC",
+            viewer: { id: row.userId, name: row.name },
+          });
       })
       .catch(() => undefined);
     return () => {
       active = false;
     };
   }, []);
-  return timeZone;
+  return me;
 }
 
 /** A counter screens bump to refetch, per ticket and for everything. */

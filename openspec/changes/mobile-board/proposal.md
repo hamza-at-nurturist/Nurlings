@@ -89,7 +89,10 @@ mobile catalog (or is the same word as on web).
 | `Description`, `Files` | Section labels | Two sections of different kinds; `Files` only when there are files. |
 | `Show more` | Under a clamped description, only when it overflows | Only way to read the rest without editing. |
 | `Status`, `Owner`, `Priority`, `Start`, `Due` | Picker titles; empty date chips | An empty chip must say which date it is; the others title the native picker. |
-| `Low`, `Normal`, `High`, `Urgent`, `Clear` | Priority and date pickers | The choices. |
+| `Low`, `Normal`, `High`, `Urgent` | Priority menu | The choices. |
+| `Today`, `Tomorrow`, `Choose date…`, `Clear` | Date chip menu | The quick picks web has, the way into the native calendar, and the way to remove a date. `Clear` only while a date is set. |
+| `Ticket sections` | Accessible name of the segmented control only | Not visible. |
+| `Attach file`, `Remove {name}`, `Skipped {names}` | Reply box: attach button name, staged-file remove name, a line only when picked files were refused | Same as web. |
 | `Reply` | Composer placeholder | The input's only label. Same as web. |
 | `You`, `Someone` | Feed author and actor names | Who did it. |
 | Feed lines (`{actor} moved it to {status}`, `{actor} created this and assigned it to {owner}`, `{actor} created this`, `{actor} assigned it to {owner}`, `{actor} approved it`, `Moved back to {status}`, `{actor} attached {name}`, `You attached {name}`, `{name} couldn't finish, reply to retry`) | Activity | The history itself; same wording as web so a ticket reads the same in both. |
@@ -109,8 +112,10 @@ mobile has no per-device read state yet).
 |---|---|
 | Columns, 7-day Done rule, card fields, overdue, quick-add parsing, mention parsing and options, activity merge and separator rows | Unit tests in `@rakazo/core` (CI) |
 | Push payload carries `ticketId`; mobile routes a ticket notification and a `rakazo://ticket` link | Unit tests in adapters and `apps/mobile/lib` (CI) |
-| Board and ticket components render the right fields, hide the entry when the flag is off, call the right RPCs (move, approve, comment, update, create) | Mobile component tests with the existing React Native test setup (CI) |
-| Type correctness of both new routes | `pnpm --filter @rakazo/mobile check` (CI) |
+| A column renders its header, counts, Your turn and Show N older; a card renders its fields, the overdue colour and the working line; the long-press menu has Approve only In review and reports move / approve / open; the home header shows the Board button only when the flag is on (native and fallback header) | Mobile render tests in `apps/mobile/lib/nurlings-board` (CI) |
+| Event stream parsing, reconnect and backoff; the flag store; card menu ids; mention input; date strings | Unit tests in `apps/mobile/lib/nurlings-board` (CI) |
+| The quick-add and reply composers, the filter row, the Ticket and Activity screens as rendered components | Not render-tested. Their logic (parsing, mentions, payload dates, activity rows) is the tested shared code above; the screens are type-checked and tested on the preview APK. |
+| Type correctness of both new routes | `tsc` on `@rakazo/mobile` (CI runs `pnpm --filter @rakazo/mobile check`) |
 | Native header item, long-press context menu, native segmented control, native date picker, paging feel, keyboard behaviour, camera and photo picker, tapping a real push | Not covered: needs a device or emulator with a seeded board. Tested by the maintainer on a preview APK. |
 | Board and ticket screenshots | Optional: the manual "mobile Android screenshots" workflow can capture them once the seed includes tickets; not part of required checks. |
 
@@ -119,18 +124,20 @@ mobile has no per-device read state yet).
 All new code lives in fork-owned folders, named so upstream is unlikely to create them:
 `apps/mobile/app/(nurlings)/` (routes), `apps/mobile/components/nurlings-board/`,
 `apps/mobile/lib/nurlings-board/` and `packages/core/src/nurlings-board/`. Upstream mobile files
-are not refactored. The only upstream-owned files touched are the home header button
-(`app/index.tsx`) and the push `ticketId` path (`NotificationMessage`, `expo-push.ts`,
-`ticket-changes.ts`, `ticket-dates.ts`, and a few lines in `notification-open.ts`), plus the
-one-word `export` on two private helpers in `thread-composer.tsx`. `design.md` lists each edit and
+are not refactored. The upstream-owned files touched are the home header button
+(`app/index.tsx`, plus a `boardEnabled: false` line in the two home tests that evaluate its
+source), the push `ticketId` path (`NotificationMessage`, `expo-push.ts`, `ticket-changes.ts`,
+`ticket-dates.ts`, and a few lines in `notification-open.ts`), one spread line in each of the five
+mobile locale maps, and the word `export` on two private helpers in `thread-composer.tsx`. `design.md` lists each edit and
 has an "Upstream overlap" section for what to do if upstream ships its own mobile board. Web
 board files are fork-owned already; their pure logic moves to core.
 
 ## Impact
 
 - New capability `mobile-board`; `board-tickets` gains "Ticket notifications carry the ticket".
-- Mobile app: two routes, ~12 components. Copy is added in English only: `t()` falls back to the
-  source string for locales without it, and the typed locale maps are upstream files left alone.
+- Mobile app: two routes, ~12 components. The mobile i18n test requires every `t()` string in every
+  locale, so the new strings are translated in five files under `lib/locales/nurlings-board/`;
+  each upstream locale map gains one `...` spread line at the top.
 - `@rakazo/core`: new `nurlings-board/` module, exported from the package index.
 - Web: imports re-pointed to core; no behaviour change (the existing web tests keep passing).
 - API and adapters: additive optional `ticketId` on the notification message and Expo data. No

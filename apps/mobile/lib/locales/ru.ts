@@ -1,4 +1,7 @@
+import { NURLINGS_BOARD_RU } from "./nurlings-board/ru";
+
 export const RU_MESSAGES: Record<string, string> = {
+  ...NURLINGS_BOARD_RU,
   "Use 80 characters or fewer": "Не более 80 символов",
   "Could not update name": "Не удалось обновить имя",
   "{summary} Your backup models also failed.":

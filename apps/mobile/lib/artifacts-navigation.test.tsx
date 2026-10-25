@@ -61,6 +61,7 @@ it("keeps only Activity, Search and Create in the transparent native home header
   evaluate(slice(home, "  useLayoutEffect(() => {\n    if (!nativeHeader)", "  const openBot ="), {
     useLayoutEffect: (effect: () => void) => effect(),
     nativeHeader: true,
+    boardEnabled: false,
     navigation: { setOptions },
     ready: true,
     hasSession: true,
@@ -91,6 +92,7 @@ it.each(["android", "ios"])("omits Artifacts from the %s fallback header", (plat
   const element = evaluate(`return <>${header}</>;`, {
     React,
     nativeHeader: false,
+    boardEnabled: false,
     View: ({
       children,
       accessibilityLabel,

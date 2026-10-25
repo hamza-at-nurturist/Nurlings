@@ -129,6 +129,7 @@ import {
 import { afterChatNotifyChange, dismissThreadNotifications } from "../lib/live-notifications";
 import { native, useThemedStyles } from "../lib/native";
 import { iosAtLeast } from "../lib/native-controls";
+import { useNurlingsBoardEnabled } from "../lib/nurlings-board/enabled";
 import type { InboxSignal } from "../lib/offscreen-unreads";
 import { offerPasskeyOnce } from "../lib/passkey";
 import { ACTIVITY_POLL_INTERVAL_MS, INBOX_POLL_INTERVAL_MS } from "../lib/poll-cadence";
@@ -654,6 +655,7 @@ function Home({ embedded, onSelectSpace }: InboxPaneProps & { embedded: boolean 
   // Liquid Glass uses the native bar: glass bar items and a native menu.
   // The list beside a chat has no navigation bar of its own.
   const nativeHeader = iosAtLeast(26) && !embedded;
+  const boardEnabled = useNurlingsBoardEnabled() === true;
   const headerHeight = useHeaderHeightIfAny();
   const listRef = useRef<FlatList<InboxItem>>(null);
   const jumpSignals = useMemo(() => listData.map(inboxSignal), [listData]);
@@ -875,6 +877,18 @@ function Home({ embedded, onSelectSpace }: InboxPaneProps & { embedded: boolean 
           icon: { type: "sfSymbol" as const, name: "magnifyingglass" },
           onPress: () => router.push("/search"),
         },
+        ...(boardEnabled
+          ? [
+              {
+                type: "button" as const,
+                label: t("Board"),
+                accessibilityLabel: t("Board"),
+                identifier: "home-board-button",
+                icon: { type: "sfSymbol" as const, name: "rectangle.split.3x1" },
+                onPress: () => router.push("/board"),
+              },
+            ]
+          : []),
         {
           type: "menu" as const,
           label: t("Create"),
@@ -912,6 +926,7 @@ function Home({ embedded, onSelectSpace }: InboxPaneProps & { embedded: boolean 
     hasSession,
     initials,
     activityMode,
+    boardEnabled,
     toggleActivityMode,
     runCreateAction,
     router,
@@ -1402,6 +1417,15 @@ function Home({ embedded, onSelectSpace }: InboxPaneProps & { embedded: boolean 
             >
               <NativeSymbol ios="magnifyingglass" android="search" size={17} />
             </HeaderButton>
+            {boardEnabled ? (
+              <HeaderButton
+                testID="home-board-button"
+                accessibilityLabel={t("Board")}
+                onPress={() => router.push("/board")}
+              >
+                <NativeSymbol ios="rectangle.split.3x1" android="albums-outline" size={17} />
+              </HeaderButton>
+            ) : null}
             {Platform.OS === "android" ? (
               // A plain button: the native Android menu trigger collapses to zero width when the
               // installed app binary is older than the JS update, which hid the only way to create.

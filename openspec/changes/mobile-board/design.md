@@ -16,7 +16,8 @@
 | `quick-add.ts` | `quickAddTicket(text, picked)` | `web/.../BoardView/quick-add.ts` |
 | `mentions.ts` | `hasMentionToken`, `splitMentions`, `resolveMentionTargets`, `activeMentionToken`, `mentionColor`, plus the two pure halves of the web `useMentionInput`: `mentionOptions(bots, query)` (filter, prefix first, max 8) and `applyMention(text, token, caret, bot)` (new text and caret) | `web/.../TicketModal/mentions.ts`, `use-mention-input.ts` |
 | `activity.ts` | `mergeActivity`, and `activityRows(items, viewer)`: drops events with no line, marks each row `separated` with `needsTimeSeparator`, and returns each line as data (`{ kind: "moved", actor, status }`) | `mergeActivity` in `web/.../activity.ts`; the loop and `eventLine` in `ActivityFeed.tsx` |
-| `types.ts` | `Viewer`, `ActorRef`, `RelativeDayLabels`, `ActivityLine` | `Viewer` in `ActivityFeed.tsx` |
+| `files.ts` | `isTicketImage` (the four thumbnail types) and `shortFileType` | `THUMBNAIL_MIME_TYPES` in `TicketImage.tsx`, `shortFileType` in `TicketFileCard.tsx` |
+| `types.ts` | `Viewer` | `Viewer` in `ActivityFeed.tsx` |
 
 What stays per platform, on purpose:
 
@@ -72,10 +73,13 @@ Existing upstream files touched, and nothing else:
 | `lib/notification-open.ts` | One early branch: a payload or `rakazo://ticket` link with a `ticketId` returns the route built by `lib/nurlings-board/notification.ts` |
 | `components/thread-composer.tsx` | `export` added to `MentionOptionIcon` and `MentionChipIcon`; no other change |
 | `packages/adapter-kit/src/types.ts`, `packages/adapters/src/expo-push.ts`, `ticket-changes.ts`, `ticket-dates.ts` | Optional `ticketId` on the notification |
+| `lib/locales/{de,ja,nl,ru,zh}.ts` | One `...NURLINGS_BOARD_XX` spread line at the top of each map; the translations are in `lib/locales/nurlings-board/` |
+| `packages/core/package.json` | One `./nurlings-board` entry in `exports` |
+| `lib/home-route.test.tsx`, `lib/artifacts-navigation.test.tsx` | `boardEnabled: false` in the scope these tests evaluate the home source with |
 
 Not touched: `app/_layout.tsx`, `lib/api.ts` (`MobileMe` stays as is; `enabled.ts` reads
 `ticketBoardEnabled` from its own `rpc<{ ticketBoardEnabled?: boolean }>("me")`), `subscribeThread`,
-the locale maps (see decision 11).
+the locale maps beyond the spread line (see decision 11).
 
 ## Decisions
 
@@ -122,7 +126,8 @@ Same sources as web, in the same order:
    `POLL_MS`), with `useForegroundPoll` so nothing runs in the background.
 
 The stream is closed when the app leaves the foreground and reopened with a full refetch on
-return. The board and ticket screens share one subscription through `lib/nurlings-board/live.ts`.
+return. Only the focused screen holds a connection (`useBoardStream`), so a ticket opened over
+the board pauses the board's stream and the board refetches when it is focused again.
 
 ### 5. Long-press menu
 
@@ -196,11 +201,13 @@ No drag and drop, no create dialog beyond quick-add, no board rename, no search 
 no new-activity count, no delete. No offline queue: like the web board, a failed write shows an
 error and keeps what the user typed.
 
-### 11. Copy without touching the locale maps
+### 11. Translations without growing the locale maps
 
-`t()` returns the source string when a locale has no entry, so new copy ships in English and
-the five typed locale maps (upstream files) stay unchanged. Translations can be added in a later
-change; the existing i18n tests do not require every key in every locale.
+`i18n.test.ts` requires every `t()` string in the mobile source to exist in all five non-English
+catalogs, so English-only copy would fail CI. The translations live in our own files,
+`lib/locales/nurlings-board/{de,ja,nl,ru,zh}.ts`, and each upstream map spreads its file as the
+first entry, one line per upstream file. Later upstream entries win on a key clash. The first
+draft of this change assumed English fallback was enough; the test says otherwise.
 
 ## Upstream overlap
 
@@ -226,11 +233,9 @@ The choice is made at that sync, with both in front of us, not now. Upstream als
   decision 1. Covered by the maintainer's preview-APK test.
 - **Nested horizontal and vertical lists on Android.** Known to work with `nestedScrollEnabled`;
   verify swipe feel on a device.
-- **Native date picker availability.** The plan assumes `@expo/ui` 57 ships a date picker on both
-  platforms (SwiftUI `DatePicker`, Compose date and time dialogs) and the repo's
-  `compose-available` check guards the Android views. Dependencies are not installed in this
-  session, so task 4.3 confirms this first. If a platform lacks it, the fix is to ask the
-  maintainer before adding any dependency; nothing is added silently.
+- **Dates lose their time when picked.** `@expo/ui/community/datetime-picker` exists in 57 on both
+  platforms and sets a day, not a time, so picking on a ticket whose date had a time drops the
+  time. Times set on web or by a Nurling stay until the date is changed on the phone.
 - **Moving code out of web.** Pure refactor under existing tests; reviewers should see only
   import changes in web components.
 

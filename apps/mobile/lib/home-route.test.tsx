@@ -46,6 +46,7 @@ it.each([false, true])(
       hasSession: true,
       initials: "A",
       activityMode: false,
+      boardEnabled: false,
       toggleActivityMode: action,
       runCreateAction: action,
       router: { push: action },

@@ -1,6 +1,7 @@
 import { useLingui } from "@lingui/react/macro";
 import { isAttachmentAudioMimeType } from "@rakazo/contracts";
-import { attachmentExtensionForMimeType, formatFileSize } from "@rakazo/core";
+import { formatFileSize } from "@rakazo/core";
+import { shortFileType } from "@rakazo/core/nurlings-board";
 import { useState } from "react";
 import { downloadArtifact } from "../../../lib/artifact-open";
 import { ArtifactFileCard } from "../../ArtifactFileCard";
@@ -12,16 +13,6 @@ const PREVIEWED_BY_SHARED_CARD = new Set([
   "application/pdf",
   "video/mp4",
 ]);
-
-/** "TXT" from the name's extension, else from the type's usual one, else the type itself. */
-export function shortFileType(name: string, mimeType: string): string {
-  const dot = name.lastIndexOf(".");
-  const extension =
-    dot > 0 && dot < name.length - 1
-      ? name.slice(dot + 1)
-      : attachmentExtensionForMimeType(mimeType).replace(/^\./, "");
-  return extension ? extension.toUpperCase() : mimeType;
-}
 
 /**
  * A ticket file, in Files and on a comment: the shared card for previewable and audio files, and a download card reading

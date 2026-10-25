@@ -1,4 +1,7 @@
+import { NURLINGS_BOARD_ZH } from "./nurlings-board/zh";
+
 export const ZH_MESSAGES: Record<string, string> = {
+  ...NURLINGS_BOARD_ZH,
   "Use 80 characters or fewer": "请使用不超过 80 个字符",
   "Could not update name": "无法更新姓名",
   "{summary} Your backup models also failed.": "{summary} 备用模型也失败了。",
