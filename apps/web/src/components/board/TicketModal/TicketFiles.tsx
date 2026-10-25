@@ -1,6 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { Artifact, Bot } from "@rakazo/contracts";
-import { ArtifactFileCard } from "../../ArtifactFileCard";
+import { TicketFileCard } from "./TicketFileCard";
 
 /**
  * Files on the ticket: what you attached to comments and what its Nurlings attached while working
@@ -18,13 +18,7 @@ export function TicketFiles({ files, bots }: { files: Artifact[]; bots: Bot[] })
       <div className="flex flex-wrap gap-2">
         {shown.map((file) => (
           <figure key={file.id} data-testid="ticket-file" className="space-y-1">
-            <ArtifactFileCard
-              target={{ botId: file.botId as string }}
-              artifactId={file.id}
-              name={file.name}
-              mimeType={file.mimeType}
-              size={file.size}
-            />
+            <TicketFileCard file={{ ...file, botId: file.botId as string }} />
             <figcaption className="px-1 text-xs text-muted-foreground">
               {file.runId ? bots.find((bot) => bot.id === file.botId)?.name : t`You`}
             </figcaption>

@@ -567,6 +567,10 @@ msgstr "Add server"
 msgid "Add server URL"
 msgstr "Add server URL"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Add time"
+msgstr "Add time"
+
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Add to routine"
 msgstr "Add to routine"
@@ -1716,8 +1720,10 @@ msgstr "Could not dismiss"
 msgid "Could not dismiss this server"
 msgstr "Could not dismiss this server"
 
+#. placeholder {0}: file.name
 #. placeholder {0}: props.name
 #: src/components/ArtifactFileCard.tsx
+#: src/components/board/TicketModal/TicketFileCard.tsx
 msgid "Could not download {0}. Try again."
 msgstr "Could not download {0}. Try again."
 
@@ -2378,6 +2384,14 @@ msgstr "Draft skill"
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Drag, drop, or paste an image"
 msgstr "Drag, drop, or paste an image"
+
+#: src/components/board/TicketModal/Properties.tsx
+msgid "Due"
+msgstr "Due"
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Due {due}"
+msgstr "Due {due}"
 
 #: src/pages/BotContextMenu.tsx
 msgid "Duplicate"
@@ -3482,6 +3496,10 @@ msgstr "New ticket"
 msgid "Next settings sections"
 msgstr "Next settings sections"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Next week"
+msgstr "Next week"
+
 #: src/pages/MessagingSettingsOverlay.tsx
 msgid "No agent connections yet."
 msgstr "No agent connections yet."
@@ -3514,6 +3532,10 @@ msgstr "No bots match"
 #: src/pages/MessagingSettingsOverlay.tsx
 msgid "No chat apps linked yet."
 msgstr "No chat apps linked yet."
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "No date"
+msgstr "No date"
 
 #: src/pages/MessagingSettingsOverlay.tsx
 msgid "No group chats yet."
@@ -4806,6 +4828,14 @@ msgstr "Speech model"
 msgid "SSO is temporarily unavailable. Try again."
 msgstr "SSO is temporarily unavailable. Try again."
 
+#: src/components/board/TicketModal/Properties.tsx
+msgid "Start"
+msgstr "Start"
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Start {start}"
+msgstr "Start {start}"
+
 #: src/pages/Paywall.tsx
 msgid "Start {trialDays}-day free trial"
 msgstr "Start {trialDays}-day free trial"
@@ -5098,6 +5128,14 @@ msgstr "This subscription sign-in is not available in Rakazo yet. Use a deployme
 msgid "This week"
 msgstr "This week"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "This weekend"
+msgstr "This weekend"
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Time"
+msgstr "Time"
+
 #: src/pages/RoutineSchedule.tsx
 msgid "Time of day"
 msgstr "Time of day"
@@ -5129,10 +5167,15 @@ msgstr "To do"
 msgid "To:"
 msgstr "To:"
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/shell/chat-context.tsx
 msgid "Today"
 msgstr "Today"
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Tomorrow"
+msgstr "Tomorrow"
 
 #: src/pages/RoutineEditor.tsx
 msgid "Tool arguments (JSON)"
@@ -5546,6 +5589,7 @@ msgstr "Workspace"
 msgid "year"
 msgstr "year"
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/shell/chat-context.tsx
 #: src/pages/shell/sidebar-roster.tsx
 msgid "Yesterday"

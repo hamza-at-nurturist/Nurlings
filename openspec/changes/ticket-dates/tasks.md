@@ -56,17 +56,17 @@
 
 ## 4. Web
 
-- [ ] 4.1 `pnpm exec shadcn add calendar` in `packages/ui-web` (official registry), with exact
+- [x] 4.1 `pnpm exec shadcn add calendar` in `packages/ui-web` (official registry), with exact
   dependency versions, and export it. Verify: ui-web typecheck; no hex in the vendored file.
-- [ ] 4.2 `TicketModal/dates.ts`: quick picks and short relative display in a given timezone.
+- [x] 4.2 `TicketModal/dates.ts`: quick picks and short relative display in a given timezone.
   Verify: unit tests for Today, Tomorrow, Yesterday, a weekday, another year, a time, and overdue.
-- [ ] 4.3 `DatePicker.tsx` with quick picks, calendar, "Add time" and "No date", and Start and Due in
+- [x] 4.3 `DatePicker.tsx` with quick picks, calendar, "Add time" and "No date", and Start and Due in
   `Properties.tsx`. Verify: component tests for each control and the value sent.
-- [ ] 4.4 The card date line in `Board.tsx` (overdue in destructive), with the timezone read via
+- [x] 4.4 The card date line in `Board.tsx` (overdue in destructive), with the timezone read via
   `rpc.me` and passed to the modal. Verify: Board test for a card with and without dates.
-- [ ] 4.5 `TicketFileCard` shows "TXT · 22 B" on the ticket's Files; previewable files keep the shared
+- [x] 4.5 `TicketFileCard` shows "TXT · 22 B" on the ticket's Files; previewable files keep the shared
   card. Verify: component test; chat file-card tests unchanged.
-- [ ] 4.6 Lingui: extract. Verify: catalogs updated with only the quoted new strings.
+- [x] 4.6 Lingui: extract. Verify: catalogs updated with only the quoted new strings.
 
 ## 5. Evidence
 

@@ -19,6 +19,10 @@ const ticket: Ticket = {
   updatedAt: "2026-10-24T03:41:00.000Z",
   completedAt: null,
   needsUser: false,
+  startAt: null,
+  startHasTime: false,
+  dueAt: null,
+  dueHasTime: false,
 };
 
 function event(id: string, createdAt: string, patch: Partial<TicketEvent> = {}): TicketEvent {

@@ -1,5 +1,5 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import type { Bot, Ticket, TicketPriority, TicketStatus } from "@rakazo/contracts";
+import type { Bot, Ticket } from "@rakazo/contracts";
 import { TICKET_DESCRIPTION_MAX_LENGTH, TICKET_TITLE_MAX_LENGTH } from "@rakazo/contracts";
 import { Button, Dialog, DialogContent, DialogTitle, Textarea } from "@rakazo/ui-web";
 import { useMemo, useState } from "react";
@@ -11,6 +11,7 @@ import type { Viewer } from "./ActivityFeed";
 import { ActivityFeed } from "./ActivityFeed";
 import { mergeActivity } from "./activity";
 import { NeedsYou } from "./NeedsYou";
+import type { PropertiesPatch } from "./Properties";
 import { Properties } from "./Properties";
 import { ReplyBox } from "./ReplyBox";
 import { TicketFiles } from "./TicketFiles";
@@ -21,6 +22,8 @@ import { useTicketActivity } from "./use-ticket-activity";
 type Props = {
   ticket: Ticket;
   bots: Bot[];
+  /** The user's saved timezone, which dates are shown and picked in. */
+  timeZone: string;
   /** Bumped by the board's live events for this ticket. */
   revision: number;
   onClose: () => void;
@@ -30,7 +33,14 @@ type Props = {
 const FIELD =
   "-mx-1 min-h-0 w-[calc(100%+0.5rem)] resize-none rounded-md border-transparent bg-transparent px-1 shadow-none hover:bg-muted/60 focus-visible:bg-muted";
 
-export function TicketModal({ ticket, bots: initialBots, revision, onClose, onChanged }: Props) {
+export function TicketModal({
+  ticket,
+  bots: initialBots,
+  timeZone,
+  revision,
+  onClose,
+  onChanged,
+}: Props) {
   const { t } = useLingui();
   const session = authClient.useSession();
   const user = session.data?.user;
@@ -65,15 +75,7 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
     }
   }
 
-  function update(
-    patch: Partial<{
-      title: string;
-      description: string;
-      status: TicketStatus;
-      assigneeBotId: string;
-      priority: TicketPriority;
-    }>,
-  ) {
+  function update(patch: PropertiesPatch & Partial<{ title: string; description: string }>) {
     return save(() => rpc.tickets.update({ id: ticket.id, ...patch }));
   }
 
@@ -148,6 +150,7 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
             <Properties
               ticket={ticket}
               bots={bots}
+              timeZone={timeZone}
               disabled={busy}
               onChange={(patch) => void update(patch)}
             />
