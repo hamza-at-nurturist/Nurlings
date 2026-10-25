@@ -2,9 +2,14 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import type { Artifact, Bot } from "@rakazo/contracts";
 import { TicketFileCard } from "./TicketFileCard";
 
+/** Who added a ticket file: its Nurling when a run attached it, else the user. */
+export function fileProducer(file: Artifact, bots: Bot[], you: string): string | undefined {
+  return file.runId ? bots.find((bot) => bot.id === file.botId)?.name : you;
+}
+
 /**
  * Files on the ticket: what you attached to comments and what its Nurlings attached while working
- * on it, each labelled with who added it. Nothing is shown when there is none.
+ * on it, each carrying who added it in its meta line. Nothing is shown when there is none.
  */
 export function TicketFiles({ files, bots }: { files: Artifact[]; bots: Bot[] }) {
   const { t } = useLingui();
@@ -17,12 +22,12 @@ export function TicketFiles({ files, bots }: { files: Artifact[]; bots: Bot[] })
       </h3>
       <div className="flex flex-wrap gap-2">
         {shown.map((file) => (
-          <figure key={file.id} data-testid="ticket-file" className="space-y-1">
-            <TicketFileCard file={{ ...file, botId: file.botId as string }} />
-            <figcaption className="px-1 text-xs text-muted-foreground">
-              {file.runId ? bots.find((bot) => bot.id === file.botId)?.name : t`You`}
-            </figcaption>
-          </figure>
+          <div key={file.id} data-testid="ticket-file">
+            <TicketFileCard
+              file={{ ...file, botId: file.botId as string }}
+              producer={fileProducer(file, bots, t`You`)}
+            />
+          </div>
         ))}
       </div>
     </section>

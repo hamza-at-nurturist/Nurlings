@@ -96,7 +96,11 @@ describePostgres("ticket approval and replies (PostgreSQL)", () => {
       await call("tickets/comment", { ticketId: ticket.id, body: "Add last quarter too" });
       expect(await get()).toMatchObject({ status: "doing" });
       expect(await ownerWakes()).toBe(wakes + 1);
-      expect((await events()).at(-1)).toMatchObject({ kind: "status", status: "doing" });
+      expect((await events()).at(-1)).toMatchObject({
+        kind: "resumed",
+        status: "doing",
+        actorName: null,
+      });
       await settle();
 
       // A comment to another Nurling only is not a reply: no move, no owner wake.

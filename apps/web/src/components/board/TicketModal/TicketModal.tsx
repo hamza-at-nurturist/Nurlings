@@ -2,6 +2,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot, Ticket } from "@rakazo/contracts";
 import { TICKET_DESCRIPTION_MAX_LENGTH, TICKET_TITLE_MAX_LENGTH } from "@rakazo/contracts";
 import { Button, Dialog, DialogContent, DialogTitle, Textarea } from "@rakazo/ui-web";
+import { Maximize2, Minimize2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { authClient } from "../../../lib/auth";
 import { isFileDrag } from "../../../lib/pending-attachments";
@@ -10,6 +11,7 @@ import { errorText } from "../../../lib/user-error";
 import type { Viewer } from "./ActivityFeed";
 import { ActivityFeed } from "./ActivityFeed";
 import { mergeActivity } from "./activity";
+import { readTicketFullscreen, writeTicketFullscreen } from "./fullscreen-pref";
 import { NeedsYou } from "./NeedsYou";
 import type { PropertiesPatch } from "./Properties";
 import { Properties } from "./Properties";
@@ -51,13 +53,14 @@ export function TicketModal({
   const bots = useLiveBots(initialBots, revision);
   const activity = useTicketActivity(ticket.id, revision);
   const items = useMemo(
-    () => mergeActivity(ticket, activity.events, activity.comments),
-    [ticket, activity.events, activity.comments],
+    () => mergeActivity(ticket, activity.events, activity.comments, activity.files, activity.runs),
+    [ticket, activity.events, activity.comments, activity.files, activity.runs],
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const staged = useStagedFiles();
   const [dragging, setDragging] = useState(false);
+  const [fullscreen, setFullscreen] = useState(readTicketFullscreen);
   const canAttach = Boolean(ticket.assigneeBotId);
 
   async function save(change: () => Promise<unknown>) {
@@ -90,7 +93,11 @@ export function TicketModal({
       <DialogContent
         initialFocus={false}
         data-dragging={dragging || undefined}
-        className="h-[min(48rem,90vh)] max-w-[calc(100%-2rem)] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0 data-dragging:ring-2 data-dragging:ring-ring sm:max-w-5xl"
+        className={`grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0 data-dragging:ring-2 data-dragging:ring-ring ${
+          fullscreen
+            ? "h-dvh max-w-none rounded-none sm:max-w-none"
+            : "h-[min(48rem,90vh)] max-w-[calc(100%-2rem)] sm:max-w-5xl"
+        }`}
         // Files dropped anywhere on the ticket wait in the reply box, as on the chat composer.
         onDragOver={(event) => {
           if (!canAttach || !isFileDrag(event.dataTransfer)) return;
@@ -107,7 +114,7 @@ export function TicketModal({
           staged.add(event.dataTransfer.files);
         }}
       >
-        <header className="flex items-center gap-2 border-b px-5 py-3 pr-14 text-sm text-muted-foreground">
+        <header className="relative flex items-center gap-2 border-b px-5 py-3 pr-20 text-sm text-muted-foreground">
           <Trans>Board</Trans>
           <span aria-hidden="true">/</span>
           <span className="font-medium text-foreground">{ticket.ref}</span>
@@ -123,6 +130,19 @@ export function TicketModal({
               <Trans>Approve</Trans>
             </Button>
           ) : null}
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            data-testid="ticket-fullscreen"
+            aria-label={fullscreen ? t`Collapse` : t`Expand`}
+            className="absolute top-2 right-10"
+            onClick={() => {
+              writeTicketFullscreen(!fullscreen);
+              setFullscreen(!fullscreen);
+            }}
+          >
+            {fullscreen ? <Minimize2 /> : <Maximize2 />}
+          </Button>
         </header>
         <div className="grid min-h-0 overflow-y-auto md:grid-cols-[minmax(0,1fr)_22rem] md:overflow-hidden">
           <section className="space-y-6 p-6 md:min-h-0 md:overflow-y-auto">
@@ -185,6 +205,7 @@ export function TicketModal({
                 bots={bots}
                 viewer={viewer}
                 files={activity.files}
+                runs={activity.runs}
                 ownerBotId={ticket.assigneeBotId}
               />
             </div>

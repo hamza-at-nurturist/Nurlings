@@ -119,7 +119,7 @@ describe("ticket contracts", () => {
       assigneeName: null,
       createdAt: "2026-01-01T00:00:00.000Z",
     };
-    expect(TICKET_EVENT_KINDS).toEqual(["created", "status", "owner", "approved"]);
+    expect(TICKET_EVENT_KINDS).toEqual(["created", "status", "owner", "approved", "resumed"]);
     expect(TicketEventSchema.parse({ ...event, kind: "approved", status: "done" }).kind).toBe(
       "approved",
     );

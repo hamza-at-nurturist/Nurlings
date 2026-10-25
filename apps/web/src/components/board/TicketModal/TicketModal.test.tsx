@@ -15,6 +15,7 @@ const api = vi.hoisted(() => ({
     comments: vi.fn(),
     events: vi.fn(),
     files: vi.fn(),
+    runs: vi.fn(),
   },
 }));
 const session = vi.hoisted(() => ({
@@ -37,9 +38,10 @@ vi.mock("@rakazo/chat-ui/web", () => ({
   ChatMarkdown: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }));
 vi.mock("../../ArtifactFileCard", () => ({
-  ArtifactFileCard: (props: { name: string; target: { botId: string } }) => (
+  ArtifactFileCard: (props: { name: string; meta?: string; target: { botId: string } }) => (
     <div data-testid="file-card" data-bot={props.target.botId}>
       {props.name}
+      {props.meta ? ` (${props.meta})` : ""}
     </div>
   ),
 }));
@@ -206,6 +208,7 @@ function setup() {
   api.tickets.events.mockResolvedValue(events);
   api.tickets.comments.mockResolvedValue(comments);
   api.tickets.files.mockResolvedValue([]);
+  api.tickets.runs.mockResolvedValue([]);
   api.tickets.update.mockResolvedValue({});
   api.tickets.approve.mockResolvedValue({});
   api.artifacts.create.mockImplementation(async ({ name }: { name: string }) => ({
@@ -303,9 +306,9 @@ it("renders the owner with the shared Nurling avatar, including its working stat
 it("merges status lines and comments in time order, newest at the bottom", async () => {
   const page = await open();
   try {
-    const rows = Array.from(
-      page.container.querySelectorAll('[data-testid="ticket-activity"] > li'),
-    ).map((row) => row.textContent?.replace(/\s+/g, " ").trim());
+    const rows = Array.from(page.container.querySelectorAll('[data-testid="ticket-activity"] > li'))
+      .filter((row) => !row.querySelector('[data-testid="time-separator"]'))
+      .map((row) => row.textContent?.replace(/\s+/g, " ").trim());
     expect(rows).toEqual([
       "You created this and assigned it to Chief5m ago",
       "Chief moved it to Blocked5m ago",
@@ -509,7 +512,7 @@ it("lists attached files only when there are some", async () => {
     expect(text(page.container, '[data-testid="ticket-files"]')).toContain("Files");
     // A type the shared card cannot preview gets the ticket's own card, with a short type.
     expect(text(page.container, '[data-testid="ticket-file"]')).toContain("comps.csv");
-    expect(text(page.container, '[data-testid="ticket-file"]')).toContain("CSV · 10 B");
+    expect(text(page.container, '[data-testid="ticket-file"]')).toContain("Chief · 10 B");
     expect(text(page.container, '[data-testid="ticket-file"]')).not.toContain("text/csv");
   } finally {
     await page.cleanup();
@@ -928,13 +931,193 @@ it("shows a comment's files and labels each file with who added it", async () =>
     expect(feed).toContain("upload.csv");
     expect(feed).toContain("CSV · 10 B");
     expect(feed).not.toContain("text/csv");
-    const labels = Array.from(
-      page.container.querySelectorAll('[data-testid="ticket-file"] figcaption'),
-    ).map((node) => node.textContent);
-    expect(labels).toEqual(["You", "Chief"]);
+    // In the Files list the producer leads the card's meta line, not a caption under it.
+    const files = q(page.container, '[data-testid="ticket-files"]');
+    expect(files.querySelector("figcaption")).toBeNull();
+    expect(
+      Array.from(files.querySelectorAll('[data-testid="ticket-file"]')).map(
+        (node) => node.textContent,
+      ),
+    ).toEqual(["upload.csvYou · 10 B", "report.csvChief · 10 B"]);
   } finally {
     await page.cleanup();
   }
+});
+
+describe("feed polish", () => {
+  const row = (container: HTMLElement) =>
+    Array.from(container.querySelectorAll('[data-testid="ticket-activity"] > li')).map((node) =>
+      node.textContent?.replace(/\s+/g, " ").trim(),
+    );
+  const file = (id: string, runId: string | null, createdAt: string) => ({
+    id,
+    botId: "bot-1",
+    groupId: null,
+    runId,
+    name: `${id}.pdf`,
+    description: null,
+    mimeType: "application/pdf",
+    size: 10,
+    version: 1,
+    createdAt,
+  });
+
+  it("logs files as grey lines, by the Nurling or by you", async () => {
+    api.tickets.files.mockResolvedValue([
+      file("report", "r1", "2026-10-24T03:43:00.000Z"),
+      file("notes", null, "2026-10-24T03:44:00.000Z"),
+    ]);
+    const page = await open();
+    try {
+      const lines = row(page.container);
+      expect(lines).toContain("Chief attached report.pdf5m ago");
+      expect(lines).toContain("You attached notes.pdf5m ago");
+    } finally {
+      await page.cleanup();
+    }
+  });
+
+  it("puts a separator before the first item and wherever 15 minutes or a day passed", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-24T04:30:00Z"), toFake: ["Date"] });
+    const page = await open();
+    try {
+      const separators = Array.from(
+        page.container.querySelectorAll('[data-testid="time-separator"]'),
+      );
+      // Before the first item, and before the reply 25 minutes after the one above it.
+      expect(separators).toHaveLength(2);
+      expect(separators[0]?.textContent).toMatch(/^Today /);
+      const rows = Array.from(
+        page.container.querySelectorAll('[data-testid="ticket-activity"] > li'),
+      );
+      expect(rows[0]?.querySelector('[data-testid="time-separator"]')).not.toBeNull();
+      // Close items sit tighter than the first.
+      expect(rows[2]?.className).toContain("mt-2");
+    } finally {
+      await page.cleanup();
+      vi.useRealTimers();
+    }
+  });
+
+  it("reads an automatic move without an actor", async () => {
+    api.tickets.events.mockResolvedValue([
+      ...events,
+      event("e4", "2026-10-24T04:18:00.000Z", {
+        kind: "resumed",
+        status: "doing",
+        actorBotId: null,
+        actorName: null,
+      }),
+    ]);
+    const page = await open();
+    try {
+      expect(row(page.container)).toContain("Moved back to In progress5m ago");
+    } finally {
+      await page.cleanup();
+    }
+  });
+
+  it("shows who is working on this ticket, and clears it when the run ends", async () => {
+    api.tickets.runs.mockResolvedValue([{ botId: "bot-1", status: "running", finishedAt: null }]);
+    const page = await open();
+    try {
+      expect(text(page.container, '[data-testid="ticket-working"]')).toBe("Chief is working…");
+      api.tickets.runs.mockResolvedValue([
+        { botId: "bot-1", status: "completed", finishedAt: "2026-10-24T05:00:00.000Z" },
+      ]);
+      await page.render({ revision: 1 });
+      expect(q(page.container, '[data-testid="ticket-working"]')).toBeNull();
+    } finally {
+      await page.cleanup();
+    }
+  });
+
+  it("shows no working line for a Nurling that is busy but has no run for the ticket", async () => {
+    // `bots[0]` is running elsewhere; the ticket has no run.
+    const page = await open();
+    try {
+      expect(q(page.container, '[data-testid="ticket-working"]')).toBeNull();
+    } finally {
+      await page.cleanup();
+    }
+  });
+
+  it("says a run failed, and nothing for a cancelled one", async () => {
+    api.tickets.runs.mockResolvedValue([
+      { botId: "bot-1", status: "failed", finishedAt: "2026-10-24T05:00:00.000Z" },
+      { botId: "bot-2", status: "cancelled", finishedAt: "2026-10-24T05:01:00.000Z" },
+    ]);
+    const page = await open();
+    try {
+      const lines = row(page.container).join("\n");
+      expect(lines).toContain("Chief couldn't finish, reply to retry");
+      expect(lines).not.toContain("Scout");
+    } finally {
+      await page.cleanup();
+    }
+  });
+
+  it("polls while a run is active", async () => {
+    vi.useFakeTimers();
+    api.tickets.runs.mockResolvedValue([{ botId: "bot-1", status: "queued", finishedAt: null }]);
+    const page = await open();
+    try {
+      const before = api.tickets.runs.mock.calls.length;
+      await act(async () => vi.advanceTimersByTimeAsync(4_100));
+      expect(api.tickets.runs.mock.calls.length).toBeGreaterThan(before);
+    } finally {
+      await page.cleanup();
+      vi.useRealTimers();
+    }
+  });
+
+  describe("full screen", () => {
+    afterEach(() => window.localStorage.clear());
+    const toggle = (container: HTMLElement) =>
+      q(container, '[data-testid="ticket-fullscreen"]') as HTMLButtonElement;
+    const dialog = (container: HTMLElement) =>
+      q(container, '[data-testid="ticket-fullscreen"]').closest("div") as HTMLElement;
+
+    it("expands, collapses and remembers the choice", async () => {
+      const page = await open();
+      try {
+        expect(toggle(page.container).getAttribute("aria-label")).toBe("Expand");
+        await act(async () => toggle(page.container).click());
+        expect(toggle(page.container).getAttribute("aria-label")).toBe("Collapse");
+        expect(dialog(page.container).className).toContain("h-dvh");
+        expect(window.localStorage.getItem("rakazo.ticket-fullscreen")).toBe("1");
+      } finally {
+        await page.cleanup();
+      }
+      const again = await open();
+      try {
+        expect(toggle(again.container).getAttribute("aria-label")).toBe("Collapse");
+        await act(async () => toggle(again.container).click());
+        expect(window.localStorage.getItem("rakazo.ticket-fullscreen")).toBeNull();
+      } finally {
+        await again.cleanup();
+      }
+    });
+
+    it("still works when storage throws", async () => {
+      const broken = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+        throw new Error("blocked");
+      });
+      const writing = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+        throw new Error("blocked");
+      });
+      const page = await open();
+      try {
+        expect(toggle(page.container).getAttribute("aria-label")).toBe("Expand");
+        await act(async () => toggle(page.container).click());
+        expect(toggle(page.container).getAttribute("aria-label")).toBe("Collapse");
+      } finally {
+        await page.cleanup();
+        broken.mockRestore();
+        writing.mockRestore();
+      }
+    });
+  });
 });
 
 describe("start and due", () => {
@@ -1017,7 +1200,7 @@ describe("start and due", () => {
     ]);
     const page = await open();
     try {
-      expect(text(page.container, '[data-testid="file-card"]')).toBe("report.pdf");
+      expect(text(page.container, '[data-testid="file-card"]')).toBe("report.pdf (Chief)");
     } finally {
       await page.cleanup();
     }

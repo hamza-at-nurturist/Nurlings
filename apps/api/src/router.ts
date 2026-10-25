@@ -240,6 +240,7 @@ import {
   listTicketComments,
   listTicketEvents,
   listTicketFiles,
+  listTicketRuns,
   lockOwnedGroup,
   modelCredentialProviderFilter,
   newestModelCredentialOrder,
@@ -4420,6 +4421,14 @@ export function createRouter(deps: RouterDeps) {
         if (!ticket) throw new IsolationError();
         const rows = await listTicketEvents(deps.prisma, context.actor.spaceId, ticket.id);
         return rows.map(toTicketEventDto);
+      }),
+      runs: boardEnabled.tickets.runs.handler(async ({ context, input }) => {
+        const board = await ensureBoard(deps.prisma, context.actor.spaceId);
+        const ticket = await deps.prisma.ticket.findFirst({
+          where: { id: input.ticketId, spaceId: context.actor.spaceId, boardId: board.id },
+        });
+        if (!ticket) throw new IsolationError();
+        return listTicketRuns(deps.prisma, context.actor.spaceId, ticket.id);
       }),
       files: boardEnabled.tickets.files.handler(async ({ context, input }) => {
         const board = await ensureBoard(deps.prisma, context.actor.spaceId);

@@ -1644,7 +1644,7 @@ model TicketEvent {
   ticket        Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   spaceId       String
   space         Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  /// created | status | owner | approved
+  /// created | status | owner | approved | resumed
   kind          String
   actorBotId    String?
   actorBot      Bot?     @relation("TicketEventActorBot", fields: [actorBotId], references: [id], onDelete: SetNull)

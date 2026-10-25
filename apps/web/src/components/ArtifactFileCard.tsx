@@ -20,6 +20,8 @@ type ArtifactFileCardProps = {
   name: string;
   mimeType: string;
   size: number;
+  /** Who added the file, shown before the size. */
+  meta?: string;
 };
 
 const PREVIEWABLE_MIME_TYPES = new Set([
@@ -99,6 +101,7 @@ export function ArtifactFileCard(props: ArtifactFileCardProps) {
             <span className="min-w-0">
               <span className="block truncate text-[14px] font-medium">{props.name}</span>
               <span className="mt-0.5 block text-[13px] text-muted-foreground">
+                {props.meta ? `${props.meta} · ` : ""}
                 {formatBytes(props.size)}
               </span>
             </span>
@@ -249,6 +252,7 @@ function AudioArtifactPreview({
   artifactId,
   name,
   mimeType,
+  meta,
   onDownload,
 }: ArtifactFileCardProps & { onDownload: () => Promise<void> }) {
   const { t } = useLingui();
@@ -303,7 +307,10 @@ function AudioArtifactPreview({
             <Play />
           </Button>
         ) : null}
-        <span className="min-w-0 flex-1 truncate text-[14px] font-medium">{name}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[14px] font-medium">{name}</span>
+          {meta ? <span className="block text-[13px] text-muted-foreground">{meta}</span> : null}
+        </span>
         <button
           type="button"
           aria-label={t`Download ${name}`}

@@ -647,9 +647,9 @@ describe("replies on a ticket in review or blocked", () => {
       expect(s.current().status).toBe("doing");
       expect(s.tx.ticketEvent.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          kind: "status",
+          kind: "resumed",
           status: "doing",
-          actorUserId: "user-1",
+          actorUserId: null,
           actorBotId: null,
         }),
       });
