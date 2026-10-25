@@ -11,6 +11,7 @@ import type {
   TicketStatus,
 } from "@rakazo/contracts";
 import {
+  isTicketCompletedStatus,
   parseTicketRef,
   TicketEventKindSchema,
   TicketMentionSchema,
@@ -109,6 +110,7 @@ function coerceTicketPriority(value: string | null | undefined): TicketPriority 
 }
 
 export function toTicketDto(row: TicketRow, ticketPrefix: string): Ticket {
+  const status = coerceTicketStatus(row.status);
   return {
     id: row.id,
     boardId: row.boardId,
@@ -117,7 +119,7 @@ export function toTicketDto(row: TicketRow, ticketPrefix: string): Ticket {
     ref: ticketRef(ticketPrefix, row.number),
     title: row.title,
     description: row.description,
-    status: coerceTicketStatus(row.status),
+    status,
     priority: coerceTicketPriority(row.priority),
     assigneeBotId: row.assigneeBotId,
     createdByBotId: row.createdByBotId,
@@ -125,6 +127,7 @@ export function toTicketDto(row: TicketRow, ticketPrefix: string): Ticket {
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
     completedAt: row.completedAt ? row.completedAt.toISOString() : null,
+    needsUser: row.needsUser && !isTicketCompletedStatus(status),
   };
 }
 

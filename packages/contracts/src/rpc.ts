@@ -8,6 +8,7 @@ import {
   ATTACHMENT_MAX_COUNT,
 } from "./attachments.js";
 import {
+  ApproveTicketInput,
   BoardEventSchema,
   BoardSchema,
   CommentTicketInput,
@@ -698,6 +699,7 @@ export const appContract = {
     create: oc.input(CreateTicketInput).output(TicketSchema),
     update: oc.input(UpdateTicketInput).output(TicketSchema),
     move: oc.input(MoveTicketInput).output(TicketSchema),
+    approve: oc.input(ApproveTicketInput).output(TicketSchema),
     comment: oc.input(CommentTicketInput).output(TicketCommentSchema),
     comments: oc.input(z.object({ ticketId: Id })).output(z.array(TicketCommentSchema)),
     events: oc.input(z.object({ ticketId: Id })).output(z.array(TicketEventSchema)),

@@ -989,7 +989,8 @@ export const builtinAgentTools: ConnectorTool[] = [
         },
         mention_user: {
           type: "boolean",
-          description: "True to notify the user that this comment needs them.",
+          description:
+            "True when you need the user's answer or decision, such as when you are blocked on them. It notifies them and marks the ticket as needing them until they reply.",
         },
       },
       required: ["id", "body"],

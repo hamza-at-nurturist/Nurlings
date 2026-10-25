@@ -34,6 +34,7 @@ vi.mock("@rakazo/chat-ui/web", () => ({
 vi.mock("@rakazo/ui-web", async (importOriginal) => {
   const Container = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
   return {
+    Badge: (props: ComponentProps<"span">) => <span {...props} />,
     Button: (props: ComponentProps<"button">) => <button {...props} />,
     buttonVariants: (await importOriginal<typeof UiWeb>()).buttonVariants,
     Dialog: Container,
@@ -154,6 +155,28 @@ it("renders status columns and opens the ticket modal for the clicked ticket", a
       (page.container.querySelector('[data-testid="modal-close"]') as HTMLButtonElement).click(),
     );
     expect(page.container.querySelector('[data-testid="ticket-modal"]')).toBeNull();
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("marks only the cards that need the user", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  api.bots.list.mockResolvedValue([bot("bot-1", "Helper")]);
+  api.tickets.list.mockResolvedValue({
+    tickets: [
+      { ...ticket("Pick a region", "ticket-1", "blocked", "RAK-1", "bot-1"), needsUser: true },
+      { ...ticket("Ship", "ticket-2", "doing", "RAK-2", "bot-1"), needsUser: false },
+    ],
+  });
+  const page = await renderBoard();
+  try {
+    const badge = (id: string) =>
+      page.container.querySelector(
+        `[data-testid="board-card-${id}"] [data-testid="ticket-needs-you"]`,
+      );
+    expect(badge("ticket-1")?.textContent).toBe("Needs you");
+    expect(badge("ticket-2")).toBeNull();
   } finally {
     await page.cleanup();
   }

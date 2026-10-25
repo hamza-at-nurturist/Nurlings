@@ -122,6 +122,10 @@ msgid "{0}'s screen"
 msgstr "המסך של {0}"
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} approved it"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
 msgid "{actor} assigned it to {owner}"
 msgstr ""
 
@@ -756,6 +760,7 @@ msgstr "החלה"
 msgid "Approval boundaries"
 msgstr "גבולות אישור"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
@@ -3425,6 +3430,7 @@ msgstr "ממתין לקלט"
 msgid "Needs takeover"
 msgstr "נדרשת השתלטות"
 
+#: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/computer-overlay.tsx
 msgid "Needs you"

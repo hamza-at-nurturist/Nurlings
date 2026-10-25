@@ -3,7 +3,7 @@ import type { Bot, TicketComment } from "@rakazo/contracts";
 import { TICKET_COMMENT_MAX_LENGTH } from "@rakazo/contracts";
 import { Button, Textarea } from "@rakazo/ui-web";
 import { ArrowUp } from "lucide-react";
-import { useId, useMemo, useRef, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { rpc } from "../../../lib/rpc";
 import { errorText } from "../../../lib/user-error";
 import { MentionChip } from "./MentionChip";
@@ -31,6 +31,16 @@ export function ReplyBox({ ticketId, bots, onSent, onError }: Props) {
   const [dismissedAt, setDismissedAt] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const canSend = !busy && body.trim().length > 0;
+  // Where the caret goes after a pick. It is placed as soon as the new text is committed, before
+  // the next keystroke can land at the end of the controlled value.
+  const pendingCaret = useRef<number | null>(null);
+  useLayoutEffect(() => {
+    const at = pendingCaret.current;
+    if (at === null) return;
+    pendingCaret.current = null;
+    box.current?.focus();
+    box.current?.setSelectionRange(at, at);
+  });
 
   const token = activeMentionToken(body, caret);
   const options = useMemo(() => {
@@ -58,10 +68,7 @@ export function ReplyBox({ ticketId, bots, onSent, onError }: Props) {
     setPicked((current) =>
       current.some((row) => row.id === bot.id) ? current : [...current, bot],
     );
-    requestAnimationFrame(() => {
-      box.current?.focus();
-      box.current?.setSelectionRange(next, next);
-    });
+    pendingCaret.current = next;
   }
 
   async function send() {

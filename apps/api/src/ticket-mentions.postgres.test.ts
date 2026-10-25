@@ -81,7 +81,7 @@ describePostgres("ticket mentions (PostgreSQL)", () => {
         }),
       );
 
-      // A user's comment mentioning Scout wakes Scout (and the owner, as every reply does).
+      // A user's comment mentioning only Scout wakes Scout; it is not a reply to the owner.
       const comment = await call<{ id: string; mentions: unknown }>("tickets/comment", {
         ticketId: ticket.id,
         body: "@Scout can you check these?",
@@ -103,7 +103,7 @@ describePostgres("ticket mentions (PostgreSQL)", () => {
       expect(scoutTask?.prompt).toContain("not its owner");
       expect(
         created.filter((task) => task.botId === owner.id && task.ticketWake === null),
-      ).toHaveLength(before.length + 1);
+      ).toHaveLength(before.length);
       // Mentioning never changes the owner.
       expect(await call<{ assigneeBotId: string }>("tickets/get", { id: ticket.id })).toMatchObject(
         {

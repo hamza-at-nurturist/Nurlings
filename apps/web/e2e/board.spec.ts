@@ -64,6 +64,9 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await detail.getByRole("button", { name: "Send", exact: true }).click();
   await expect(activity).toContainText("Any update on this?");
   await expect(detail.getByLabel("Reply")).toHaveValue("");
+  // A reply to a blocked ticket sends it back to work.
+  await expect(detail.getByTestId("ticket-status")).toContainText("In progress");
+  await expect(activity).toContainText("You moved it to In progress");
   await captureScreenshot(page, testInfo, "board-ticket-modal");
 
   // Calling in another Nurling: the picker lists the space's Nurlings and the feed shows a chip.
@@ -76,4 +79,26 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await expect(chip).toBeVisible();
   await expect(chip).toHaveAttribute("data-mention-color", /^#[0-9a-f]{3,6}$/i);
   await captureScreenshot(page, testInfo, "board-ticket-mention");
+
+  // In review: one Approve action; a reply sends it back, approving moves it to Done.
+  const status = detail.getByTestId("ticket-status");
+  const approve = detail.getByRole("button", { name: "Approve", exact: true });
+  await expect(approve).toHaveCount(0);
+  await status.click();
+  await page.getByRole("menuitemradio", { name: "In review", exact: true }).click();
+  await expect(status).toContainText("In review");
+  await expect(approve).toBeVisible();
+  await detail.getByLabel("Reply").fill("Add last quarter too");
+  await detail.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(status).toContainText("In progress");
+  await expect(approve).toHaveCount(0);
+  await status.click();
+  await page.getByRole("menuitemradio", { name: "In review", exact: true }).click();
+  await expect(approve).toBeVisible();
+  await captureScreenshot(page, testInfo, "board-ticket-review");
+  await approve.click();
+  await expect(status).toContainText("Done");
+  await expect(activity).toContainText("You approved it");
+  await expect(approve).toHaveCount(0);
+  await captureScreenshot(page, testInfo, "board-ticket-approved");
 });
