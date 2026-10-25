@@ -102,6 +102,7 @@ describe("a Nurling mentioning the user", () => {
         body: "I need you to sign in",
         botId: "chief",
         threadId: "thread-1",
+        ticketId: "ticket-1",
       },
       expect.objectContaining({ spaceId: "space-1", userId: "user-1", botId: "chief" }),
     );

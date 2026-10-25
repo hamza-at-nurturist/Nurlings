@@ -285,6 +285,7 @@ export async function runTicketDates(
       spaceId: row.spaceId,
       userId,
       botId,
+      ticketId: row.id,
       title: () => `${ref} is overdue`,
       body: row.title,
     });
