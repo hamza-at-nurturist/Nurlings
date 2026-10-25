@@ -19,11 +19,21 @@ type Props = {
   bots: Bot[];
   onSent: (comment: TicketComment) => void;
   onError: (message: string) => void;
+  /** On the narrow sheet: 16px text so iOS doesn't zoom, and 44px attach and send. */
+  touch?: boolean;
 };
 
 const ATTACHMENT_ACCEPT = [...ATTACHMENT_ALLOWED_MIME_TYPES, ".zip"].join(",");
 
-export function ReplyBox({ ticketId, ownerBotId, files, bots, onSent, onError }: Props) {
+export function ReplyBox({
+  ticketId,
+  ownerBotId,
+  files,
+  bots,
+  onSent,
+  onError,
+  touch = false,
+}: Props) {
   const { t } = useLingui();
   const pickerId = useId();
   const picker = useRef<HTMLInputElement>(null);
@@ -139,7 +149,7 @@ export function ReplyBox({ ticketId, ownerBotId, files, bots, onSent, onError }:
               aria-label={t`Attach file`}
               disabled={busy}
               onClick={() => picker.current?.click()}
-              className="absolute bottom-2 left-2 z-10 rounded-full border border-border bg-muted text-muted-foreground hover:bg-accent hover:text-foreground"
+              className={`absolute z-10 rounded-full border border-border bg-muted text-muted-foreground hover:bg-accent hover:text-foreground ${touch ? "bottom-1.5 left-1.5 size-11" : "bottom-2 left-2"}`}
             >
               <Plus size={16} strokeWidth={2} />
             </Button>
@@ -154,7 +164,11 @@ export function ReplyBox({ ticketId, ownerBotId, files, bots, onSent, onError }:
           value={body}
           maxLength={TICKET_COMMENT_MAX_LENGTH}
           rows={1}
-          className={`max-h-40 min-h-11 resize-none rounded-2xl py-2.5 pr-12 ${ownerBotId ? "pl-12" : ""}`}
+          className={
+            touch
+              ? `max-h-40 min-h-14 resize-none rounded-3xl py-4 pr-14 text-base md:text-base ${ownerBotId ? "pl-14" : ""}`
+              : `max-h-40 min-h-11 resize-none rounded-2xl py-2.5 pr-12 ${ownerBotId ? "pl-12" : ""}`
+          }
           onChange={input.onChange}
           onSelect={input.onSelect}
           onKeyDown={(event) => {
@@ -167,7 +181,7 @@ export function ReplyBox({ ticketId, ownerBotId, files, bots, onSent, onError }:
         <Button
           type="submit"
           size="icon-sm"
-          className="absolute right-2 bottom-2 rounded-full"
+          className={`absolute rounded-full ${touch ? "right-1.5 bottom-1.5 size-11" : "right-2 bottom-2"}`}
           aria-label={t`Send`}
           disabled={!canSend}
         >

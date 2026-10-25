@@ -460,6 +460,7 @@ msgstr "Активный"
 msgid "Active model"
 msgstr "Активная модель"
 
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/pages/shell/sidebar-header.tsx
 msgid "Activity"
 msgstr "Активность"
@@ -788,6 +789,7 @@ msgid "Approval boundaries"
 msgstr "Границы одобрения"
 
 #: src/components/board/BoardView/BoardCard.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
@@ -923,6 +925,7 @@ msgid "Avatar Studio"
 msgstr "Студия аватаров"
 
 #: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/pages/Auth.tsx
 #: src/pages/Board.tsx
 #: src/pages/PluginsOverlay.tsx
@@ -965,6 +968,7 @@ msgid "Blocked"
 msgstr ""
 
 #: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
@@ -1279,6 +1283,10 @@ msgstr "Закрыть график"
 #: src/pages/shell/computer-overlay.tsx
 msgid "Close computer"
 msgstr "Закрыть компьютер"
+
+#: src/components/board/TicketModal/TicketImage.tsx
+msgid "Close image"
+msgstr ""
 
 #: src/pages/shell/message-cards.tsx
 msgid "Close image preview"
@@ -2275,7 +2283,8 @@ msgstr "Запретить"
 msgid "Deployment default"
 msgstr "Развертывание по умолчанию"
 
-#: src/components/board/TicketModal/TicketModal.tsx
+#: src/components/board/TicketModal/ClampedDescription.tsx
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Description"
@@ -4722,6 +4731,7 @@ msgstr ""
 msgid "Show list"
 msgstr ""
 
+#: src/components/board/TicketModal/ClampedDescription.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/ScratchpadSection.tsx
@@ -4828,6 +4838,7 @@ msgid "Slide up to lock"
 msgstr "Проведите вверх, чтобы закрепить"
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
 msgid "Someone"
 msgstr ""
 
@@ -5189,6 +5200,10 @@ msgstr ""
 msgid "This weekend"
 msgstr ""
 
+#: src/components/board/TicketModal/NarrowTicket.tsx
+msgid "Ticket"
+msgstr ""
+
 #: src/components/board/TicketModal/DatePicker.tsx
 msgid "Time"
 msgstr ""
@@ -5201,7 +5216,7 @@ msgstr "Время суток"
 msgid "Timezone"
 msgstr ""
 
-#: src/components/board/TicketModal/TicketModal.tsx
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/bot-panel.tsx
 msgid "Title"
@@ -5656,6 +5671,7 @@ msgid "Yesterday"
 msgstr "Вчера"
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
 #: src/components/board/TicketModal/TicketFiles.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx

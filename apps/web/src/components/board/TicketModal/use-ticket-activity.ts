@@ -17,6 +17,8 @@ export function useTicketActivity(ticketId: string, revision: number) {
   const [files, setFiles] = useState<Artifact[]>([]);
   const [runs, setRuns] = useState<TicketRun[]>([]);
   const [error, setError] = useState("");
+  // Whether the first fetch came back, so a count of new items doesn't start from an empty feed.
+  const [loaded, setLoaded] = useState(false);
   const [local, setLocal] = useState(0);
 
   useEffect(() => {
@@ -33,6 +35,7 @@ export function useTicketActivity(ticketId: string, revision: number) {
         setEvents(nextEvents);
         setFiles(nextFiles);
         setRuns(nextRuns);
+        setLoaded(true);
         setError("");
       })
       .catch((cause) => {
@@ -59,5 +62,5 @@ export function useTicketActivity(ticketId: string, revision: number) {
       ),
     [],
   );
-  return { comments, events, files, runs, error, refresh, addComment };
+  return { comments, events, files, runs, loaded, error, refresh, addComment };
 }

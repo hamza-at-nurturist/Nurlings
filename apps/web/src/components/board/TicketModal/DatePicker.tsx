@@ -3,6 +3,7 @@ import { useLingui } from "@lingui/react/macro";
 import { Button, Calendar, Input, Popover, PopoverContent, PopoverTrigger } from "@rakazo/ui-web";
 import { CalendarDays } from "lucide-react";
 import { useState } from "react";
+import { CHIP } from "./chip";
 import type { RelativeDayLabels } from "./dates";
 import { formatTicketDate, localDate, localTime, quickPickDates } from "./dates";
 
@@ -15,6 +16,8 @@ type Props = {
   disabled: boolean;
   overdue?: boolean;
   testId: string;
+  /** A 44px pill on the narrow sheet, naming itself while empty. */
+  chip?: boolean;
   /** A local `YYYY-MM-DD` or `YYYY-MM-DDTHH:mm` in `timeZone`, or null to clear. */
   onChange: (value: string | null) => void;
 };
@@ -29,7 +32,16 @@ export function useRelativeDayLabels(): RelativeDayLabels {
 }
 
 /** One picker for a ticket's start or due: quick picks, a calendar, an optional time, no date. */
-export function DatePicker({ label, value, timeZone, disabled, overdue, testId, onChange }: Props) {
+export function DatePicker({
+  label,
+  value,
+  timeZone,
+  disabled,
+  overdue,
+  testId,
+  chip = false,
+  onChange,
+}: Props) {
   const { t } = useLingui();
   const labels = useRelativeDayLabels();
   const [open, setOpen] = useState(false);
@@ -53,10 +65,15 @@ export function DatePicker({ label, value, timeZone, disabled, overdue, testId, 
         disabled={disabled}
         aria-label={label}
         data-testid={testId}
-        className={`${TRIGGER} -ml-2.5 ${overdue ? "text-destructive" : ""}`}
+        className={`${chip ? CHIP : `${TRIGGER} -ml-2.5`} ${overdue ? "text-destructive" : ""}`}
       >
+        {chip ? (
+          <CalendarDays size={15} aria-hidden="true" className="text-muted-foreground" />
+        ) : null}
         {value ? (
           formatTicketDate(value, now, timeZone, labels, i18n.locale || "en")
+        ) : chip ? (
+          <span className="text-muted-foreground">{label}</span>
         ) : (
           <CalendarDays size={15} aria-hidden="true" className="text-muted-foreground" />
         )}
