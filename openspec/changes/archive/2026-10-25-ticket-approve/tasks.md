@@ -44,7 +44,7 @@
 
 ## 4. Evidence
 
-- [ ] 4.1 Extend `apps/web/e2e/board.spec.ts`: a ticket in review shows Approve, approving moves it
+- [x] 4.1 Extend `apps/web/e2e/board.spec.ts`: a ticket in review shows Approve, approving moves it
   to Done and shows "You approved it"; a reply on a ticket in review moves it to In progress;
   capture a screenshot. Verify: CI E2E passes and the screenshot is linked in the PR.
 
@@ -57,4 +57,4 @@
 
 ## 6. After merge
 
-- [ ] 6.1 Archive the change.
+- [x] 6.1 Archive the change.
