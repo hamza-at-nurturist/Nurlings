@@ -70,13 +70,13 @@
 
 ## 5. Evidence
 
-- [ ] 5.1 Extend `apps/web/e2e/board.spec.ts`: set a due with the picker, see it in the modal and on
+- [x] 5.1 Extend `apps/web/e2e/board.spec.ts`: set a due with the picker, see it in the modal and on
   the card, and capture a screenshot. Verify: CI E2E passes and the screenshot is linked in the PR.
 
 ## 6. Checks
 
-- [ ] 6.1 `openspec validate ticket-dates --strict`, typecheck, lint and the unit suites pass.
+- [x] 6.1 `openspec validate ticket-dates --strict`, typecheck, lint and the unit suites pass.
 
 ## 7. After merge
 
-- [ ] 7.1 Archive the change.
+- [x] 7.1 Archive the change.
