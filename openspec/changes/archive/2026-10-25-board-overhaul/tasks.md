@@ -50,9 +50,9 @@
 
 ## 4. Ship
 
-- [ ] 4.1 `pnpm` typecheck, lint, unit tests for changed packages; `openspec validate board-overhaul
+- [x] 4.1 `pnpm` typecheck, lint, unit tests for changed packages; `openspec validate board-overhaul
   --strict`. Verify: all pass locally.
-- [ ] 4.2 PR `feature/board-overhaul` with Why/What/Testing, the copy table, and the CI screenshot
+- [x] 4.2 PR `feature/board-overhaul` with Why/What/Testing, the copy table, and the CI screenshot
   links. Verify: CI green, review comments handled.
-- [ ] 4.3 Archive the change after merge. Verify: `openspec archive board-overhaul` and the main
+- [x] 4.3 Archive the change after merge. Verify: `openspec archive board-overhaul` and the main
   spec updated.
