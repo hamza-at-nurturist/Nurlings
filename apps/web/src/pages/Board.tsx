@@ -24,6 +24,7 @@ import {
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useId, useState } from "react";
 import { Link } from "react-router-dom";
+import { CardDates } from "../components/board/TicketModal/CardDates";
 import { NeedsYou } from "../components/board/TicketModal/NeedsYou";
 import { TicketModal } from "../components/board/TicketModal/TicketModal";
 import { formatRelativeTime } from "../lib/relative-time";
@@ -38,6 +39,8 @@ export function BoardPage() {
   const statuses = useTicketStatusLabels();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [bots, setBots] = useState<Bot[]>([]);
+  // Dates are shown and picked in the user's saved timezone, the one the server resolves them in.
+  const [timeZone, setTimeZone] = useState("UTC");
   const [selected, setSelected] = useState<Ticket | "new" | null>(null);
   const [error, setError] = useState("");
   const [commentRefresh, setCommentRefresh] = useState<Record<string, number>>({});
@@ -49,11 +52,12 @@ export function BoardPage() {
   useEffect(() => {
     let currentController: AbortController | undefined;
     let active = true;
-    void Promise.all([rpc.tickets.list({}), rpc.bots.list()])
-      .then(([result, owners]) => {
+    void Promise.all([rpc.tickets.list({}), rpc.bots.list(), rpc.me()])
+      .then(([result, owners, me]) => {
         if (!active) return;
         setTickets(result.tickets);
         setBots(owners);
+        setTimeZone(me.timezone ?? "UTC");
       })
       .catch((cause) => {
         if (active) setError(errorText(cause));
@@ -151,6 +155,7 @@ export function BoardPage() {
                       {ticket.needsUser ? <NeedsYou /> : null}
                     </span>
                     <span>{ticket.title}</span>
+                    <CardDates ticket={ticket} timeZone={timeZone} />
                     <span className="text-xs text-muted-foreground">
                       {bots.find((bot) => bot.id === ticket.assigneeBotId)?.name}
                     </span>
@@ -170,6 +175,7 @@ export function BoardPage() {
           key={selected.id}
           ticket={tickets.find((row) => row.id === selected.id) ?? selected}
           bots={bots}
+          timeZone={timeZone}
           revision={(commentRefresh["*"] ?? 0) + (commentRefresh[selected.id] ?? 0)}
           onClose={() => setSelected(null)}
           onChanged={reload}

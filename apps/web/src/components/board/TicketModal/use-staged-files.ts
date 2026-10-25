@@ -26,11 +26,14 @@ export function useStagedFiles() {
   const add = useCallback(
     (files: FileList | File[] | null) => {
       if (!files?.length) return;
+      // Copied now: the caller clears its input next, which empties a live FileList before a
+      // deferred update below would read it.
+      const picked = Array.from(files);
       const maxBytes = attachmentMaxBytes({ maxUploadSizeBytes: getMaxUploadSizeBytes() });
       setStaged((current) => {
         const next: StagedFile[] = [];
         const skipped: string[] = [];
-        for (const file of Array.from(files)) {
+        for (const file of picked) {
           if (current.length + next.length >= ATTACHMENT_MAX_COUNT) {
             skipped.push(t`${file.name} (max ${ATTACHMENT_MAX_COUNT} attachments)`);
             continue;

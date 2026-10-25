@@ -115,9 +115,31 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await expect(detail.getByTestId("reply-files")).toHaveCount(0);
   await expect(activity).toContainText("Notes from the viewing");
   await expect(activity).toContainText("listing-notes.txt");
+  await expect(activity).toContainText("TXT · 22 B");
   const files = detail.getByTestId("ticket-files");
   await expect(
     files.getByTestId("ticket-file").filter({ hasText: "listing-notes.txt" }),
   ).toContainText("You");
+  // Ticket file cards show a short type, not the MIME type.
+  await expect(files.getByTestId("ticket-file")).toContainText("TXT · 22 B");
   await captureScreenshot(page, testInfo, "board-ticket-files");
+
+  // Dates: one picker for start and due, shown short in the modal and on the card.
+  await status.click();
+  await page.getByRole("menuitemradio", { name: "In progress", exact: true }).click();
+  await detail.getByTestId("ticket-start").click();
+  await page.getByRole("button", { name: "Add time", exact: true }).click();
+  await page.getByLabel("Time", { exact: true }).fill("09:30");
+  await page.getByRole("button", { name: "Today", exact: true }).click();
+  await expect(detail.getByTestId("ticket-start")).toHaveText("Today 9:30 AM");
+  await detail.getByTestId("ticket-due").click();
+  await expect(page.getByRole("button", { name: "This weekend", exact: true })).toBeVisible();
+  await captureScreenshot(page, testInfo, "board-ticket-dates");
+  await page.getByRole("button", { name: "Tomorrow", exact: true }).click();
+  await expect(detail.getByTestId("ticket-due")).toHaveText("Tomorrow");
+  await page.keyboard.press("Escape");
+  await expect(detail).toBeHidden();
+  await expect(card.getByTestId("card-dates")).toContainText("Today 9:30 AM –");
+  await expect(card.getByTestId("card-dates")).toContainText("Tomorrow");
+  await captureScreenshot(page, testInfo, "board-ticket-card-dates");
 });

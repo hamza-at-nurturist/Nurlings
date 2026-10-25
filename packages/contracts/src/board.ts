@@ -141,6 +141,11 @@ export const TicketSchema = z.object({
   completedAt: z.string().nullable(),
   /** A Nurling's latest comment calls for the user and the ticket is still open. */
   needsUser: z.boolean().default(false),
+  /** Instants; without a time a start is 9 AM and a due the end of that day, local. */
+  startAt: z.string().nullable().default(null),
+  startHasTime: z.boolean().default(false),
+  dueAt: z.string().nullable().default(null),
+  dueHasTime: z.boolean().default(false),
 });
 export type Ticket = z.infer<typeof TicketSchema>;
 
@@ -165,23 +170,68 @@ export const GetTicketInput = z
   });
 export type GetTicketInput = z.infer<typeof GetTicketInput>;
 
-export const CreateTicketInput = z.object({
-  boardId: Id.optional(),
-  title: z.string().trim().min(1).max(TICKET_TITLE_MAX_LENGTH),
-  description: z.string().max(TICKET_DESCRIPTION_MAX_LENGTH).optional(),
-  priority: TicketPrioritySchema.default(DEFAULT_TICKET_PRIORITY),
-  assigneeBotId: Id,
-});
+export type TicketDateKind = "start" | "due";
+/** A date without a time starts at 9 AM and is due at the end of the day. */
+const TICKET_DEFAULT_TIME: Record<TicketDateKind, string> = { start: "09:00", due: "23:59" };
+export const TICKET_START_AFTER_DUE_ERROR = "Start must be before due.";
+
+/** A local date (`2026-10-30`) or date-time (`2026-10-30T15:00`) in the user's timezone. */
+export const TicketDateInputSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/, "Use YYYY-MM-DD or YYYY-MM-DDTHH:mm")
+  .refine((value) => {
+    const [date, time = "00:00"] = value.split("T");
+    const [year, month, day] = (date ?? "").split("-").map(Number);
+    const [hour, minute] = time.split(":").map(Number);
+    const check = new Date(Date.UTC(year!, month! - 1, day!));
+    return (
+      check.getUTCFullYear() === year &&
+      check.getUTCMonth() === month! - 1 &&
+      check.getUTCDate() === day &&
+      hour! < 24 &&
+      minute! < 60
+    );
+  }, "Not a real date or time");
+
+/** The local wall-clock time a date input stands for, as `YYYY-MM-DDTHH:mm`. */
+export function ticketLocalDateTime(value: string, kind: TicketDateKind): string {
+  return value.includes("T") ? value : `${value}T${TICKET_DEFAULT_TIME[kind]}`;
+}
+
+function startNotAfterDue(value: { start?: string | null; due?: string | null }) {
+  return (
+    !value.start ||
+    !value.due ||
+    ticketLocalDateTime(value.start, "start") <= ticketLocalDateTime(value.due, "due")
+  );
+}
+
+export const CreateTicketInput = z
+  .object({
+    boardId: Id.optional(),
+    title: z.string().trim().min(1).max(TICKET_TITLE_MAX_LENGTH),
+    description: z.string().max(TICKET_DESCRIPTION_MAX_LENGTH).optional(),
+    priority: TicketPrioritySchema.default(DEFAULT_TICKET_PRIORITY),
+    assigneeBotId: Id,
+    start: TicketDateInputSchema.nullable().optional(),
+    due: TicketDateInputSchema.nullable().optional(),
+  })
+  .refine(startNotAfterDue, { message: TICKET_START_AFTER_DUE_ERROR });
 export type CreateTicketInput = z.infer<typeof CreateTicketInput>;
 
-export const UpdateTicketInput = z.object({
-  id: Id,
-  title: z.string().trim().min(1).max(TICKET_TITLE_MAX_LENGTH).optional(),
-  description: z.string().max(TICKET_DESCRIPTION_MAX_LENGTH).nullable().optional(),
-  priority: TicketPrioritySchema.nullable().optional(),
-  status: TicketStatusSchema.optional(),
-  assigneeBotId: Id.optional(),
-});
+export const UpdateTicketInput = z
+  .object({
+    id: Id,
+    title: z.string().trim().min(1).max(TICKET_TITLE_MAX_LENGTH).optional(),
+    description: z.string().max(TICKET_DESCRIPTION_MAX_LENGTH).nullable().optional(),
+    priority: TicketPrioritySchema.nullable().optional(),
+    status: TicketStatusSchema.optional(),
+    assigneeBotId: Id.optional(),
+    /** Null clears the date; omitted leaves it. */
+    start: TicketDateInputSchema.nullable().optional(),
+    due: TicketDateInputSchema.nullable().optional(),
+  })
+  .refine(startNotAfterDue, { message: TICKET_START_AFTER_DUE_ERROR });
 export type UpdateTicketInput = z.infer<typeof UpdateTicketInput>;
 
 export const MoveTicketInput = z.object({

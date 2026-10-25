@@ -13,6 +13,10 @@ const payloadSchemas = {
     routineId: z.string().min(1),
     scheduledFor: z.string().datetime({ offset: true }),
   }),
+  "ticket.dates": z.object({
+    ticketId: z.string().min(1),
+    scheduledFor: z.string().datetime({ offset: true }),
+  }),
   "routine.retry": z.object({ runId: z.string().min(1) }),
   "computer.update": z.object({ updateId: z.string().min(1) }),
   "computer.sleep": z.object({ computerId: z.string().min(1) }),
@@ -90,6 +94,15 @@ export function routineWakeupJob(routineId: string, scheduledFor: Date): Backgro
     payload: { routineId, scheduledFor: scheduledFor.toISOString() },
     availableAt: scheduledFor,
     replaceKey: routineJobKey(routineId),
+  };
+}
+
+export function ticketDatesJob(ticketId: string, scheduledFor: Date): BackgroundJob {
+  return {
+    name: "ticket.dates",
+    payload: { ticketId, scheduledFor: scheduledFor.toISOString() },
+    availableAt: scheduledFor,
+    replaceKey: `ticket.dates:${ticketId}`,
   };
 }
 

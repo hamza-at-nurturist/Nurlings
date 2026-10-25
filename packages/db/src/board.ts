@@ -130,6 +130,10 @@ export function toTicketDto(row: TicketRow, ticketPrefix: string): Ticket {
     updatedAt: row.updatedAt.toISOString(),
     completedAt: row.completedAt ? row.completedAt.toISOString() : null,
     needsUser: row.needsUser && !isTicketCompletedStatus(status),
+    startAt: row.startAt ? row.startAt.toISOString() : null,
+    startHasTime: row.startHasTime,
+    dueAt: row.dueAt ? row.dueAt.toISOString() : null,
+    dueHasTime: row.dueHasTime,
   };
 }
 

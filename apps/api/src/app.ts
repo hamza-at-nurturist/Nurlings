@@ -51,6 +51,7 @@ import {
   EmailEmulator,
   ExpoPushProvider,
   endSessionPushToken,
+  enqueueDueTicketDates,
   GraphileJobPublisher,
   InMemoryJobQueue,
   InMemoryRealtimeFanout,
@@ -604,6 +605,7 @@ async function buildApp(overrides: CreateAppOverrides): Promise<AppHandles> {
     deploymentModelConfigured: env.deploymentModelConfigured,
     messaging,
     cloudAgent,
+    ticketBoardEnabled,
   });
   if (inMemoryJobs) {
     await inMemoryJobs.start(jobHandlers);
@@ -624,6 +626,9 @@ async function buildApp(overrides: CreateAppOverrides): Promise<AppHandles> {
           prisma,
           securityEventRetentionDays(),
         ),
+        reconcileTicketDates: ticketBoardEnabled
+          ? () => enqueueDueTicketDates({ prisma, jobs })
+          : undefined,
       })
     : undefined;
   reconciler?.start();

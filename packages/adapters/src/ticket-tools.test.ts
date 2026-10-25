@@ -52,6 +52,14 @@ function ticket(overrides: Record<string, unknown> = {}) {
     updatedAt: NOW,
     completedAt: null,
     needsUser: false,
+    startAt: null,
+    startHasTime: false,
+    dueAt: null,
+    dueHasTime: false,
+    startWokenAt: null,
+    dueWarnedAt: null,
+    overdueNotifiedAt: null,
+    scheduleAt: null,
     ...overrides,
   };
 }
@@ -188,6 +196,7 @@ function mutationDeps(ticketBoardEnabled = true) {
       ),
     },
     ticket: tx.ticket,
+    user: { findUnique: vi.fn(async () => ({ timezone: "America/New_York" })) },
     ticketComment: { findMany: vi.fn(async () => []), count: priorReplies },
     task: { findFirst: mentionTask },
     $transaction: vi.fn(async (fn: (client: typeof tx) => Promise<unknown>) => fn(tx)),
@@ -796,5 +805,97 @@ describe("comment attachments", () => {
     expect(s.tx.ticketComment.create).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ attachments: [] }) }),
     );
+  });
+});
+
+describe("ticket dates", () => {
+  const user = { spaceId: "ws", userId: "user-1" };
+  const wakes = (s: ReturnType<typeof mutationDeps>) =>
+    s.changes.mock.calls.map(([value]) => (value as { wakeAssignee: boolean }).wakeAssignee);
+
+  it("resolves dates in the user's timezone and schedules the first reminder", async () => {
+    vi.useFakeTimers({ now: new Date("2026-10-26T12:00:00Z"), toFake: ["Date"] });
+    try {
+      const s = mutationDeps();
+      const result = await updateTicket(s.deps, {
+        ...user,
+        id: "t1",
+        start: "2026-10-27",
+        due: "2026-10-30T15:00",
+      });
+      expect(result).toEqual({
+        ticket: expect.objectContaining({
+          startAt: "2026-10-27T13:00:00.000Z",
+          startHasTime: false,
+          dueAt: "2026-10-30T19:00:00.000Z",
+          dueHasTime: true,
+        }),
+      });
+      expect(s.current()).toMatchObject({
+        startWokenAt: null,
+        dueWarnedAt: null,
+        overdueNotifiedAt: null,
+        scheduleAt: new Date("2026-10-27T13:00:00.000Z"),
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("refuses a start after the due, counting the stored due", async () => {
+    const s = mutationDeps();
+    s.setTicket({ dueAt: new Date("2026-10-30T03:59:00Z") });
+    expect(await updateTicket(s.deps, { ...user, id: "t1", start: "2026-11-02" })).toEqual({
+      error: "Start must be before due.",
+    });
+    expect(
+      await updateTicket(s.deps, { ...user, id: "t1", start: "2026-11-02", due: "2026-11-01" }),
+    ).toEqual({ error: "Start must be before due." });
+    expect(s.tx.ticket.update).not.toHaveBeenCalled();
+  });
+
+  it("explains a malformed date and clears a date with an empty string", async () => {
+    const s = mutationDeps();
+    expect(await updateTicket(s.deps, { ...user, id: "t1", due: "Friday" })).toEqual({
+      error: "due: Use YYYY-MM-DD or YYYY-MM-DDTHH:mm",
+    });
+    s.setTicket({ dueAt: new Date("2030-01-01T04:59:00Z"), scheduleAt: new Date("2030-01-01") });
+    await updateTicket(s.deps, { ...user, botId: "bot-1", id: "t1", due: "" });
+    expect(s.current()).toMatchObject({ dueAt: null, scheduleAt: null });
+  });
+
+  it("does not wake the owner of a new ticket whose start is still to come", async () => {
+    const s = mutationDeps();
+    await createTicket(s.deps, {
+      ...user,
+      title: "Later",
+      ownerBotId: "bot-2",
+      start: "2099-01-05",
+    });
+    await createTicket(s.deps, { ...user, title: "Now", ownerBotId: "bot-2", start: "2020-01-05" });
+    expect(wakes(s)).toEqual([false, true]);
+  });
+
+  it("holds a reassignment until the start, and wakes when a pending start is cleared", async () => {
+    const s = mutationDeps();
+    s.setTicket({ startAt: new Date("2099-01-05T14:00:00Z") });
+    await updateTicket(s.deps, { ...user, id: "t1", ownerBotId: "bot-2" });
+    await updateTicket(s.deps, { ...user, id: "t1", start: null });
+    expect(wakes(s)).toEqual([false, true]);
+  });
+
+  it("wakes when a pending start moves to the past, but not in review or for the owner itself", async () => {
+    const s = mutationDeps();
+    s.setTicket({ startAt: new Date("2099-01-05T14:00:00Z") });
+    await updateTicket(s.deps, { ...user, botId: "bot-1", id: "t1", start: "2020-01-01" });
+    s.setTicket({
+      startAt: new Date("2099-01-05T14:00:00Z"),
+      startWokenAt: null,
+      status: "review",
+    });
+    await updateTicket(s.deps, { ...user, id: "t1", start: "2020-01-01" });
+    s.setTicket({ startAt: new Date("2099-01-05T14:00:00Z"), startWokenAt: null, status: "todo" });
+    await updateTicket(s.deps, { ...user, id: "t1", start: "2020-01-01" });
+    expect(wakes(s)).toEqual([false, false, true]);
   });
 });

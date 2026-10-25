@@ -3,7 +3,7 @@
 import type { ComponentProps, ReactNode } from "react";
 import { act, createContext, useContext } from "react";
 import { createRoot } from "react-dom/client";
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const api = vi.hoisted(() => ({
   bots: { list: vi.fn() },
@@ -47,6 +47,7 @@ vi.mock("../../../pages/shell/chat-shared", () => ({ FALLBACK_BOT_COLOR: "#11111
 vi.mock("@rakazo/ui-web", () => {
   const Container = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
   const Choose = createContext<(value: string) => void>(() => {});
+  const Opens = createContext<(open: boolean) => void>(() => {});
   return {
     BotAvatar: (props: { color: string; identity?: string; status?: string; size?: number }) => (
       <span
@@ -87,6 +88,27 @@ vi.mock("@rakazo/ui-web", () => {
       );
     },
     Textarea: (props: ComponentProps<"textarea">) => <textarea {...props} />,
+    Input: (props: ComponentProps<"input">) => <input {...props} />,
+    Popover: ({
+      children,
+      onOpenChange,
+    }: {
+      children?: ReactNode;
+      onOpenChange: (open: boolean) => void;
+    }) => <Opens.Provider value={onOpenChange}>{children}</Opens.Provider>,
+    PopoverTrigger: (props: ComponentProps<"button">) => {
+      const setOpen = useContext(Opens);
+      return <button type="button" {...props} onClick={() => setOpen(true)} />;
+    },
+    PopoverContent: Container,
+    // A calendar whose one day is 4 November 2026, picked as react-day-picker hands it back.
+    Calendar: ({ onSelect }: { onSelect: (day: Date) => void }) => (
+      <button
+        type="button"
+        data-testid="calendar-day"
+        onClick={() => onSelect(new Date("2026-11-04T05:00:00Z"))}
+      />
+    ),
   };
 });
 
@@ -116,6 +138,10 @@ function makeTicket(patch: Partial<Ticket> = {}): Ticket {
     updatedAt: "2026-10-24T03:41:00.000Z",
     completedAt: null,
     needsUser: false,
+    startAt: null,
+    startHasTime: false,
+    dueAt: null,
+    dueHasTime: false,
     ...patch,
   };
 }
@@ -212,6 +238,7 @@ async function open(props: Partial<ComponentProps<typeof TicketModal>> = {}) {
         <TicketModal
           ticket={makeTicket()}
           bots={bots}
+          timeZone="America/New_York"
           revision={0}
           onClose={onClose}
           onChanged={onChanged}
@@ -480,9 +507,10 @@ it("lists attached files only when there are some", async () => {
     ]);
     await page.render({ revision: 1 });
     expect(text(page.container, '[data-testid="ticket-files"]')).toContain("Files");
-    const card = q(page.container, '[data-testid="file-card"]');
-    expect(card.textContent).toBe("comps.csv");
-    expect(card.dataset.bot).toBe("bot-1");
+    // A type the shared card cannot preview gets the ticket's own card, with a short type.
+    expect(text(page.container, '[data-testid="ticket-file"]')).toContain("comps.csv");
+    expect(text(page.container, '[data-testid="ticket-file"]')).toContain("CSV · 10 B");
+    expect(text(page.container, '[data-testid="ticket-file"]')).not.toContain("text/csv");
   } finally {
     await page.cleanup();
   }
@@ -767,6 +795,33 @@ it("stages picked files, uploads them for the owner on send, then posts the comm
   }
 });
 
+it("keeps picked files when the input is cleared before the staged list updates", async () => {
+  const page = await open();
+  try {
+    const input = q(page.container, '[data-testid="reply-file-input"]') as HTMLInputElement;
+    // As in a browser, clearing the input empties the list the change event carried.
+    let current: File[] = [];
+    Object.defineProperty(input, "files", { get: () => current, configurable: true });
+    Object.defineProperty(input, "value", {
+      get: () => "",
+      set: () => {
+        current.length = 0;
+      },
+      configurable: true,
+    });
+    // Two picks in one batch: the second update is not applied right away.
+    await act(async () => {
+      for (const name of ["first.txt", "second.txt"]) {
+        current = [fileOf(name)];
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+    expect(staged(page.container)).toEqual(["first.txt", "second.txt"]);
+  } finally {
+    await page.cleanup();
+  }
+});
+
 it("skips files over the count or of unknown types, and removes a staged one", async () => {
   const page = await open();
   try {
@@ -868,10 +923,11 @@ it("shows a comment's files and labels each file with who added it", async () =>
   ]);
   const page = await open();
   try {
-    const feedCards = page.container.querySelectorAll(
-      '[data-testid="ticket-activity"] [data-testid="file-card"]',
-    );
-    expect(Array.from(feedCards).map((card) => card.textContent)).toEqual(["upload.csv"]);
+    // The comment's file uses the ticket's own card, with a short type.
+    const feed = text(page.container, '[data-testid="ticket-activity"]');
+    expect(feed).toContain("upload.csv");
+    expect(feed).toContain("CSV · 10 B");
+    expect(feed).not.toContain("text/csv");
     const labels = Array.from(
       page.container.querySelectorAll('[data-testid="ticket-file"] figcaption'),
     ).map((node) => node.textContent);
@@ -879,4 +935,91 @@ it("shows a comment's files and labels each file with who added it", async () =>
   } finally {
     await page.cleanup();
   }
+});
+
+describe("start and due", () => {
+  // Monday 26 October 2026, noon in New York.
+  beforeEach(() => vi.useFakeTimers({ now: new Date("2026-10-26T16:00:00Z"), toFake: ["Date"] }));
+  afterEach(() => vi.useRealTimers());
+  const button = (container: HTMLElement, label: string) =>
+    [...container.querySelectorAll("button")].find((el) => el.textContent === label)!;
+
+  it("shows dates short, with a passed due in the destructive color", async () => {
+    const page = await open({
+      ticket: makeTicket({
+        status: "doing",
+        startAt: "2026-10-27T13:00:00.000Z",
+        dueAt: "2026-10-25T19:00:00.000Z",
+        dueHasTime: true,
+      }),
+    });
+    try {
+      expect(text(page.container, '[data-testid="ticket-start"]')).toBe("Tomorrow");
+      const due = q(page.container, '[data-testid="ticket-due"]');
+      expect(due.textContent).toBe("Yesterday 3 PM");
+      expect(due.className).toContain("text-destructive");
+    } finally {
+      await page.cleanup();
+    }
+  });
+
+  it("sets a date from a quick pick or the calendar, in the user's timezone", async () => {
+    const page = await open();
+    try {
+      await act(async () => q(page.container, '[data-testid="ticket-due"]').click());
+      await act(async () => button(page.container, "Next week").click());
+      expect(api.tickets.update).toHaveBeenLastCalledWith({ id: "t1", due: "2026-11-02" });
+      await act(async () => q(page.container, '[data-testid="ticket-start"]').click());
+      await act(async () => q(page.container, '[data-testid="calendar-day"]').click());
+      expect(api.tickets.update).toHaveBeenLastCalledWith({ id: "t1", start: "2026-11-04" });
+    } finally {
+      await page.cleanup();
+    }
+  });
+
+  it("adds a time only when asked, and clears with No date", async () => {
+    const page = await open({ ticket: makeTicket({ dueAt: "2026-11-05T04:59:00.000Z" }) });
+    try {
+      expect(q(page.container, '[data-testid="ticket-due-time"]')).toBeNull();
+      await act(async () => q(page.container, '[data-testid="ticket-due"]').click());
+      await act(async () => button(page.container, "Add time").click());
+      const time = q(page.container, '[data-testid="ticket-due-time"]') as HTMLInputElement;
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
+          time,
+          "15:00",
+        );
+        time.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await act(async () => blur(time));
+      expect(api.tickets.update).toHaveBeenLastCalledWith({ id: "t1", due: "2026-11-04T15:00" });
+      await act(async () => button(page.container, "No date").click());
+      expect(api.tickets.update).toHaveBeenLastCalledWith({ id: "t1", due: null });
+    } finally {
+      await page.cleanup();
+    }
+  });
+
+  it("keeps the shared card for files it previews", async () => {
+    api.tickets.files.mockResolvedValue([
+      {
+        id: "a2",
+        botId: "bot-1",
+        groupId: null,
+        runId: "r1",
+        name: "report.pdf",
+        description: null,
+        mimeType: "application/pdf",
+        size: 10,
+        version: 1,
+        createdAt: "2026-10-24T04:00:00.000Z",
+      },
+    ]);
+    const page = await open();
+    try {
+      expect(text(page.container, '[data-testid="file-card"]')).toBe("report.pdf");
+    } finally {
+      await page.cleanup();
+    }
+  });
 });

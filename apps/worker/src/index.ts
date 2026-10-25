@@ -30,6 +30,7 @@ import {
   databaseCapacityBackoffMs,
   deploymentModelUsageLookup,
   ExpoPushProvider,
+  enqueueDueTicketDates,
   GraphileJobPublisher,
   homeStorageSweeper,
   InMemoryJobQueue,
@@ -288,6 +289,7 @@ async function main() {
     messaging,
     cloudAgent,
     notifications,
+    ticketBoardEnabled,
   });
   const reconciler = createJobReconciler({
     prisma,
@@ -311,6 +313,9 @@ async function main() {
       securityEventRetentionDays(),
     ),
     reconcileHomeStorage: homeStorageSweeper(home),
+    reconcileTicketDates: ticketBoardEnabled
+      ? () => enqueueDueTicketDates({ prisma, jobs })
+      : undefined,
   });
   let stopHealth: (() => Promise<void>) | undefined;
   const shutdown = new AbortController();

@@ -10,6 +10,7 @@ import { expect, it, vi } from "vitest";
 const api = vi.hoisted(() => ({
   boards: { subscribe: vi.fn() },
   bots: { list: vi.fn() },
+  me: vi.fn(async () => ({ timezone: "America/New_York" })),
   tickets: {
     list: vi.fn(),
     update: vi.fn(),
@@ -178,6 +179,45 @@ it("marks only the cards that need the user", async () => {
     expect(badge("ticket-1")?.textContent).toBe("Needs you");
     expect(badge("ticket-2")).toBeNull();
   } finally {
+    await page.cleanup();
+  }
+});
+
+it("shows a card's dates in the user's timezone only when it has some", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  vi.useFakeTimers({ now: new Date("2026-10-26T16:00:00Z"), toFake: ["Date"] });
+  api.bots.list.mockResolvedValue([bot("bot-1", "Helper")]);
+  api.tickets.list.mockResolvedValue({
+    tickets: [
+      {
+        ...ticket("Lease", "ticket-1", "doing", "RAK-1", "bot-1"),
+        startAt: "2026-10-27T13:00:00.000Z",
+        startHasTime: false,
+        dueAt: "2026-10-30T19:00:00.000Z",
+        dueHasTime: true,
+      },
+      {
+        ...ticket("Late", "ticket-2", "doing", "RAK-2", "bot-1"),
+        dueAt: "2026-10-25T03:59:00.000Z",
+        dueHasTime: false,
+      },
+      ticket("Plain", "ticket-3", "doing", "RAK-3", "bot-1"),
+    ],
+  });
+  const page = await renderBoard();
+  try {
+    const dates = (id: string) =>
+      page.container.querySelector(`[data-testid="board-card-${id}"] [data-testid="card-dates"]`);
+    expect(dates("ticket-1")?.querySelector('[data-testid="card-dates-shown"]')?.textContent).toBe(
+      "Tomorrow –Fri 3 PM",
+    );
+    expect(dates("ticket-1")?.querySelector(".sr-only")?.textContent).toBe(
+      "Start Tomorrow, Due Fri 3 PM",
+    );
+    expect(dates("ticket-2")?.querySelector(".text-destructive")?.textContent).toBe("Oct 24");
+    expect(dates("ticket-3")).toBeNull();
+  } finally {
+    vi.useRealTimers();
     await page.cleanup();
   }
 });

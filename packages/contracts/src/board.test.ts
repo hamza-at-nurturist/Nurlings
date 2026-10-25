@@ -206,3 +206,51 @@ describe("ticket contracts", () => {
     expect(TicketCommentSchema.parse(comment).attachments).toEqual([]);
   });
 });
+
+describe("ticket dates", () => {
+  it("accepts a local date, a local date-time or null, and nothing else", () => {
+    for (const value of ["2026-10-30", "2026-10-30T15:00", null])
+      expect(UpdateTicketInput.safeParse({ id: "t1", due: value }).success).toBe(true);
+    for (const value of ["Friday", "2026-02-30", "2026-10-30T24:00", "2026-10-30T15:00Z"])
+      expect(UpdateTicketInput.safeParse({ id: "t1", due: value }).success).toBe(false);
+  });
+
+  it("refuses a start after the due, reading a date alone as 9 AM and end of day", () => {
+    const create = { title: "T", assigneeBotId: "bot-1" };
+    expect(
+      CreateTicketInput.safeParse({ ...create, start: "2026-10-30", due: "2026-10-30" }).success,
+    ).toBe(true);
+    expect(
+      CreateTicketInput.safeParse({ ...create, start: "2026-10-30", due: "2026-10-30T08:00" }),
+    ).toMatchObject({
+      success: false,
+      error: { issues: [{ message: "Start must be before due." }] },
+    });
+  });
+
+  it("defaults tickets from an older server to no dates", () => {
+    const ticket = TicketSchema.parse({
+      id: "t1",
+      boardId: "b1",
+      spaceId: "s1",
+      number: 1,
+      ref: "RAK-1",
+      title: "T",
+      description: null,
+      status: "todo",
+      priority: "normal",
+      assigneeBotId: null,
+      createdByBotId: null,
+      createdByUserId: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      completedAt: null,
+    });
+    expect(ticket).toMatchObject({
+      startAt: null,
+      startHasTime: false,
+      dueAt: null,
+      dueHasTime: false,
+    });
+  });
+});

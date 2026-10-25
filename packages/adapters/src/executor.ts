@@ -6402,6 +6402,8 @@ export function createRunExecutor(deps: ExecutorDeps) {
                 description: args.description !== undefined ? String(args.description) : undefined,
                 priority: args.priority !== undefined ? String(args.priority) : undefined,
                 ownerBotId: args.ownerBotId !== undefined ? String(args.ownerBotId) : undefined,
+                start: args.start,
+                due: args.due,
               }),
             );
           }
@@ -6417,6 +6419,8 @@ export function createRunExecutor(deps: ExecutorDeps) {
                 priority: args.priority !== undefined ? String(args.priority) : undefined,
                 status: args.status !== undefined ? String(args.status) : undefined,
                 ownerBotId: args.ownerBotId !== undefined ? String(args.ownerBotId) : undefined,
+                start: args.start,
+                due: args.due,
               }),
             );
           }

@@ -11,6 +11,8 @@ import {
 } from "@rakazo/ui-web";
 import { useTicketPriorityLabels } from "../../../lib/ticket-priority";
 import { useTicketStatusLabels } from "../../../lib/ticket-status";
+import { DatePicker } from "./DatePicker";
+import { isTicketOverdue } from "./dates";
 
 const STATUS_DOT: Record<TicketStatus, string> = {
   todo: "bg-muted-foreground",
@@ -25,17 +27,25 @@ const MENU = "w-auto min-w-40";
 const TRIGGER =
   "inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-sm outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
 
+export type PropertiesPatch = Partial<{
+  status: TicketStatus;
+  assigneeBotId: string;
+  priority: TicketPriority;
+  start: string | null;
+  due: string | null;
+}>;
+
 type Props = {
   ticket: Ticket;
   bots: Bot[];
+  /** The user's saved timezone, which dates are shown and picked in. */
+  timeZone: string;
   disabled: boolean;
-  onChange: (
-    patch: Partial<{ status: TicketStatus; assigneeBotId: string; priority: TicketPriority }>,
-  ) => void;
+  onChange: (patch: PropertiesPatch) => void;
 };
 
-/** Status, owner and priority, each changed in place from its own menu. */
-export function Properties({ ticket, bots, disabled, onChange }: Props) {
+/** Status, owner, priority, start and due, each changed in place from its own menu. */
+export function Properties({ ticket, bots, timeZone, disabled, onChange }: Props) {
   const { t } = useLingui();
   const statuses = useTicketStatusLabels();
   const priorities = useTicketPriorityLabels();
@@ -134,6 +144,35 @@ export function Properties({ ticket, bots, disabled, onChange }: Props) {
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
+      </dd>
+      <dt className="text-muted-foreground">
+        <Trans>Start</Trans>
+      </dt>
+      <dd>
+        <DatePicker
+          key={`start-${ticket.startAt}-${ticket.startHasTime}`}
+          label={t`Start`}
+          testId="ticket-start"
+          value={ticket.startAt ? { at: ticket.startAt, hasTime: ticket.startHasTime } : null}
+          timeZone={timeZone}
+          disabled={disabled}
+          onChange={(start) => onChange({ start })}
+        />
+      </dd>
+      <dt className="text-muted-foreground">
+        <Trans>Due</Trans>
+      </dt>
+      <dd>
+        <DatePicker
+          key={`due-${ticket.dueAt}-${ticket.dueHasTime}`}
+          label={t`Due`}
+          testId="ticket-due"
+          value={ticket.dueAt ? { at: ticket.dueAt, hasTime: ticket.dueHasTime } : null}
+          timeZone={timeZone}
+          disabled={disabled}
+          overdue={isTicketOverdue(ticket, new Date())}
+          onChange={(due) => onChange({ due })}
+        />
       </dd>
     </dl>
   );

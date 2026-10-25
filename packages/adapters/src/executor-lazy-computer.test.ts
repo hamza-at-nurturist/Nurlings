@@ -5,13 +5,22 @@ import { createLogger, createTestSink, installLogger } from "@rakazo/logging";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type * as ComputerLifecycleModule from "./computer-lifecycle.js";
 import { createRunExecutor } from "./executor.js";
+import type * as TicketToolsModule from "./ticket-tools.js";
 
 const sink = createTestSink();
 
 const provisionComputer = vi.hoisted(() => vi.fn());
 const readTicketForRun = vi.hoisted(() => vi.fn());
 
+const createTicket = vi.hoisted(() => vi.fn(async (_deps: unknown, _input: unknown) => ({})));
+const updateTicket = vi.hoisted(() => vi.fn(async (_deps: unknown, _input: unknown) => ({})));
+
 vi.mock("./ticket-files.js", () => ({ readTicketForRun }));
+vi.mock("./ticket-tools.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof TicketToolsModule>()),
+  createTicket,
+  updateTicket,
+}));
 
 vi.mock("./computer-lifecycle.js", async (importOriginal) => ({
   ...(await importOriginal<typeof ComputerLifecycleModule>()),
@@ -187,7 +196,18 @@ async function runRoutine(
     botSecret: { findMany: vi.fn(async () => []) },
     agentSkill: { findMany: vi.fn(async () => []) },
     scratchpadItem: { findMany: vi.fn(async () => []) },
-    externalEffect: { findMany: vi.fn(async () => []) },
+    externalEffect: {
+      findMany: vi.fn(async () => []),
+      // Mutating tools record an effect around their call.
+      findUnique: vi.fn(async () => null),
+      create: vi.fn(async ({ data }: { data: Record<string, unknown> }) => ({
+        id: "effect-1",
+        status: "pending",
+        ...data,
+      })),
+      update: vi.fn(async ({ data }: { data: Record<string, unknown> }) => data),
+      updateMany: vi.fn(async () => ({ count: 1 })),
+    },
     artifact: {
       findMany: vi.fn(async () =>
         options.attachments || options.ticketBoardEnabled
@@ -472,6 +492,24 @@ describe("run computer provisioning", () => {
     expect(sandbox.writeFile).toHaveBeenCalledOnce();
     expect(sandbox.writeFile.mock.invocationCallOrder[0]).toBeLessThan(
       sandbox.listFiles.mock.invocationCallOrder[0]!,
+    );
+  });
+
+  it("passes a Nurling's start and due through ticket_create and ticket_update", async () => {
+    await runRoutine(
+      [
+        { name: "ticket_create", args: { title: "Lease", due: "2026-10-30" } },
+        { name: "ticket_update", args: { id: "t1", start: "2026-10-27T10:00", due: "" } },
+      ],
+      { ticketBoardEnabled: true },
+    );
+    expect(createTicket).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ title: "Lease", due: "2026-10-30", start: undefined }),
+    );
+    expect(updateTicket).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ id: "t1", start: "2026-10-27T10:00", due: "" }),
     );
   });
 

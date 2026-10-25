@@ -25,6 +25,7 @@ import { compactHistory } from "./history-compaction.js";
 import type { MemoryProviderResolver } from "./memory-provider-factory.js";
 import { deliverMessagingOutbound, mirrorMessagingOutbound } from "./messaging-delivery.js";
 import { expireTaughtSkillTeaching } from "./teaching-session.js";
+import { runTicketDates } from "./ticket-dates.js";
 
 type Tenant = { spaceId: string; userId: string };
 
@@ -65,6 +66,7 @@ export function createBackgroundJobHandlers(deps: {
   messaging?: MessagingSurface;
   cloudAgent?: CloudAgentConnection | null;
   notifications?: ExpoPushProvider;
+  ticketBoardEnabled?: boolean;
 }): BackgroundJobHandlers {
   const messagingDeps = deps.messaging
     ? {
@@ -104,6 +106,14 @@ export function createBackgroundJobHandlers(deps: {
     deps.prisma.taughtSkill.findUnique({ where: { id: skillId }, select: OWNER });
   const cloudAgent = ({ agentId }: { agentId: string }) =>
     deps.prisma.cloudAgent.findUnique({ where: { id: agentId }, select: OWNER });
+  // The owning Nurling's user: the one who is woken for and told about the ticket.
+  const ticket = async ({ ticketId }: { ticketId: string }) => {
+    const row = await deps.prisma.ticket.findUnique({
+      where: { id: ticketId },
+      select: { spaceId: true, assigneeBot: { select: { userId: true } } },
+    });
+    return row?.assigneeBot ? { spaceId: row.spaceId, userId: row.assigneeBot.userId } : null;
+  };
   const updatedComputer = async ({ updateId }: { updateId: string }) =>
     (
       await deps.prisma.computerUpdate.findUnique({
@@ -135,6 +145,17 @@ export function createBackgroundJobHandlers(deps: {
     },
     "routine.wakeup": asOwner(routine, async (payload) => {
       await deps.executor.wakeRoutine(payload.routineId, payload.scheduledFor);
+    }),
+    "ticket.dates": asOwner(ticket, async (payload) => {
+      await runTicketDates(
+        {
+          prisma: deps.prisma,
+          jobs: deps.jobs,
+          ticketBoardEnabled: deps.ticketBoardEnabled,
+          notifications: () => deps.notifications,
+        },
+        payload,
+      );
     }),
     "routine.retry": asOwner(run, async (payload) => {
       await deps.executor.retryRoutineRun(payload.runId);
