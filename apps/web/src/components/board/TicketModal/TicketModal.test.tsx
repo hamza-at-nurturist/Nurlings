@@ -540,6 +540,26 @@ it("opens a picker of the space's Nurlings on @, narrows it, and adds a chip and
   }
 });
 
+it("puts the caret right after a mention picked mid-text, before the next keystroke", async () => {
+  const page = await open();
+  try {
+    const box = q(page.container, 'textarea[aria-label="Reply"]') as HTMLTextAreaElement;
+    box.focus();
+    await act(async () => type(box, "Hi @sc tail"));
+    await act(async () => {
+      box.setSelectionRange(6, 6);
+      box.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true }));
+    });
+    expect(options(page.container)).toEqual(["Scout"]);
+    await act(async () => key(box, "Enter"));
+    expect(box.value).toBe("Hi @Scout  tail");
+    // No frame has run yet: the caret is already after "@Scout ", not at the end of the text.
+    expect([box.selectionStart, box.selectionEnd]).toEqual([10, 10]);
+  } finally {
+    await page.cleanup();
+  }
+});
+
 it("moves through the picker with the arrow keys and closes it with Escape without closing the dialog", async () => {
   const page = await open();
   try {

@@ -51,6 +51,9 @@
 ## 5. Checks
 
 - [x] 5.1 `openspec validate ticket-approve --strict`, typecheck, lint and the unit suites pass.
+- [x] 5.2 Fix the reply box caret after picking a mention: it was placed a frame late, so a fast
+  first keystroke landed at the end of the text (the board E2E failed on `main` this way). Verify:
+  a component test that fails before the fix, and the board E2E passing in CI.
 
 ## 6. After merge
 
