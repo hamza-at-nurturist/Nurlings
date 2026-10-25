@@ -1,5 +1,4 @@
 import { useLingui } from "@lingui/react/macro";
-import type { Artifact } from "@rakazo/contracts";
 import { isAttachmentAudioMimeType } from "@rakazo/contracts";
 import { attachmentExtensionForMimeType, formatFileSize } from "@rakazo/core";
 import { useState } from "react";
@@ -25,10 +24,14 @@ export function shortFileType(name: string, mimeType: string): string {
 }
 
 /**
- * A ticket file: the shared card for previewable and audio files, and a download card reading
+ * A ticket file, in Files and on a comment: the shared card for previewable and audio files, and a download card reading
  * "TXT · 22 B" for the rest, where the shared card would show the raw MIME type.
  */
-export function TicketFileCard({ file }: { file: Artifact & { botId: string } }) {
+export function TicketFileCard({
+  file,
+}: {
+  file: { id: string; botId: string; name: string; mimeType: string; size: number };
+}) {
   const { t } = useLingui();
   const [error, setError] = useState<string | null>(null);
   if (PREVIEWED_BY_SHARED_CARD.has(file.mimeType) || isAttachmentAudioMimeType(file.mimeType))

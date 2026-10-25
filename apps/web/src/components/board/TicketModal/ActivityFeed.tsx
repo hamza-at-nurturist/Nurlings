@@ -6,10 +6,10 @@ import { useEffect, useRef } from "react";
 import { formatRelativeTime } from "../../../lib/relative-time";
 import { useTicketStatusLabels } from "../../../lib/ticket-status";
 import { FALLBACK_BOT_COLOR } from "../../../pages/shell/chat-shared";
-import { ArtifactFileCard } from "../../ArtifactFileCard";
 import type { ActivityItem } from "./activity";
 import { MentionText } from "./MentionText";
 import { resolveMentionTargets } from "./mentions";
+import { TicketFileCard } from "./TicketFileCard";
 
 export type Viewer = { id: string; name: string; image?: string | null };
 
@@ -136,13 +136,15 @@ export function ActivityFeed({ items, bots, viewer, files = [], ownerBotId = nul
                   const botId = file?.botId ?? ownerBotId;
                   if (!botId) return null;
                   return (
-                    <ArtifactFileCard
+                    <TicketFileCard
                       key={block.artifactId}
-                      target={{ botId }}
-                      artifactId={block.artifactId}
-                      name={block.name}
-                      mimeType={block.mimeType}
-                      size={file?.size ?? ("size" in block ? block.size : 0)}
+                      file={{
+                        id: block.artifactId,
+                        botId,
+                        name: block.name,
+                        mimeType: block.mimeType,
+                        size: file?.size ?? ("size" in block ? block.size : 0),
+                      }}
                     />
                   );
                 })}

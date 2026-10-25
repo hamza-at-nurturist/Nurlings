@@ -115,6 +115,7 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await expect(detail.getByTestId("reply-files")).toHaveCount(0);
   await expect(activity).toContainText("Notes from the viewing");
   await expect(activity).toContainText("listing-notes.txt");
+  await expect(activity).toContainText("TXT · 22 B");
   const files = detail.getByTestId("ticket-files");
   await expect(
     files.getByTestId("ticket-file").filter({ hasText: "listing-notes.txt" }),

@@ -923,10 +923,11 @@ it("shows a comment's files and labels each file with who added it", async () =>
   ]);
   const page = await open();
   try {
-    const feedCards = page.container.querySelectorAll(
-      '[data-testid="ticket-activity"] [data-testid="file-card"]',
-    );
-    expect(Array.from(feedCards).map((card) => card.textContent)).toEqual(["upload.csv"]);
+    // The comment's file uses the ticket's own card, with a short type.
+    const feed = text(page.container, '[data-testid="ticket-activity"]');
+    expect(feed).toContain("upload.csv");
+    expect(feed).toContain("CSV · 10 B");
+    expect(feed).not.toContain("text/csv");
     const labels = Array.from(
       page.container.querySelectorAll('[data-testid="ticket-file"] figcaption'),
     ).map((node) => node.textContent);
