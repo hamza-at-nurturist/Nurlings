@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  ApproveTicketInput,
   CommentTicketInput,
   CreateTicketInput,
   GetTicketInput,
@@ -118,7 +119,10 @@ describe("ticket contracts", () => {
       assigneeName: null,
       createdAt: "2026-01-01T00:00:00.000Z",
     };
-    expect(TICKET_EVENT_KINDS).toEqual(["created", "status", "owner"]);
+    expect(TICKET_EVENT_KINDS).toEqual(["created", "status", "owner", "approved"]);
+    expect(TicketEventSchema.parse({ ...event, kind: "approved", status: "done" }).kind).toBe(
+      "approved",
+    );
     expect(TicketEventSchema.parse(event).status).toBe("blocked");
     expect(() => TicketEventSchema.parse({ ...event, kind: "priority" })).toThrow();
     expect(() => TicketEventSchema.parse({ ...event, status: "archived" })).toThrow();
@@ -161,5 +165,15 @@ describe("ticket contracts", () => {
       updatedAt: "2026-01-01T00:00:00.000Z",
     };
     expect(TicketCommentSchema.parse(comment).mentions).toEqual([]);
+  });
+
+  it("reads a ticket without needsUser as not needing the user", () => {
+    expect(TicketSchema.parse(ticket).needsUser).toBe(false);
+    expect(TicketSchema.parse({ ...ticket, needsUser: true }).needsUser).toBe(true);
+  });
+
+  it("approves by id only", () => {
+    expect(ApproveTicketInput.parse({ id: "ticket-1" })).toEqual({ id: "ticket-1" });
+    expect(() => ApproveTicketInput.parse({})).toThrow();
   });
 });

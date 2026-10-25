@@ -248,9 +248,12 @@ export async function updateTicket(
       where: { id: data.id, spaceId: input.spaceId, boardId: board.id },
     });
     if (!current) return null;
+    const statusChanged = data.status !== undefined && data.status !== current.status;
     const row = await tx.ticket.update({
       where: { id: current.id },
       data: {
+        // A user who moves the ticket has acted on it, so it no longer waits on them.
+        ...(statusChanged && !input.botId ? { needsUser: false } : {}),
         ...(data.title !== undefined ? { title: data.title } : {}),
         ...(data.description !== undefined ? { description: data.description } : {}),
         ...(data.priority !== undefined ? { priority: data.priority ?? "normal" } : {}),
@@ -265,7 +268,6 @@ export async function updateTicket(
           : {}),
       },
     });
-    const statusChanged = data.status !== undefined && data.status !== current.status;
     const reassigned =
       data.assigneeBotId !== undefined && data.assigneeBotId !== current.assigneeBotId;
     await recordTicketEvents(tx, {
@@ -334,7 +336,19 @@ export async function commentTicket(
   const resolved = input.userId
     ? await resolveMentions(deps.prisma, { ...input, userId: input.userId })
     : { mentions: [], botIds: [] };
+  // A user's comment that calls in only other Nurlings is addressed to them, not to the owner.
+  const reply =
+    !input.botId &&
+    (resolved.botIds.length === 0 ||
+      (ticket.assigneeBotId !== null && resolved.botIds.includes(ticket.assigneeBotId)));
   const row = await deps.prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM tickets WHERE id = ${ticket.id} AND "spaceId" = ${input.spaceId} FOR UPDATE`;
+    const current = await tx.ticket.findFirst({
+      where: { id: ticket.id, spaceId: input.spaceId },
+      select: { status: true },
+    });
+    // A reply to a ticket in review or blocked means there is more to do.
+    const sendBack = reply && (current?.status === "review" || current?.status === "blocked");
     const comment = await tx.ticketComment.create({
       include: { authorBot: { select: { name: true } }, authorUser: { select: { name: true } } },
       data: {
@@ -346,17 +360,31 @@ export async function commentTicket(
         mentions: resolved.mentions,
       },
     });
-    await tx.ticket.update({ where: { id: ticket.id }, data: { updatedAt: new Date() } });
+    await tx.ticket.update({
+      where: { id: ticket.id },
+      data: {
+        updatedAt: new Date(),
+        needsUser: Boolean(input.botId) && resolved.mentions.some((item) => item.kind === "user"),
+        ...(sendBack ? { status: "doing" } : {}),
+      },
+    });
+    if (sendBack)
+      await recordTicketEvents(tx, {
+        spaceId: input.spaceId,
+        ticketId: ticket.id,
+        actor: input,
+        events: [{ kind: "status", status: "doing" }],
+      });
     return comment;
   });
-  // A user's comment wakes the owner; a Nurling's never wakes anyone, so two Nurlings cannot loop.
+  // A user's reply wakes the owner; a Nurling's never wakes anyone, so two Nurlings cannot loop.
   // The wake itself skips tickets that are done or closed.
   await deps.onTicketChange?.({
     spaceId: input.spaceId,
     boardId: board.id,
     ticketId: ticket.id,
     assigneeBotId: ticket.assigneeBotId,
-    wakeAssignee: !input.botId && Boolean(ticket.assigneeBotId),
+    wakeAssignee: reply && Boolean(ticket.assigneeBotId),
     mentionBotIds: resolved.botIds,
     ...(input.userId ? { userId: input.userId } : {}),
     ...(input.botId ? { commentBotId: input.botId } : {}),

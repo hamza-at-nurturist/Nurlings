@@ -122,6 +122,10 @@ msgid "{0}'s screen"
 msgstr "{0}s Bildschirm"
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} approved it"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
 msgid "{actor} assigned it to {owner}"
 msgstr ""
 
@@ -756,6 +760,7 @@ msgstr "Anwenden"
 msgid "Approval boundaries"
 msgstr "Bestätigungsgrenzen"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
@@ -3425,6 +3430,7 @@ msgstr "Eingabe erforderlich"
 msgid "Needs takeover"
 msgstr "Übernahme erforderlich"
 
+#: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/computer-overlay.tsx
 msgid "Needs you"

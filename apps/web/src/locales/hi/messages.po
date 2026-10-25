@@ -122,6 +122,10 @@ msgid "{0}'s screen"
 msgstr ""
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} approved it"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
 msgid "{actor} assigned it to {owner}"
 msgstr ""
 
@@ -756,6 +760,7 @@ msgstr "लागू करें"
 msgid "Approval boundaries"
 msgstr "अनुमोदन सीमाएं"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
@@ -3425,6 +3430,7 @@ msgstr "इनपुट चाहिए"
 msgid "Needs takeover"
 msgstr "नियंत्रण लेना ज़रूरी"
 
+#: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/computer-overlay.tsx
 msgid "Needs you"

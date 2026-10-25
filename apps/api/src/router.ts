@@ -44,6 +44,7 @@ import {
   applyCodexLiveCatalog,
   applyProviderLiveCatalog,
   applyTeachingDesktopInput,
+  approveTicket,
   archiveBot,
   assertSafeRemoteUrl,
   buildMcpCredentialBlob,
@@ -4337,6 +4338,15 @@ export function createRouter(deps: RouterDeps) {
       move: boardEnabled.tickets.move.handler(async ({ context, input }) => {
         const result = await updateTicket(ticketDeps, {
           ...input,
+          spaceId: context.actor.spaceId,
+          userId: context.actor.userId,
+        });
+        if ("error" in result) throw new ORPCError("BAD_REQUEST", { message: result.error });
+        return result.ticket;
+      }),
+      approve: boardEnabled.tickets.approve.handler(async ({ context, input }) => {
+        const result = await approveTicket(ticketDeps, {
+          id: input.id,
           spaceId: context.actor.spaceId,
           userId: context.actor.userId,
         });

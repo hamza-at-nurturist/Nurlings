@@ -3956,9 +3956,11 @@ describe("ticket_comment mentions", () => {
       ticketBoardEnabled: true,
     }).find((candidate) => candidate.name === "ticket_comment");
     const schema = tool?.inputSchema as {
-      properties: Record<string, { type: string; items?: { type: string } }>;
+      properties: Record<string, { type: string; description?: string; items?: { type: string } }>;
       required: string[];
     };
+    // A blocked Nurling sets it, which is what raises Needs you on the ticket.
+    expect(schema.properties.mention_user?.description).toContain("blocked on them");
     expect(schema.properties.mention_bots).toMatchObject({
       type: "array",
       items: { type: "string" },

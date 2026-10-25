@@ -66,6 +66,7 @@ export function ActivityFeed({ items, bots, viewer }: Props) {
     if (event.kind === "status" && event.status)
       return t`${actor} moved it to ${statuses[event.status]}`;
     if (event.kind === "owner" && owner) return t`${actor} assigned it to ${owner}`;
+    if (event.kind === "approved") return t`${actor} approved it`;
     return null;
   }
 

@@ -1576,6 +1576,8 @@ model Ticket {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   completedAt       DateTime?
+  /// The latest comment is a Nurling's that calls for the user; cleared by a reply or a status change.
+  needsUser       Boolean   @default(false)
   comments        TicketComment[]
   events          TicketEvent[]
   tasks           Task[]
@@ -1613,7 +1615,7 @@ model TicketEvent {
   ticket        Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   spaceId       String
   space         Space    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
-  /// created | status | owner
+  /// created | status | owner | approved
   kind          String
   actorBotId    String?
   actorBot      Bot?     @relation("TicketEventActorBot", fields: [actorBotId], references: [id], onDelete: SetNull)

@@ -24,6 +24,7 @@ import {
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useId, useState } from "react";
 import { Link } from "react-router-dom";
+import { NeedsYou } from "../components/board/TicketModal/NeedsYou";
 import { TicketModal } from "../components/board/TicketModal/TicketModal";
 import { formatRelativeTime } from "../lib/relative-time";
 import { rpc } from "../lib/rpc";
@@ -145,7 +146,10 @@ export function BoardPage() {
                     className="h-auto w-full flex-col items-start gap-1 whitespace-normal p-3 text-left font-normal"
                     onClick={() => setSelected(ticket)}
                   >
-                    <span className="text-xs text-muted-foreground">{ticket.ref}</span>
+                    <span className="flex w-full items-center justify-between gap-2 text-xs text-muted-foreground">
+                      {ticket.ref}
+                      {ticket.needsUser ? <NeedsYou /> : null}
+                    </span>
                     <span>{ticket.title}</span>
                     <span className="text-xs text-muted-foreground">
                       {bots.find((bot) => bot.id === ticket.assigneeBotId)?.name}
