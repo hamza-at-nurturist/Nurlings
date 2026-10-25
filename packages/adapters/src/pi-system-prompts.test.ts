@@ -1,6 +1,7 @@
 import { brand } from "@nurlings/brand";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { builtinAgentTools } from "./builtin-tools.js";
+import { withUserFacingGuidance } from "./user-facing-guidance.js";
 
 type FakeTool = {
   name: string;
@@ -94,8 +95,20 @@ describe("system prompts sent to a model", () => {
   it("introduces the bot by the brand's bot term when there is only a sandbox", async () => {
     await run([]);
     expect(seen.systemPrompts).toEqual([
-      `You are a ${brand.bot.singular} with a persistent sandbox filesystem and shell. Be concise.`,
+      withUserFacingGuidance(
+        `You are a ${brand.bot.singular} with a persistent sandbox filesystem and shell. Be concise.`,
+      ),
     ]);
+  });
+
+  it("tells the bot to keep paths, folders and internal IDs from the user", async () => {
+    for (const tools of [[computerObserve], []]) {
+      seen.systemPrompts = [];
+      await run(tools);
+      expect(seen.systemPrompts[0]).toContain(
+        "Never mention file system paths, folders, or internal IDs to the user.",
+      );
+    }
   });
 
   it("names the product, not the upstream, in the helper's prompt", async () => {
