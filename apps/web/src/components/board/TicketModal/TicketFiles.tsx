@@ -1,9 +1,13 @@
-import { Trans } from "@lingui/react/macro";
-import type { Artifact } from "@rakazo/contracts";
+import { Trans, useLingui } from "@lingui/react/macro";
+import type { Artifact, Bot } from "@rakazo/contracts";
 import { ArtifactFileCard } from "../../ArtifactFileCard";
 
-/** What the owner attached while working on the ticket; nothing is shown when there is none. */
-export function TicketFiles({ files }: { files: Artifact[] }) {
+/**
+ * Files on the ticket: what you attached to comments and what its Nurlings attached while working
+ * on it, each labelled with who added it. Nothing is shown when there is none.
+ */
+export function TicketFiles({ files, bots }: { files: Artifact[]; bots: Bot[] }) {
+  const { t } = useLingui();
   const shown = files.filter((file) => file.botId);
   if (shown.length === 0) return null;
   return (
@@ -13,14 +17,18 @@ export function TicketFiles({ files }: { files: Artifact[] }) {
       </h3>
       <div className="flex flex-wrap gap-2">
         {shown.map((file) => (
-          <ArtifactFileCard
-            key={file.id}
-            target={{ botId: file.botId as string }}
-            artifactId={file.id}
-            name={file.name}
-            mimeType={file.mimeType}
-            size={file.size}
-          />
+          <figure key={file.id} data-testid="ticket-file" className="space-y-1">
+            <ArtifactFileCard
+              target={{ botId: file.botId as string }}
+              artifactId={file.id}
+              name={file.name}
+              mimeType={file.mimeType}
+              size={file.size}
+            />
+            <figcaption className="px-1 text-xs text-muted-foreground">
+              {file.runId ? bots.find((bot) => bot.id === file.botId)?.name : t`You`}
+            </figcaption>
+          </figure>
         ))}
       </div>
     </section>

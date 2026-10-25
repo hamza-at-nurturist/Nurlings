@@ -1,18 +1,26 @@
 import { useLingui } from "@lingui/react/macro";
 import { ChatMarkdown } from "@rakazo/chat-ui/web";
-import type { Bot, TicketComment, TicketEvent } from "@rakazo/contracts";
+import type { Artifact, Bot, TicketComment, TicketEvent } from "@rakazo/contracts";
 import { BotAvatar } from "@rakazo/ui-web";
 import { useEffect, useRef } from "react";
 import { formatRelativeTime } from "../../../lib/relative-time";
 import { useTicketStatusLabels } from "../../../lib/ticket-status";
 import { FALLBACK_BOT_COLOR } from "../../../pages/shell/chat-shared";
+import { ArtifactFileCard } from "../../ArtifactFileCard";
 import type { ActivityItem } from "./activity";
 import { MentionText } from "./MentionText";
 import { resolveMentionTargets } from "./mentions";
 
 export type Viewer = { id: string; name: string; image?: string | null };
 
-type Props = { items: ActivityItem[]; bots: Bot[]; viewer: Viewer };
+type Props = {
+  items: ActivityItem[];
+  bots: Bot[];
+  viewer: Viewer;
+  /** The ticket's files, which know the Nurling each upload belongs to. */
+  files?: Artifact[];
+  ownerBotId?: string | null;
+};
 
 function Time({ at }: { at: string }) {
   return (
@@ -38,7 +46,7 @@ function UserMark({ name, image }: { name: string; image?: string | null }) {
   );
 }
 
-export function ActivityFeed({ items, bots, viewer }: Props) {
+export function ActivityFeed({ items, bots, viewer, files = [], ownerBotId = null }: Props) {
   const { t } = useLingui();
   const statuses = useTicketStatusLabels();
   const end = useRef<HTMLDivElement>(null);
@@ -121,6 +129,25 @@ export function ActivityFeed({ items, bots, viewer }: Props) {
             ) : (
               <ChatMarkdown>{item.comment.body}</ChatMarkdown>
             )}
+            {item.comment.attachments?.length ? (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {item.comment.attachments.map((block) => {
+                  const file = files.find((row) => row.id === block.artifactId);
+                  const botId = file?.botId ?? ownerBotId;
+                  if (!botId) return null;
+                  return (
+                    <ArtifactFileCard
+                      key={block.artifactId}
+                      target={{ botId }}
+                      artifactId={block.artifactId}
+                      name={block.name}
+                      mimeType={block.mimeType}
+                      size={file?.size ?? ("size" in block ? block.size : 0)}
+                    />
+                  );
+                })}
+              </div>
+            ) : null}
           </li>
         );
       })}

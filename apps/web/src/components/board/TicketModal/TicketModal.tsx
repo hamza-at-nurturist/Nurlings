@@ -4,6 +4,7 @@ import { TICKET_DESCRIPTION_MAX_LENGTH, TICKET_TITLE_MAX_LENGTH } from "@rakazo/
 import { Button, Dialog, DialogContent, DialogTitle, Textarea } from "@rakazo/ui-web";
 import { useMemo, useState } from "react";
 import { authClient } from "../../../lib/auth";
+import { isFileDrag } from "../../../lib/pending-attachments";
 import { rpc } from "../../../lib/rpc";
 import { errorText } from "../../../lib/user-error";
 import type { Viewer } from "./ActivityFeed";
@@ -14,6 +15,7 @@ import { Properties } from "./Properties";
 import { ReplyBox } from "./ReplyBox";
 import { TicketFiles } from "./TicketFiles";
 import { useLiveBots } from "./use-live-bots";
+import { useStagedFiles } from "./use-staged-files";
 import { useTicketActivity } from "./use-ticket-activity";
 
 type Props = {
@@ -44,6 +46,9 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const staged = useStagedFiles();
+  const [dragging, setDragging] = useState(false);
+  const canAttach = Boolean(ticket.assigneeBotId);
 
   async function save(change: () => Promise<unknown>) {
     setBusy(true);
@@ -82,7 +87,23 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
     >
       <DialogContent
         initialFocus={false}
-        className="h-[min(48rem,90vh)] max-w-[calc(100%-2rem)] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0 sm:max-w-5xl"
+        data-dragging={dragging || undefined}
+        className="h-[min(48rem,90vh)] max-w-[calc(100%-2rem)] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0 data-dragging:ring-2 data-dragging:ring-ring sm:max-w-5xl"
+        // Files dropped anywhere on the ticket wait in the reply box, as on the chat composer.
+        onDragOver={(event) => {
+          if (!canAttach || !isFileDrag(event.dataTransfer)) return;
+          event.preventDefault();
+          setDragging(true);
+        }}
+        onDragLeave={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDragging(false);
+        }}
+        onDrop={(event) => {
+          if (!canAttach || !isFileDrag(event.dataTransfer)) return;
+          event.preventDefault();
+          setDragging(false);
+          staged.add(event.dataTransfer.files);
+        }}
       >
         <header className="flex items-center gap-2 border-b px-5 py-3 pr-14 text-sm text-muted-foreground">
           <Trans>Board</Trans>
@@ -147,7 +168,7 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
                 }}
               />
             </section>
-            <TicketFiles files={activity.files} />
+            <TicketFiles files={activity.files} bots={bots} />
             {failure ? (
               <p role="alert" className="text-sm text-destructive">
                 {failure}
@@ -156,11 +177,19 @@ export function TicketModal({ ticket, bots: initialBots, revision, onClose, onCh
           </section>
           <aside className="flex flex-col border-t bg-muted/30 md:min-h-0 md:border-t-0 md:border-l">
             <div className="flex-1 p-4 md:min-h-0 md:overflow-y-auto">
-              <ActivityFeed items={items} bots={bots} viewer={viewer} />
+              <ActivityFeed
+                items={items}
+                bots={bots}
+                viewer={viewer}
+                files={activity.files}
+                ownerBotId={ticket.assigneeBotId}
+              />
             </div>
             <div className="p-4 pt-0">
               <ReplyBox
                 ticketId={ticket.id}
+                ownerBotId={ticket.assigneeBotId}
+                files={staged}
                 bots={bots}
                 onSent={activity.addComment}
                 onError={setError}

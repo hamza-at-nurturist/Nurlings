@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { ATTACHMENT_MAX_COUNT } from "./attachments.js";
 import { Id } from "./ids.js";
 
 export const TICKET_STATUSES = ["todo", "doing", "review", "blocked", "done", "closed"] as const;
@@ -76,6 +77,19 @@ export const TicketMentionSchema = z.object({
 export type TicketMention = z.infer<typeof TicketMentionSchema>;
 export const TICKET_MENTIONS_MAX = 20;
 
+/** A file attached to a comment, in the shape of a chat message's file or image block. */
+export const TicketAttachmentSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("image"), artifactId: Id, mimeType: z.string(), name: z.string() }),
+  z.object({
+    kind: z.literal("file"),
+    artifactId: Id,
+    mimeType: z.string(),
+    name: z.string(),
+    size: z.number().int().nonnegative(),
+  }),
+]);
+export type TicketAttachment = z.infer<typeof TicketAttachmentSchema>;
+
 export const TicketCommentSchema = z.object({
   id: Id,
   ticketId: Id,
@@ -84,6 +98,7 @@ export const TicketCommentSchema = z.object({
   authorUserId: Id.nullable(),
   authorName: z.string().nullable(),
   mentions: z.array(TicketMentionSchema).default([]),
+  attachments: z.array(TicketAttachmentSchema).default([]),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -179,11 +194,17 @@ export type MoveTicketInput = z.infer<typeof MoveTicketInput>;
 export const ApproveTicketInput = z.object({ id: Id });
 export type ApproveTicketInput = z.infer<typeof ApproveTicketInput>;
 
-export const CommentTicketInput = z.object({
-  ticketId: Id,
-  body: z.string().trim().min(1).max(TICKET_COMMENT_MAX_LENGTH),
-  mentions: z.array(TicketMentionSchema).max(TICKET_MENTIONS_MAX).optional(),
-});
+export const CommentTicketInput = z
+  .object({
+    ticketId: Id,
+    body: z.string().trim().max(TICKET_COMMENT_MAX_LENGTH),
+    mentions: z.array(TicketMentionSchema).max(TICKET_MENTIONS_MAX).optional(),
+    /** Files uploaded with `artifacts.create` for the ticket's owner. */
+    artifactIds: z.array(Id).max(ATTACHMENT_MAX_COUNT).optional(),
+  })
+  .refine((value) => value.body.length > 0 || Boolean(value.artifactIds?.length), {
+    message: "Write a comment or attach a file",
+  });
 export type CommentTicketInput = z.infer<typeof CommentTicketInput>;
 
 export const BoardEventSchema = z.object({

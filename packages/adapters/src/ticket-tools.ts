@@ -1,4 +1,4 @@
-import type { TicketMention, TicketStatus } from "@rakazo/contracts";
+import type { TicketAttachment, TicketMention, TicketStatus } from "@rakazo/contracts";
 import {
   CommentTicketInput,
   CreateTicketInput,
@@ -306,10 +306,16 @@ export async function commentTicket(
     mentions?: TicketMention[];
     mentionBotIds?: string[];
     mentionUser?: boolean;
+    /** The user's files, already checked by the caller against the ticket's owner. */
+    attachments?: TicketAttachment[];
   },
 ) {
   if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
-  const parsed = CommentTicketInput.safeParse({ ticketId: input.id, body: input.body });
+  const parsed = CommentTicketInput.safeParse({
+    ticketId: input.id,
+    body: input.body,
+    artifactIds: input.attachments?.map((block) => block.artifactId),
+  });
   if (!parsed.success) return { error: "Invalid comment." };
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const ticket = await findTicket(deps.prisma, input.spaceId, board, { id: input.id });
@@ -358,6 +364,7 @@ export async function commentTicket(
         authorUserId: input.userId ?? null,
         body: parsed.data.body,
         mentions: resolved.mentions,
+        attachments: input.botId ? [] : (input.attachments ?? []),
       },
     });
     await tx.ticket.update({

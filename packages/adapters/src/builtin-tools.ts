@@ -926,7 +926,8 @@ export const builtinAgentTools: ConnectorTool[] = [
   },
   {
     name: "ticket_get",
-    description: "Read a ticket by reference or id, with comments.",
+    description:
+      "Read a ticket by reference or id, with comments and files. Files are copied to their listed paths when you next use a file tool; images may also be shown to you directly.",
     inputSchema: {
       type: "object",
       properties: {

@@ -7175,6 +7175,7 @@ describe("tickets.events and tickets.files", () => {
       artifact("a1", 1, null, 3),
     ]);
     const runFindMany = vi.fn(async (_args: unknown) => [{ id: "run-1" }]);
+    const commentFindMany = vi.fn(async (_args: unknown) => [] as Array<{ attachments: unknown }>);
     const prisma = {
       board: {
         findUnique: vi.fn(async () => ({
@@ -7191,6 +7192,7 @@ describe("tickets.events and tickets.files", () => {
       ticketEvent: { findMany: eventFindMany },
       run: { findMany: runFindMany },
       artifact: { findMany: artifactFindMany },
+      ticketComment: { findMany: commentFindMany },
     } as unknown as PrismaClient;
     const deps = { prisma, env: { ticketBoardEnabled: true } } as unknown as RouterDeps;
     const handler = new RPCHandler(createRouter(deps));
@@ -7203,7 +7205,7 @@ describe("tickets.events and tickets.files", () => {
         }),
         { prefix: "/rpc", context: { actor } },
       );
-    return { call, eventFindMany, artifactFindMany, runFindMany, prisma };
+    return { call, eventFindMany, artifactFindMany, runFindMany, commentFindMany, prisma };
   }
 
   it("returns a ticket's events oldest first with names, scoped to the space", async () => {
@@ -7252,12 +7254,43 @@ describe("tickets.events and tickets.files", () => {
     });
     expect(s.artifactFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { spaceId: "workspace-1", userId: "user-1", runId: { in: ["run-1"] } },
+        where: {
+          spaceId: "workspace-1",
+          userId: "user-1",
+          OR: [{ runId: { in: ["run-1"] } }, { id: { in: [] } }],
+        },
       }),
     );
   });
 
-  it("lists no files without reading artifacts when no run belongs to the ticket", async () => {
+  it("also lists the files the user attached to comments", async () => {
+    const s = setup({ id: "t1" });
+    s.runFindMany.mockResolvedValueOnce([]);
+    s.commentFindMany.mockResolvedValueOnce([
+      {
+        attachments: [
+          { kind: "file", artifactId: "a1", mimeType: "text/csv", name: "comps.csv", size: 10 },
+          { kind: "bogus" },
+        ],
+      },
+    ]);
+    await s.call("files");
+    expect(s.commentFindMany).toHaveBeenCalledWith({
+      where: { spaceId: "workspace-1", ticketId: "t1" },
+      select: { attachments: true },
+    });
+    expect(s.artifactFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          spaceId: "workspace-1",
+          userId: "user-1",
+          OR: [{ runId: { in: [] } }, { id: { in: ["a1"] } }],
+        },
+      }),
+    );
+  });
+
+  it("lists no files without reading artifacts when nothing belongs to the ticket", async () => {
     const s = setup({ id: "t1" });
     s.runFindMany.mockResolvedValueOnce([]);
     const { response } = await s.call("files");

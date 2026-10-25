@@ -9,6 +9,9 @@ import { createRunExecutor } from "./executor.js";
 const sink = createTestSink();
 
 const provisionComputer = vi.hoisted(() => vi.fn());
+const readTicketForRun = vi.hoisted(() => vi.fn());
+
+vi.mock("./ticket-files.js", () => ({ readTicketForRun }));
 
 vi.mock("./computer-lifecycle.js", async (importOriginal) => ({
   ...(await importOriginal<typeof ComputerLifecycleModule>()),
@@ -41,6 +44,7 @@ async function runRoutine(
     exportError?: Error;
     setupError?: Error;
     onRunStarted?: () => void;
+    ticketBoardEnabled?: boolean;
   } = {},
 ) {
   const attachment: Extract<MessageBlock, { kind: "file" | "image" }> = {
@@ -186,7 +190,7 @@ async function runRoutine(
     externalEffect: { findMany: vi.fn(async () => []) },
     artifact: {
       findMany: vi.fn(async () =>
-        options.attachments
+        options.attachments || options.ticketBoardEnabled
           ? [
               {
                 id: "artifact-1",
@@ -245,6 +249,7 @@ async function runRoutine(
     jobs: { enqueue },
     notifications: { send: vi.fn(async () => undefined) },
     secrets: [],
+    ticketBoardEnabled: options.ticketBoardEnabled,
   } as unknown as Parameters<typeof createRunExecutor>[0]);
 
   await executor.continueRun(
@@ -434,6 +439,39 @@ describe("run computer provisioning", () => {
     );
     expect(sandbox.writeFile.mock.invocationCallOrder[0]).toBeLessThan(
       sandbox.listFiles.mock.invocationCallOrder[1]!,
+    );
+  });
+
+  it("queues a ticket's files from ticket_get and copies them before the next file tool", async () => {
+    const block = {
+      kind: "file" as const,
+      artifactId: "artifact-1",
+      name: "brief.txt",
+      mimeType: "text/plain",
+      size: 4,
+    };
+    readTicketForRun.mockResolvedValueOnce({
+      result: { ticket: { ref: "RAK-1" } },
+      blocks: [block],
+    });
+    const { sandbox, finalizeRun, toolResults } = await runRoutine(
+      [
+        { name: "ticket_get", args: { ref: "RAK-1" } },
+        { name: "list_files", args: { path: "" } },
+      ],
+      { ticketBoardEnabled: true },
+    );
+    expect(finalizeRun).toHaveBeenCalledWith(expect.objectContaining({ outcome: "completed" }));
+    expect(readTicketForRun).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ ref: "RAK-1", acceptsImages: false }),
+    );
+    expect(toolResults[0]).toEqual({ ticket: { ref: "RAK-1" } });
+    // Reading the ticket does not start the computer; the file tool does, after the copy.
+    expect(provisionComputer).toHaveBeenCalledOnce();
+    expect(sandbox.writeFile).toHaveBeenCalledOnce();
+    expect(sandbox.writeFile.mock.invocationCallOrder[0]).toBeLessThan(
+      sandbox.listFiles.mock.invocationCallOrder[0]!,
     );
   });
 

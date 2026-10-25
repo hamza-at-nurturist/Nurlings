@@ -101,4 +101,23 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await expect(activity).toContainText("You approved it");
   await expect(approve).toHaveCount(0);
   await captureScreenshot(page, testInfo, "board-ticket-approved");
+
+  // Attaching: the reply box's attach control stages a file, sending puts it on the comment and
+  // in the ticket's files, labelled as yours.
+  await detail.getByTestId("reply-file-input").setInputFiles({
+    name: "listing-notes.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("Roof replaced in 2021."),
+  });
+  await expect(detail.getByTestId("reply-files")).toContainText("listing-notes.txt");
+  await detail.getByLabel("Reply").fill("Notes from the viewing");
+  await detail.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(detail.getByTestId("reply-files")).toHaveCount(0);
+  await expect(activity).toContainText("Notes from the viewing");
+  await expect(activity).toContainText("listing-notes.txt");
+  const files = detail.getByTestId("ticket-files");
+  await expect(
+    files.getByTestId("ticket-file").filter({ hasText: "listing-notes.txt" }),
+  ).toContainText("You");
+  await captureScreenshot(page, testInfo, "board-ticket-files");
 });

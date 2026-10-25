@@ -176,4 +176,33 @@ describe("ticket contracts", () => {
     expect(ApproveTicketInput.parse({ id: "ticket-1" })).toEqual({ id: "ticket-1" });
     expect(() => ApproveTicketInput.parse({})).toThrow();
   });
+
+  it("takes a comment with text, files or both, but not neither", () => {
+    expect(CommentTicketInput.safeParse({ ticketId: "t1", body: "Hi" }).success).toBe(true);
+    expect(
+      CommentTicketInput.safeParse({ ticketId: "t1", body: "", artifactIds: ["a1"] }).success,
+    ).toBe(true);
+    expect(CommentTicketInput.safeParse({ ticketId: "t1", body: " " }).success).toBe(false);
+    expect(
+      CommentTicketInput.safeParse({
+        ticketId: "t1",
+        body: "x",
+        artifactIds: ["a1", "a2", "a3", "a4", "a5"],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("reads a comment stored before attachments existed as having none", () => {
+    const comment = {
+      id: "c1",
+      ticketId: "t1",
+      body: "Ready",
+      authorBotId: null,
+      authorUserId: "user-1",
+      authorName: "Ada",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    };
+    expect(TicketCommentSchema.parse(comment).attachments).toEqual([]);
+  });
 });

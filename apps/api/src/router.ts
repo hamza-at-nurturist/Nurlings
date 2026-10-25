@@ -160,6 +160,7 @@ import type {
   ProductEvent,
   Routine,
   SpaceNavigation,
+  TicketAttachment,
 } from "@rakazo/contracts";
 import {
   appContract,
@@ -279,6 +280,7 @@ import {
   getSpaceArtifactById,
   listArtifactVersions,
   listSpaceArtifacts,
+  resolveSendAttachments,
 } from "./artifacts.js";
 import type { BillingService } from "./billing.js";
 import {
@@ -4354,10 +4356,28 @@ export function createRouter(deps: RouterDeps) {
         return result.ticket;
       }),
       comment: boardEnabled.tickets.comment.handler(async ({ context, input }) => {
+        // Files are checked with the chat send rule, against the ticket's owner.
+        let attachments: TicketAttachment[] = [];
+        if (input.artifactIds?.length) {
+          const ticket = await deps.prisma.ticket.findFirst({
+            where: { id: input.ticketId, spaceId: context.actor.spaceId },
+            select: { assigneeBotId: true },
+          });
+          if (!ticket?.assigneeBotId) throw new IsolationError();
+          attachments = (
+            await resolveSendAttachments(
+              deps,
+              context.actor,
+              ticket.assigneeBotId,
+              input.artifactIds,
+            )
+          ).blocks;
+        }
         const result = await commentTicket(ticketDeps, {
           id: input.ticketId,
           body: input.body,
           mentions: input.mentions,
+          attachments,
           spaceId: context.actor.spaceId,
           userId: context.actor.userId,
         });
