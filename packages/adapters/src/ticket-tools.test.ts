@@ -251,6 +251,41 @@ describe("ticket mutations", () => {
     expect(s.changes).toHaveBeenCalledOnce();
     expect(s.changes).toHaveBeenCalledWith(expect.objectContaining({ wakeAssignee: true }));
   });
+  it("gives a user's ticket without an owner to Chief, with the triage prompt", async () => {
+    const s = mutationDeps();
+    const result = await createTicket(s.deps, { spaceId: "ws", userId: "user-1", title: "Comps" });
+    expect(s.prisma.bot.findFirst).toHaveBeenCalledWith({
+      where: { spaceId: "ws", userId: "user-1", spawnKey: "onboarding:first", archivedAt: null },
+      select: { id: true },
+    });
+    expect(result).toEqual({ ticket: expect.objectContaining({ assigneeBotId: "bot-2" }) });
+    expect(s.changes).toHaveBeenCalledWith(
+      expect.objectContaining({
+        wakeAssignee: true,
+        assigneeBotId: "bot-2",
+        wakePrompt: expect.stringContaining("Ticket RAK-1 came in from the user without an owner"),
+      }),
+    );
+  });
+  it("leaves a user's ticket without an owner unowned when there is no Chief", async () => {
+    const s = mutationDeps();
+    s.prisma.bot.findFirst.mockResolvedValueOnce(null as never);
+    const result = await createTicket(s.deps, { spaceId: "ws", userId: "user-1", title: "Comps" });
+    expect(result).toEqual({ ticket: expect.objectContaining({ assigneeBotId: null }) });
+    expect(s.changes).toHaveBeenCalledWith(expect.objectContaining({ assigneeBotId: null }));
+  });
+  it("keeps the usual wake when a user names the owner", async () => {
+    const s = mutationDeps();
+    await createTicket(s.deps, {
+      spaceId: "ws",
+      userId: "user-1",
+      title: "Comps",
+      ownerBotId: "bot-2",
+    });
+    expect(s.changes).toHaveBeenCalledWith(
+      expect.not.objectContaining({ wakePrompt: expect.anything() }),
+    );
+  });
   it("wakes on an actual reassignment once, and never on status edits or repeated assignment", async () => {
     const s = mutationDeps();
     await updateTicket(s.deps, {

@@ -9,6 +9,11 @@ export function ticketWakePrompt(ref: string): string {
   return `Work on ticket ${ref}. Read it with ticket_get, including any comments added since you last looked, and answer them. Keep progress in ticket comments and update its status with ticket_update. Use ask or approval cards when user input is needed.`;
 }
 
+/** What Chief is told when a user's ticket arrives without an owner. */
+export function ticketTriagePrompt(ref: string): string {
+  return `Ticket ${ref} came in from the user without an owner. Read it with ticket_get. If another Nurling is a better fit, reassign it to them with ticket_update; otherwise work on it yourself.`;
+}
+
 /**
  * Assignment and a user's comment wake only the current owner, without posting a chat message.
  * A wake that is still queued will read everything when it starts, so it absorbs a newer one.

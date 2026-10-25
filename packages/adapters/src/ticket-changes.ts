@@ -12,6 +12,8 @@ export type TicketChange = {
   ticketId: string;
   assigneeBotId: string | null;
   wakeAssignee: boolean;
+  /** Replaces the owner's usual wake prompt, as Chief's triage does. */
+  wakePrompt?: string;
   /** Nurlings a comment mentioned, already checked to belong to the commenting user. */
   mentionBotIds?: string[];
   /** The commenting user, whose Nurlings the mentions are. */
@@ -33,29 +35,34 @@ export function createTicketChangeNotifier(deps: {
 }): TicketChangeNotifier {
   return async (change) => {
     if (!deps.ticketBoardEnabled) return;
-    await deps.boardEvents
-      .notify(change.spaceId, {
-        boardId: change.boardId,
-        ticketId: change.ticketId,
-      })
-      .catch(() => undefined);
-    if (change.wakeAssignee && change.assigneeBotId) {
-      await wakeTicketAssignee(deps, {
-        spaceId: change.spaceId,
-        ticketId: change.ticketId,
-        botId: change.assigneeBotId,
-      });
-    }
-    if (change.userId) {
-      for (const botId of change.mentionBotIds ?? []) {
-        await wakeMentionedBot(deps, {
+    try {
+      if (change.wakeAssignee && change.assigneeBotId) {
+        await wakeTicketAssignee(deps, {
           spaceId: change.spaceId,
-          userId: change.userId,
           ticketId: change.ticketId,
-          botId,
-          ...(change.commentBotId ? { byBotId: change.commentBotId } : {}),
-        }).catch((error) => getLogger().warn("ticket mention wake", error));
+          botId: change.assigneeBotId,
+          ...(change.wakePrompt ? { prompt: change.wakePrompt } : {}),
+        });
       }
+      if (change.userId) {
+        for (const botId of change.mentionBotIds ?? []) {
+          await wakeMentionedBot(deps, {
+            spaceId: change.spaceId,
+            userId: change.userId,
+            ticketId: change.ticketId,
+            botId,
+            ...(change.commentBotId ? { byBotId: change.commentBotId } : {}),
+          }).catch((error) => getLogger().warn("ticket mention wake", error));
+        }
+      }
+    } finally {
+      // After the wakes, so the board's reload already sees the queued runs.
+      await deps.boardEvents
+        .notify(change.spaceId, {
+          boardId: change.boardId,
+          ticketId: change.ticketId,
+        })
+        .catch(() => undefined);
     }
     if (change.mentionedUser && change.commentBotId && change.userId) {
       const { ref, body } = change.mentionedUser;

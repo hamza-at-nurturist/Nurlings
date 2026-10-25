@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   ensureBoard,
+  listTicketCards,
   listTicketComments,
   listTicketEvents,
   listTicketFiles,
@@ -214,5 +215,122 @@ describePostgres("board creation (PostgreSQL)", () => {
         listTicketRuns(prisma, spaceId, ticket.id),
       ),
     ).toEqual([]);
+  });
+
+  it("reads every card's comment, file count and working Nurling in one go", async () => {
+    const board = await runAsTenant(tenant, () => ensureBoard(prisma, spaceId));
+    const owner = await fixtures.bot.create({
+      data: { spaceId, userId, name: "Runway", color: "pink" },
+    });
+    const helper = await fixtures.bot.create({
+      data: { spaceId, userId, name: "Dialer", color: "orange" },
+    });
+    const thread = await fixtures.thread.create({ data: { spaceId, botId: owner.id, userId } });
+    const ticket = await fixtures.ticket.create({
+      data: { spaceId, boardId: board.id, number: 30, title: "Cash", assigneeBotId: owner.id },
+    });
+    const quiet = await fixtures.ticket.create({
+      data: { spaceId, boardId: board.id, number: 31, title: "Quiet" },
+    });
+    const run = async (botId: string, status: string) => {
+      const task = await fixtures.task.create({
+        data: {
+          spaceId,
+          userId,
+          botId,
+          threadId: thread.id,
+          prompt: "work",
+          status,
+          ticketId: ticket.id,
+        },
+      });
+      return fixtures.run.create({
+        data: {
+          spaceId,
+          userId,
+          botId,
+          threadId: thread.id,
+          taskId: task.id,
+          status,
+          trigger: "tickets",
+        },
+      });
+    };
+    await run(helper.id, "running");
+    const done = await run(owner.id, "running");
+    const artifact = (runId: string | null, name: string, version = 1, rootArtifactId?: string) =>
+      fixtures.artifact.create({
+        data: {
+          spaceId,
+          userId,
+          botId: owner.id,
+          runId,
+          name,
+          mimeType: "text/plain",
+          size: 1,
+          hash: "h",
+          storageKey: `${name}-${version}-${Math.random()}`,
+          version,
+          rootArtifactId: rootArtifactId ?? null,
+        },
+      });
+    const first = await artifact(done.id, "cash.md");
+    await artifact(done.id, "cash.md", 2, first.id);
+    const upload = await artifact(null, "notes.txt");
+    await fixtures.ticketComment.create({
+      data: {
+        ticketId: ticket.id,
+        spaceId,
+        authorUserId: userId,
+        body: "Older",
+        createdAt: new Date(Date.now() - 60_000),
+      },
+    });
+    await fixtures.ticketComment.create({
+      data: { ticketId: ticket.id, spaceId, authorBotId: owner.id, body: "x".repeat(400) },
+    });
+    await fixtures.ticketComment.create({
+      data: {
+        ticketId: ticket.id,
+        spaceId,
+        authorUserId: userId,
+        body: "",
+        createdAt: new Date(Date.now() + 60_000),
+        attachments: [
+          {
+            kind: "file",
+            artifactId: upload.id,
+            mimeType: "text/plain",
+            name: "notes.txt",
+            size: 1,
+          },
+        ],
+      },
+    });
+    const tickets = [
+      { id: ticket.id, assigneeBotId: owner.id },
+      { id: quiet.id, assigneeBotId: null },
+    ];
+    const cards = await runAsTenant(tenant, () =>
+      listTicketCards(prisma, { spaceId, userId, tickets }),
+    );
+    const files = await runAsTenant(tenant, () =>
+      listTicketFiles(prisma, { spaceId, userId, ticketId: ticket.id }),
+    );
+    expect(cards.get(ticket.id)).toEqual({
+      lastComment: "x".repeat(280),
+      fileCount: files.length,
+      workingBotId: owner.id,
+    });
+    expect(files).toHaveLength(2);
+    expect(cards.get(quiet.id)).toEqual({ lastComment: null, fileCount: 0, workingBotId: null });
+    const elsewhere = await runAsTenant({ spaceId: "someone-else", userId }, () =>
+      listTicketCards(prisma, { spaceId: "someone-else", userId, tickets }),
+    );
+    expect(elsewhere.get(ticket.id)).toEqual({
+      lastComment: null,
+      fileCount: 0,
+      workingBotId: null,
+    });
   });
 });

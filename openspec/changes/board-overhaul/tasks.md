@@ -2,28 +2,28 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal and the decisions in `design.md`. Verify: explicit
+- [x] 1.1 Maintainer approves the proposal and the decisions in `design.md`. Verify: explicit
   approval in the session.
 
 ## 2. Backend
 
-- [ ] 2.1 Two migrations, one statement each: `CREATE INDEX CONCURRENTLY` on `runs("taskId")` and
+- [x] 2.1 Two migrations, one statement each: `CREATE INDEX CONCURRENTLY` on `runs("taskId")` and
   on `artifacts("runId")`, with the matching `@@index` in `schema.prisma`. Verify: migrations apply
   on an empty and an existing database; `prisma migrate diff` is clean; row-security test passes.
-- [ ] 2.2 Contracts: `TicketListItemSchema` (`lastComment`, `fileCount`, `workingBotId`, all
+- [x] 2.2 Contracts: `TicketListItemSchema` (`lastComment`, `fileCount`, `workingBotId`, all
   defaulted) in `ListTicketsOutput`; `CreateTicketInput.assigneeBotId` optional. Verify: contract
   tests parse an old list response and a create without an owner.
-- [ ] 2.3 `listTicketCards` in `packages/db/src/board.ts` (three queries for any number of
+- [x] 2.3 `listTicketCards` in `packages/db/src/board.ts` (three queries for any number of
   tickets). Verify: Postgres test for latest comment, empty-body comments skipped, working Nurling
   (owner first), file count equal to `listTicketFiles` length, tenant context, and another Space's
   rows not counted.
-- [ ] 2.4 `tickets.list` merges the card fields. Verify: router test that the fields come back and
+- [x] 2.4 `tickets.list` merges the card fields. Verify: router test that the fields come back and
   the query count does not grow with the number of tickets.
-- [ ] 2.5 `createTicket`: no owner from a user → Chief (`onboarding:first`, not archived, same user
+- [x] 2.5 `createTicket`: no owner from a user → Chief (`onboarding:first`, not archived, same user
   and space) with `ticketTriagePrompt`, or unassigned when there is none; Nurling-created tickets
   unchanged; router `create` checks the owner only when given. Verify: unit tests for each case and
   that the wake carries the triage prompt.
-- [ ] 2.6 `createTicketChangeNotifier` sends the board event after the wakes, also when a wake
+- [x] 2.6 `createTicketChangeNotifier` sends the board event after the wakes, also when a wake
   throws. Verify: unit test of the order and of the failure path.
 
 ## 3. Web board

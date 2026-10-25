@@ -165,7 +165,18 @@ export const ListTicketsInput = z.object({
 });
 export type ListTicketsInput = z.infer<typeof ListTicketsInput>;
 
-export const ListTicketsOutput = z.object({ tickets: z.array(TicketSchema) });
+/** What a board card shows beyond the ticket, read for the whole list at once. */
+export const TicketListItemSchema = TicketSchema.extend({
+  /** The newest comment with text, cut short, as plain text. */
+  lastComment: z.string().nullable().default(null),
+  /** The files the ticket's files list shows, counted. */
+  fileCount: z.number().int().nonnegative().default(0),
+  /** A Nurling with a queued, leased or running run for the ticket, the owner first. */
+  workingBotId: Id.nullable().default(null),
+});
+export type TicketListItem = z.infer<typeof TicketListItemSchema>;
+
+export const ListTicketsOutput = z.object({ tickets: z.array(TicketListItemSchema) });
 export type ListTicketsOutput = z.infer<typeof ListTicketsOutput>;
 
 export const GetTicketInput = z
@@ -220,7 +231,8 @@ export const CreateTicketInput = z
     title: z.string().trim().min(1).max(TICKET_TITLE_MAX_LENGTH),
     description: z.string().max(TICKET_DESCRIPTION_MAX_LENGTH).optional(),
     priority: TicketPrioritySchema.default(DEFAULT_TICKET_PRIORITY),
-    assigneeBotId: Id,
+    /** A user may leave it out; the server then picks the owner. */
+    assigneeBotId: Id.optional(),
     start: TicketDateInputSchema.nullable().optional(),
     due: TicketDateInputSchema.nullable().optional(),
   })

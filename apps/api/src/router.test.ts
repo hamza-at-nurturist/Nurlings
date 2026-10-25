@@ -7152,7 +7152,9 @@ describe("boards.tickets.list", () => {
   } satisfies Actor;
 
   function listDeps() {
-    const findMany = vi.fn(async () => []);
+    const findMany = vi.fn(async (_args: unknown) => [] as unknown[]);
+    const queryRaw = vi.fn(async (..._args: unknown[]) => [] as unknown[]);
+    const runFindMany = vi.fn(async (_args: unknown) => [] as unknown[]);
     const prisma = {
       board: {
         findUnique: vi.fn(async () => ({
@@ -7166,9 +7168,11 @@ describe("boards.tickets.list", () => {
         })),
       },
       ticket: { findMany },
+      run: { findMany: runFindMany },
+      $queryRaw: queryRaw,
     } as unknown as PrismaClient;
     const deps = { prisma, env: { ticketBoardEnabled: true } } as unknown as RouterDeps;
-    return { findMany, handler: new RPCHandler(createRouter(deps)) };
+    return { findMany, queryRaw, runFindMany, handler: new RPCHandler(createRouter(deps)) };
   }
 
   it("searches ticket text for the characters the user typed, not SQL wildcards", async () => {
@@ -7186,6 +7190,65 @@ describe("boards.tickets.list", () => {
     expect(where?.OR?.[0]?.title?.contains).toBe("50\\%\\_off");
     expect(where?.OR?.[1]?.description?.contains).toBe("50\\%\\_off");
   });
+
+  it.each([1, 3])(
+    "adds each card's comment, files and working Nurling in the same queries for %i tickets",
+    async (count) => {
+      const { findMany, handler, queryRaw, runFindMany } = listDeps();
+      const rows = Array.from({ length: count }, (_, index) => ({
+        id: `t${index}`,
+        boardId: "board-1",
+        spaceId: "workspace-1",
+        number: index + 1,
+        title: `Ticket ${index}`,
+        description: null,
+        status: "doing",
+        priority: "normal",
+        assigneeBotId: "bot-1",
+        createdByBotId: null,
+        createdByUserId: "user-1",
+        createdAt: new Date("2026-06-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-06-01T00:00:00.000Z"),
+        completedAt: null,
+        needsUser: false,
+        startAt: null,
+        startHasTime: false,
+        dueAt: null,
+        dueHasTime: false,
+      }));
+      findMany.mockResolvedValueOnce(rows as never);
+      queryRaw
+        .mockResolvedValueOnce([{ ticketId: "t0", body: "Report attached" }])
+        .mockResolvedValueOnce([{ ticketId: "t0", count: 2 }]);
+      runFindMany.mockResolvedValueOnce([{ botId: "bot-1", task: { ticketId: "t0" } }]);
+      const { response } = await handler.handle(
+        new Request("http://127.0.0.1/rpc/tickets/list", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ json: {} }),
+        }),
+        { prefix: "/rpc", context: { actor } },
+      );
+      const body = (await response?.json()) as {
+        json: { tickets: Array<Record<string, unknown>> };
+      };
+      expect(body.json.tickets[0]).toEqual(
+        expect.objectContaining({
+          id: "t0",
+          lastComment: "Report attached",
+          fileCount: 2,
+          workingBotId: "bot-1",
+        }),
+      );
+      expect(body.json.tickets.slice(1)).toEqual(
+        Array.from({ length: count - 1 }, () =>
+          expect.objectContaining({ lastComment: null, fileCount: 0, workingBotId: null }),
+        ),
+      );
+      expect(queryRaw).toHaveBeenCalledTimes(2);
+      expect(runFindMany).toHaveBeenCalledTimes(1);
+    },
+  );
 });
 
 describe("tickets.events and tickets.files", () => {
