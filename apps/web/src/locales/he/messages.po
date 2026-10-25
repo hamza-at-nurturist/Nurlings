@@ -365,6 +365,10 @@ msgstr "{title}, {label}"
 msgid "{toolCount, plural, one {# tool} other {# tools}}"
 msgstr "{toolCount, plural, one {# כלי} other {# כלים}}"
 
+#: src/components/board/BoardView/BoardCard.tsx
+msgid "{workerName} is working…"
+msgstr ""
+
 #. placeholder {0}: mention.name
 #: src/pages/shell/composer.tsx
 msgid "@{0}"
@@ -460,6 +464,7 @@ msgstr "מודל פעיל"
 msgid "Activity"
 msgstr "פעילות"
 
+#: src/components/board/BoardView/QuickAdd.tsx
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/ScratchpadSection.tsx
@@ -631,6 +636,10 @@ msgstr "חיבורי סוכנים"
 msgid "Agents:"
 msgstr "סוכנים:"
 
+#: src/components/board/BoardView/NurlingFilter.tsx
+msgid "All"
+msgstr ""
+
 #: src/pages/Artifacts.tsx
 msgid "All bots"
 msgstr "כל הבוטים"
@@ -778,6 +787,7 @@ msgstr "החלה"
 msgid "Approval boundaries"
 msgstr "גבולות אישור"
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsOverlay.tsx
 #: src/pages/shell/message-cards.tsx
@@ -912,6 +922,7 @@ msgstr "זמין לפקודות ה-shell של הבוט הזה בתור {commandV
 msgid "Avatar Studio"
 msgstr "Avatar Studio"
 
+#: src/components/board/BoardView/BoardView.tsx
 #: src/pages/Auth.tsx
 #: src/pages/Board.tsx
 #: src/pages/PluginsOverlay.tsx
@@ -953,6 +964,7 @@ msgstr "חיוב"
 msgid "Blocked"
 msgstr "חסום"
 
+#: src/components/board/BoardView/BoardView.tsx
 #: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
@@ -2630,6 +2642,7 @@ msgstr ""
 msgid "File"
 msgstr "קובץ"
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/components/board/TicketModal/TicketFiles.tsx
 msgid "Files"
 msgstr ""
@@ -3417,6 +3430,7 @@ msgstr "הזזת {full} למעלה"
 msgid "Move them to your shared memory."
 msgstr "אפשר להעביר אותם לזיכרון המשותף."
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "העברה אל"
@@ -4688,6 +4702,10 @@ msgstr "צ׳אט משותף עם {GROUP_MEMBER_MIN}-{GROUP_MEMBER_MAX} בוטי�
 msgid "Shared documents"
 msgstr "מסמכים משותפים"
 
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Show {hidden} older"
+msgstr ""
+
 #: src/pages/GroupPanel.tsx
 msgid "Show all"
 msgstr ""
@@ -5003,6 +5021,10 @@ msgstr "הודעת Teams"
 #: src/pages/RoutineEditor.tsx
 msgid "Teams not enabled"
 msgstr "Teams לא מופעל"
+
+#: src/components/board/BoardView/QuickAdd.tsx
+msgid "Tell a {noun} what to do…"
+msgstr ""
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Test"
@@ -5697,6 +5719,10 @@ msgstr ""
 #: src/pages/Welcome.tsx
 msgid "Your team of always-on agents<0/>that you can give real work to."
 msgstr "צוות של סוכנים שזמינים תמיד<0/>שאפשר להטיל עליהם עבודה אמיתית."
+
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Your turn"
+msgstr ""
 
 #: src/lib/user-error.ts
 msgid "Your voice provider is out of credit."

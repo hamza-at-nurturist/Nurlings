@@ -6,15 +6,14 @@
 
 | File | Role |
 |---|---|
-| `BoardView.tsx` | Page: loads tickets, Nurlings and timezone, follows `boards.subscribe` (moved from `Board.tsx` unchanged), owns filter, selection and the open modal |
-| `BoardHeader.tsx` | Back, title, `NurlingFilter`, `QuickAdd`; the container-query layout |
+| `BoardView.tsx` | Page: loads tickets, Nurlings and timezone, follows `boards.subscribe` (copied from `Board.tsx`), owns filter, selection and the open modal; its header (back, title, `NurlingFilter`, `QuickAdd`) and the container-query layout |
 | `NurlingFilter.tsx` | `ToggleGroup` with "All" and one `BotAvatar` item per Nurling |
 | `QuickAdd.tsx` | The input, the `@` picker, submit |
 | `quick-add.ts` | Pure: text + picked Nurlings → `{ title, description, assigneeBotId? }` |
 | `BoardColumn.tsx` | Dot, name, count, "Your turn", drop target, "Show N older" |
 | `BoardCard.tsx` | One card, drag source, "Move to" menu, Approve |
 | `columns.ts` | Pure: tickets + filter + now → six columns, Done split into recent and older |
-| `use-mention-input.ts` | The `@` token, options, highlight, picks: lifted out of `ReplyBox` so both use one copy |
+| `../TicketModal/use-mention-input.ts` | The `@` token, options, highlight, picks: lifted out of `ReplyBox` so both use one copy |
 
 Tests sit next to each file. `TicketModal/*` is reused as is, except `MentionPicker` gains a
 `side` prop (`"above"` default, `"below"` for the header) and `ReplyBox` uses the shared hook.
@@ -112,8 +111,7 @@ only under All), then group by status in `TICKET_STATUSES` order, keeping the li
 `completedAt` counts as recent. The count shows what the column holds after filtering, older Done
 included. "Show N older" reveals them until the board reloads from scratch.
 
-Dots use tokens: To do `muted-foreground`, In progress `status-working`, In review `warning`,
-Blocked `destructive`, Done `success`, Won't do `faint-foreground`. In review is tinted
+Dots reuse the modal's `STATUS_DOT` map from `Properties.tsx`, so the board and the modal agree. In review is tinted
 `bg-warning/5`; "Your turn" is a `Badge` in warning colours, shown only while the column has
 cards. Done and Won't do cards are dimmed as in the mockup.
 

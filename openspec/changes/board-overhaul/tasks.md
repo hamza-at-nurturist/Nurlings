@@ -28,25 +28,25 @@
 
 ## 3. Web board
 
-- [ ] 3.1 `use-mention-input.ts` lifted from `ReplyBox`; `MentionPicker` `side` prop. Verify:
-  existing `TicketModal` tests pass unchanged; hook unit tests.
-- [ ] 3.2 `quick-add.ts` and `QuickAdd.tsx`. Verify: unit tests for one line, several lines, a
+- [x] 3.1 `use-mention-input.ts` lifted from `ReplyBox`; `MentionPicker` `side` prop. Verify:
+  existing `TicketModal` tests pass unchanged; quick-add tests drive the shared hook.
+- [x] 3.2 `quick-add.ts` and `QuickAdd.tsx`. Verify: unit tests for one line, several lines, a
   long first line, owner by mention (token removed), a deleted mention, empty text, Enter and
   Shift+Enter, and the create call.
-- [ ] 3.3 `columns.ts`: filter, grouping, Done recent/older split, counts. Verify: unit tests.
-- [ ] 3.4 `BoardCard.tsx`: ref, Needs you, title, shimmer or last comment, footer, file count,
+- [x] 3.3 `columns.ts`: filter, grouping, Done recent/older split, counts. Verify: unit tests.
+- [x] 3.4 `BoardCard.tsx`: ref, Needs you, title, shimmer or last comment, footer, file count,
   Approve, opening the modal, Move to menu. Verify: component tests for each state, and that
   Approve does not open the modal.
-- [ ] 3.5 `BoardColumn.tsx` and drag and drop with optimistic move and revert. Verify: component
+- [x] 3.5 `BoardColumn.tsx` and drag and drop with optimistic move and revert. Verify: component
   tests firing drag events, and a refused move restoring the card and showing the error.
-- [ ] 3.6 `NurlingFilter.tsx`, `BoardHeader.tsx` and responsive layout. Verify: component test of
+- [x] 3.6 `NurlingFilter.tsx`, the header in `BoardView.tsx` and the responsive layout. Verify: component test of
   the filter; e2e checks below.
-- [ ] 3.7 `BoardView.tsx` with live updates and the working-set reload; `Board.tsx` swaps to it,
+- [x] 3.7 `BoardView.tsx` with live updates and the working-set reload; `Board.tsx` swaps to it,
   upstream board kept as `UpstreamBoardPage`. Verify: `BoardView` tests; `Board.test.tsx` still
   passes against `UpstreamBoardPage`; typecheck and lint clean.
-- [ ] 3.8 Rewrite `apps/web/e2e/board.spec.ts` for quick-add, filter, move menu and approve, with
+- [x] 3.8 Rewrite `apps/web/e2e/board.spec.ts` for quick-add, filter, move menu and approve, with
   screenshots at 1440 and 390 px and a no-page-sideways-scroll check at 390, 834 and 1440 px.
-  Verify: CI e2e job green; screenshots linked on the PR.
+  Verify: passes locally against Postgres 16; CI e2e job green; screenshots linked on the PR.
 
 ## 4. Ship
 

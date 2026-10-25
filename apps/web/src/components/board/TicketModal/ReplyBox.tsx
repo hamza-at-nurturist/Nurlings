@@ -3,12 +3,12 @@ import type { Bot, TicketComment } from "@rakazo/contracts";
 import { ATTACHMENT_ALLOWED_MIME_TYPES, TICKET_COMMENT_MAX_LENGTH } from "@rakazo/contracts";
 import { Button, Textarea } from "@rakazo/ui-web";
 import { ArrowUp, Paperclip, Plus, X } from "lucide-react";
-import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { rpc } from "../../../lib/rpc";
 import { errorText } from "../../../lib/user-error";
 import { MentionChip } from "./MentionChip";
 import { MentionPicker } from "./MentionPicker";
-import { activeMentionToken, hasMentionToken } from "./mentions";
+import { useMentionInput } from "./use-mention-input";
 import type { StagedFiles } from "./use-staged-files";
 
 type Props = {
@@ -21,68 +21,20 @@ type Props = {
   onError: (message: string) => void;
 };
 
-const MAX_OPTIONS = 8;
 const ATTACHMENT_ACCEPT = [...ATTACHMENT_ALLOWED_MIME_TYPES, ".zip"].join(",");
 
 export function ReplyBox({ ticketId, ownerBotId, files, bots, onSent, onError }: Props) {
   const { t } = useLingui();
   const pickerId = useId();
-  const box = useRef<HTMLTextAreaElement>(null);
   const picker = useRef<HTMLInputElement>(null);
-  const [body, setBody] = useState("");
-  const [caret, setCaret] = useState(0);
-  const [picked, setPicked] = useState<Bot[]>([]);
-  const [highlighted, setHighlighted] = useState(0);
-  // The `@` position the user closed the picker at, so it stays closed until they type another.
-  const [dismissedAt, setDismissedAt] = useState<number | null>(null);
+  const input = useMentionInput(bots);
+  const { box, text: body, picked, options, open, active } = input;
   const [busy, setBusy] = useState(false);
   const canSend = !busy && (body.trim().length > 0 || files.staged.length > 0);
-  // Where the caret goes after a pick. It is placed as soon as the new text is committed, before
-  // the next keystroke can land at the end of the controlled value.
-  const pendingCaret = useRef<number | null>(null);
-  useLayoutEffect(() => {
-    const at = pendingCaret.current;
-    if (at === null) return;
-    pendingCaret.current = null;
-    box.current?.focus();
-    box.current?.setSelectionRange(at, at);
-  });
-
-  const token = activeMentionToken(body, caret);
-  const options = useMemo(() => {
-    if (!token || token.start === dismissedAt) return [];
-    const query = token.query.toLowerCase();
-    return bots
-      .filter((bot) => bot.name.toLowerCase().includes(query))
-      .sort(
-        (a, b) =>
-          Number(b.name.toLowerCase().startsWith(query)) -
-          Number(a.name.toLowerCase().startsWith(query)),
-      )
-      .slice(0, MAX_OPTIONS);
-  }, [token, dismissedAt, bots]);
-  const open = options.length > 0;
-  const active = Math.min(highlighted, Math.max(options.length - 1, 0));
-
-  function pick(bot: Bot) {
-    if (!token) return;
-    const text = `${body.slice(0, token.start)}@${bot.name} ${body.slice(caret)}`;
-    const next = token.start + bot.name.length + 2;
-    setBody(text);
-    setCaret(next);
-    setHighlighted(0);
-    setPicked((current) =>
-      current.some((row) => row.id === bot.id) ? current : [...current, bot],
-    );
-    pendingCaret.current = next;
-  }
 
   async function send() {
     if (!canSend) return;
-    // Only the mentions still in the text count; a chip whose `@Name` was deleted is dropped.
-    const mentions = picked
-      .filter((bot) => hasMentionToken(body, bot.name))
-      .map((bot) => ({ kind: "bot" as const, id: bot.id }));
+    const mentions = input.mentioned().map((bot) => ({ kind: "bot" as const, id: bot.id }));
     setBusy(true);
     onError("");
     try {
@@ -95,9 +47,7 @@ export function ReplyBox({ ticketId, ownerBotId, files, bots, onSent, onError }:
           ...(artifactIds.length ? { artifactIds } : {}),
         }),
       );
-      setBody("");
-      setCaret(0);
-      setPicked([]);
+      input.reset();
       files.clear();
     } catch (cause) {
       onError(errorText(cause));
@@ -119,8 +69,8 @@ export function ReplyBox({ ticketId, ownerBotId, files, bots, onSent, onError }:
           id={pickerId}
           options={options}
           highlighted={active}
-          onHighlight={setHighlighted}
-          onPick={pick}
+          onHighlight={input.setHighlighted}
+          onPick={input.pick}
         />
       ) : null}
       {picked.length ? (
@@ -130,7 +80,7 @@ export function ReplyBox({ ticketId, ownerBotId, files, bots, onSent, onError }:
               key={bot.id}
               name={bot.name}
               color={bot.color}
-              onRemove={() => setPicked((current) => current.filter((row) => row.id !== bot.id))}
+              onRemove={() => input.unpick(bot.id)}
             />
           ))}
         </div>
@@ -205,35 +155,10 @@ export function ReplyBox({ ticketId, ownerBotId, files, bots, onSent, onError }:
           maxLength={TICKET_COMMENT_MAX_LENGTH}
           rows={1}
           className={`max-h-40 min-h-11 resize-none rounded-2xl py-2.5 pr-12 ${ownerBotId ? "pl-12" : ""}`}
-          onChange={(event) => {
-            setBody(event.target.value);
-            setCaret(event.target.selectionStart);
-            setHighlighted(0);
-          }}
-          onSelect={(event) => setCaret(event.currentTarget.selectionStart)}
+          onChange={input.onChange}
+          onSelect={input.onSelect}
           onKeyDown={(event) => {
-            if (event.nativeEvent.isComposing) return;
-            if (open) {
-              if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-                event.preventDefault();
-                const step = event.key === "ArrowDown" ? 1 : -1;
-                setHighlighted((active + step + options.length) % options.length);
-                return;
-              }
-              if (event.key === "Enter" || event.key === "Tab") {
-                event.preventDefault();
-                const bot = options[active];
-                if (bot) pick(bot);
-                return;
-              }
-              if (event.key === "Escape") {
-                // Close the picker, not the whole dialog.
-                event.preventDefault();
-                event.stopPropagation();
-                setDismissedAt(token?.start ?? null);
-                return;
-              }
-            }
+            if (event.nativeEvent.isComposing || input.pickerKey(event)) return;
             if (event.key !== "Enter" || event.shiftKey) return;
             event.preventDefault();
             void send();

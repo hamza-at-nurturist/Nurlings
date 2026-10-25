@@ -14,39 +14,87 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await page.getByTestId("user-menu-trigger").click();
   await page.getByRole("button", { name: "Board", exact: true }).click();
   await expect(page).toHaveURL(/\/app\/board$/);
-  await expect(page.getByTestId("board-columns")).toBeVisible();
-  await expect(page.getByText("No tickets yet", { exact: true })).toBeVisible();
   const board = page.getByTestId("board-columns");
+  await expect(board).toBeVisible();
+  await expect(page.getByRole("button", { name: "New ticket", exact: true })).toHaveCount(0);
+  const pageScrollsSideways = () =>
+    page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+
+  // Wide: all six columns fit without scrolling sideways.
   expect(await board.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
   await expect(page.getByRole("heading", { name: "Won't do", exact: true })).toBeInViewport();
-  await page.setViewportSize({ width: 800, height: 900 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
-    true,
-  );
-  expect(
-    await board.evaluate(
-      (node) => node.parentElement!.scrollWidth > node.parentElement!.clientWidth,
-    ),
-  ).toBe(true);
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await captureScreenshot(page, testInfo, "board-kanban");
 
-  await page.getByRole("button", { name: "New ticket", exact: true }).click();
-  const dialog = page.getByRole("dialog", { name: "New ticket" });
-  await dialog.getByLabel("Title").fill(title);
-  await dialog.getByLabel("Description").fill(description);
-  const owner = dialog.getByLabel("Owner");
-  await expect(owner.locator("option", { hasText: "Planner" })).toHaveCount(1);
-  await owner.selectOption({ label: "Planner" });
-  await dialog.getByRole("button", { name: "Create", exact: true }).click();
-
-  await expect(dialog).toBeHidden();
+  // Quick-add: the first line is the title, the rest the description, an @ Nurling owns it.
+  const quickAdd = page.getByRole("textbox", { name: "Tell a Nurling what to do…" });
+  await quickAdd.fill("@Pl");
+  await page.getByRole("option", { name: "Planner", exact: true }).click();
+  await quickAdd.pressSequentially(title);
+  await quickAdd.press("Shift+Enter");
+  await quickAdd.pressSequentially(description);
+  await quickAdd.press("Enter");
+  await expect(quickAdd).toHaveValue("");
   const card = page.locator("[data-testid^='board-card-']").filter({ hasText: title });
   await expect(card).toBeVisible();
-  await expect(card).toContainText("Planner");
-  await captureScreenshot(page, testInfo, "board-ticket-created");
+  await expect(card.getByTestId("card-owner")).toHaveText("Planner");
+  await expect(page.getByTestId("board-column-todo")).toContainText(title);
 
-  await card.click();
+  // Without a mention Chief takes it, to hand on or do itself.
+  const comps = "Pull county records for 1907 Oak St";
+  await quickAdd.fill(comps);
+  await quickAdd.press("Enter");
+  const chiefCard = page.locator("[data-testid^='board-card-']").filter({ hasText: comps });
+  await expect(chiefCard.getByTestId("card-owner")).toHaveText("Chief");
+
+  // The filter shows one Nurling's tickets.
+  const filter = page.getByTestId("board-filter");
+  await filter.getByRole("button", { name: "Planner", exact: true }).click();
+  await expect(chiefCard).toHaveCount(0);
+  await expect(card).toBeVisible();
+  await filter.getByRole("button", { name: "All", exact: true }).click();
+  await expect(chiefCard).toBeVisible();
+
+  // Drag to Blocked, then the card's menu to In review, where it waits on the user.
+  await chiefCard.dragTo(page.getByTestId("board-column-blocked"));
+  await expect(page.getByTestId("board-column-blocked")).toContainText(comps);
+  await chiefCard.hover();
+  await chiefCard.getByRole("button", { name: "Move to", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "In review", exact: true }).click();
+  const review = page.getByTestId("board-column-review");
+  await expect(review).toContainText(comps);
+  await expect(review).toContainText("Your turn");
+  await expect(chiefCard.getByRole("button", { name: "Approve", exact: true })).toBeVisible();
+  await page.mouse.move(0, 0);
+  await captureScreenshot(page, testInfo, "board-desktop");
+
+  // Narrower: columns scroll sideways, the page never does, and quick-add gets its own row.
+  await page.setViewportSize({ width: 834, height: 1112 });
+  expect(await pageScrollsSideways()).toBe(false);
+  expect(await board.evaluate((node) => node.scrollWidth > node.clientWidth)).toBe(true);
+  const heading = await page.getByRole("heading", { name: "Board", exact: true }).boundingBox();
+  const addBox = await page.getByTestId("quick-add").boundingBox();
+  expect(addBox!.y).toBeGreaterThan(heading!.y + heading!.height);
+  await captureScreenshot(page, testInfo, "board-tablet");
+
+  // Phone: the header stacks and the next column peeks in.
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await pageScrollsSideways()).toBe(false);
+  const filterBox = await filter.boundingBox();
+  const phoneHeading = await page
+    .getByRole("heading", { name: "Board", exact: true })
+    .boundingBox();
+  expect(filterBox!.y).toBeGreaterThan(phoneHeading!.y + phoneHeading!.height);
+  const todo = await page.getByTestId("board-column-todo").boundingBox();
+  expect(todo!.width).toBeLessThan(390 * 0.9);
+  expect(todo!.width).toBeGreaterThan(390 * 0.7);
+  await captureScreenshot(page, testInfo, "board-phone");
+  await page.setViewportSize({ width: 1440, height: 900 });
+
+  // Approving from the card finishes it without opening the ticket.
+  await chiefCard.getByRole("button", { name: "Approve", exact: true }).click();
+  await expect(page.getByTestId("board-column-done")).toContainText(comps);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  await card.getByTestId("card-open").click();
   const detail = page.getByRole("dialog", { name: title });
   await expect(detail.getByLabel("Title")).toHaveValue(title);
   await expect(detail.getByLabel("Description")).toHaveValue(description);
