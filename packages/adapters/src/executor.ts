@@ -96,6 +96,7 @@ import {
   nextFence,
   nextRoutineRunDateAcross,
   outboundSiteGate,
+  plainTextFromMarkdown,
   planActionGate,
   promptInvokesSkill,
   redactSecrets,
@@ -108,6 +109,7 @@ import {
   toolRequiresExplicitApproval,
   toolResultTaintsRun,
   truncatedPlainText,
+  truncatePlainText,
   unattendedTriggerToolRequiresApproval,
   userTurnMessageForRun,
 } from "@rakazo/core";
@@ -125,6 +127,7 @@ import {
   countUnreadInboxChats,
   createSpaceForMember,
   createThreadMessageInTransaction,
+  dropRunTurnCheckpoint,
   effectiveMemoryScope,
   findDefaultModelCredential,
   InstructionConflictError,
@@ -141,6 +144,7 @@ import {
   reserveInstructionProposal,
   retireModelCredential,
   runAsSystem,
+  runSecretKind,
   SpaceLimitError,
   saveRunTurnCheckpoint,
   searchHistory,
@@ -165,12 +169,14 @@ import {
 } from "./agent-environment.js";
 import type { FleetCardSummary } from "./approval-ask.js";
 import { buildApprovalAskBlock, MAX_FETCH_URL_LENGTH } from "./approval-ask.js";
+import type { ApprovalPausedToolResult } from "./approval-effect.js";
 import {
   approvalPausedToolResult,
   approvalReplayPathError,
   approvalReplayResourceError,
   approvalRoutesMatch,
   approvedCatalogReplay,
+  approvedEffectOccurrence,
   approvedReplayArgs,
   boundDirectApprovalDetails,
   boundDirectApprovalRequest,
@@ -212,6 +218,7 @@ import {
   forgetBotSecret,
   listBotSecrets,
   loadBotCommandEnvironment,
+  loadLoginPasswordRedactions,
   normalizeSecretDestination,
   requestWithBotSecret,
   resolveLoginFill,
@@ -372,6 +379,7 @@ import type { RemoteTransportDependencies } from "./remote-mcp.js";
 import { assertSafeRemoteUrl } from "./remote-mcp.js";
 import { loadReplyContext, messageToAgentHistoryText } from "./reply-context.js";
 import { findPendingRoutineTick, routineTimerNonce } from "./routine-coalescing.js";
+import { lateRoutineRunInstruction } from "./routine-lateness.js";
 import { routineTaskInstructions, tickRoutineWatch } from "./routine-watch.js";
 import { lazyRunComputer } from "./run-computer.js";
 import {
@@ -380,7 +388,6 @@ import {
   reconcileManagedConnection,
   resolveCompletedSecretLeftover,
   resolveMissingRunSecretAction,
-  runSecretKind,
   secretPausedToolResult,
   tryCompleteConnectionWithCode,
 } from "./run-secret.js";
@@ -3709,12 +3716,14 @@ export function createRunExecutor(deps: ExecutorDeps) {
         return;
       }
       let attempt: { id: string };
+      // Resumed attempts keep the first start, so lateness reflects when the run began.
+      const executionStartedAt = current.startedAt ?? new Date();
       try {
         // Acquiring the computer can requeue a busy run. Count that wait as queue
         // time, and only stamp execution once this attempt can use its computer.
         const executionStarted = await deps.prisma.run.updateMany({
           where: { id: runId, status: "running", leaseOwner: workerId, leaseFence: fence },
-          data: { startedAt: current.startedAt ?? new Date() },
+          data: { startedAt: executionStartedAt },
         });
         if (executionStarted.count !== 1) {
           await releaseComputerExecutionLease(deps.prisma, computerLease).catch(() => undefined);
@@ -3831,6 +3840,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
           agentSkills,
           agentSecretRows,
           initialBotCommandEnvironment,
+          savedLoginPasswordRedactions,
         ] = await Promise.all([
           deps.prisma.bot.findUniqueOrThrow({
             where: { id: run.botId },
@@ -3873,6 +3883,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
             },
           }),
           loadBotCommandEnvironment(deps.prisma, deps.secretStore, run),
+          loadLoginPasswordRedactions(deps.prisma, deps.secretStore, run),
         ]);
         const historySearchBeforeSeq =
           contextStrategy !== "current" && run.sourceMessageId
@@ -3889,6 +3900,9 @@ export function createRunExecutor(deps: ExecutorDeps) {
         runSecrets.push(...Object.values(agentEnvironment));
         // Encoded forms too: read_file redacts with these values before any shell command runs.
         runSecrets.push(...commandCredentialRedactions(initialBotCommandEnvironment));
+        // A login filled in an earlier run may still be on its page, and anything this run reads
+        // or is given may contain it, so every run hides its saved passwords before the model runs.
+        runSecrets.push(...savedLoginPasswordRedactions);
         const agentEnvironmentInstruction = formatAgentEnvironmentInstruction({
           ...agentEnvironment,
           ...initialBotCommandEnvironment,
@@ -4354,7 +4368,9 @@ export function createRunExecutor(deps: ExecutorDeps) {
             .then((rules) => rules as ActionApprovalRule[]);
           return approvalRulesPromise;
         };
-        let autoReviewPreferencePromise: Promise<boolean> | undefined;
+        let autoReviewPreferencePromise:
+          | Promise<{ enabled: boolean; skipApprovals: boolean }>
+          | undefined;
         const loadAutoReviewPreference = () => {
           autoReviewPreferencePromise ??= deps.prisma.actionAutoReviewPreference
             .findUnique({
@@ -4364,9 +4380,12 @@ export function createRunExecutor(deps: ExecutorDeps) {
                   userId: run.userId,
                 },
               },
-              select: { enabled: true },
+              select: { enabled: true, skipApprovals: true },
             })
-            .then((row) => row?.enabled ?? deploymentAutoReviewDefault());
+            .then((row) => ({
+              enabled: row?.enabled ?? deploymentAutoReviewDefault(),
+              skipApprovals: row?.skipApprovals ?? false,
+            }));
           return autoReviewPreferencePromise;
         };
         // Outbound destinations this run may reach without asking. See outboundSiteGate and
@@ -4471,6 +4490,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
           checkpointLoadError =
             error instanceof Error ? error : new Error("Unsupported turn checkpoint");
         }
+        let storedTurnCheckpoint = Boolean(turnCheckpoint);
         let runTainted =
           !ownerStartedRun || Boolean(turnCheckpoint) || Boolean(checkpointLoadError);
         let earlierAttemptPromise: Promise<boolean> | undefined;
@@ -4492,7 +4512,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
         const approvedEffects = await deps.prisma.externalEffect.findMany({
           where: { runId, status: "approved" },
           orderBy: APPROVED_EFFECT_REPLAY_ORDER,
-          select: { kind: true, request: true },
+          select: { kind: true, request: true, idempotencyKey: true },
         });
         const approvedEffectReplays = createApprovedEffectReplayQueue(approvedEffects);
         const baseComputerInstruction = persistentComputerInstruction({
@@ -4615,6 +4635,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
         let unchangedVisualStreak: UnchangedVisualStreak = { count: 0 };
         let terminalCheckpointComplete = false;
         let approvalPausePending = false;
+        let approvalRequest: Promise<ApprovalPausedToolResult> | undefined;
         const pendingTurnCheckpoints = new Map<string, () => string>();
         const persistTurnCheckpoint = async (executionId?: string) => {
           const capture = executionId ? pendingTurnCheckpoints.get(executionId) : undefined;
@@ -4622,6 +4643,11 @@ export function createRunExecutor(deps: ExecutorDeps) {
             const saved = JSON.parse(capture());
             saved.effectOccurrences = effectOccurrences;
             await saveRunTurnCheckpoint(deps.prisma, run, workerId, fence, JSON.stringify(saved));
+            storedTurnCheckpoint = true;
+          } else if (storedTurnCheckpoint) {
+            // Helper calls have no saved turn. An earlier pause's turn must not resume this one.
+            await dropRunTurnCheckpoint(deps.prisma, run, workerId, fence);
+            storedTurnCheckpoint = false;
           }
         };
         let handedOff = false;
@@ -4702,8 +4728,18 @@ export function createRunExecutor(deps: ExecutorDeps) {
             visualActionKey,
           );
           unchangedVisualStreak = guard.streak;
+          // A browser window's title is the page title, which can echo a signed-in username.
+          const activeWindow = observation.activeWindow;
           const result = observationToolResult(
-            observation,
+            activeWindow?.title
+              ? {
+                  ...observation,
+                  activeWindow: {
+                    ...activeWindow,
+                    title: redactSecrets(activeWindow.title, runSecrets),
+                  },
+                }
+              : observation,
             note,
             lastComputerFrameId,
             visualActionKey ? { unchangedVisualCount: guard.streak.count } : undefined,
@@ -4734,16 +4770,26 @@ export function createRunExecutor(deps: ExecutorDeps) {
           toolName: string,
           args: Record<string, unknown>,
           executionId: string,
+          approvedKey?: string,
         ) => {
           const fingerprint = toolEffectIdempotencyKey(runId, toolName, args);
+          const approved = approvedKey
+            ? approvedEffectOccurrence(approvedKey, fingerprint)
+            : undefined;
           const previous = restoredPendingEffect;
           if (previous?.executionId === executionId) {
             restoredPendingEffect = undefined;
-            if (previous.fingerprint === fingerprint) return previous.occurrence;
+            if (previous.fingerprint === fingerprint && approved === undefined)
+              return previous.occurrence;
           }
-          const occurrence = mutatingEffectOccurrences.get(fingerprint) ?? 0;
+          // An approved replay reuses the approved row's occurrence, so it claims that row
+          // even when this call would have counted differently.
+          const occurrence = approved ?? mutatingEffectOccurrences.get(fingerprint) ?? 0;
           effectOccurrences.push({ executionId, fingerprint, occurrence });
-          mutatingEffectOccurrences.set(fingerprint, occurrence + 1);
+          mutatingEffectOccurrences.set(
+            fingerprint,
+            Math.max(mutatingEffectOccurrences.get(fingerprint) ?? 0, occurrence + 1),
+          );
           return occurrence;
         };
 
@@ -4781,6 +4827,13 @@ export function createRunExecutor(deps: ExecutorDeps) {
           if (IMAGE_RETURNING_COMPUTER_TOOLS.has(name) && !acceptsImages) {
             return { error: MODEL_CANNOT_SEE_MESSAGE };
           }
+          const registerRunSecrets = (values: string[]) => {
+            const additions = values.filter((value) => !runSecrets.includes(value));
+            if (additions.length === 0) return;
+            pendingProgress += progressRedactor.finish();
+            runSecrets.push(...additions);
+            progressRedactor = createStreamingRedactor(runSecrets);
+          };
           let connectorCall: ConnectorCall = {
             tool: name,
             args,
@@ -4869,6 +4922,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
           // reconstructs after the worker resumes. This also makes a changed reconstruction
           // hit the already-approved effect instead of creating a second approval card.
           const nextApprovedTool = approvedEffectReplays.nextToolName();
+          let approvedEffectKey: string | undefined;
           const nextApprovedRequest = approvedEffectReplays.nextRequest();
           const liveRoute =
             connectorCall.route?.resourceId &&
@@ -4928,6 +4982,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
               CATALOG_APPROVAL_TOOL,
             );
             if (resourceError) return { error: resourceError };
+            approvedEffectKey = approvedEffectReplays.nextIdempotencyKey();
             const approvedRequest = approvedEffectReplays.take(nextApprovedTool)!;
             const approvedCatalog = catalogApprovalDetails(approvedRequest, CATALOG_APPROVAL_TOOL);
             if (approvedCatalog && !catalogRemapped) {
@@ -5112,11 +5167,18 @@ export function createRunExecutor(deps: ExecutorDeps) {
             siteGate === "new" ||
             connectorReadGated ||
             toolRequiresApproval(name, viaConnector, declaredReadOnly);
+          // An owner who skips approvals gets new spaces, and their bot's own instruction updates
+          // (with Undo on the card), without a card. An update still asks once outside content
+          // entered the run, since that content could have written it.
+          const ownerSkipsMandatoryApproval =
+            (name === "create_space" || name === "propose_instructions_update") &&
+            (await loadAutoReviewPreference()).skipApprovals &&
+            (name === "create_space" || !(await isRunTainted()));
           const requiresMandatoryApproval =
             commandWatch ||
             scheduleNamesNewSite ||
             requiresUnattendedApproval ||
-            toolRequiresExplicitApproval(name);
+            (toolRequiresExplicitApproval(name) && !ownerSkipsMandatoryApproval);
           const approvalResolved = requiresMandatoryApproval
             ? {
                 decision: "ask" as const,
@@ -5130,9 +5192,10 @@ export function createRunExecutor(deps: ExecutorDeps) {
                 site: fetchSite,
                 rules: await loadApprovalRules(),
               });
-          const autoReviewPref = requiresMandatoryApproval
-            ? false
+          const preference = requiresMandatoryApproval
+            ? { enabled: false, skipApprovals: false }
             : await loadAutoReviewPreference();
+          const autoReviewPref = preference.enabled && !preference.skipApprovals;
           const injectedReview = requiresMandatoryApproval ? undefined : deps.autoReview;
           const checker = requiresMandatoryApproval ? undefined : resolveAutoReviewChecker();
           const checkerConfigured =
@@ -5157,6 +5220,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
                 autoReviewEnabled: autoReviewPref,
                 checkerConfigured,
                 newDestination: siteGate === "new",
+                skipApprovals: preference.skipApprovals,
               });
           let reviewReason: string | undefined;
           let gateDecision: "ask" | "allow" = plan === "ask" ? "ask" : "allow";
@@ -5173,15 +5237,26 @@ export function createRunExecutor(deps: ExecutorDeps) {
           const occurrence =
             name === "request_secret" || name === "connect_app"
               ? 0
-              : nextMutatingEffectOccurrence(replayEffectToolName, args, executionId);
+              : nextMutatingEffectOccurrence(
+                  replayEffectToolName,
+                  args,
+                  executionId,
+                  approvedEffectKey,
+                );
+          // An approved replay claims the row the user approved. A derived key can differ
+          // (another call's occurrence count), which would ask again and strand the approval.
           const effectKey =
-            usesApprovalKey && occurrence === 0
+            approvedEffectKey ??
+            (usesApprovalKey && occurrence === 0
               ? approvalEffectKey(runId, replayEffectToolName, args)
-              : toolEffectIdempotencyKey(runId, replayEffectToolName, args, occurrence);
+              : toolEffectIdempotencyKey(runId, replayEffectToolName, args, occurrence));
           // Connector read-only hints must not bypass approval, review, or replay decisions.
           // A fetch to a new site is gated like any action, so it needs an effect to approve.
           const applied =
-            READ_ONLY_AGENT_TOOLS.has(name) && siteGate !== "new" && nextApprovedTool !== name
+            READ_ONLY_AGENT_TOOLS.has(name) &&
+            siteGate !== "new" &&
+            nextApprovedTool !== name &&
+            !approvedEffectKey
               ? undefined
               : await recordEffect(
                   deps,
@@ -5480,7 +5555,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
             throw uncertainEffectError(name);
           };
 
-          const requestApproval = async () => {
+          const showApprovalCard = async () => {
             if (!(await renewRunLease(deps, runId, workerId, fence))) {
               // Another worker owns the run now; exit without leaving a local pause card.
               return pauseForApproval();
@@ -5525,6 +5600,14 @@ export function createRunExecutor(deps: ExecutorDeps) {
               threadId: thread.id,
             });
             return pauseForApproval();
+          };
+          const requestApproval = () => {
+            // Parallel calls can need approval at once. Only the first saves the turn and shows
+            // its card; the others wait for that pause. Otherwise a later call's save could make
+            // the turn resume a call other than the one the user approved.
+            if (approvalRequest) return approvalRequest.then(() => pauseForApproval());
+            approvalRequest = showApprovalCard();
+            return approvalRequest;
           };
 
           if (applied?.duplicate) {
@@ -5610,13 +5693,6 @@ export function createRunExecutor(deps: ExecutorDeps) {
               : Promise.resolve(true);
           const finish = async (result: unknown) =>
             (await persistEffectResult(result)) ? result : uncertainEffectResult(name, args);
-          const registerRunSecrets = (values: string[]) => {
-            const additions = values.filter((value) => !runSecrets.includes(value));
-            if (additions.length === 0) return;
-            pendingProgress += progressRedactor.finish();
-            runSecrets.push(...additions);
-            progressRedactor = createStreamingRedactor(runSecrets);
-          };
           const appendComputerCommand = (payload: ComputerCommand) =>
             deps.events
               .append({
@@ -5710,7 +5786,11 @@ export function createRunExecutor(deps: ExecutorDeps) {
               path: requestedPath,
               entries: entries.map((entry) => ({
                 ...entry,
-                path: displayBotWorkspacePath(computerMode, bot.id, requestedPath, entry.path),
+                // A file name can carry a value an earlier command or page wrote.
+                path: redactSecrets(
+                  displayBotWorkspacePath(computerMode, bot.id, requestedPath, entry.path),
+                  runSecrets,
+                ),
               })),
             };
           }
@@ -5880,7 +5960,10 @@ export function createRunExecutor(deps: ExecutorDeps) {
               }
               return finish({ ok: true, path: outPath, attached });
             } catch (error) {
-              const message = error instanceof Error ? error.message : String(error);
+              const message = redactSecrets(
+                error instanceof Error ? error.message : String(error),
+                runSecrets,
+              );
               if (!checkingSpec)
                 getLogger().error(`render_plot failed for bot ${bot.id}: ${message}`);
               return finish({
@@ -7106,8 +7189,11 @@ export function createRunExecutor(deps: ExecutorDeps) {
             }
             await notifyRun(deps, run, {
               kind: "help",
-              title: `${displayName(bot.name, "Bot")} needs a code`,
-              body: String(args.label ?? "Code"),
+              ...secretAskNotification(
+                displayName(bot.name, "Bot"),
+                String(args.label ?? "Code"),
+                runSecrets,
+              ),
               botId: bot.id,
               threadId: thread.id,
             });
@@ -7121,7 +7207,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
             };
           }
           if (name === "propose_instructions_update") {
-            if (nextApprovedTool !== name || !claimedEffect) {
+            if ((nextApprovedTool !== name && !bypassApproval) || !claimedEffect) {
               return finish({ error: "Instruction updates require human approval." });
             }
             const committed = await deps.prisma.$transaction(async (tx) => {
@@ -7677,6 +7763,19 @@ export function createRunExecutor(deps: ExecutorDeps) {
         } catch {
           // Timezone is optional context; a lookup failure must not prevent a run.
         }
+        let lateRoutineNote: string | undefined;
+        if (run.trigger === "routine" && run.routineId && run.clientNonce) {
+          try {
+            const routine = await deps.prisma.routine.findUnique({
+              where: { id: run.routineId },
+              select: { crons: true, timezone: true },
+            });
+            if (routine)
+              lateRoutineNote = lateRoutineRunInstruction(run, routine, executionStartedAt);
+          } catch {
+            // Lateness is optional context; a lookup failure must not prevent a run.
+          }
+        }
         const prompt = [
           replyContext,
           run.trigger === "reaction" && replyContext ? undefined : basePrompt,
@@ -7686,6 +7785,7 @@ export function createRunExecutor(deps: ExecutorDeps) {
           voiceCall && !callEndRun ? voiceCallInstruction(disabledBuiltinTools) : undefined,
           // Per-turn, not in the system prompt: the timestamp changes every call and would break the cacheable prefix.
           formatCurrentTimeInstruction(new Date(), userTimeZone),
+          lateRoutineNote,
         ]
           .filter(Boolean)
           .join("\n\n");
@@ -8608,11 +8708,12 @@ export function createRunExecutor(deps: ExecutorDeps) {
           if (
             error instanceof TransientModelError ||
             error instanceof ModelAccountError ||
-            error instanceof ModelOutputError
+            error instanceof ModelOutputError ||
+            error instanceof SandboxRateLimitError
           ) {
             // Provider outages that outlasted retries, provider accounts, plans and model
-            // choices the user fixes, and unusable model output are not server faults; the
-            // run error already tells the user what to do.
+            // choices the user fixes, unusable model output and the computer provider's own
+            // rate limit are not server faults; the run error already tells the user what to do.
             getLogger().warn("run.failed", {
               "run.outcome": "failed",
               "run.failure": error.name,
@@ -9472,7 +9573,7 @@ export function userTurnInstructions(parts: {
     offeredBuiltinClause(
       parts.disabledBuiltinTools,
       "create_space",
-      "create_space proposes a new privacy boundary inside the current organization. Use it when the user asks to create a space or separate data between teams or projects. It always pauses for explicit user approval; never claim the space exists before the tool succeeds.",
+      "create_space proposes a new privacy boundary inside the current organization. Use it when the user asks to create a space or separate data between teams or projects. Never claim the space exists before the tool succeeds.",
     ),
     spawnBotClause(parts.disabledBuiltinTools),
     offeredBuiltinClause(
@@ -9718,6 +9819,17 @@ const COMPLETION_NOTIFICATION_MAX_CHARS = 180;
 /** Push body: Markdown stripped, then truncated so a cut cannot land inside a marker. */
 export function completionNotificationPreview(text: string): string {
   return truncatedPlainText(text, COMPLETION_NOTIFICATION_MAX_CHARS);
+}
+
+/** A secret card can ask for a code or a login, so the title stays generic and the label short. */
+export function secretAskNotification(botName: string, label: string, runSecrets: string[]) {
+  // Strip and redact before shortening so no protected value is left half-shown.
+  const text = plainTextFromMarkdown(redactSecrets(label, runSecrets), { maxSource: Infinity });
+  const body = truncatePlainText(
+    redactSecrets(text, runSecrets),
+    COMPLETION_NOTIFICATION_MAX_CHARS,
+  );
+  return { title: `${botName} needs an answer`, body };
 }
 
 export function completionMarksUnread(

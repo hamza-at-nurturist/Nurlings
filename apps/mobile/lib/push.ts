@@ -2,6 +2,7 @@ import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { rpc } from "./api";
+import { whenSplashGone } from "./splash-gate";
 
 async function notificationsAllowed() {
   // On iOS getPermissionsAsync holds Expo's shared native queue until the system answers,
@@ -13,6 +14,8 @@ async function notificationsAllowed() {
 }
 
 export async function registerPushToken() {
+  // The permission prompt waits for the launch splash to finish rather than covering it.
+  await whenSplashGone();
   if (!(await notificationsAllowed())) return;
   try {
     const projectId = Constants.easConfig?.projectId ?? Constants.expoConfig?.extra?.eas?.projectId;

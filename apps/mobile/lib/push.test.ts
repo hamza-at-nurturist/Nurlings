@@ -48,6 +48,7 @@ import type { MobileMe } from "./api";
 import { rpc, selectInitialSpace } from "./api";
 import { registerPushToken } from "./push";
 import { restoreSessionToken } from "./session";
+import { markSplashGone } from "./splash-gate";
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -93,7 +94,26 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+describe("push registration during the launch splash", () => {
+  it("asks for notification permission only after the splash is gone", async () => {
+    Platform.OS = "android";
+    vi.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ granted: false } as never);
+
+    const registered = registerPushToken();
+    await expect(settled(registered)).resolves.toBe("still waiting");
+    expect(Notifications.getPermissionsAsync).not.toHaveBeenCalled();
+    expect(Notifications.requestPermissionsAsync).not.toHaveBeenCalled();
+
+    markSplashGone();
+    permission.resolve({ granted: false });
+    await registered;
+    expect(Notifications.requestPermissionsAsync).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe("push registration on iOS", () => {
+  beforeEach(markSplashGone);
+
   it("loads the inbox while notification settings have not answered", async () => {
     void registerPushToken();
 
@@ -127,6 +147,8 @@ describe("push registration on iOS", () => {
 });
 
 describe("push registration on Android", () => {
+  beforeEach(markSplashGone);
+
   it("does not ask again once notifications are allowed", async () => {
     Platform.OS = "android";
     vi.mocked(Notifications.getPermissionsAsync).mockResolvedValue({ granted: true } as never);

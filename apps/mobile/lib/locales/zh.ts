@@ -91,6 +91,8 @@ export const ZH_MESSAGES: Record<string, string> = {
   "{provider} took too long to respond. Try again.": "{provider}响应超时。请重试。",
   "{provider} is overloaded right now. Try again in a moment.":
     "{provider}当前负载过高。请稍后再试。",
+  "{provider} couldn't be reached. Check that it's running.":
+    "无法连接到{provider}。请检查它是否正在运行。",
   "This conversation is too long for the model. Retrying won't help. Start a new chat or shorten your message.":
     "此对话对模型来说太长了。重试无济于事。请开始新的聊天或缩短你的消息。",
   "{provider} key hit its limit.": "{provider}的密钥已达到限额。",
@@ -187,6 +189,7 @@ export const ZH_MESSAGES: Record<string, string> = {
   "{name} is working": "{name} 正在工作",
   "{name}’s computer": "{name} 的电脑",
   "{runs} runs · {tokens} tokens": "{runs} 次运行 · {tokens} 个 token",
+  "{calls} calls · {tokens} tokens": "{calls} 次调用 · {tokens} 个 token",
   "@{name}": "@{name}",
   "API key": "API 密钥",
   "Account ID": "账户 ID",
@@ -231,7 +234,6 @@ export const ZH_MESSAGES: Record<string, string> = {
   "Collapse {name}": "折叠 {name}",
   "Expand {name}": "展开 {name}",
   Archived: "已归档",
-  "Archived. Chat, memory, and files kept.": "已归档。对话、记忆和文件均已保留。",
   Asleep: "已休眠",
   Attach: "附件",
   "Attach file": "添加附件",
@@ -553,7 +555,6 @@ export const ZH_MESSAGES: Record<string, string> = {
   "Remove {name}": "移除 {name}",
   "Remove mention {name}": "移除提及 {name}",
   "Remove skill {name}": "移除技能 {name}",
-  "Removed with chat, computer, and memory.": "已连同对话、电脑和记忆一起移除。",
   "Replies and completed work": "回复和已完成的工作",
   Reply: "回复",
   "Replying to": "正在回复",
@@ -566,6 +567,7 @@ export const ZH_MESSAGES: Record<string, string> = {
   "Resetting…": "正在重置…",
   Restore: "恢复",
   "Stream replies": "流式回复",
+  "Run actions without asking": "无需询问直接执行操作",
   "Load web images automatically": "自动加载网络图片",
   "Restore the last saved workspace. Unsaved work on the computer is lost.":
     "恢复上次保存的工作区。电脑上未保存的工作将会丢失。",
@@ -724,7 +726,6 @@ export const ZH_MESSAGES: Record<string, string> = {
   "Open conversation": "打开对话",
   "Open in full window": "在全窗口中打开",
   "OpenAPI JSON": "OpenAPI JSON",
-  "Opened its thread.": "已打开其对话。",
   "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.":
     "粘贴你服务器的 OpenAI 兼容地址。如有需要，Rakazo 会自动补上 /v1。",
   Paused: "已暂停",

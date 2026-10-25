@@ -1,4 +1,5 @@
 import type { Bot, TicketMention } from "@rakazo/contracts";
+import { botHexColor } from "@rakazo/core";
 import type { Viewer } from "./ActivityFeed";
 
 /** A Nurling or user a comment called in, with what the reader knows about them now. */
@@ -13,14 +14,10 @@ export type MentionSegment =
   | { type: "text"; text: string }
   | { type: "mention"; text: string; target: MentionTarget };
 
-const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
 const WORD = "\\p{L}\\p{N}_-";
 
 /** The `#hex` part of a Nurling's color, before `::`; nothing when it is not a hex value. */
-export function mentionColor(color: string | undefined): string | undefined {
-  const hex = color?.split("::")[0]?.trim();
-  return hex && HEX.test(hex) ? hex : undefined;
-}
+export const mentionColor = botHexColor;
 
 /** Mentions the reader can name: a Nurling it still has, or the reader themselves. */
 export function resolveMentionTargets(

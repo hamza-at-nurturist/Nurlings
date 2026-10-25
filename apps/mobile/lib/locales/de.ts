@@ -103,6 +103,8 @@ export const DE_MESSAGES: Record<string, string> = {
     "{provider} hat zu lange zum Antworten gebraucht. Versuche es erneut.",
   "{provider} is overloaded right now. Try again in a moment.":
     "{provider} ist gerade überlastet. Versuche es gleich noch einmal.",
+  "{provider} couldn't be reached. Check that it's running.":
+    "{provider} ist nicht erreichbar. Prüfe, ob er läuft.",
   "This conversation is too long for the model. Retrying won't help. Start a new chat or shorten your message.":
     "Diese Unterhaltung ist zu lang für das Modell. Ein erneuter Versuch hilft nicht. Starte einen neuen Chat oder kürze deine Nachricht.",
   "{provider} key hit its limit.": "{provider}: Schlüssellimit erreicht.",
@@ -241,8 +243,6 @@ export const DE_MESSAGES: Record<string, string> = {
     "Genehmige diesen Server, damit dein Agent seine Tools nutzen kann.",
   "Answered: {answer}": "Beantwortet: {answer}",
   Archive: "Archivieren",
-  "Archived. Chat, memory, and files kept.":
-    "Archiviert. Chat, Erinnerungen und Dateien bleiben erhalten.",
   Attach: "Anhängen",
   "Attach file": "Datei anhängen",
   Attachment: "Anhang",
@@ -298,14 +298,11 @@ export const DE_MESSAGES: Record<string, string> = {
   "Messaged {peer}": "Nachricht an {peer} gesendet",
   "Message…": "Nachricht…",
   "No longer active": "Nicht mehr aktiv",
-  "Opened its thread.": "Thread geöffnet.",
   "Photo library": "Fotomediathek",
   "Pull request": "Pull Request",
   React: "Reagieren",
   "Remove mention {name}": "Erwähnung {name} entfernen",
   "Remove skill {name}": "Skill {name} entfernen",
-  "Removed with chat, computer, and memory.":
-    "Zusammen mit Chat, Computer und Erinnerungen entfernt.",
   Reply: "Antworten",
   "Replying to": "Antwort auf",
   "Return to inbox": "Zurück zur Übersicht",
@@ -661,6 +658,7 @@ export const DE_MESSAGES: Record<string, string> = {
   "Scheduled tasks": "Geplante Aufgaben",
   "Sign out": "Abmelden",
   "Stream replies": "Antworten streamen",
+  "Run actions without asking": "Aktionen ohne Nachfrage ausführen",
   "Load web images automatically": "Webbilder automatisch laden",
   System: "System",
   "This permanently deletes your account, bots, conversations, memories, files, and saved connections. This cannot be undone.":
@@ -669,6 +667,7 @@ export const DE_MESSAGES: Record<string, string> = {
   Usage: "Nutzung",
   "Your account": "Dein Konto",
   "{runs} runs · {tokens} tokens": "{runs} Ausführungen · {tokens} Token",
+  "{calls} calls · {tokens} tokens": "{calls} Aufrufe · {tokens} Token",
   // app/(settings)/change-password.tsx
   "Confirm password": "Passwort bestätigen",
   "Could not change password": "Passwort konnte nicht geändert werden",

@@ -98,6 +98,8 @@ export const NL_MESSAGES: Record<string, string> = {
     "{provider} deed er te lang over om te antwoorden. Probeer het opnieuw.",
   "{provider} is overloaded right now. Try again in a moment.":
     "{provider} is op dit moment overbelast. Probeer het zo nog eens.",
+  "{provider} couldn't be reached. Check that it's running.":
+    "{provider} is niet bereikbaar. Controleer of hij draait.",
   "This conversation is too long for the model. Retrying won't help. Start a new chat or shorten your message.":
     "Dit gesprek is te lang voor het model. Opnieuw proberen helpt niet. Begin een nieuwe chat of maak je bericht korter.",
   "{provider} key hit its limit.": "De sleutel van {provider} heeft de limiet bereikt.",
@@ -234,8 +236,6 @@ export const NL_MESSAGES: Record<string, string> = {
     "Keur deze server goed zodat je agent zijn tools kan gebruiken.",
   "Answered: {answer}": "Beantwoord: {answer}",
   Archive: "Archiveren",
-  "Archived. Chat, memory, and files kept.":
-    "Gearchiveerd. Chat, geheugen en bestanden blijven bewaard.",
   Attach: "Bijvoegen",
   "Attach file": "Bestand bijvoegen",
   Attachment: "Bijlage",
@@ -291,13 +291,11 @@ export const NL_MESSAGES: Record<string, string> = {
   "Messaged {peer}": "{peer} een bericht gestuurd",
   "Message…": "Bericht…",
   "No longer active": "Niet langer actief",
-  "Opened its thread.": "De thread ervan is geopend.",
   "Photo library": "Fotobibliotheek",
   "Pull request": "Pull request",
   React: "Reageren",
   "Remove mention {name}": "Vermelding {name} verwijderen",
   "Remove skill {name}": "Skill {name} verwijderen",
-  "Removed with chat, computer, and memory.": "Verwijderd samen met chat, computer en geheugen.",
   Reply: "Beantwoorden",
   "Replying to": "Antwoordt op",
   "Return to inbox": "Terug naar postvak IN",
@@ -643,6 +641,7 @@ export const NL_MESSAGES: Record<string, string> = {
   "Scheduled tasks": "Geplande taken",
   "Sign out": "Uitloggen",
   "Stream replies": "Antwoorden streamen",
+  "Run actions without asking": "Acties uitvoeren zonder te vragen",
   "Load web images automatically": "Webafbeeldingen automatisch laden",
   System: "Systeem",
   "This permanently deletes your account, bots, conversations, memories, files, and saved connections. This cannot be undone.":
@@ -651,6 +650,7 @@ export const NL_MESSAGES: Record<string, string> = {
   Usage: "Gebruik",
   "Your account": "Je account",
   "{runs} runs · {tokens} tokens": "{runs} uitvoeringen · {tokens} tokens",
+  "{calls} calls · {tokens} tokens": "{calls} aanroepen · {tokens} tokens",
   "Confirm password": "Wachtwoord bevestigen",
   "Could not change password": "Wachtwoord wijzigen mislukt",
   "New password": "Nieuw wachtwoord",
