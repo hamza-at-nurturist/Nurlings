@@ -39,7 +39,7 @@
 
 ## 4. Evidence
 
-- [ ] 4.1 Extend `apps/web/e2e/board.spec.ts`: attach a file, send, see it in the feed and in Files
+- [x] 4.1 Extend `apps/web/e2e/board.spec.ts`: attach a file, send, see it in the feed and in Files
   as "You"; capture a screenshot. Verify: CI E2E passes and the screenshot is linked in the PR.
 
 ## 5. Checks
@@ -48,4 +48,4 @@
 
 ## 6. After merge
 
-- [ ] 6.1 Archive the change.
+- [x] 6.1 Archive the change.
