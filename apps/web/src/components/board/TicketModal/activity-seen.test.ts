@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
 import type { TicketComment, TicketEvent } from "@rakazo/contracts";
+import type { ActivityItem } from "@rakazo/core/nurlings-board";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ActivityItem } from "./activity";
 import {
   ACTIVITY_SEEN_KEY,
   readActivitySeen,

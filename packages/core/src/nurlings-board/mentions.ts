@@ -1,6 +1,6 @@
 import type { Bot, TicketMention } from "@rakazo/contracts";
-import { botHexColor } from "@rakazo/core";
-import type { Viewer } from "./ActivityFeed";
+import { botHexColor } from "../bot-avatar-colors.js";
+import type { Viewer } from "./types.js";
 
 /** A Nurling or user a comment called in, with what the reader knows about them now. */
 export type MentionTarget = {
@@ -82,4 +82,35 @@ export function activeMentionToken(
   const match = /(^|\s)@([^\s@]*)$/u.exec(before);
   if (!match) return null;
   return { start: before.length - match[2]!.length - 1, query: match[2]! };
+}
+
+const MAX_OPTIONS = 8;
+
+/** The Nurlings an `@query` offers: names containing the query, those starting with it first. */
+export function mentionOptions<T extends Pick<Bot, "name">>(
+  bots: readonly T[],
+  query: string,
+): T[] {
+  const needle = query.toLowerCase();
+  return bots
+    .filter((bot) => bot.name.toLowerCase().includes(needle))
+    .sort(
+      (a, b) =>
+        Number(b.name.toLowerCase().startsWith(needle)) -
+        Number(a.name.toLowerCase().startsWith(needle)),
+    )
+    .slice(0, MAX_OPTIONS);
+}
+
+/** The text and caret after picking `bot` for the `@query` token the caret was in. */
+export function applyMention(
+  text: string,
+  token: { start: number },
+  caret: number,
+  bot: Pick<Bot, "name">,
+): { text: string; caret: number } {
+  return {
+    text: `${text.slice(0, token.start)}@${bot.name} ${text.slice(caret)}`,
+    caret: token.start + bot.name.length + 2,
+  };
 }

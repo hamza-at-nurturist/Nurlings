@@ -93,3 +93,27 @@ export function isTicketOverdue(ticket: Pick<Ticket, "dueAt" | "status">, now: D
     ["todo", "doing", "blocked"].includes(ticket.status)
   );
 }
+
+export type CardDatesInfo = {
+  start: string | null;
+  due: string | null;
+  /** The due has passed on a ticket that still has work to do. */
+  overdue: boolean;
+};
+
+/** A card's dates, each formatted, plus whether the due is overdue. */
+export function cardDates(
+  ticket: Pick<Ticket, "startAt" | "startHasTime" | "dueAt" | "dueHasTime" | "status">,
+  now: Date,
+  timeZone: string,
+  labels: RelativeDayLabels,
+  locale = "en",
+): CardDatesInfo {
+  const show = (at: string, hasTime: boolean) =>
+    formatTicketDate({ at, hasTime }, now, timeZone, labels, locale);
+  return {
+    start: ticket.startAt ? show(ticket.startAt, ticket.startHasTime) : null,
+    due: ticket.dueAt ? show(ticket.dueAt, ticket.dueHasTime) : null,
+    overdue: isTicketOverdue(ticket, now),
+  };
+}

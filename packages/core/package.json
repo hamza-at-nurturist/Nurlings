@@ -49,6 +49,11 @@
       "development": "./src/node/screen-capability.ts",
       "default": "./src/node/screen-capability.ts"
     },
+    "./nurlings-board": {
+      "types": "./src/nurlings-board/index.ts",
+      "development": "./src/nurlings-board/index.ts",
+      "default": "./src/nurlings-board/index.ts"
+    },
     "./egress": {
       "types": "./src/egress.ts",
       "development": "./src/egress.ts",

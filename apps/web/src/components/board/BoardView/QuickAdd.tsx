@@ -2,13 +2,13 @@ import { useLingui } from "@lingui/react/macro";
 import { brand } from "@nurlings/brand";
 import type { Bot } from "@rakazo/contracts";
 import { TICKET_DESCRIPTION_MAX_LENGTH } from "@rakazo/contracts";
+import type { QuickAddTicket } from "@rakazo/core/nurlings-board";
+import { quickAddTicket } from "@rakazo/core/nurlings-board";
 import { Button, cn, Textarea } from "@rakazo/ui-web";
 import { ArrowUp } from "lucide-react";
 import { useId, useState } from "react";
 import { MentionPicker } from "../TicketModal/MentionPicker";
 import { useMentionInput } from "../TicketModal/use-mention-input";
-import type { QuickAddTicket } from "./quick-add";
-import { quickAddTicket } from "./quick-add";
 
 type Props = {
   bots: Bot[];

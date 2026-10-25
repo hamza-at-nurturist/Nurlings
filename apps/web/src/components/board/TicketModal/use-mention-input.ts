@@ -1,9 +1,12 @@
 import type { Bot } from "@rakazo/contracts";
+import {
+  activeMentionToken,
+  applyMention,
+  hasMentionToken,
+  mentionOptions,
+} from "@rakazo/core/nurlings-board";
 import type { ChangeEvent, KeyboardEvent, SyntheticEvent } from "react";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { activeMentionToken, hasMentionToken } from "./mentions";
-
-const MAX_OPTIONS = 8;
 
 /**
  * A text box that offers the space's Nurlings after an `@`: the text, the picker's options and
@@ -29,25 +32,16 @@ export function useMentionInput(bots: Bot[]) {
   });
 
   const token = activeMentionToken(text, caret);
-  const options = useMemo(() => {
-    if (!token || token.start === dismissedAt) return [];
-    const query = token.query.toLowerCase();
-    return bots
-      .filter((bot) => bot.name.toLowerCase().includes(query))
-      .sort(
-        (a, b) =>
-          Number(b.name.toLowerCase().startsWith(query)) -
-          Number(a.name.toLowerCase().startsWith(query)),
-      )
-      .slice(0, MAX_OPTIONS);
-  }, [token, dismissedAt, bots]);
+  const options = useMemo(
+    () => (token && token.start !== dismissedAt ? mentionOptions(bots, token.query) : []),
+    [token, dismissedAt, bots],
+  );
   const open = options.length > 0;
   const active = Math.min(highlighted, Math.max(options.length - 1, 0));
 
   function pick(bot: Bot) {
     if (!token) return;
-    const next = `${text.slice(0, token.start)}@${bot.name} ${text.slice(caret)}`;
-    const at = token.start + bot.name.length + 2;
+    const { text: next, caret: at } = applyMention(text, token, caret, bot);
     setText(next);
     setCaret(at);
     setHighlighted(0);

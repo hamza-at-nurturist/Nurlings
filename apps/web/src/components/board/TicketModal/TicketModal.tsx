@@ -1,5 +1,7 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot, Ticket } from "@rakazo/contracts";
+import type { Viewer } from "@rakazo/core/nurlings-board";
+import { mergeActivity } from "@rakazo/core/nurlings-board";
 import { Button, Dialog, DialogContent } from "@rakazo/ui-web";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -7,9 +9,7 @@ import { authClient } from "../../../lib/auth";
 import { isFileDrag } from "../../../lib/pending-attachments";
 import { rpc } from "../../../lib/rpc";
 import { errorText } from "../../../lib/user-error";
-import type { Viewer } from "./ActivityFeed";
 import { ActivityFeed } from "./ActivityFeed";
-import { mergeActivity } from "./activity";
 import { useActivitySeen } from "./activity-seen";
 import { readTicketFullscreen, writeTicketFullscreen } from "./fullscreen-pref";
 import { LatestActivity } from "./LatestActivity";

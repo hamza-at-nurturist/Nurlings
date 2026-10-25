@@ -1,6 +1,8 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import { isRetryableError, retryDelayMs, WORKING_RUN_STATUSES } from "@rakazo/core";
+import type { QuickAddTicket } from "@rakazo/core/nurlings-board";
+import { boardColumns } from "@rakazo/core/nurlings-board";
 import { buttonVariants } from "@rakazo/ui-web";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -12,10 +14,8 @@ import { TicketModal } from "../TicketModal/TicketModal";
 import { useLiveBots } from "../TicketModal/use-live-bots";
 import { BoardCard } from "./BoardCard";
 import { BoardColumn } from "./BoardColumn";
-import { boardColumns } from "./columns";
 import { NurlingFilter } from "./NurlingFilter";
 import { QuickAdd } from "./QuickAdd";
-import type { QuickAddTicket } from "./quick-add";
 
 /** The Board: quick-add, a Nurling filter and six columns of live cards. */
 export function BoardView() {

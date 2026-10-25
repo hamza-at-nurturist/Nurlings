@@ -1,11 +1,16 @@
 import { i18n } from "@lingui/core";
 import { useLingui } from "@lingui/react/macro";
+import type { RelativeDayLabels } from "@rakazo/core/nurlings-board";
+import {
+  formatTicketDate,
+  localDate,
+  localTime,
+  quickPickDates,
+} from "@rakazo/core/nurlings-board";
 import { Button, Calendar, Input, Popover, PopoverContent, PopoverTrigger } from "@rakazo/ui-web";
 import { CalendarDays } from "lucide-react";
 import { useState } from "react";
 import { CHIP } from "./chip";
-import type { RelativeDayLabels } from "./dates";
-import { formatTicketDate, localDate, localTime, quickPickDates } from "./dates";
 
 type Value = { at: string; hasTime: boolean } | null;
 
