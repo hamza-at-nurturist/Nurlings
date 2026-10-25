@@ -748,3 +748,53 @@ describe("needs you", () => {
     }
   });
 });
+
+describe("comment attachments", () => {
+  const file = {
+    kind: "file" as const,
+    artifactId: "a1",
+    name: "brief.pdf",
+    mimeType: "application/pdf",
+    size: 10,
+  };
+
+  it("stores a user's files and accepts a comment that is only files", async () => {
+    const s = mutationDeps();
+    const result = await commentTicket(s.deps, {
+      spaceId: "ws",
+      userId: "user-1",
+      id: "t1",
+      body: "",
+      attachments: [file],
+    });
+    expect(result).toHaveProperty("comment.attachments", [file]);
+    expect(s.tx.ticketComment.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ body: "", attachments: [file] }) }),
+    );
+    // A files-only comment is a reply like any other.
+    expect(s.changes).toHaveBeenLastCalledWith(expect.objectContaining({ wakeAssignee: true }));
+  });
+
+  it("refuses an empty comment without files", async () => {
+    const s = mutationDeps();
+    await expect(
+      commentTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", body: "  " }),
+    ).resolves.toEqual({ error: "Invalid comment." });
+    expect(s.tx.ticketComment.create).not.toHaveBeenCalled();
+  });
+
+  it("never stores files on a Nurling's comment", async () => {
+    const s = mutationDeps();
+    await commentTicket(s.deps, {
+      spaceId: "ws",
+      userId: "user-1",
+      botId: "bot-1",
+      id: "t1",
+      body: "Here",
+      attachments: [file],
+    });
+    expect(s.tx.ticketComment.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ attachments: [] }) }),
+    );
+  });
+});

@@ -3968,6 +3968,16 @@ describe("ticket_comment mentions", () => {
     expect(schema.properties.mention_user?.type).toBe("boolean");
     expect(schema.required).toEqual(["id", "body"]);
     expect(tool?.description).toContain("@Name");
+    const read = selectBuiltinToolsForRun({
+      graphicalToolsAllowed: false,
+      groupId: null,
+      trigger: "tickets",
+      semanticMemoryEnabled: false,
+      messagingChannelRun: false,
+      ticketBoardEnabled: true,
+    }).find((candidate) => candidate.name === "ticket_get");
+    // The Nurling learns from the description that a ticket carries files it can open.
+    expect(read?.description).toContain("files");
   });
 });
 

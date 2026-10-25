@@ -447,13 +447,8 @@ import {
 } from "./thread-artifacts.js";
 import type { TicketChangeNotifier } from "./ticket-changes.js";
 import { loadAgentTicketContext } from "./ticket-context.js";
-import {
-  commentTicket,
-  createTicket,
-  getTicket,
-  listBoardTickets,
-  updateTicket,
-} from "./ticket-tools.js";
+import { readTicketForRun } from "./ticket-files.js";
+import { commentTicket, createTicket, listBoardTickets, updateTicket } from "./ticket-tools.js";
 import { advanceToolCallLoopGuard, loopGuardStopText } from "./tool-loop.js";
 import { textContentArg } from "./tool-text.js";
 import { argumentGiven, parseUpdateBotPatch } from "./update-bot-patch.js";
@@ -6388,12 +6383,14 @@ export function createRunExecutor(deps: ExecutorDeps) {
             );
           }
           if (name === "ticket_get") {
-            return finish(
-              await getTicket(deps, {
-                spaceId: run.spaceId,
-                ref: String(args.ref ?? ""),
-              }),
-            );
+            // The ticket's files join the chat attachment queue, copied on first computer use.
+            const read = await readTicketForRun(deps, {
+              ref: String(args.ref ?? ""),
+              acceptsImages,
+              context,
+            });
+            if (read.blocks.length) pendingTurnFiles.push(read.blocks);
+            return finish(read.result);
           }
           if (name === "ticket_create") {
             return finish(

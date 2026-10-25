@@ -1601,6 +1601,8 @@ model TicketComment {
   body         String
   /// [{ kind: "bot" | "user", id }]; names and colors are resolved by the reader.
   mentions     Json     @default("[]")
+  /// Files the user attached to the comment, as chat file and image blocks.
+  attachments  Json     @default("[]")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

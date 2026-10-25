@@ -29,6 +29,10 @@ files on the ticket itself, and makes every Nurling working the ticket able to o
 - The files are copied onto the Nurling's computer at those paths, on first use of a file tool, by the
   same code that copies chat attachments. It applies to the owner and to a mentioned Nurling alike,
   since both read the ticket with `ticket_get`.
+- When the Nurling's model can see images, `ticket_get` also returns the ticket's newest PNG and JPEG
+  images as image content, the same provider-neutral tool result that computer screenshots use. A
+  property photo is visible to the model directly, as a photo sent in chat is. At most 4 images per
+  call, each within chat's size limit; other images are still listed and on the computer.
 
 ### Backend, additive only
 
@@ -59,7 +63,8 @@ are dragged over it.
 | `packages/db/src/board.ts` | parse `attachments` in the DTO; comment files in `listTicketFiles` |
 | `packages/adapters/src/ticket-tools.ts` | store attachments; `getTicket` returns files and their blocks |
 | `packages/adapters/src/builtin-tools.ts` | `ticket_get` description mentions files |
-| `packages/adapters/src/executor.ts` | **one change**: the `ticket_get` branch pushes the returned file blocks onto the run's existing `pendingTurnFiles` queue and leaves the blocks out of the tool result (about four lines) |
+| `packages/adapters/src/ticket-files.ts` (new) | reads the ticket for a run: tool result with files, optional image content, and the blocks to copy |
+| `packages/adapters/src/executor.ts` | **one change**: the `ticket_get` branch calls the new reader with the run's `acceptsImages`, pushes the blocks onto the existing `pendingTurnFiles` queue, and returns its result (about six lines) |
 | `apps/api/src/router.ts` | the comment handler validates `artifactIds` with `resolveSendAttachments` |
 | `TicketModal/{ReplyBox,ActivityFeed,TicketFiles,TicketModal}.tsx` | attach control, drop, file cards, labels |
 
@@ -68,14 +73,15 @@ are dragged over it.
 ### Not changed, on purpose
 
 - No new upload endpoint, storage path or copy-to-computer code.
-- No inline image input for ticket runs. Chat feeds images of the current turn to the model directly;
-  a ticket run sees its images as files on the computer, as it does for any earlier chat attachment.
+- No image content for models that cannot see; they get the file list and the files on the computer.
+- WebP and GIF images are not sent as image content (the tool result type carries PNG and JPEG);
+  they are listed and copied like any file.
 - No deleting or renaming of uploads from the ticket.
 
-## Decisions to approve
+## Decisions (approved)
 
-See `design.md`. The executor change is the one point to look at: it is the only way to reuse the
-chat copy path, because a ticket run has no user turn message.
+All five in `design.md` as recommended, including the `executor.ts` edit, plus image content in
+`ticket_get` (decision 6).
 
 ## Impact
 

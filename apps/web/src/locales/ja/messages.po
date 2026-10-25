@@ -45,12 +45,15 @@ msgid "{0, plural, one {Waiting for sign-in — the link expires in about # minu
 msgstr "{0, plural, one {ログインを待っています。リンクの有効期限はあと約#分です。} other {ログインを待っています。リンクの有効期限はあと約#分です。}}"
 
 #. placeholder {0}: file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "{0} (max {ATTACHMENT_MAX_COUNT} attachments)"
 msgstr "{0}（添付ファイルは最大{ATTACHMENT_MAX_COUNT}個）"
 
 #. placeholder {0}: file.name
 #. placeholder {1}: attachmentSizeLabel(attachmentMaxBytes(bootstrapMe))
+#. placeholder {1}: attachmentSizeLabel(maxBytes)
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "{0} (over {1})"
 msgstr "{0}（{1}を超えています）"
@@ -835,6 +838,7 @@ msgstr "{0}に"
 msgid "at {timeSelect}"
 msgstr "{timeSelect}に"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Attach file"
 msgstr "ファイルを添付"
@@ -4120,6 +4124,8 @@ msgid "Remove"
 msgstr "削除"
 
 #. placeholder {0}: attachment.file.name
+#. placeholder {0}: item.file.name
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Remove {0}"
 msgstr "{0}を削除"
@@ -4729,6 +4735,7 @@ msgid "Skip or deploy key"
 msgstr "スキップまたはデプロイキーを使用"
 
 #. placeholder {0}: skipped.join(", ")
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "Skipped {0}"
 msgstr "{0}をスキップしました"
@@ -5234,7 +5241,9 @@ msgstr "ミュート解除"
 msgid "Unpin"
 msgstr "ピン留めを解除"
 
+#. placeholder {0}: item.file.name
 #. placeholder {0}: pending.file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "Unsupported file type: {0}"
 msgstr "サポートされていないファイル形式です: {0}"
@@ -5543,6 +5552,7 @@ msgid "Yesterday"
 msgstr "昨日"
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx

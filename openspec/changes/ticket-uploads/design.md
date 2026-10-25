@@ -52,8 +52,18 @@ owner as the bot. A ticket without an owner offers no attach control.
 
 It wakes the owner and moves a ticket in review or blocked back to In progress, like any user comment.
 
+### 6. Images reach the model as tool-result images
+
+`computer_observe` already returns an `agent_tool_result` whose content mixes text and PNG/JPEG
+images, and the runtime forwards it unflattened; only `details` is stored as the effect result. The
+ticket reader returns that shape when the run's model accepts images (`acceptsImages`), with the
+newest 4 PNG/JPEG images of the ticket, read through the artifact store and capped at chat's
+attachment size. Otherwise it returns the plain JSON result. Alternative: copy only to disk and let
+the Nurling open them with a tool, which no file tool turns into model vision.
+
 ## Risks
 
+- Each `ticket_get` call resends up to 4 images, which costs context; the cap bounds it.
 - Large uploads on a ticket count toward the same per-file limit as chat; nothing new is enforced.
 - A reassigned ticket keeps uploads that belong to the previous owner's files. They stay readable,
   because reading checks the space and user, not the bot.

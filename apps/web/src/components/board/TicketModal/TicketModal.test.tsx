@@ -7,6 +7,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 
 const api = vi.hoisted(() => ({
   bots: { list: vi.fn() },
+  artifacts: { create: vi.fn() },
   tickets: {
     update: vi.fn(),
     approve: vi.fn(),
@@ -20,6 +21,11 @@ const session = vi.hoisted(() => ({
   data: { user: { id: "user-1", name: "Ada", image: null as string | null } },
 }));
 vi.mock("../../../lib/rpc", () => ({ rpc: api }));
+vi.mock("../../../lib/bootstrap", () => ({ getMaxUploadSizeBytes: () => undefined }));
+vi.mock("../../../lib/prepare-image", () => ({
+  canPrepareImage: () => false,
+  prepareImage: async (file: File) => file,
+}));
 vi.mock("../../../lib/auth", () => ({ authClient: { useSession: () => session } }));
 vi.mock("../../../lib/relative-time", () => ({ formatRelativeTime: () => "5m ago" }));
 vi.mock("@lingui/react/macro", () => {
@@ -56,7 +62,11 @@ vi.mock("@rakazo/ui-web", () => {
       return <button {...rest} />;
     },
     Dialog: Container,
-    DialogContent: Container,
+    DialogContent: ({
+      children,
+      initialFocus: _initialFocus,
+      ...rest
+    }: ComponentProps<"div"> & { initialFocus?: unknown }) => <div {...rest}>{children}</div>,
     DialogTitle: ({ children }: { children?: ReactNode }) => <h2>{children}</h2>,
     DropdownMenu: Container,
     DropdownMenuContent: Container,
@@ -135,6 +145,7 @@ function comment(id: string, createdAt: string, patch: Partial<TicketComment>): 
     authorUserId: "user-1",
     authorName: "Ada",
     mentions: [],
+    attachments: [],
     createdAt,
     updatedAt: createdAt,
     ...patch,
@@ -171,12 +182,19 @@ function setup() {
   api.tickets.files.mockResolvedValue([]);
   api.tickets.update.mockResolvedValue({});
   api.tickets.approve.mockResolvedValue({});
+  api.artifacts.create.mockImplementation(async ({ name }: { name: string }) => ({
+    id: `art-${name}`,
+  }));
+  vi.stubGlobal(
+    "URL",
+    Object.assign(URL, { createObjectURL: () => "blob:preview", revokeObjectURL: () => {} }),
+  );
   api.tickets.comment.mockImplementation(async ({ body }: { body: string }) =>
     comment("sent", "2026-10-24T05:00:00.000Z", { body }),
   );
 }
 beforeEach(() => {
-  for (const group of [api.bots, api.tickets])
+  for (const group of [api.bots, api.tickets, api.artifacts])
     for (const fn of Object.values(group)) fn.mockReset();
   session.data.user.image = null;
   setup();
@@ -696,6 +714,168 @@ it("shows Needs you only while the ticket needs the user", async () => {
     expect(text(page.container, '[data-testid="ticket-needs-you"]')).toBe("Needs you");
     await page.render({ ticket: makeTicket({ needsUser: false }) });
     expect(q(page.container, '[data-testid="ticket-needs-you"]')).toBeNull();
+  } finally {
+    await page.cleanup();
+  }
+});
+
+const fileOf = (name: string, type = "text/plain") => new File(["data"], name, { type });
+async function pick(container: HTMLElement, files: File[]) {
+  const input = q(container, '[data-testid="reply-file-input"]') as HTMLInputElement;
+  Object.defineProperty(input, "files", { value: files, configurable: true });
+  await act(async () => input.dispatchEvent(new Event("change", { bubbles: true })));
+}
+const submit = (container: HTMLElement) =>
+  act(async () => {
+    q(container, "form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+  });
+const staged = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll('[data-testid="reply-files"] span')).map(
+    (node) => node.textContent,
+  );
+
+it("stages picked files, uploads them for the owner on send, then posts the comment", async () => {
+  const page = await open();
+  try {
+    expect(q(page.container, 'button[aria-label="Attach file"]')).not.toBeNull();
+    await pick(page.container, [fileOf("brief.txt"), fileOf("front.png", "image/png")]);
+    expect(staged(page.container)).toEqual(["brief.txt", "front.png"]);
+    expect(api.artifacts.create).not.toHaveBeenCalled();
+    // Files alone are enough to send.
+    expect((q(page.container, 'button[aria-label="Send"]') as HTMLButtonElement).disabled).toBe(
+      false,
+    );
+    await submit(page.container);
+    await vi.waitFor(() => expect(api.tickets.comment).toHaveBeenCalled());
+    expect(
+      api.artifacts.create.mock.calls.map(([input]) => [input.botId, input.name, input.mimeType]),
+    ).toEqual([
+      ["bot-1", "brief.txt", "text/plain"],
+      ["bot-1", "front.png", "image/png"],
+    ]);
+    expect(api.artifacts.create.mock.invocationCallOrder[1]).toBeLessThan(
+      api.tickets.comment.mock.invocationCallOrder[0]!,
+    );
+    expect(api.tickets.comment).toHaveBeenCalledWith({
+      ticketId: "t1",
+      body: "",
+      artifactIds: ["art-brief.txt", "art-front.png"],
+    });
+    expect(q(page.container, '[data-testid="reply-files"]')).toBeNull();
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("skips files over the count or of unknown types, and removes a staged one", async () => {
+  const page = await open();
+  try {
+    await pick(
+      page.container,
+      ["a", "b", "c", "d", "e"].map((name) => fileOf(`${name}.txt`)),
+    );
+    expect(staged(page.container)).toEqual(["a.txt", "b.txt", "c.txt", "d.txt"]);
+    expect(page.container.textContent).toContain("Skipped e.txt (max 4 attachments)");
+    await act(async () => q(page.container, 'button[aria-label="Remove b.txt"]').click());
+    expect(staged(page.container)).toEqual(["a.txt", "c.txt", "d.txt"]);
+    await pick(page.container, [fileOf("tool.exe", "application/x-msdownload")]);
+    expect(page.container.textContent).toContain("Skipped tool.exe");
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("keeps the draft and the files when an upload fails", async () => {
+  api.artifacts.create.mockRejectedValueOnce(new Error("Upload failed"));
+  const page = await open();
+  try {
+    await pick(page.container, [fileOf("brief.txt")]);
+    await submit(page.container);
+    await vi.waitFor(() =>
+      expect(text(page.container, '[role="alert"]')).toContain("Upload failed"),
+    );
+    expect(api.tickets.comment).not.toHaveBeenCalled();
+    expect(staged(page.container)).toEqual(["brief.txt"]);
+    expect(text(page.container, '[role="alert"]')).toContain("Upload failed");
+  } finally {
+    await page.cleanup();
+  }
+});
+
+function drag(target: Element, type: "dragover" | "drop", files: File[]) {
+  const event = new Event(type, { bubbles: true, cancelable: true });
+  Object.defineProperty(event, "dataTransfer", {
+    value: { types: ["Files"], items: files.map(() => ({ kind: "file" })), files },
+  });
+  target.dispatchEvent(event);
+  return event;
+}
+
+it("stages files dropped anywhere on the ticket and outlines it while dragging", async () => {
+  const page = await open();
+  try {
+    const target = q(page.container, '[data-testid="ticket-description"]');
+    const over = await act(async () =>
+      drag(target, "dragover", [fileOf("plan.pdf", "application/pdf")]),
+    );
+    // Taking the drag over is what lets the browser drop here.
+    expect(over.defaultPrevented).toBe(true);
+    expect(page.container.querySelector("[data-dragging]")).not.toBeNull();
+    await act(async () => {
+      drag(target, "drop", [fileOf("plan.pdf", "application/pdf")]);
+    });
+    expect(page.container.querySelector("[data-dragging]")).toBeNull();
+    expect(staged(page.container)).toEqual(["plan.pdf"]);
+    expect(api.artifacts.create).not.toHaveBeenCalled();
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("offers no attaching on a ticket without an owner", async () => {
+  const page = await open({ ticket: makeTicket({ assigneeBotId: null }) });
+  try {
+    expect(q(page.container, 'button[aria-label="Attach file"]')).toBeNull();
+    await act(async () => {
+      drag(q(page.container, '[data-testid="ticket-description"]'), "drop", [fileOf("plan.pdf")]);
+    });
+    expect(q(page.container, '[data-testid="reply-files"]')).toBeNull();
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("shows a comment's files and labels each file with who added it", async () => {
+  const artifact = (id: string, runId: string | null) => ({
+    id,
+    botId: "bot-1",
+    groupId: null,
+    runId,
+    name: `${id}.csv`,
+    description: null,
+    mimeType: "text/csv",
+    size: 10,
+    version: 1,
+    createdAt: "2026-10-24T04:00:00.000Z",
+  });
+  api.tickets.files.mockResolvedValue([artifact("upload", null), artifact("report", "r1")]);
+  api.tickets.comments.mockResolvedValue([
+    comment("Here is the brief", "2026-10-24T03:50:00.000Z", {
+      attachments: [
+        { kind: "file", artifactId: "upload", name: "upload.csv", mimeType: "text/csv", size: 10 },
+      ],
+    }),
+  ]);
+  const page = await open();
+  try {
+    const feedCards = page.container.querySelectorAll(
+      '[data-testid="ticket-activity"] [data-testid="file-card"]',
+    );
+    expect(Array.from(feedCards).map((card) => card.textContent)).toEqual(["upload.csv"]);
+    const labels = Array.from(
+      page.container.querySelectorAll('[data-testid="ticket-file"] figcaption'),
+    ).map((node) => node.textContent);
+    expect(labels).toEqual(["You", "Chief"]);
   } finally {
     await page.cleanup();
   }

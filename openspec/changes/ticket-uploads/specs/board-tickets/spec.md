@@ -30,3 +30,11 @@ to those paths by the same mechanism as chat attachments.
 #### Scenario: Mentioned Nurling
 - **WHEN** a Nurling woken by a mention calls `ticket_get`
 - **THEN** it sees and can read the same files
+
+#### Scenario: Photos are visible to a model that can see
+- **WHEN** the ticket has a JPEG photo and the Nurling's model accepts images
+- **THEN** `ticket_get` returns that photo as image content alongside the ticket
+
+#### Scenario: Model without vision
+- **WHEN** the Nurling's model does not accept images
+- **THEN** `ticket_get` returns no image content and still lists the photo with its path

@@ -45,12 +45,15 @@ msgid "{0, plural, one {Waiting for sign-in — the link expires in about # minu
 msgstr ""
 
 #. placeholder {0}: file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "{0} (max {ATTACHMENT_MAX_COUNT} attachments)"
 msgstr "{0} (макс. {ATTACHMENT_MAX_COUNT} вложений)"
 
 #. placeholder {0}: file.name
 #. placeholder {1}: attachmentSizeLabel(attachmentMaxBytes(bootstrapMe))
+#. placeholder {1}: attachmentSizeLabel(maxBytes)
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "{0} (over {1})"
 msgstr "{0} (более {1})"
@@ -835,6 +838,7 @@ msgstr "в {0}"
 msgid "at {timeSelect}"
 msgstr "в {timeSelect}"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Attach file"
 msgstr "Прикрепить файл"
@@ -4120,6 +4124,8 @@ msgid "Remove"
 msgstr "Удалить"
 
 #. placeholder {0}: attachment.file.name
+#. placeholder {0}: item.file.name
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Remove {0}"
 msgstr "Удалить {0}"
@@ -4729,6 +4735,7 @@ msgid "Skip or deploy key"
 msgstr "Пропустить или добавить ключ"
 
 #. placeholder {0}: skipped.join(", ")
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "Skipped {0}"
 msgstr "Пропущен {0}"
@@ -5234,7 +5241,9 @@ msgstr "Включить микрофон"
 msgid "Unpin"
 msgstr "Открепить"
 
+#. placeholder {0}: item.file.name
 #. placeholder {0}: pending.file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "Unsupported file type: {0}"
 msgstr "Неподдерживаемый тип файла: {0}."
@@ -5543,6 +5552,7 @@ msgid "Yesterday"
 msgstr "Вчера"
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx

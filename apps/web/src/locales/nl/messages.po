@@ -45,12 +45,15 @@ msgid "{0, plural, one {Waiting for sign-in — the link expires in about # minu
 msgstr "{0, plural, one {Wachten op aanmelding — de link verloopt over ongeveer # minuut.} other {Wachten op aanmelding — de link verloopt over ongeveer # minuten.}}"
 
 #. placeholder {0}: file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "{0} (max {ATTACHMENT_MAX_COUNT} attachments)"
 msgstr "{0} (max. {ATTACHMENT_MAX_COUNT} bijlagen)"
 
 #. placeholder {0}: file.name
 #. placeholder {1}: attachmentSizeLabel(attachmentMaxBytes(bootstrapMe))
+#. placeholder {1}: attachmentSizeLabel(maxBytes)
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "{0} (over {1})"
 msgstr "{0} (meer dan {1})"
@@ -835,6 +838,7 @@ msgstr "om {0}"
 msgid "at {timeSelect}"
 msgstr "om {timeSelect}"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Attach file"
 msgstr "Bestand bijvoegen"
@@ -4120,6 +4124,8 @@ msgid "Remove"
 msgstr "Verwijderen"
 
 #. placeholder {0}: attachment.file.name
+#. placeholder {0}: item.file.name
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Remove {0}"
 msgstr "{0} verwijderen"
@@ -4729,6 +4735,7 @@ msgid "Skip or deploy key"
 msgstr "Overslaan of deploysleutel"
 
 #. placeholder {0}: skipped.join(", ")
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "Skipped {0}"
 msgstr "{0} overgeslagen"
@@ -5234,7 +5241,9 @@ msgstr "Dempen opheffen"
 msgid "Unpin"
 msgstr "Vastzetten opheffen"
 
+#. placeholder {0}: item.file.name
 #. placeholder {0}: pending.file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/Shell.tsx
 msgid "Unsupported file type: {0}"
 msgstr "Niet-ondersteund bestandstype: {0}"
@@ -5543,6 +5552,7 @@ msgid "Yesterday"
 msgstr "Gisteren"
 
 #: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx

@@ -3,6 +3,7 @@ import type {
   Artifact,
   Board,
   Ticket,
+  TicketAttachment,
   TicketComment,
   TicketEvent,
   TicketEventKind,
@@ -13,6 +14,7 @@ import type {
 import {
   isTicketCompletedStatus,
   parseTicketRef,
+  TicketAttachmentSchema,
   TicketEventKindSchema,
   TicketMentionSchema,
   TicketPrioritySchema,
@@ -152,6 +154,15 @@ export function parseTicketMentions(value: unknown): TicketMention[] {
   });
 }
 
+/** Well-formed attachment blocks only, for the same reason as mentions. */
+export function parseTicketAttachments(value: unknown): TicketAttachment[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item: unknown) => {
+    const attachment = TicketAttachmentSchema.safeParse(item);
+    return attachment.success ? [attachment.data] : [];
+  });
+}
+
 export function toTicketCommentDto(
   row: TicketCommentRow & {
     authorBot: { name: string } | null;
@@ -166,6 +177,7 @@ export function toTicketCommentDto(
     authorUserId: row.authorUserId,
     authorName: row.authorBot?.name ?? row.authorUser?.name ?? null,
     mentions: parseTicketMentions(row.mentions),
+    attachments: parseTicketAttachments(row.attachments),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -243,24 +255,31 @@ export function toTicketEventDto(row: TicketEventWithNames): TicketEvent {
 }
 
 /**
- * Files the ticket's owner attached while working on it: artifacts of runs whose task was
- * started for this ticket, newest version of each family. A file that was only written to a
- * workspace is not an artifact, so it is not listed.
+ * The ticket's files, newest version of each family: what Nurlings attached in runs whose task was
+ * started for this ticket, and what the user attached to comments. A file that was only written to
+ * a workspace is not an artifact, so it is not listed.
  */
 export async function listTicketFiles(
-  prisma: Pick<PrismaClient, "run" | "artifact">,
+  prisma: Pick<PrismaClient, "run" | "artifact" | "ticketComment">,
   input: { spaceId: string; userId: string; ticketId: string },
 ): Promise<Artifact[]> {
   const runs = await prisma.run.findMany({
     where: { spaceId: input.spaceId, task: { ticketId: input.ticketId } },
     select: { id: true },
   });
-  if (runs.length === 0) return [];
+  const comments = await prisma.ticketComment.findMany({
+    where: { spaceId: input.spaceId, ticketId: input.ticketId },
+    select: { attachments: true },
+  });
+  const uploads = comments.flatMap((comment) =>
+    parseTicketAttachments(comment.attachments).map((block) => block.artifactId),
+  );
+  if (runs.length === 0 && uploads.length === 0) return [];
   const rows = await prisma.artifact.findMany({
     where: {
       spaceId: input.spaceId,
       userId: input.userId,
-      runId: { in: runs.map((run) => run.id) },
+      OR: [{ runId: { in: runs.map((run) => run.id) } }, { id: { in: uploads } }],
     },
     orderBy: [{ version: "desc" }, { createdAt: "desc" }, { id: "desc" }],
   });
