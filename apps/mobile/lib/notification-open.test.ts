@@ -197,4 +197,20 @@ describe("notification space switch", () => {
       }).activeSpaceId,
     ).toBe("space-1");
   });
+
+  it("opens the ticket, ahead of the chat, when the payload carries one", () => {
+    expect(
+      notificationOpenTarget({
+        kind: "help",
+        botId: "bot-1",
+        threadId: "thread-1",
+        ticketId: "ticket-1",
+        spaceId: "space-1",
+      }),
+    ).toEqual({ pathname: "/ticket", params: { ticketId: "ticket-1", spaceId: "space-1" } });
+    expect(notificationOpenTargetFromLink("rakazo://ticket?ticketId=ticket-1")).toEqual({
+      pathname: "/ticket",
+      params: { ticketId: "ticket-1" },
+    });
+  });
 });

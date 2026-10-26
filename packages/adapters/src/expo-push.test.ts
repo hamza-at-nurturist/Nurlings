@@ -182,6 +182,22 @@ describe("expo push", () => {
     });
   });
 
+  it("carries the ticket a tap opens, and only when there is one", () => {
+    const message = {
+      kind: "help" as const,
+      title: "NUR-7 is overdue",
+      body: "Comps",
+      botId: "bot-1",
+      threadId: "thread-1",
+    };
+    expect(expoPushData({ ...message, ticketId: "ticket-1" }, "space-1", "d1")).toMatchObject({
+      ticketId: "ticket-1",
+      botId: "bot-1",
+      threadId: "thread-1",
+    });
+    expect(expoPushData(message, "space-1", "d2")).not.toHaveProperty("ticketId");
+  });
+
   it("does not deliver a token whose session row is gone, and leaves it to be retargeted", async () => {
     const tokens = new MemoryPushTokenStore();
     const token = "ExponentPushToken[test]";

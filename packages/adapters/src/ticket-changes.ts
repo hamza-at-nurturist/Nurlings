@@ -70,6 +70,7 @@ export function createTicketChangeNotifier(deps: {
         spaceId: change.spaceId,
         userId: change.userId,
         botId: change.commentBotId,
+        ticketId: change.ticketId,
         title: (name) => `${name} mentioned you on ${ref}`,
         body: [...body.trim()].slice(0, MENTION_BODY_CHARS).join(""),
       });
@@ -84,6 +85,8 @@ export async function notifyTicketUser(
     spaceId: string;
     userId: string;
     botId: string;
+    /** The ticket a tap opens. */
+    ticketId: string;
     /** Given the Nurling's name. */
     title: (botName: string) => string;
     body: string;
@@ -104,6 +107,7 @@ export async function notifyTicketUser(
         body: input.body,
         botId: input.botId,
         threadId: bot.thread.id,
+        ticketId: input.ticketId,
       },
       {
         operationId: "notify",

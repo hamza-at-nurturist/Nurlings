@@ -226,7 +226,12 @@ describe("runTicketDates", () => {
     await runTicketDates(s.deps, { ticketId: "t1" });
     expect(notify).toHaveBeenCalledOnce();
     const input = notify.mock.calls[0]?.[1] as { title: () => string; body: string };
-    expect(input).toMatchObject({ userId: "user-1", botId: "bot-1", body: "Lease renewal" });
+    expect(input).toMatchObject({
+      userId: "user-1",
+      botId: "bot-1",
+      ticketId: "t1",
+      body: "Lease renewal",
+    });
     expect(input.title()).toBe("RAK-7 is overdue");
     expect(wake).not.toHaveBeenCalled();
   });

@@ -751,6 +751,8 @@ export interface NotificationMessage {
   threadId: string;
   /** Group chat that owns threadId, so a tap does not open the bot's direct thread. */
   groupId?: string;
+  /** The ticket a tap opens, for ticket mentions and overdue notices. */
+  ticketId?: string;
   /** Unread chats to show on the app icon, when the sender knows them. */
   badge?: number;
 }

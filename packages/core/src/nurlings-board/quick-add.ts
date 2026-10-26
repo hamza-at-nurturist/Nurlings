@@ -1,6 +1,6 @@
 import type { Bot } from "@rakazo/contracts";
 import { TICKET_TITLE_MAX_LENGTH } from "@rakazo/contracts";
-import { hasMentionToken } from "../TicketModal/mentions";
+import { hasMentionToken } from "./mentions.js";
 
 export type QuickAddTicket = { title: string; description?: string; assigneeBotId?: string };
 

@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { formatTicketDate, isTicketOverdue, quickPickDates } from "./dates";
+import { formatTicketDate, isTicketOverdue, quickPickDates } from "./dates.js";
 
 const NY = "America/New_York";
 const labels = { today: "Today", tomorrow: "Tomorrow", yesterday: "Yesterday" };

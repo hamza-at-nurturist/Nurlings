@@ -1,7 +1,7 @@
 import type { Bot } from "@rakazo/contracts";
 import { TICKET_TITLE_MAX_LENGTH } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
-import { quickAddTicket } from "./quick-add";
+import { quickAddTicket } from "./quick-add.js";
 
 const scout = { id: "bot-scout", name: "Scout" } as Bot;
 const dialer = { id: "bot-dialer", name: "Dialer" } as Bot;

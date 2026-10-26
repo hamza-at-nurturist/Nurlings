@@ -1,6 +1,6 @@
 import type { Ticket, TicketComment, TicketEvent } from "@rakazo/contracts";
-import { expect, it } from "vitest";
-import { mergeActivity } from "./activity";
+import { describe, expect, it } from "vitest";
+import { activityRows, mergeActivity } from "./activity.js";
 
 const ticket: Ticket = {
   id: "t1",
@@ -126,4 +126,112 @@ it("adds files and a failed latest run, in time order before a comment at the sa
     ],
   );
   expect(items.map((item) => item.id)).toEqual(["created-t1", "file-a1", "c1", "failed-bot-1"]);
+});
+
+describe("activityRows", () => {
+  const bots = [{ id: "bot-1", name: "Chief" }];
+  const rows = (items: ReturnType<typeof mergeActivity>) =>
+    activityRows(items, { bots, viewerId: "user-1" });
+  const comment = (id: string, createdAt: string): TicketComment => ({
+    id,
+    ticketId: "t1",
+    body: "hi",
+    authorBotId: "bot-1",
+    authorUserId: null,
+    authorName: "Chief",
+    mentions: [],
+    attachments: [],
+    createdAt,
+    updatedAt: createdAt,
+  });
+
+  it("opens with a separator and drops events that have no line", () => {
+    const merged = mergeActivity(
+      ticket,
+      [event("e1", "2026-10-24T03:42:00.000Z", { kind: "owner", assigneeName: null })],
+      [],
+    );
+    const result = rows(merged);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ line: { kind: "created" }, separated: true });
+  });
+
+  it("separates at 15 minutes and across days, not before", () => {
+    const merged = mergeActivity(
+      ticket,
+      [],
+      [
+        comment("c1", "2026-10-24T03:50:00.000Z"),
+        comment("c2", "2026-10-24T04:04:00.000Z"),
+        comment("c3", "2026-10-24T04:19:00.000Z"),
+        comment("c4", "2026-10-25T04:20:00.000Z"),
+      ],
+    );
+    expect(rows(merged).map((row) => row.separated)).toEqual([true, false, false, true, true]);
+  });
+
+  it("says who moved a ticket, naming bots, you, and strangers", () => {
+    const merged = mergeActivity(
+      ticket,
+      [
+        event("e1", "2026-10-24T03:42:00.000Z"),
+        event("e2", "2026-10-24T03:43:00.000Z", {
+          actorBotId: null,
+          actorUserId: "user-1",
+          status: "doing",
+        }),
+        event("e3", "2026-10-24T03:44:00.000Z", {
+          actorBotId: null,
+          actorUserId: "user-2",
+          actorName: "Sam",
+          status: "done",
+        }),
+      ],
+      [],
+    );
+    const lines = rows(merged).flatMap((row) => (row.line ? [row.line] : []));
+    expect(lines.slice(1)).toEqual([
+      { kind: "moved", actor: { you: false, name: "Chief" }, status: "blocked" },
+      { kind: "moved", actor: { you: true, name: null }, status: "doing" },
+      { kind: "moved", actor: { you: false, name: "Sam" }, status: "done" },
+    ]);
+  });
+
+  it("reads a resumed event without an actor, and a failed run by the bot's name", () => {
+    const merged = mergeActivity(
+      ticket,
+      [
+        event("e1", "2026-10-24T03:42:00.000Z", {
+          kind: "resumed",
+          actorBotId: null,
+          actorName: null,
+          status: "doing",
+        }),
+      ],
+      [],
+      [],
+      [{ botId: "bot-1", status: "failed", finishedAt: "2026-10-24T03:43:00.000Z" }],
+    );
+    const lines = rows(merged).flatMap((row) => (row.line ? [row.line] : []));
+    expect(lines).toContainEqual({ kind: "resumed", status: "doing" });
+    expect(lines).toContainEqual({ kind: "failed", name: "Chief" });
+  });
+
+  it("attributes an attached file to you when no run made it", () => {
+    const file = {
+      id: "f1",
+      botId: "bot-1",
+      runId: null,
+      name: "a.pdf",
+      createdAt: "2026-10-24T03:42:00.000Z",
+    } as never;
+    const lines = rows(mergeActivity(ticket, [], [], [file])).flatMap((row) =>
+      row.line ? [row.line] : [],
+    );
+    expect(lines).toContainEqual({
+      kind: "attached",
+      name: "a.pdf",
+      actor: { you: true, name: null },
+    });
+  });
 });

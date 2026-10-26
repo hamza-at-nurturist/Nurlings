@@ -1,6 +1,7 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot, Ticket, TicketPriority, TicketStatus } from "@rakazo/contracts";
 import { TICKET_PRIORITIES, TICKET_STATUSES } from "@rakazo/contracts";
+import { isTicketOverdue } from "@rakazo/core/nurlings-board";
 import {
   BotAvatar,
   DropdownMenu,
@@ -13,7 +14,6 @@ import { useTicketPriorityLabels } from "../../../lib/ticket-priority";
 import { useTicketStatusLabels } from "../../../lib/ticket-status";
 import { CHIP } from "./chip";
 import { DatePicker } from "./DatePicker";
-import { isTicketOverdue } from "./dates";
 
 export const STATUS_DOT: Record<TicketStatus, string> = {
   todo: "bg-muted-foreground",

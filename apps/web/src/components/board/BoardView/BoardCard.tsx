@@ -1,6 +1,8 @@
+import { i18n } from "@lingui/core";
 import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import { TICKET_STATUSES } from "@rakazo/contracts";
+import { ticketCard } from "@rakazo/core/nurlings-board";
 import {
   BotAvatar,
   Button,
@@ -15,6 +17,7 @@ import { Ellipsis, Paperclip } from "lucide-react";
 import { useTicketStatusLabels } from "../../../lib/ticket-status";
 import { Shimmer } from "../../ai/primitives";
 import { CardDates } from "../TicketModal/CardDates";
+import { useRelativeDayLabels } from "../TicketModal/DatePicker";
 import { NeedsYou } from "../TicketModal/NeedsYou";
 import { STATUS_DOT } from "../TicketModal/Properties";
 
@@ -34,12 +37,14 @@ type Props = {
 export function BoardCard({ ticket, bots, timeZone, busy, onOpen, onMove, onApprove }: Props) {
   const { t } = useLingui();
   const statuses = useTicketStatusLabels();
-  const owner = bots.find((bot) => bot.id === ticket.assigneeBotId);
-  const worker = ticket.workingBotId
-    ? bots.find((bot) => bot.id === ticket.workingBotId)
-    : undefined;
+  const { owner, worker, finished } = ticketCard(ticket, {
+    bots,
+    now: new Date(),
+    timeZone,
+    labels: useRelativeDayLabels(),
+    locale: i18n.locale || "en",
+  });
   const workerName = worker?.name;
-  const finished = ticket.status === "done" || ticket.status === "closed";
   return (
     <article
       data-testid={`board-card-${ticket.id}`}

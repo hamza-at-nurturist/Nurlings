@@ -1,6 +1,6 @@
+import type { MentionTarget } from "@rakazo/core/nurlings-board";
+import { splitMentions } from "@rakazo/core/nurlings-board";
 import { MentionChip } from "./MentionChip";
-import type { MentionTarget } from "./mentions";
-import { splitMentions } from "./mentions";
 
 /** A comment that mentions someone: plain text, line breaks kept, with a chip for each mention. */
 export function MentionText({ body, targets }: { body: string; targets: MentionTarget[] }) {

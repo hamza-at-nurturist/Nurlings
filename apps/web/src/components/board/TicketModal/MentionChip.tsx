@@ -1,6 +1,6 @@
 import { useLingui } from "@lingui/react/macro";
+import { mentionColor } from "@rakazo/core/nurlings-board";
 import { X } from "lucide-react";
-import { mentionColor } from "./mentions";
 
 type Props = { name: string; color?: string; onRemove?: () => void };
 

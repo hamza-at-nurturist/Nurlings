@@ -1,12 +1,14 @@
 import type { Bot } from "@rakazo/contracts";
-import { expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   activeMentionToken,
+  applyMention,
   hasMentionToken,
   mentionColor,
+  mentionOptions,
   resolveMentionTargets,
   splitMentions,
-} from "./mentions";
+} from "./mentions.js";
 
 const bots = [
   { id: "bot-1", name: "Chief", color: "#7C3AED::shape_8" },
@@ -94,4 +96,22 @@ it("finds the @ the caret is in, only at the start of a word", () => {
   expect(activeMentionToken("mail me@sc", 10)).toBeNull();
   expect(activeMentionToken("line\n@x", 7)).toEqual({ start: 5, query: "x" });
   expect(activeMentionToken("@a @b", 5)).toEqual({ start: 3, query: "b" });
+});
+
+describe("mentionOptions and applyMention", () => {
+  const names = ["Scout", "Chief", "Runway", "Scoop", "Dialer", "Collector", "Nova", "Echo", "Sol"];
+  const list = names.map((name) => ({ name }));
+
+  it("lists names containing the query, those starting with it first, at most 8", () => {
+    expect(mentionOptions(list, "sco").map((bot) => bot.name)).toEqual(["Scout", "Scoop"]);
+    expect(mentionOptions(list, "o").map((bot) => bot.name)).toContain("Echo");
+    expect(mentionOptions(list, "")).toHaveLength(8);
+  });
+
+  it("puts the picked name in place of the query and the caret after it", () => {
+    expect(applyMention("Ask @sc now", { start: 4 }, 7, { name: "Scout" })).toEqual({
+      text: "Ask @Scout  now",
+      caret: 11,
+    });
+  });
 });

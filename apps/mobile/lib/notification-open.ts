@@ -1,4 +1,8 @@
+import type { TicketRoute } from "./nurlings-board/notification";
+import { ticketNotificationRoute } from "./nurlings-board/notification";
+
 export type NotificationRoute =
+  | TicketRoute
   | {
       pathname: "/thread";
       params: { botId: string; threadId?: string; spaceId?: string; name?: string };
@@ -36,6 +40,8 @@ function notificationField(data: Record<string, unknown>, key: string): string |
 export function notificationOpenTarget(data: unknown): NotificationRoute | null {
   if (!data || typeof data !== "object" || Array.isArray(data)) return null;
   const record = data as Record<string, unknown>;
+  const ticket = ticketNotificationRoute(record);
+  if (ticket) return ticket;
   const threadId = notificationField(record, "threadId");
   const spaceId = notificationField(record, "spaceId");
   const name = notificationField(record, "name");
@@ -62,6 +68,7 @@ export function notificationOpenTargetFromLink(url: string): NotificationRoute |
   const screen = (parsed.hostname || parsed.pathname.replace(/^\//, "")).replace(/\/$/, "");
   const data: Record<string, string> = {};
   for (const [key, value] of parsed.searchParams) data[key] = value;
+  if (screen === "ticket") return ticketNotificationRoute(data);
   if (screen === "thread") {
     delete data.groupId;
   } else if (screen === "group-thread") {

@@ -559,7 +559,7 @@ export function ThreadComposer({
   );
 }
 
-function MentionOptionIcon({ mention }: { mention: ComposerMention }) {
+export function MentionOptionIcon({ mention }: { mention: ComposerMention }) {
   const tokens = useMobileTokens();
   if (mention.kind === "routine") {
     return (
@@ -620,7 +620,7 @@ function MentionOptionIcon({ mention }: { mention: ComposerMention }) {
   );
 }
 
-function MentionChipIcon({ mention }: { mention: ComposerMention }) {
+export function MentionChipIcon({ mention }: { mention: ComposerMention }) {
   const tokens = useMobileTokens();
   if (mention.kind === "routine") {
     return (

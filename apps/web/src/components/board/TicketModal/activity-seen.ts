@@ -1,5 +1,5 @@
+import type { ActivityItem } from "@rakazo/core/nurlings-board";
 import { useEffect, useState } from "react";
-import type { ActivityItem } from "./activity";
 
 /** When each ticket's activity was last viewed, remembered per browser for the latest tickets. */
 export const ACTIVITY_SEEN_KEY = "rakazo.ticket-activity-seen";

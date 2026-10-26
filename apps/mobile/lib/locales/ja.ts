@@ -1,4 +1,7 @@
+import { NURLINGS_BOARD_JA } from "./nurlings-board/ja";
+
 export const JA_MESSAGES: Record<string, string> = {
+  ...NURLINGS_BOARD_JA,
   "The model returned an unusable response. Try again.":
     "モデルが利用できない応答を返しました。もう一度お試しください。",
   "This model's context window is too small. Choose another model.":

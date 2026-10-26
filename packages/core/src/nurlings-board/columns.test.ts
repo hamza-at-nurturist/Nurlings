@@ -1,6 +1,6 @@
 import type { TicketListItem } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
-import { boardColumns } from "./columns";
+import { boardColumns } from "./columns.js";
 
 const NOW = new Date("2026-10-25T12:00:00.000Z");
 const ticket = (id: string, overrides: Partial<TicketListItem> = {}) =>

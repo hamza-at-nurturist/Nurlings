@@ -1,8 +1,15 @@
 import { i18n } from "@lingui/core";
 import { useLingui } from "@lingui/react/macro";
 import { ChatMarkdown } from "@rakazo/chat-ui/web";
-import type { Artifact, Bot, TicketComment, TicketEvent, TicketRun } from "@rakazo/contracts";
-import { needsTimeSeparator, WORKING_RUN_STATUSES } from "@rakazo/core";
+import type { Artifact, Bot, TicketComment, TicketRun } from "@rakazo/contracts";
+import { WORKING_RUN_STATUSES } from "@rakazo/core";
+import type {
+  ActivityActor,
+  ActivityItem,
+  ActivityLine,
+  Viewer,
+} from "@rakazo/core/nurlings-board";
+import { activityRows, resolveMentionTargets } from "@rakazo/core/nurlings-board";
 import { BotAvatar } from "@rakazo/ui-web";
 import { Fragment, useEffect, useRef } from "react";
 import { formatRelativeTime } from "../../../lib/relative-time";
@@ -10,12 +17,8 @@ import { useTicketStatusLabels } from "../../../lib/ticket-status";
 import { TimeSeparator } from "../../../pages/shell/chat-context";
 import { FALLBACK_BOT_COLOR } from "../../../pages/shell/chat-shared";
 import { Shimmer } from "../../ai/primitives";
-import type { ActivityItem } from "./activity";
 import { MentionText } from "./MentionText";
-import { resolveMentionTargets } from "./mentions";
 import { TicketFileCard } from "./TicketFileCard";
-
-export type Viewer = { id: string; name: string; image?: string | null };
 
 type Props = {
   items: ActivityItem[];
@@ -73,38 +76,43 @@ export function ActivityFeed({
 
   const botName = (id: string | null, fallback: string | null) =>
     (id ? bots.find((bot) => bot.id === id)?.name : undefined) ?? fallback;
-  const actorName = (event: TicketEvent) =>
-    event.actorBotId
-      ? (botName(event.actorBotId, event.actorName) ?? t`Someone`)
-      : event.actorUserId === viewer.id
-        ? t`You`
-        : (event.actorName ?? t`Someone`);
+  const actorText = (actor: ActivityActor) => (actor.you ? t`You` : (actor.name ?? t`Someone`));
 
-  function eventLine(event: TicketEvent): string | null {
-    const actor = actorName(event);
-    const owner = botName(event.assigneeBotId, event.assigneeName);
-    if (event.kind === "created")
-      return owner
-        ? t`${actor} created this and assigned it to ${owner}`
-        : t`${actor} created this`;
-    if (event.kind === "status" && event.status)
-      return t`${actor} moved it to ${statuses[event.status]}`;
-    if (event.kind === "owner" && owner) return t`${actor} assigned it to ${owner}`;
-    if (event.kind === "approved") return t`${actor} approved it`;
-    if (event.kind === "resumed" && event.status) return t`Moved back to ${statuses[event.status]}`;
-    return null;
-  }
-
-  function failedLine(botId: string): string {
-    const name = botName(botId, null) ?? t`Someone`;
-    return t`${name} couldn't finish, reply to retry`;
-  }
-
-  function fileLine(file: Artifact): string {
-    const name = file.name;
-    if (!file.runId) return t`You attached ${name}`;
-    const actor = botName(file.botId, null) ?? t`Someone`;
-    return t`${actor} attached ${name}`;
+  function lineText(line: ActivityLine): string {
+    switch (line.kind) {
+      case "created": {
+        const actor = actorText(line.actor);
+        const owner = line.owner;
+        return owner
+          ? t`${actor} created this and assigned it to ${owner}`
+          : t`${actor} created this`;
+      }
+      case "moved": {
+        const actor = actorText(line.actor);
+        return t`${actor} moved it to ${statuses[line.status]}`;
+      }
+      case "assigned": {
+        const actor = actorText(line.actor);
+        const owner = line.owner;
+        return t`${actor} assigned it to ${owner}`;
+      }
+      case "approved": {
+        const actor = actorText(line.actor);
+        return t`${actor} approved it`;
+      }
+      case "resumed":
+        return t`Moved back to ${statuses[line.status]}`;
+      case "attached": {
+        const name = line.name;
+        if (line.actor.you) return t`You attached ${name}`;
+        const actor = actorText(line.actor);
+        return t`${actor} attached ${name}`;
+      }
+      case "failed": {
+        const name = line.name ?? t`Someone`;
+        return t`${name} couldn't finish, reply to retry`;
+      }
+    }
   }
 
   function author(comment: TicketComment) {
@@ -127,21 +135,11 @@ export function ActivityFeed({
   }
 
   // What shows, each with whether a time separator opens it.
-  const rows: Array<{ item: ActivityItem; line: string | null; separated: boolean }> = [];
-  let previous: string | undefined;
-  for (const item of items) {
-    const line =
-      item.kind === "event"
-        ? eventLine(item.event)
-        : item.kind === "file"
-          ? fileLine(item.file)
-          : item.kind === "failed"
-            ? failedLine(item.botId)
-            : null;
-    if (item.kind !== "comment" && line === null) continue;
-    rows.push({ item, line, separated: needsTimeSeparator(item.at, previous) });
-    previous = item.at;
-  }
+  const rows = activityRows(items, { bots, viewerId: viewer.id }).map((row) => ({
+    item: row.item,
+    line: row.line ? lineText(row.line) : null,
+    separated: row.separated,
+  }));
 
   return (
     <ol data-testid="ticket-activity" className="flex flex-col">
