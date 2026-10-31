@@ -94,6 +94,7 @@ Only `NURLINGS_VERSION` is mandatory. Everything else works empty.
 | --- | --- | --- | --- |
 | `NURLINGS_VERSION` | yes, you set it | no | Release tag for every image, for example `v0.1.0`. |
 | `NURLINGS_PULL_POLICY` | optional | no | `missing` (default) pulls an image only when the server lacks it. Only the test server sets `always`, so a redeploy also pulls a moved `edge` tag. |
+| `NURLINGS_PROXY_NETWORK` | optional | no | Name of Coolify's network for this resource, which is the resource UUID. Leave empty: the compose file uses the UUID Coolify provides. Set it only if a deploy stops with `COOLIFY_RESOURCE_UUID` missing. |
 | `SERVICE_PASSWORD_POSTGRES` | generated | yes | Database owner password. |
 | `SERVICE_PASSWORD_APPDB` | generated | yes | The app's database login password. |
 | `SERVICE_PASSWORD_64_AUTH` | generated | yes | Session signing secret. |
@@ -197,6 +198,7 @@ Then **Redeploy** in Coolify to start everything again. Copy backups off the ser
 | Bots start but cannot look anything up | DNS: set `SANDBOX_COMPUTER_DNS` to a public resolver your network allows. |
 | `Blocked request. This host is not allowed` on the web page | The `web` domain does not match the URL you are using. Fix the domain and redeploy. |
 | `worker` shows unhealthy right after a deploy | It reports healthy after about two minutes; look at its logs if it does not. |
+| `Gateway Timeout` after a redeploy | Traefik chose a network the proxy is not on. The `web` label `traefik.docker.network` pins Coolify's resource network. Check it: `docker inspect $(docker ps -qf label=com.docker.compose.project=<resource uuid> -f label=com.docker.compose.service=web) --format '{{ index .Config.Labels "traefik.docker.network" }}'` prints the resource UUID. If the label is missing or wrong, set `NURLINGS_PROXY_NETWORK` to the UUID from the Coolify URL and redeploy. |
 | Sign-in loops or redirects to `localhost` | `SERVICE_URL_WEB` is empty. Set the `web` domain and redeploy. |
 
 ## 10. The test server

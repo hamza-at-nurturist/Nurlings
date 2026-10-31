@@ -497,6 +497,12 @@ services:
       - RAKAZO_CSP_CONNECT_SRC=${RAKAZO_CSP_CONNECT_SRC:-}
     networks:
       - app
+    # `web` is on several networks, and only Coolify's resource network (named after the resource
+    # UUID) has the proxy on it. Pin Traefik to it, or it can route via a network it cannot reach
+    # and answer Gateway Timeout. Coolify provides COOLIFY_RESOURCE_UUID; NURLINGS_PROXY_NETWORK
+    # overrides it. With neither, the deploy stops rather than ship an empty label.
+    labels:
+      - traefik.docker.network=${NURLINGS_PROXY_NETWORK:-${COOLIFY_RESOURCE_UUID:?Coolify did not provide COOLIFY_RESOURCE_UUID; set NURLINGS_PROXY_NETWORK to the resource UUID}}
     depends_on:
       api:
         condition: service_healthy
