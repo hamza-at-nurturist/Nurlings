@@ -526,7 +526,7 @@ const options = (container: HTMLElement) =>
     (node) => node.textContent,
   );
 
-it("shows a comment's mentions as chips: tinted by each Nurling's own hex and neutral for a user", async () => {
+it("shows a comment's mentions: Nurlings with avatar and color as in chat, a neutral chip for a user", async () => {
   api.tickets.comments.mockResolvedValue([
     comment("m1", "2026-10-24T05:00:00.000Z", {
       body: "Hi @Chief and @Scout, and @Ada\nsecond line",
@@ -540,15 +540,24 @@ it("shows a comment's mentions as chips: tinted by each Nurling's own hex and ne
   ]);
   const page = await open();
   try {
+    // A Nurling reads like it does in chat: its avatar and its name in its own color.
+    const bots = Array.from(
+      page.container.querySelectorAll<HTMLElement>('[data-testid="bot-mention"]'),
+    );
+    expect(bots.map((bot) => bot.textContent)).toEqual(["Chief", "Scout"]);
+    expect(
+      bots.map((bot) =>
+        bot.querySelector("[data-testid=bot-avatar]")?.getAttribute("data-identity"),
+      ),
+    ).toEqual(["bot-1", "bot-2"]);
+    expect(bots[0]!.querySelector<HTMLElement>("span[dir]")!.style.color).not.toBe("");
+    // A user keeps the neutral chip.
     const chips = Array.from(
       page.container.querySelectorAll<HTMLElement>('[data-testid="mention-chip"]'),
     );
-    expect(chips.map((chip) => chip.textContent)).toEqual(["Chief", "Scout", "Ada"]);
-    expect(chips.map((chip) => chip.dataset.mentionColor)).toEqual(["#7c3aed", "#22c55e", ""]);
-    expect(chips[0]?.style.color).toBe("rgb(124, 58, 237)");
-    expect(chips[0]?.style.backgroundColor).toContain("color-mix");
-    expect(chips[2]?.className).toContain("bg-accent");
-    const card = chips[0]!.closest("li")!;
+    expect(chips.map((chip) => chip.textContent)).toEqual(["Ada"]);
+    expect(chips[0]?.className).toContain("bg-accent");
+    const card = bots[0]!.closest("li")!;
     expect(card.querySelector("p")?.textContent).toContain("second line");
     expect(card.querySelector("p")?.className).toContain("whitespace-pre-wrap");
     // A comment without mentions is still markdown.
