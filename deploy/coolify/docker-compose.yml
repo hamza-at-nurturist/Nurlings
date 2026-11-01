@@ -501,6 +501,9 @@ services:
     # UUID) has the proxy on it. Pin Traefik to it, or it can route via a network it cannot reach
     # and answer Gateway Timeout. Coolify provides COOLIFY_RESOURCE_UUID; NURLINGS_PROXY_NETWORK
     # overrides it. With neither, the deploy stops rather than ship an empty label.
+    # Coolify's "Escape special characters in labels" setting (resource, Advanced) must be OFF: when
+    # it is on, Coolify escapes the $ and the label stays a literal ${...} string, so the pin does
+    # nothing (README section 5, step 4).
     labels:
       - traefik.docker.network=${NURLINGS_PROXY_NETWORK:-${COOLIFY_RESOURCE_UUID:?Coolify did not provide COOLIFY_RESOURCE_UUID; set NURLINGS_PROXY_NETWORK to the resource UUID}}
     depends_on:

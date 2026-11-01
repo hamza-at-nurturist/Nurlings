@@ -215,7 +215,12 @@ describe("the Coolify compose file", () => {
       if (name !== "web")
         expect({ name, labels: service.labels }).toEqual({ name, labels: undefined });
     }
-    expect(readFileSync(readmeFile, "utf8")).toMatch(/Gateway Timeout[^\n]*NURLINGS_PROXY_NETWORK/);
+    // Coolify escapes the $ in labels unless that setting is off, which leaves a literal ${...}.
+    const readme = readFileSync(readmeFile, "utf8");
+    expect(readme).toMatch(/Gateway Timeout[^\n]*NURLINGS_PROXY_NETWORK/);
+    expect(readme).toMatch(/Gateway Timeout[^\n]*Escape special characters in labels/);
+    expect(readme).toMatch(/Escape special characters in labels\*\*\s+OFF/);
+    expect(source).toContain("Escape special characters in labels");
   });
 
   it("leaves sign-up open until the operator closes it after the first account", () => {
