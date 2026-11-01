@@ -20,7 +20,7 @@ it("puts props below, beside and above the body, and the gloss inside its box", 
     expect(a.pad.y).toBeGreaterThan(b.maxY);
     expect(a.lens.x).toBeGreaterThan(0);
     expect(a.stars.y).toBeLessThan(b.minY);
-    const gloss = svgPathBounds(avatarGlossPath(b));
+    const gloss = svgPathBounds(avatarGlossPath(d));
     expect(gloss.minX).toBeGreaterThanOrEqual(b.minX);
     expect(gloss.maxX).toBeLessThanOrEqual(b.maxX);
     expect(gloss.minY).toBeGreaterThanOrEqual(b.minY);

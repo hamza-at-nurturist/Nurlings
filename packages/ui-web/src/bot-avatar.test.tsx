@@ -50,9 +50,9 @@ describe("BotAvatar", () => {
     expect(parsed.isImage).toBe(false);
   });
 
-  it("keeps shape indexes up to 11 and wraps after that", () => {
-    expect(parseBotAvatar(`${DEFAULT_BOT_AVATAR_COLOR}::shape_11`).shapeIndex).toBe(11);
-    expect(parseBotAvatar(`${DEFAULT_BOT_AVATAR_COLOR}::shape_12`).shapeIndex).toBe(0);
+  it("keeps shape indexes up to 21 and wraps after that", () => {
+    expect(parseBotAvatar(`${DEFAULT_BOT_AVATAR_COLOR}::shape_21`).shapeIndex).toBe(21);
+    expect(parseBotAvatar(`${DEFAULT_BOT_AVATAR_COLOR}::shape_22`).shapeIndex).toBe(0);
   });
 
   it("normalizes malformed shape suffixes to shape 0", () => {
@@ -230,7 +230,8 @@ describe("BotAvatar", () => {
     expect(html).toContain(organicBotAvatarFrame(index)?.path);
     expect(html.match(/<rect/g)).toHaveLength(2);
     expect(html).not.toContain("<ellipse");
-    expect(html).toContain("rotate(13.5)");
+    expect(html).toContain("rotate(-13)");
+    expect(html).toContain('data-glint-tone="ink"');
     // The blob keeps its outline, so there is nothing to morph between.
     expect(html).not.toContain("<animate");
   });

@@ -1,5 +1,10 @@
 import { brand } from "@nurlings/brand";
-import { organicOutlinePath, smoothOrganicOutline } from "./avatar-shape.js";
+import {
+  ORGANIC_AVATAR_FAMILY_COUNT,
+  organicAvatarPath,
+  organicOutlinePath,
+  smoothOrganicOutline,
+} from "./avatar-shape.js";
 
 export const SHIPPED_BOT_AVATAR_VIEWBOX = "-15 -15 259 259";
 export const SHIPPED_BOT_AVATAR_CENTER = 114.2705;
@@ -123,13 +128,27 @@ export interface OrganicBotAvatarFrame {
    * the body for the working-state glint; nothing draws it yet.
    */
   gloss?: string;
+  /** "ink": the eye catchlights are ink and the gloss is a faint page-colored stroke, as on an ink body. */
+  glint?: "ink";
 }
 
 /** The brand blob is `shape_8`; the original organic bodies that follow it are `shape_9` to `shape_11`. */
 export const BRAND_BLOB_SHAPE_INDEX = 8;
 
-/** The shapes the avatar pickers offer besides the bot's own default body. */
-export const PICKABLE_ORGANIC_SHAPE_INDEXES: readonly number[] = [8, 9, 10, 11];
+/** `shape_12` to `shape_21` pin organic family 0 to 9, whatever the bot's id: `shape_{12 + family}`. */
+export const PINNED_FAMILY_FIRST_SHAPE_INDEX = 12;
+
+/** The shapes the avatar pickers offer besides the bot's own default body: Chief, the three originals, the ten families. */
+export const PICKABLE_ORGANIC_SHAPE_INDEXES: readonly number[] = [
+  8,
+  9,
+  10,
+  11,
+  ...Array.from(
+    { length: ORGANIC_AVATAR_FAMILY_COUNT },
+    (_, family) => PINNED_FAMILY_FIRST_SHAPE_INDEX + family,
+  ),
+];
 
 interface OrganicBodyDesign {
   /** Corner points in the organic box, smoothed like the hashed organic families. */
@@ -250,26 +269,55 @@ let originalBodyFrames: readonly OrganicBotAvatarFrame[] | undefined;
  */
 export function organicBotAvatarFrame(shapeIndex: number): OrganicBotAvatarFrame | undefined {
   if (shapeIndex === BRAND_BLOB_SHAPE_INDEX) return brandBlobFrame();
+  const family = shapeIndex - PINNED_FAMILY_FIRST_SHAPE_INDEX;
+  if (family >= 0 && family < ORGANIC_AVATAR_FAMILY_COUNT) return pinnedFamilyFrame(family);
   originalBodyFrames ??= ORGANIC_BODY_DESIGNS.map(organicBodyFrame);
   return originalBodyFrames[shapeIndex - BRAND_BLOB_SHAPE_INDEX - 1];
 }
 
-function brandBlobFrame(): OrganicBotAvatarFrame {
+// Chief, from the storyboard: the pill pair (9x20, centres 26 apart) is placed at [6, -11], leaned
+// -13 degrees and drawn at 0.72 scale. The gloss arc is Chief's own, drawn by hand.
+const CHIEF_EYES = {
+  at: [6, -11],
+  leanDeg: -13,
+  scale: 0.72,
+  halfGap: 13,
+  rx: 4.5,
+  ry: 10,
+} as const;
+const CHIEF_GLOSS = "M-14 -17 C-11 -24 -5 -27 2 -27";
+
+/** A hashed organic family drawn at a fixed phase with the standard pill eyes. */
+function pinnedFamilyFrame(family: number): OrganicBotAvatarFrame {
   return {
-    path: markShapePath(brand.mark.blobBody, organicX, organicY),
+    path: organicAvatarPath(family),
     eyes: {
       kind: "pill",
-      left: {
-        cx: round(organicX(brand.mark.eyeLeft.cx)),
-        cy: round(organicY(brand.mark.eyeLeft.cy)),
-      },
-      right: {
-        cx: round(organicX(brand.mark.eyeRight.cx)),
-        cy: round(organicY(brand.mark.eyeRight.cy)),
-      },
-      rx: round((brand.mark.eyeWidth * ORGANIC_BLOB_SCALE) / 2),
-      ry: round((brand.mark.eyeLength * ORGANIC_BLOB_SCALE) / 2),
-      tiltDeg: brand.mark.eyeAngleDeg,
+      left: { cx: -10.5, cy: 0 },
+      right: { cx: 10.5, cy: 0 },
+      rx: 3.5,
+      ry: 12,
+      tiltDeg: 0,
+    },
+  };
+}
+
+function brandBlobFrame(): OrganicBotAvatarFrame {
+  const { at, leanDeg, scale, halfGap, rx, ry } = CHIEF_EYES;
+  const lean = (leanDeg * Math.PI) / 180;
+  const offsetX = halfGap * scale * Math.cos(lean);
+  const offsetY = halfGap * scale * Math.sin(lean);
+  return {
+    path: markShapePath(brand.mark.blobBody, organicX, organicY),
+    gloss: CHIEF_GLOSS,
+    glint: "ink",
+    eyes: {
+      kind: "pill",
+      left: { cx: round(at[0] - offsetX), cy: round(at[1] - offsetY) },
+      right: { cx: round(at[0] + offsetX), cy: round(at[1] + offsetY) },
+      rx: round(rx * scale),
+      ry: round(ry * scale),
+      tiltDeg: leanDeg,
     },
   };
 }

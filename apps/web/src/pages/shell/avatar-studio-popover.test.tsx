@@ -102,13 +102,15 @@ describe("selectable bot icon sets", () => {
     const labels = [...document.querySelectorAll("button[aria-pressed]")].map((node) =>
       node.getAttribute("aria-label"),
     );
-    expect(labels).toEqual(expect.arrayContaining(["Shape 1", "Shape 2", "Shape 3", "Shape 4"]));
+    expect(labels).toEqual(expect.arrayContaining(["Shape 1", "Shape 4", "Shape 5", "Shape 14"]));
     for (const classic of ["hex", "wedge", "squircle", "tablet", "pebble", "cloud", "teardrop"]) {
       expect(labels).not.toContain(classic);
     }
-    expect(labels.filter((label) => label?.startsWith("Shape "))).toHaveLength(4);
+    expect(labels.filter((label) => label?.startsWith("Shape "))).toHaveLength(14);
     await click("Shape 3");
     expect(changed).toHaveBeenLastCalledWith("#8B5CF6::shape_10", undefined);
+    await click("Shape 14");
+    expect(changed).toHaveBeenLastCalledWith("#8B5CF6::shape_21", undefined);
   });
 
   it("shows a retired static shape as the default look", async () => {

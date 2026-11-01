@@ -1,4 +1,5 @@
 import "../../src/styles.css";
+import { PICKABLE_ORGANIC_SHAPE_INDEXES } from "@rakazo/core";
 import { BotAvatar, BotAvatarActivityProvider } from "@rakazo/ui-web";
 import { createRoot } from "react-dom/client";
 
@@ -89,10 +90,39 @@ function Row({
   );
 }
 
+// Every body the picker offers, in picker order: Chief, the three originals, the ten organic families.
+const BODY_NAMES = ["Chief", "Bean", "Drift", "Sprout"];
+const BODIES = PICKABLE_ORGANIC_SHAPE_INDEXES.map((shapeIndex, position) => ({
+  shapeIndex,
+  label: BODY_NAMES[position] ?? `Family ${position - BODY_NAMES.length + 1}`,
+}));
+
+function Bodies() {
+  return (
+    <section>
+      <h2>Bodies, with their gloss</h2>
+      <div className="row" data-row="bodies">
+        {BODIES.map(({ shapeIndex, label }) => (
+          <div className="case" key={shapeIndex}>
+            <BotAvatar
+              color={`#14B8A6::shape_${shapeIndex}`}
+              identity={`body-${shapeIndex}`}
+              name={label}
+              size={96}
+            />
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 createRoot(document.getElementById("root")!).render(
   <BotAvatarActivityProvider source={source}>
     <Row title="States" items={CASES} size={96} />
     <Row title="Working, other ways" items={VARIANTS} size={96} />
     <Row title="At 24px only the pip tells" items={CASES} size={24} />
+    <Bodies />
   </BotAvatarActivityProvider>,
 );

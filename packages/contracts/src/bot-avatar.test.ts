@@ -26,13 +26,14 @@ describe("bot avatar values", () => {
     });
   });
 
-  it("keeps retired static shape values and the new body indexes, wrapping at 12", () => {
-    for (const shapeIndex of [0, 7, 8, 9, 10, 11]) {
+  it("keeps retired static shape values and the new body indexes, wrapping at 22", () => {
+    for (const shapeIndex of [0, 7, 8, 9, 10, 11, 12, 21]) {
       const value = `#8B5CF6::shape_${shapeIndex}`;
       expect(parseBotAvatarValue(value)).toEqual({ kind: "shape", color: "#8B5CF6", shapeIndex });
       expect(isBotAvatarValue(value)).toBe(true);
     }
-    expect(parseBotAvatarValue("#8B5CF6::shape_12")).toMatchObject({ shapeIndex: 0 });
+    expect(parseBotAvatarValue("#8B5CF6::shape_12")).toMatchObject({ shapeIndex: 12 });
+    expect(parseBotAvatarValue("#8B5CF6::shape_22")).toMatchObject({ shapeIndex: 0 });
   });
 
   it("does not treat remote URLs as images", () => {

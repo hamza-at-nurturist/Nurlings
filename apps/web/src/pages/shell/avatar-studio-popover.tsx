@@ -27,24 +27,19 @@ import type { ClipboardEvent, DragEvent } from "react";
 import { useRef, useState } from "react";
 
 /**
- * The shape grid and color row for a bot's look. With `organicIdentities`, the grid also offers
- * the organic body each identity draws (for a bot that has no id yet); without them, "Default"
- * restores the bot's own organic body.
+ * The shape grid and color row for a bot's look: "Default" restores the bot's own organic body, and
+ * the 14 chips pin Chief, the three original bodies or one of the ten organic families.
  */
 export function BotLookPicker({
   value,
-  identity,
-  organicIdentities,
   avatarSet = "organic",
   onAvatarSetChange,
   onChange,
 }: {
   value: string;
-  identity?: string;
-  organicIdentities?: readonly string[];
   avatarSet?: BotAvatarSet;
   onAvatarSetChange?: (set: BotAvatarSet, value: string) => void;
-  onChange: (value: string, identity?: string) => void;
+  onChange: (value: string) => void;
 }) {
   const parsed = parseBotAvatar(value);
   const currentColor = parsed.color || DEFAULT_BOT_AVATAR_COLOR;
@@ -79,48 +74,37 @@ export function BotLookPicker({
       ) : null}
       {avatarSet === "organic" ? (
         <div>
-          {organicIdentities ? null : (
-            <div className="mb-2 flex items-center justify-between">
-              <div className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-                <Trans>Shape</Trans>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                type="button"
-                data-testid="avatar-studio-default"
-                aria-pressed={isDefaultLook}
-                onClick={() => {
-                  const next = defaultBotAvatarValue(value);
-                  if (next !== value) onChange(next);
-                }}
-                className={`px-3 py-1 text-xs font-medium transition-colors ${
-                  isDefaultLook
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Trans>Default</Trans>
-              </Button>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+              <Trans>Shape</Trans>
             </div>
-          )}
+            <Button
+              variant="ghost"
+              size="sm"
+              type="button"
+              data-testid="avatar-studio-default"
+              aria-pressed={isDefaultLook}
+              onClick={() => {
+                const next = defaultBotAvatarValue(value);
+                if (next !== value) onChange(next);
+              }}
+              className={`px-3 py-1 text-xs font-medium transition-colors ${
+                isDefaultLook
+                  ? "bg-secondary text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Trans>Default</Trans>
+            </Button>
+          </div>
           <div
-            className={`grid place-items-center gap-2 ${organicIdentities ? "grid-cols-4 sm:grid-cols-8 sm:gap-1" : "grid-cols-4"}`}
+            className="grid grid-cols-7 place-items-center gap-1"
+            data-testid="avatar-studio-shapes"
           >
-            {organicIdentities?.map((organicIdentity, index) => (
-              <BotShapePreview
-                key={organicIdentity}
-                identity={organicIdentity}
-                label={t`Shape ${index + 1}`}
-                color={currentColor}
-                selected={isDefaultLook && identity === organicIdentity}
-                onClick={() => onChange(currentColor, organicIdentity)}
-              />
-            ))}
             {PICKABLE_ORGANIC_SHAPE_INDEXES.map((shapeIndex, position) => (
               <BotShapePreview
                 key={shapeIndex}
-                label={t`Shape ${(organicIdentities?.length ?? 0) + position + 1}`}
+                label={t`Shape ${position + 1}`}
                 color={`${currentColor}::shape_${shapeIndex}`}
                 selected={!parsed.isImage && parsed.shapeIndex === shapeIndex}
                 onClick={() => onChange(`${currentColor}::shape_${shapeIndex}`)}
@@ -131,11 +115,9 @@ export function BotLookPicker({
       ) : null}
 
       <div className="border-t border-border pt-2">
-        {organicIdentities ? null : (
-          <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-            <Trans>Color</Trans>
-          </div>
-        )}
+        <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+          <Trans>Color</Trans>
+        </div>
         <div className="grid grid-cols-6 place-items-center gap-2">
           {BOT_AVATAR_COLORS.map((color) => {
             const selected = currentColor.toLowerCase() === color.toLowerCase() && !parsed.isImage;
@@ -329,7 +311,6 @@ export function AvatarStudioPopover({
             <TabsContent value="bot" className="pt-1" data-testid="avatar-studio-bot-tab">
               <BotLookPicker
                 value={value}
-                identity={identity}
                 avatarSet={avatarSet}
                 onChange={(next) => onChange(next)}
                 onAvatarSetChange={(set, next) => onChange(next, set)}

@@ -888,10 +888,8 @@ export default function BotSettingsScreen() {
                 <Text style={{ color: tokens.mutedForeground, marginTop: 16, fontSize: 14 }}>
                   {t("Shape")}
                 </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: 10, paddingVertical: 8, paddingHorizontal: 4 }}
+                <View
+                  style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, paddingVertical: 8 }}
                   accessibilityRole="radiogroup"
                 >
                   <Pressable
@@ -941,7 +939,7 @@ export default function BotSettingsScreen() {
                       />
                     </Pressable>
                   ))}
-                </ScrollView>
+                </View>
               </>
             ) : null}
           </ScrollView>

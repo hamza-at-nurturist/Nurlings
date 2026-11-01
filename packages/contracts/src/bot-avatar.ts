@@ -17,9 +17,10 @@ export function resolveBotAvatarSet(value?: string | null): BotAvatarSet {
 
 /**
  * `#hex::shape_N` indexes: 0 to 7 are retired static shapes that now draw the bot's own organic
- * body, 8 is the brand blob and 9 to 11 are the original organic bodies in `@rakazo/core`.
+ * body, 8 is the brand blob, 9 to 11 are the original organic bodies in `@rakazo/core` and 12 to 21 pin
+ * organic family 0 to 9. Older builds read `N % 12`, so they draw a different body with the right color.
  */
-export const BOT_AVATAR_SHAPE_COUNT = 12;
+export const BOT_AVATAR_SHAPE_COUNT = 22;
 
 /**
  * 256x256 webp data URLs from Avatar Studio stay well under this. Cap writes so

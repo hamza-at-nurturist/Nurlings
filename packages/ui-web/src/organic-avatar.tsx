@@ -121,7 +121,7 @@ export function OrganicAvatar({
   const seed = avatarIdentitySeed(identity || color);
   const body = frame?.path ?? organicAvatarPath(seed);
   const bounds = useMemo(() => svgPathBounds(body), [body]);
-  const gloss = frame?.gloss ?? avatarGlossPath(bounds);
+  const gloss = frame?.gloss ?? avatarGlossPath(body);
   const anchors = useMemo(() => avatarPropAnchors(bounds), [bounds]);
   const eyes = useMemo(() => eyeSpecs(frame), [frame]);
 
@@ -174,6 +174,7 @@ export function OrganicAvatar({
       data-dizzy={dizzy}
       data-swapping={swapping}
       data-glint="true"
+      data-glint-tone={frame?.glint}
       data-paused={!visible}
       data-shape-family={seed % 10}
       data-eye-pattern={seed % 4}
@@ -183,6 +184,7 @@ export function OrganicAvatar({
           height: size,
           "--c0": color,
           "--rakazo-av-eye": tokens.background,
+          "--rakazo-av-ink": tokens.foreground,
           "--rakazo-av-white": ink.white,
           "--rakazo-av-dull": ink.dull,
           "--rakazo-av-shadow": ink.shadow,

@@ -50,6 +50,17 @@ strip. The Default chip stays first. The create-bot dialog drops its ten sample 
 the same 14 chips, so new and existing bots share one list; its heart exclusion goes away because the
 heart is now an explicit choice.
 
+## As built
+
+- The create-bot dialog keeps its random starting look (a preview body whose family it sends so the
+  server mints a matching id); the chips only apply when someone picks one, and Default returns to
+  the preview body.
+- No picker ever wrote `shape_12` or higher, so no stored bot is affected by the range growing.
+- The derived gloss now follows the outline (outermost edge point on rays from the centre, stepped
+  in 7 units) instead of using the bounding box, and a test checks every hashed family at every
+  phase plus Chief, Bean, Drift and Sprout against the outline with room for the stroke.
+- Chief's ink glint is stored on its frame and applies whatever color the Chief is.
+
 ## Other items
 
 - **Follow:** `pull = smoothstep((R - d) / (R - size/2))` with `R = max(120, 2.5 * size)` and `d` the
