@@ -164,8 +164,7 @@ export function ArtifactsPage() {
     });
   }, [items, searchQuery, dateFilter, showUploads]);
 
-  const clientFilterActive =
-    searchQuery.trim().length > 0 || dateFilter !== "all" || !showUploads;
+  const clientFilterActive = searchQuery.trim().length > 0 || dateFilter !== "all" || !showUploads;
   const autoFetchedCursorRef = useRef<string | null>(null);
 
   useEffect(() => {
