@@ -28,7 +28,6 @@ import {
   Easing,
   ReduceMotion,
   useSharedValue,
-  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import { useAppForeground } from "./app-foreground";
@@ -120,8 +119,6 @@ export function useAvatarOnScreen(): boolean {
 const LIFE_RUN_SECONDS = 24 * 60 * 60;
 /** How long motion takes to ease in and out of the still picture. */
 export const AWAKE_MS = 600;
-/** The spring that turns the face into the typing dots and back: quick, barely overshooting. */
-export const MORPH_SPRING = { duration: 520, dampingRatio: 0.8 } as const;
 /** The timeline is rebuilt this long before it runs out. */
 const SCHEDULE_MARGIN_S = 5;
 
@@ -136,7 +133,7 @@ function clockNow({ base, since }: ClockMirror): number {
 
 /**
  * Everything a moving avatar needs on the UI thread: a seconds clock, its 0–1 wake-up,
- * the clip timeline for its state, the typing-dots morph and the current tap poke.
+ * the clip timeline for its state, the eyes' resting gaze and the current tap poke.
  */
 export function useLife(
   state: AvatarLifeState,
@@ -146,13 +143,13 @@ export function useLife(
 ) {
   const seconds = useSharedValue(0);
   const awake = useSharedValue(0);
-  // Only a running avatar turns into the typing dots. A still one stays a picture, and a
-  // parked one (Reduce Motion) keeps its face and only blinks.
-  const dots = state === "thinking" && clock === "running";
-  const morph = useSharedValue(dots ? 1 : 0);
   const schedule = useSharedValue<AvatarSegment[]>([]);
   const poke = useSharedValue<AvatarPoke | null>(null);
   const pokeProgress = useSharedValue(1);
+  // Where the eyes rest while a prop is shown (motion units), and how far the lids may open.
+  const gazeX = useSharedValue(0);
+  const gazeY = useSharedValue(0);
+  const lidCap = useSharedValue(1);
   const mirror = useRef<ClockMirror>({ base: 0, since: null });
   const moving = clock !== "still";
   const pool = avatarClipPool(state, size, mode);
@@ -162,9 +159,6 @@ export function useLife(
       easing: Easing.inOut(Easing.cubic),
     });
   }, [clock, awake]);
-  useEffect(() => {
-    morph.value = withSpring(dots ? 1 : 0, MORPH_SPRING);
-  }, [dots, morph]);
   useEffect(() => {
     if (!moving) return;
     // The JS thread sets where the clock starts, so it can tell the time without reading it.
@@ -198,7 +192,7 @@ export function useLife(
     plan();
     return () => clearTimeout(timer);
   }, [moving, pool, schedule]);
-  return { seconds, awake, morph, schedule, poke, pokeProgress };
+  return { seconds, awake, schedule, poke, pokeProgress, gazeX, gazeY, lidCap };
 }
 
 export type AvatarLife = ReturnType<typeof useLife>;

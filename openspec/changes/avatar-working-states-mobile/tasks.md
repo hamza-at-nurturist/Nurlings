@@ -19,28 +19,28 @@
 
 ## 3. States and pips
 
-- [ ] 3.1 Derive state, working look and tool inside the organic mobile avatar from `status`,
+- [x] 3.1 Derive state, working look and tool inside the organic mobile avatar from `status`,
   `composing`, `ticketStatus`, `asleep`, `progress` and `mobileLogoAvatarActivity.getLive`. A resting
   avatar adds no subscription. Verify: render tests per state with a mocked store: state attribute,
   pip color token, one subscription only while active.
-- [ ] 3.2 Draw pips with the warning, destructive and success tokens, the glint, the blocked dull
+- [x] 3.2 Draw pips with the warning, destructive and success tokens, the glint, the blocked dull
   body, sleep z's and the long-run sweat drop; remove the working dot and typing-dot morph for
   organic avatars only. Verify: render tests; the logo set and photo avatars render as before.
-- [ ] 3.3 Accessible names with the state ("Chief, working") and the six new strings
+- [x] 3.3 Accessible names with the state ("Chief, working") and the six new strings
   (thinking, needs you, in review, blocked, done, asleep); an idle avatar is named by the Nurling's
   name alone. Verify: tests for name and role, a nameless avatar stays hidden, and `i18n.test.ts` passes for every catalog.
 
 ## 4. Working looks and props
 
-- [ ] 4.1 Orbit dot, ripples for queued runs, progress ring (built, unfed) and the long-run look with
+- [x] 4.1 Orbit dot, ripples for queued runs, progress ring (built, unfed) and the long-run look with
   Reanimated. Verify: unit tests that the look follows `avatarWorking` for each status and tool, and
   the ring offset follows `progress`.
-- [ ] 4.2 Pencil on notepad, magnifier and laptop (screen facing the Nurling) at the shared anchors,
+- [x] 4.2 Pencil on notepad, magnifier and laptop (screen facing the Nurling) at the shared anchors,
   eyes settling on the prop. Verify: render tests for each tool and anchor position on two bodies.
-- [ ] 4.3 Still rules: 24 pt and smaller and Reduce Motion render no props and no animation, only the
+- [x] 4.3 Still rules: 24 pt and smaller and Reduce Motion render no props and no animation, only the
   pip; `static` avatars show the pip when given a status and nothing else. Verify: render tests at 24, 25 and 54 pt with Reduce
   Motion on and off.
-- [ ] 4.4 Calm gaze: no touch handling added; idle clips and blinks as today. Verify: a test that the
+- [x] 4.4 Calm gaze: no touch handling added; idle clips and blinks as today. Verify: a test that the
   avatar registers no gesture or pointer handler.
 
 ## 5. Surfaces

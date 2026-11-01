@@ -1,54 +1,62 @@
 import type { BotAvatarSet } from "@rakazo/contracts";
-import type { AvatarMotionMode, LogoAvatarActivity } from "@rakazo/core";
+import type { AvatarMotionMode, AvatarState, LogoAvatarActivity } from "@rakazo/core";
 import {
   AVATAR_LID_CLOSE,
   AVATAR_MOTION_UNITS,
-  AVATAR_TYPING_DOTS,
   avatarClip,
   avatarClock,
   avatarFrame,
+  avatarGlossPath,
   avatarIdentitySeed,
-  avatarLifeState,
+  avatarMotionState,
   avatarPokeFrame,
+  avatarPropAnchors,
   avatarRestingBlink,
   avatarSchedulePose,
-  avatarThinkingDot,
   avatarWorkingDot,
   botAvatarActivity,
+  isLightAvatarColor,
+  isRunWaitingOnUser,
   isRunWorking,
   type OrganicBotAvatarFrame,
   organicAvatarPath,
   organicBotAvatarFrame,
+  svgPathBounds,
   usesLogoAvatar,
 } from "@rakazo/core";
-import { botEyeColor } from "@rakazo/ui-tokens";
-import { memo, useSyncExternalStore } from "react";
+import { useAvatarState, useToolSwap } from "@rakazo/core/avatar-state-react";
+import { AVATAR_ILLUSTRATION, botEyeColor } from "@rakazo/ui-tokens";
+import { memo, useEffect, useMemo, useSyncExternalStore } from "react";
 import { Image, Pressable, View } from "react-native";
 import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
   useReducedMotion,
+  withTiming,
 } from "react-native-reanimated";
-import Svg, { G, Path, Rect } from "react-native-svg";
+import Svg, { Circle, G, Path, Rect } from "react-native-svg";
 import type { AvatarLife } from "../lib/avatar-life";
 import { useAvatarOnScreen, useLife, usePoke, useSettling } from "../lib/avatar-life";
 import { mobileBotAvatarPresentation } from "../lib/bot-avatar";
 import { useI18n } from "../lib/i18n";
 import { mobileLogoAvatarActivity } from "../lib/logo-avatar-activity";
 import { useMobileTokens } from "../lib/native";
+import { dullBody, lidCap, organicAvatarView, TOOL_GAZE } from "../lib/organic-avatar-view";
+import { AvatarPip } from "./avatar-pip";
+import {
+  OrbitDot,
+  ProgressRing,
+  Ripples,
+  SleepZs,
+  SweatDrop,
+  ThinkingDots as ThinkingPulse,
+  ToolProp,
+} from "./avatar-props";
 import { LogoAvatar } from "./logo-avatar";
 import { NativeSymbol } from "./native-symbol";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
-
-/** How far (0–1) the face has turned into the typing dots, for a morph of 0–1. */
-function morphGrow(morph: number): number {
-  "worklet";
-  const t = Math.min(Math.max(morph, 0), 1);
-  return t * t * (3 - 2 * t);
-}
-/** The face shrinks until it is the size of the middle typing dot. */
-const MORPH_SHRINK = 1 - (2 * AVATAR_TYPING_DOTS.radius) / AVATAR_MOTION_UNITS;
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 /** The avatar's flat frame right now, a tap poke included; a worklet. */
 function liveFrame(life: AvatarLife) {
@@ -68,6 +76,10 @@ function liveFrame(life: AvatarLife) {
     }
     frame.lid = Math.min(frame.lid, 1 - AVATAR_LID_CLOSE * shut);
   }
+  // The eyes settle on a shown prop and the lids stay heavy while asleep, blocked or worn out.
+  frame.eyeX += life.gazeX.value;
+  frame.eyeY += life.gazeY.value;
+  frame.lid = Math.min(frame.lid, life.lidCap.value);
   const poke = life.poke.value;
   if (poke) {
     const extra = avatarPokeFrame(poke, life.pokeProgress.value);
@@ -76,19 +88,14 @@ function liveFrame(life: AvatarLife) {
     frame.scaleY *= extra.scaleY;
     frame.eyeY += extra.eyeY;
   }
-  // The face shrinks into the middle typing dot while the bot writes.
-  const grow = morphGrow(life.morph.value);
-  frame.scaleX *= 1 - MORPH_SHRINK * grow;
-  frame.scaleY *= 1 - MORPH_SHRINK * grow;
-  return { frame, grow };
+  return frame;
 }
 
 /** The body transform for an avatar `size` points wide. */
 function useBodyStyle(life: AvatarLife, size: number) {
   return useAnimatedStyle(() => {
-    const { frame, grow } = liveFrame(life);
+    const frame = liveFrame(life);
     return {
-      opacity: 1 - grow,
       transform: [
         { translateX: frame.translateX * size },
         { translateY: frame.translateY * size },
@@ -103,8 +110,8 @@ function useBodyStyle(life: AvatarLife, size: number) {
 /** An eye's offset (motion units), its height and whether it shows. */
 function eyeState(life: AvatarLife) {
   "worklet";
-  const { frame, grow } = liveFrame(life);
-  return { x: frame.eyeX, y: frame.eyeY, lid: frame.lid, hidden: grow >= 0.5 };
+  const frame = liveFrame(life);
+  return { x: frame.eyeX, y: frame.eyeY, lid: frame.lid };
 }
 
 export interface BotAvatarProps {
@@ -118,6 +125,14 @@ export interface BotAvatarProps {
   motion?: AvatarMotionMode;
   composing?: boolean;
   pokeable?: boolean;
+  /** The Nurling's name. With it the avatar is an image named "{name}, {state}" (idle: just the name). */
+  name?: string;
+  /** The status of the ticket this avatar stands for, on screens that show one. */
+  ticketStatus?: string;
+  /** The Nurling's computer is asleep. Nothing supplies this yet. */
+  asleep?: boolean;
+  /** Run progress, 0 to 1. Nothing supplies this yet. */
+  progress?: number | null;
 }
 
 /** Missing set metadata deliberately preserves every existing avatar. */
@@ -234,6 +249,36 @@ function MutedBadge({ size }: { size: number }) {
   );
 }
 
+/** The live tool and reply-writing flag of a busy run; empty for a resting avatar, with no subscription. */
+function useLiveAvatar(identity: string | undefined, enabled: boolean) {
+  const subscribe = (listener: () => void) =>
+    enabled ? mobileLogoAvatarActivity.subscribe(listener) : () => undefined;
+  return useSyncExternalStore(
+    subscribe,
+    () => (enabled ? mobileLogoAvatarActivity.getLive(identity ?? "") : NO_LIVE),
+    () => NO_LIVE,
+  );
+}
+const NO_LIVE = { tool: "none", composing: false } as const;
+
+/** The spoken name: the Nurling's name, then its state; an idle avatar is just the name. */
+function useAvatarLabel(name: string | undefined, state: AvatarState): string | undefined {
+  const { t } = useI18n();
+  if (!name) return undefined;
+  const spoken: Record<AvatarState, string | undefined> = {
+    idle: undefined,
+    thinking: t("thinking"),
+    working: t("Working").toLowerCase(),
+    needs: t("needs you"),
+    review: t("in review"),
+    blocked: t("blocked"),
+    done: t("done"),
+    asleep: t("asleep"),
+  };
+  const word = spoken[state];
+  return word ? `${name}, ${word}` : name;
+}
+
 function LegacyBotAvatar({
   color,
   size = 54,
@@ -243,53 +288,70 @@ function LegacyBotAvatar({
   motion = "static",
   composing = false,
   pokeable = false,
-}: {
-  color: string;
-  size?: number;
-  status?: string;
-  identity?: string;
-  muted?: boolean;
-  /**
-   * How the avatar may move: still (the default), lazy (inbox rows and pinned chats: still
-   * at rest, moving while the bot is busy), live (the call card: also blinks at rest) or
-   * running (the activity mark in a chat).
-   */
-  motion?: AvatarMotionMode;
-  /**
-   * The bot is writing its reply: a moving avatar turns into the typing dots, and no avatar
-   * shows the working dot.
-   */
-  composing?: boolean;
-  /** A tap plays a little reaction (the activity mark). */
-  pokeable?: boolean;
-}) {
+  name,
+  ticketStatus,
+  asleep,
+  progress,
+}: BotAvatarProps) {
   const tokens = useMobileTokens();
-  const state = avatarLifeState(status, composing);
-  // The working dot marks a bot at work, not one writing its reply; a running avatar is
-  // itself that sign, so it carries none.
-  const isWorking = isRunWorking(status) && !composing && motion !== "running";
+  const live = useLiveAvatar(identity, isRunWorking(status) || isRunWaitingOnUser(status));
+  const { state: avatarStateValue, working } = useAvatarState({
+    status,
+    composing: composing || live.composing,
+    tool: live.tool,
+    ticketStatus,
+    asleep,
+    progress,
+  });
+  const state = avatarMotionState(avatarStateValue);
   const parsed = mobileBotAvatarPresentation(color);
+  const isImage = parsed.kind === "image";
+  // The working dot marks a photo's run; organic avatars show their state instead, and a
+  // running avatar is itself that sign.
+  const isWorking = isImage && isRunWorking(status) && !composing && motion !== "running";
   const onScreen = useAvatarOnScreen();
   const reducedMotion = useReducedMotion();
   const settling = useSettling(state);
   const clock = avatarClock({
     mode: motion,
     onScreen,
-    hasEyes: parsed.kind !== "image",
+    hasEyes: !isImage,
     size,
     state,
     settling,
     reducedMotion,
   });
+  const propTool = avatarStateValue === "working" ? working.tool : "none";
+  const swap = useToolSwap(propTool, false);
+  const view = organicAvatarView({
+    state: avatarStateValue,
+    working,
+    shownTool: swap.shown,
+    clock,
+    size,
+    reducedMotion,
+  });
   const life = useLife(state, clock, size, motion);
   const poke = usePoke(life, pokeable && clock === "running");
   const bodyStyle = useBodyStyle(life, size);
+  const gaze = TOOL_GAZE[view.tool];
+  const cap = lidCap(view);
+  useEffect(() => {
+    life.gazeX.value = withTiming(gaze.x, { duration: 300 });
+    life.gazeY.value = withTiming(gaze.y, { duration: 300 });
+    life.lidCap.value = withTiming(cap, { duration: 300 });
+  }, [life, gaze.x, gaze.y, cap]);
   // The brand blob and the original bodies (shapes 8 to 11) draw their own body and eyes; every
   // other shape draws the organic body the bot's id picks.
   const blobFrame = parsed.kind === "shape" ? organicBotAvatarFrame(parsed.shapeIndex) : undefined;
   const fillColor = parsed.kind === "shape" || parsed.kind === "color" ? parsed.color : color;
-  const picture =
-    parsed.kind === "image" && parsed.imageUrl ? (
+  const seed = avatarIdentitySeed(identity || fillColor || "#8B5CF6");
+  const path = blobFrame?.path ?? organicAvatarPath(seed);
+  const anchors = useMemo(() => avatarPropAnchors(svgPathBounds(path)), [path]);
+  const bodyColor = view.dull ? dullBody(fillColor, AVATAR_ILLUSTRATION.dull) : fillColor;
+  const label = useAvatarLabel(name, avatarStateValue);
+  const picture = isImage ? (
+    parsed.imageUrl ? (
       <View
         style={{
           width: size,
@@ -302,22 +364,40 @@ function LegacyBotAvatar({
       >
         <Image source={{ uri: parsed.imageUrl }} style={{ width: size, height: size }} />
       </View>
-    ) : (
-      <OrganicAvatar
-        color={fillColor}
-        identity={identity}
-        size={size}
-        life={life}
-        bodyStyle={bodyStyle}
-        frame={blobFrame}
-      />
-    );
+    ) : null
+  ) : (
+    <OrganicAvatar
+      color={bodyColor}
+      glintTone={blobFrame?.glint ?? (isLightAvatarColor(fillColor) ? "light" : undefined)}
+      path={path}
+      gloss={blobFrame?.gloss ?? avatarGlossPath(path)}
+      seed={seed}
+      size={size}
+      life={life}
+      bodyStyle={bodyStyle}
+      frame={blobFrame}
+    />
+  );
   const avatar = (
-    <View style={{ width: size, height: size }}>
-      {picture}
-      {parsed.kind !== "image" && clock !== "still" ? (
-        <ThinkingDots color={fillColor} size={size} life={life} />
+    <View
+      style={{ width: size, height: size }}
+      accessible={label ? true : undefined}
+      accessibilityRole={label ? "image" : undefined}
+      accessibilityLabel={label}
+    >
+      {view.look === "ripple" ? <Ripples color={fillColor} size={size} /> : null}
+      {view.look === "ring" ? (
+        <ProgressRing color={fillColor} size={size} progress={progress ?? 0} />
       ) : null}
+      {view.look === "orbit" ? <OrbitDot color={fillColor} size={size} /> : null}
+      {picture}
+      {view.look === "tool" ? <ToolProp tool={view.tool} anchors={anchors} size={size} /> : null}
+      {view.long ? <SweatDrop size={size} /> : null}
+      {view.animated && avatarStateValue === "thinking" ? (
+        <ThinkingPulse color={fillColor} size={size} />
+      ) : null}
+      {view.animated && view.asleep ? <SleepZs color={fillColor} size={size} /> : null}
+      {view.pip ? <AvatarPip pip={view.pip} size={size} /> : null}
       {isWorking ? <WorkingDot size={size} muted={muted} /> : null}
       {muted ? <MutedBadge size={size} /> : null}
     </View>
@@ -330,44 +410,6 @@ function LegacyBotAvatar({
   ) : (
     avatar
   );
-}
-
-/** The three typing dots a writing bot's avatar turns into; the middle one is its body. */
-function ThinkingDots({ color, size, life }: { color: string; size: number; life: AvatarLife }) {
-  return (
-    <View pointerEvents="none" style={{ position: "absolute", width: size, height: size }}>
-      <Dot slot={0} color={color} size={size} life={life} />
-      <Dot slot={1} color={color} size={size} life={life} />
-      <Dot slot={2} color={color} size={size} life={life} />
-    </View>
-  );
-}
-
-function Dot({
-  slot,
-  color,
-  size,
-  life,
-}: {
-  slot: 0 | 1 | 2;
-  color: string;
-  size: number;
-  life: AvatarLife;
-}) {
-  const style = useAnimatedStyle(() => {
-    const dot = avatarThinkingDot(slot, life.seconds.value, life.morph.value);
-    const unit = size / AVATAR_MOTION_UNITS;
-    const radius = dot.radius * unit;
-    return {
-      opacity: dot.opacity,
-      width: radius * 2,
-      height: radius * 2,
-      borderRadius: radius,
-      left: size / 2 + dot.x * unit - radius,
-      top: size / 2 + dot.y * unit - radius,
-    };
-  });
-  return <Animated.View style={[{ position: "absolute", backgroundColor: color }, style]} />;
 }
 
 type BodyStyle = ReturnType<typeof useAnimatedStyle>;
@@ -384,30 +426,57 @@ const ORGANIC_EYES: ShapeEyes = {
 
 type ShapeEyes = OrganicBotAvatarFrame["eyes"];
 
+/** The eye glint: white, darker on a light body, ink on an ink one. */
+function glintColors(
+  tone: "ink" | "light" | undefined,
+  tokens: { background: string; foreground: string },
+) {
+  if (tone === "ink")
+    return { catchlight: tokens.foreground, gloss: tokens.background, opacity: 0.16 };
+  if (tone === "light")
+    return { catchlight: tokens.foreground, gloss: AVATAR_ILLUSTRATION.glintOnLight, opacity: 0.4 };
+  return { catchlight: AVATAR_ILLUSTRATION.white, gloss: AVATAR_ILLUSTRATION.white, opacity: 0.5 };
+}
+
 /** Pill eyes are tilted about their own centre; blinking closes them along their length. */
 function PillEyes({
   eyes,
   life,
   units,
+  catchlight,
 }: {
   eyes: ShapeEyes;
   life: AvatarLife;
   /** The width of the box the eyes are drawn in. */
   units: number;
+  catchlight: string;
 }) {
   const eyeProps = (cx: number, cy: number) => () => {
     "worklet";
     const state = eyeState(life);
     const scale = units / AVATAR_MOTION_UNITS;
-    const height = state.hidden ? 0 : eyes.ry * 2 * state.lid;
+    const height = eyes.ry * 2 * state.lid;
     return {
       x: cx - eyes.rx + state.x * scale,
       y: cy - height / 2 + state.y * scale,
       height,
     };
   };
+  const catchProps = (cx: number, cy: number) => () => {
+    "worklet";
+    const state = eyeState(life);
+    const scale = units / AVATAR_MOTION_UNITS;
+    return {
+      cx: cx - eyes.rx * 0.25 + state.x * scale,
+      cy: cy - eyes.ry * 0.45 * state.lid + state.y * scale,
+      opacity: state.lid > 0.6 ? 1 : 0,
+    };
+  };
   const leftEye = useAnimatedProps(eyeProps(eyes.left.cx, eyes.left.cy));
   const rightEye = useAnimatedProps(eyeProps(eyes.right.cx, eyes.right.cy));
+  const leftCatch = useAnimatedProps(catchProps(eyes.left.cx, eyes.left.cy));
+  const rightCatch = useAnimatedProps(catchProps(eyes.right.cx, eyes.right.cy));
+  const radius = Math.max(1.4, eyes.rx * 0.55);
   return (
     <>
       <AnimatedRect
@@ -424,33 +493,55 @@ function PillEyes({
         fill={botEyeColor}
         transform={`rotate(${eyes.tiltDeg} ${eyes.right.cx} ${eyes.right.cy})`}
       />
+      <AnimatedCircle animatedProps={leftCatch} r={radius} fill={catchlight} />
+      <AnimatedCircle animatedProps={rightCatch} r={radius} fill={catchlight} />
     </>
   );
 }
 
 function OrganicAvatar({
   color,
-  identity,
+  glintTone,
+  path,
+  gloss,
+  seed,
   size,
   life,
   bodyStyle,
   frame,
 }: {
   color: string;
-  identity?: string;
+  glintTone: "ink" | "light" | undefined;
+  path: string;
+  gloss: string;
+  seed: number;
   size: number;
   life: AvatarLife;
   bodyStyle: BodyStyle;
   /** A fixed body and eyes to draw instead of the seeded organic ones. */
   frame?: OrganicBotAvatarFrame;
 }) {
-  const seed = avatarIdentitySeed(identity || color || "#8B5CF6");
+  const tokens = useMobileTokens();
+  const glint = glintColors(glintTone, tokens);
   return (
     <Animated.View style={[{ width: size, height: size }, bodyStyle]}>
       <Svg width={size} height={size} viewBox="-60 -60 120 120">
-        <Path d={frame?.path ?? organicAvatarPath(seed)} fill={color} />
+        <Path d={path} fill={color} />
+        <Path
+          d={gloss}
+          fill="none"
+          stroke={glint.gloss}
+          strokeWidth="4.5"
+          strokeLinecap="round"
+          opacity={glint.opacity}
+        />
         <G transform={frame ? undefined : `rotate(${(seed % 9) - 4})`}>
-          <PillEyes eyes={frame?.eyes ?? ORGANIC_EYES} life={life} units={120} />
+          <PillEyes
+            eyes={frame?.eyes ?? ORGANIC_EYES}
+            life={life}
+            units={120}
+            catchlight={glint.catchlight}
+          />
         </G>
       </Svg>
     </Animated.View>

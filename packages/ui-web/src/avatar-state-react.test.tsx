@@ -2,11 +2,11 @@
 import { readFileSync } from "node:fs";
 import type { AvatarTool } from "@rakazo/core";
 import { AVATAR_DONE_MS, AVATAR_LONG_RUN_MS } from "@rakazo/core";
+import type { AvatarStateSource } from "@rakazo/core/avatar-state-react";
+import { useAvatarState, useToolSwap } from "@rakazo/core/avatar-state-react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { AvatarStateSource } from "@rakazo/core/avatar-state-react";
-import { useAvatarState, useToolSwap } from "@rakazo/core/avatar-state-react";
 
 let snapshot: unknown;
 function Probe({ source, animate = true }: { source: AvatarStateSource; animate?: boolean }) {

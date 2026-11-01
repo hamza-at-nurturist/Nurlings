@@ -109,3 +109,12 @@ export function avatarPropAnchors(b: AvatarBounds) {
     stars: { x: 0, y: round(minY - 12) },
   };
 }
+
+/** True for a body so light that a white glint would vanish on it. */
+export function isLightAvatarColor(color: string): boolean {
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim())?.[1];
+  if (!hex) return false;
+  const full = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
+  const [r, g, b] = [0, 2, 4].map((i) => Number.parseInt(full.slice(i, i + 2), 16));
+  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b! > 200;
+}
