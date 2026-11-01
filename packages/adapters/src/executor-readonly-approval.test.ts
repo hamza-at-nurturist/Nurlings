@@ -2131,7 +2131,7 @@ describe("outbound destinations", () => {
     expect(isApprovalPausedResult(f.results[2])).toBe(true);
   });
 
-  it("asks before fetching upstream's docs pages, since the fork has no docs allow-list", async () => {
+  it("asks before fetching upstream's docs pages, which a Nurlings build does not allow-list", async () => {
     const f = fixture({ builtin: true });
     f.setCalls([
       {

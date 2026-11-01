@@ -132,6 +132,12 @@ import { spaceQueries } from "../../lib/query";
 import { rpc } from "../../lib/rpc";
 import { BotSettings } from "./bot-panel";
 
+// A Nurlings build offers one icon set; these tests exercise the set switcher, so offer both.
+vi.mock("@rakazo/contracts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@rakazo/contracts")>()),
+  SELECTABLE_BOT_AVATAR_SETS: ["organic", "rakazo"],
+}));
+
 const longInstructions = "I".repeat(4_000);
 
 function bot(description = "Billing", overrides: Partial<Bot> = {}): Bot {

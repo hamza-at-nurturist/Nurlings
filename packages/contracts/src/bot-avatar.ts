@@ -6,13 +6,13 @@ export type BotAvatarSet = z.infer<typeof BotAvatarSetSchema>;
 export const DEFAULT_NEW_BOT_AVATAR_SET: BotAvatarSet = "organic";
 
 /**
- * The sets this build offers. The "rakazo" set draws upstream's logo, which a Nurlings build must
- * not show, so only the original shapes are offered and a stored "rakazo" resolves to them.
+ * The sets the pickers offer. The "rakazo" set draws upstream's logo, which a Nurlings build must
+ * not show, so only the original shapes are offered (stored values still render as stored).
  */
 export const SELECTABLE_BOT_AVATAR_SETS: readonly BotAvatarSet[] = ["organic"];
 
 export function resolveBotAvatarSet(value?: string | null): BotAvatarSet {
-  return value === "rakazo" && SELECTABLE_BOT_AVATAR_SETS.includes("rakazo") ? "rakazo" : "organic";
+  return value === "rakazo" ? "rakazo" : "organic";
 }
 
 /** Matches the shipped mascot shapes in `@rakazo/core`, including the brand blob. */

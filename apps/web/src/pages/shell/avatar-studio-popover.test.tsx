@@ -14,6 +14,12 @@ vi.mock("@lingui/react/macro", () => ({
 
 import { AvatarStudioPopover } from "./avatar-studio-popover";
 
+// A Nurlings build offers one icon set; these tests exercise the set switcher, so offer both.
+vi.mock("@rakazo/contracts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@rakazo/contracts")>()),
+  SELECTABLE_BOT_AVATAR_SETS: ["organic", "rakazo"],
+}));
+
 let container: HTMLDivElement;
 let root: Root;
 const changed = vi.fn<(value: string, avatarSet?: BotAvatarSet) => void>();

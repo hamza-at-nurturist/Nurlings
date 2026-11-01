@@ -145,7 +145,6 @@ const SERVER_TEXT_FILES = [
   "packages/adapters/src/compacted-summary.ts",
   "packages/adapters/src/automated-messages.ts",
   "packages/adapters/src/auto-review.ts",
-  "packages/adapters/src/builtin-skills.ts",
   "apps/api/src/team-chat-judge.ts",
 ];
 /**

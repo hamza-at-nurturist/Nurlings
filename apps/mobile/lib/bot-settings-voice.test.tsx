@@ -9,6 +9,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import BotSettingsScreen from "../app/bot-settings";
 import { MenuPicker } from "../components/menu-picker";
 
+// A Nurlings build offers one icon set; these tests exercise the set switcher, so offer both.
+vi.mock("@rakazo/contracts", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@rakazo/contracts")>()),
+  SELECTABLE_BOT_AVATAR_SETS: ["organic", "rakazo"],
+}));
+
 const mocks = vi.hoisted(() => ({
   instructions: "",
   description: "",
