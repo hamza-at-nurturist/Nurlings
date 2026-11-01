@@ -1,7 +1,10 @@
 import {
   ACTIVE_RUN_STATUSES,
+  avatarIdentitySeed,
+  BRAND_BLOB_SHAPE_INDEX,
+  organicAvatarPath,
   organicBotAvatarFrame,
-  SHIPPED_BOT_AVATAR_SHAPE_KEYS,
+  PICKABLE_ORGANIC_SHAPE_INDEXES,
 } from "@rakazo/core";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -16,27 +19,10 @@ import {
 } from "./bot-avatar.js";
 
 describe("BotAvatar", () => {
-  it("renders distinct SVG gradient IDs for concurrent working avatars", () => {
-    const html = renderToString(
-      <div>
-        <BotAvatar color="#8B5CF6::shape_0" status="running" />
-        <BotAvatar color="#10B981::shape_1" status="running" />
-      </div>,
-    );
-
-    const gradMatches = [...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
-    expect(gradMatches).toHaveLength(4);
-    expect(new Set(gradMatches).size).toBe(4);
-    for (const id of gradMatches) {
-      expect(id).toBeTruthy();
-      expect(html).toContain(`url(#${id})`);
-    }
-  });
-
   // Button sizes any SVG without a size class, which beats width/height attributes but not inline styles.
   it("sizes the shape with an inline style so icon sizing in a button cannot shrink it", () => {
     const html = renderToString(<BotAvatar color="#8B5CF6::shape_0" size={26} />);
-    const shape = html.match(/<svg[^>]*transition-transform[^>]*>/)?.[0];
+    const shape = html.match(/<svg[^>]*rakazo-organic-avatar[^>]*>/)?.[0];
     expect(shape).toMatch(/style="[^"]*width:26px;height:26px/);
   });
 
@@ -62,6 +48,11 @@ describe("BotAvatar", () => {
     expect(parsed.color).toBe(DEFAULT_BOT_AVATAR_COLOR);
     expect(parsed.shapeIndex).toBe(3);
     expect(parsed.isImage).toBe(false);
+  });
+
+  it("keeps shape indexes up to 11 and wraps after that", () => {
+    expect(parseBotAvatar(`${DEFAULT_BOT_AVATAR_COLOR}::shape_11`).shapeIndex).toBe(11);
+    expect(parseBotAvatar(`${DEFAULT_BOT_AVATAR_COLOR}::shape_12`).shapeIndex).toBe(0);
   });
 
   it("normalizes malformed shape suffixes to shape 0", () => {
@@ -124,14 +115,6 @@ describe("BotAvatar", () => {
     expect(html).not.toContain("evil.example");
   });
 
-  it("honors reduced-motion for the working mascot pulse class", () => {
-    const html = renderToString(
-      <BotAvatar color="#8B5CF6::shape_0" identity="maya" size={32} status="running" />,
-    );
-    expect(html).toContain("animate-pulse");
-    expect(html).toContain("motion-reduce:animate-none");
-  });
-
   it("restores a plain color that renders the organic body instead of a pinned shape", () => {
     expect(defaultBotAvatarValue(`${DEFAULT_BOT_AVATAR_COLOR}::shape_3`)).toBe(
       DEFAULT_BOT_AVATAR_COLOR,
@@ -153,16 +136,21 @@ describe("BotAvatar", () => {
       <BotAvatar color={`${DEFAULT_BOT_AVATAR_COLOR}::shape_4`} identity="maya" />,
     );
     expect(restored).toContain("rakazo-organic-avatar");
-    expect(restored).not.toContain("bot-character-eyes");
-    expect(shaped).toContain("bot-character-eyes");
-    expect(shaped).not.toContain("rakazo-organic-avatar");
+    expect(shaped).toBe(
+      renderToString(<BotAvatar color={DEFAULT_BOT_AVATAR_COLOR} identity="maya" />),
+    );
   });
 
   it("exposes shape picker name and pressed state", () => {
     const html = renderToString(
-      <BotShapePreview shapeIndex={0} color="#8B5CF6" selected onClick={() => undefined} />,
+      <BotShapePreview
+        label="Shape 1"
+        color="#8B5CF6::shape_9"
+        selected
+        onClick={() => undefined}
+      />,
     );
-    expect(html).toContain('aria-label="hex"');
+    expect(html).toContain('aria-label="Shape 1"');
     expect(html).toContain('aria-pressed="true"');
     expect(html).toContain("focus-visible:ring-2");
   });
@@ -200,12 +188,26 @@ describe("BotAvatar", () => {
     expect(html).not.toContain("rakazo-organic-avatar");
   });
 
-  it("keeps an encoded studio shape", () => {
-    const html = renderToString(
+  it("draws a retired static shape as the organic body its bot id picks", () => {
+    const retired = renderToString(
       <BotAvatar color={`${DEFAULT_BOT_AVATAR_COLOR}::shape_3`} identity="maya" />,
     );
-    expect(html).toContain("bot-character-eyes");
-    expect(html).not.toContain("rakazo-organic-avatar");
+    expect(retired).toBe(
+      renderToString(<BotAvatar color={DEFAULT_BOT_AVATAR_COLOR} identity="maya" />),
+    );
+    expect(retired).not.toContain("bot-character-eyes");
+  });
+
+  it.each([9, 10, 11])("draws shape_%i with its own body and pill eyes", (index) => {
+    const frame = organicBotAvatarFrame(index);
+    const html = renderToString(<BotAvatar color={`#8B5CF6::shape_${index}`} identity="maya" />);
+    expect(html).toContain(frame?.path);
+    expect(html).not.toContain(organicAvatarPath(avatarIdentitySeed("maya")));
+    // The gloss arc is stored with the body but not drawn yet.
+    expect(frame?.gloss).toMatch(/^M/);
+    expect(html).not.toContain(frame?.gloss);
+    expect(html.match(/<rect/g)).toHaveLength(4);
+    expect(html).not.toContain("<animate");
   });
 
   it("fills the organic body with the resolved palette hex when the custom color is invalid", () => {
@@ -217,7 +219,7 @@ describe("BotAvatar", () => {
   });
 
   it("draws the brand blob as an organic avatar with its own body and pill eyes", () => {
-    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const index = BRAND_BLOB_SHAPE_INDEX;
     const colorDef = resolvePersonaColorDef("chief", DEFAULT_BOT_AVATAR_COLOR);
     const html = renderToString(
       <BotAvatar color={`${DEFAULT_BOT_AVATAR_COLOR}::shape_${index}`} identity="chief" />,
@@ -235,17 +237,21 @@ describe("BotAvatar", () => {
     expect(html).not.toContain("<animate");
   });
 
-  it("lists the brand blob in the shape picker like any other shape", () => {
-    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
-    const html = renderToString(
-      <BotShapePreview shapeIndex={index} color="#8B5CF6" selected onClick={() => undefined} />,
-    );
-    expect(html).toContain('aria-label="nurling"');
-    expect(html.match(/<rect/g)).toHaveLength(2);
+  it("previews every pickable body in the shape picker", () => {
+    for (const index of PICKABLE_ORGANIC_SHAPE_INDEXES) {
+      const html = renderToString(
+        <BotShapePreview
+          label="Shape"
+          color={`#8B5CF6::shape_${index}`}
+          onClick={() => undefined}
+        />,
+      );
+      expect(html).toContain(organicBotAvatarFrame(index)?.path);
+    }
   });
 
-  it("gives the brand blob the organic working state and eye patterns, and leaves the classic shapes alone", () => {
-    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+  it("gives the brand blob the organic working state and eye patterns, like every retired shape", () => {
+    const index = BRAND_BLOB_SHAPE_INDEX;
     const render = (color: string, identity: string, status?: string) =>
       renderToString(<BotAvatar color={color} identity={identity} status={status} />);
     const blob = render(`#8B5CF6::shape_${index}`, "chief", "running");
@@ -266,16 +272,8 @@ describe("BotAvatar", () => {
       render(`#8B5CF6::shape_${index}`, "chief"),
     );
 
-    const classic = render("#8B5CF6::shape_3", "chief", "running");
-    expect(classic).not.toContain("rakazo-organic-avatar");
-    expect(classic).not.toContain("data-eye-pattern");
-    expect(classic).toContain("rakazo-bot-avatar-ring");
-    expect(classic).toContain("<ellipse");
-  });
-
-  it("keeps the shape picker preview still", () => {
-    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
-    const html = renderToString(<BotShapePreview shapeIndex={index} color="#8B5CF6" />);
-    expect(html).not.toContain("rakazo-organic-avatar-eyes");
+    const retired = render("#8B5CF6::shape_3", "chief", "running");
+    expect(retired).toContain("rakazo-organic-avatar");
+    expect(retired).not.toContain("rakazo-bot-avatar-ring");
   });
 });

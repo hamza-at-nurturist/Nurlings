@@ -5480,6 +5480,7 @@ msgstr "設定ヘルプ"
 msgid "Shape"
 msgstr "形"
 
+#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
 #. placeholder {0}: index + 1
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"

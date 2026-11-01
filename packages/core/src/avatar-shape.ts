@@ -191,12 +191,26 @@ export function organicAvatarPath(seed: number, phaseOffset = 0): string {
   const xScale = 1 + Math.sin(phase) * 0.035;
   const yScale = 1 + Math.cos(phase) * 0.025;
   const shear = Math.sin(phase * 1.7) * 0.025;
-  let points = (templates[family] ?? templates[5]!).map(([x, y]) => ({
+  const points = (templates[family] ?? templates[5]!).map(([x, y]) => ({
     x: x * xScale + y * shear,
     y: y * yScale,
   }));
   const smoothingPasses = family >= 3 && family <= 5 ? 1 : 2;
-  for (let pass = 0; pass < smoothingPasses; pass++) {
+  return organicOutlinePath(smoothOrganicOutline(points, smoothingPasses));
+}
+
+export interface OrganicOutlinePoint {
+  x: number;
+  y: number;
+}
+
+/** Each pass cuts every corner of a closed outline at a quarter of the way along each edge. */
+export function smoothOrganicOutline(
+  outline: readonly OrganicOutlinePoint[],
+  passes: number,
+): OrganicOutlinePoint[] {
+  let points = [...outline];
+  for (let pass = 0; pass < passes; pass++) {
     points = points.flatMap((point, index) => {
       const next = points[(index + 1) % points.length]!;
       return [
@@ -205,6 +219,11 @@ export function organicAvatarPath(seed: number, phaseOffset = 0): string {
       ];
     });
   }
+  return points;
+}
+
+/** A closed Catmull-Rom style cubic path through the outline. */
+export function organicOutlinePath(points: readonly OrganicOutlinePoint[]): string {
   const pointCount = points.length;
   const round = (value: number) => Math.round(value * 100) / 100;
   const first = points[0]!;

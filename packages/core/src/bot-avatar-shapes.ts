@@ -1,4 +1,5 @@
 import { brand } from "@nurlings/brand";
+import { organicOutlinePath, smoothOrganicOutline } from "./avatar-shape.js";
 
 export const SHIPPED_BOT_AVATAR_VIEWBOX = "-15 -15 259 259";
 export const SHIPPED_BOT_AVATAR_CENTER = 114.2705;
@@ -117,14 +118,143 @@ export interface OrganicBotAvatarFrame {
   /** The body outline in the organic avatar box. */
   path: string;
   eyes: BotAvatarEyes;
+  /**
+   * A short arc along the body's upper-left edge, clear of the eyes, for a gloss stroke. Stored with
+   * the body for the working-state glint; nothing draws it yet.
+   */
+  gloss?: string;
 }
 
+/** The brand blob is `shape_8`; the original organic bodies that follow it are `shape_9` to `shape_11`. */
+export const BRAND_BLOB_SHAPE_INDEX = 8;
+
+/** The shapes the avatar pickers offer besides the bot's own default body. */
+export const PICKABLE_ORGANIC_SHAPE_INDEXES: readonly number[] = [8, 9, 10, 11];
+
+interface OrganicBodyDesign {
+  /** Corner points in the organic box, smoothed like the hashed organic families. */
+  outline: readonly (readonly [number, number])[];
+  /** Where the pill eyes' midpoint sits. */
+  eyeCenter: readonly [number, number];
+  /** The angle window, in degrees from the body's centre, the gloss arc covers. */
+  glossDegrees: readonly [number, number];
+}
+
+// Original soft, asymmetric bodies. Each leaves a clear spot for the two upright pill eyes and a
+// gloss arc that stays well away from them.
+const ORGANIC_BODY_DESIGNS: readonly OrganicBodyDesign[] = [
+  {
+    outline: [
+      [-46, -6],
+      [-38, -26],
+      [-18, -36],
+      [2, -30],
+      [14, -38],
+      [34, -38],
+      [48, -22],
+      [50, 0],
+      [44, 22],
+      [26, 36],
+      [0, 40],
+      [-26, 38],
+      [-42, 24],
+    ],
+    eyeCenter: [0, -2],
+    glossDegrees: [-165, -120],
+  },
+  {
+    outline: [
+      [-48, 12],
+      [-46, -6],
+      [-32, -18],
+      [-14, -18],
+      [-4, -34],
+      [14, -46],
+      [34, -40],
+      [46, -22],
+      [48, 2],
+      [40, 26],
+      [22, 40],
+      [-4, 42],
+      [-30, 38],
+    ],
+    eyeCenter: [10, 0],
+    glossDegrees: [-80, -40],
+  },
+  {
+    outline: [
+      [-40, -30],
+      [-34, -44],
+      [-22, -46],
+      [-14, -34],
+      [4, -38],
+      [28, -30],
+      [42, -10],
+      [44, 14],
+      [32, 34],
+      [10, 44],
+      [-16, 44],
+      [-38, 32],
+      [-46, 8],
+      [-46, -14],
+    ],
+    eyeCenter: [-2, -2],
+    glossDegrees: [-95, -55],
+  },
+];
+
+const round2 = (value: number) => Math.round(value * 100) / 100;
+
+function organicBodyFrame(design: OrganicBodyDesign): OrganicBotAvatarFrame {
+  const outline = smoothOrganicOutline(
+    design.outline.map(([x, y]) => ({ x, y })),
+    2,
+  );
+  const centre = {
+    x: outline.reduce((sum, point) => sum + point.x, 0) / outline.length,
+    y: outline.reduce((sum, point) => sum + point.y, 0) / outline.length,
+  };
+  const [from, to] = design.glossDegrees;
+  const gloss = outline
+    .map((point) => ({
+      x: centre.x + (point.x - centre.x) * 0.84,
+      y: centre.y + (point.y - centre.y) * 0.84,
+    }))
+    .filter((point) => {
+      const angle = (Math.atan2(point.y - centre.y, point.x - centre.x) * 180) / Math.PI;
+      return angle > from && angle < to;
+    })
+    .map((point, index) => `${index === 0 ? "M" : "L"}${round2(point.x)} ${round2(point.y)}`)
+    .join("");
+  const [eyeX, eyeY] = design.eyeCenter;
+  return {
+    path: organicOutlinePath(outline),
+    gloss,
+    eyes: {
+      kind: "pill",
+      left: { cx: eyeX - 10.5, cy: eyeY },
+      right: { cx: eyeX + 10.5, cy: eyeY },
+      rx: 3.5,
+      ry: 12,
+      tiltDeg: 0,
+    },
+  };
+}
+
+let originalBodyFrames: readonly OrganicBotAvatarFrame[] | undefined;
+
 /**
- * The body and eyes an organic avatar draws for a shape that is rendered as one, in the organic
- * avatar's box; undefined for the shapes that keep the classic renderer.
+ * The body and eyes an organic avatar draws for a shape that has its own: the brand blob and the
+ * original bodies. Every other index draws the organic body its bot's id picks, so this is
+ * undefined for it.
  */
 export function organicBotAvatarFrame(shapeIndex: number): OrganicBotAvatarFrame | undefined {
-  if (shippedShapeKey(shapeIndex) !== "nurling") return undefined;
+  if (shapeIndex === BRAND_BLOB_SHAPE_INDEX) return brandBlobFrame();
+  originalBodyFrames ??= ORGANIC_BODY_DESIGNS.map(organicBodyFrame);
+  return originalBodyFrames[shapeIndex - BRAND_BLOB_SHAPE_INDEX - 1];
+}
+
+function brandBlobFrame(): OrganicBotAvatarFrame {
   return {
     path: markShapePath(brand.mark.blobBody, organicX, organicY),
     eyes: {

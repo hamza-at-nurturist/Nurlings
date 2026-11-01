@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   avatarColor,
   avatarShape,
+  hasOwnBody,
   isAvatarPhoto,
   withAvatarColor,
   withAvatarShape,
@@ -18,6 +19,13 @@ describe("bot avatar editing", () => {
     expect(withAvatarShape("#F5A03C", 5)).toBe("#F5A03C::shape_5");
     expect(avatarShape("#F5A03C::shape_5")).toBe(5);
     expect(avatarColor("#F5A03C::shape_5")).toBe("#F5A03C");
+  });
+
+  it("counts only the organic bodies with their own shape as picked", () => {
+    for (const shape of [8, 9, 10, 11]) expect(hasOwnBody(`#F5A03C::shape_${shape}`)).toBe(true);
+    for (const value of ["#F5A03C", "#F5A03C::shape_3", "data:image/webp;base64,AAAA"]) {
+      expect(hasOwnBody(value)).toBe(false);
+    }
   });
 
   it("replaces a photo with a plain color", () => {

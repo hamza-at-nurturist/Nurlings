@@ -145,16 +145,17 @@ describe("CreateBotDialog", () => {
     expect(family).toBe(ORGANIC_AVATAR_LOOKS[1]);
   });
 
-  it("sends a studio shape without an organic family", async () => {
+  it("sends an original body without an organic family", async () => {
     const onCreate = vi.fn(async (_input: CreateBotDialogInput) => undefined);
     await render(onCreate);
     await click(button("Color #F97316"));
-    await click(button("wedge"));
+    // The brand blob follows the organic looks in the grid.
+    await click(button(`Shape ${ORGANIC_AVATAR_LOOKS.length + 1}`));
     await typeName("Scout");
     await click(button("Create"));
     expect(onCreate).toHaveBeenCalledWith({
       name: "Scout",
-      color: "#F97316::shape_1",
+      color: "#F97316::shape_8",
       avatarSet: "organic",
     });
   });

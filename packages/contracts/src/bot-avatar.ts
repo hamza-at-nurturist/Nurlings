@@ -15,8 +15,11 @@ export function resolveBotAvatarSet(value?: string | null): BotAvatarSet {
   return value === "rakazo" ? "rakazo" : "organic";
 }
 
-/** Matches the shipped mascot shapes in `@rakazo/core`, including the brand blob. */
-export const BOT_AVATAR_SHAPE_COUNT = 9;
+/**
+ * `#hex::shape_N` indexes: 0 to 7 are retired static shapes that now draw the bot's own organic
+ * body, 8 is the brand blob and 9 to 11 are the original organic bodies in `@rakazo/core`.
+ */
+export const BOT_AVATAR_SHAPE_COUNT = 12;
 
 /**
  * 256x256 webp data URLs from Avatar Studio stay well under this. Cap writes so

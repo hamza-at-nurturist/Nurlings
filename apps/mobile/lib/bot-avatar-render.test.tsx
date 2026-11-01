@@ -2,14 +2,13 @@
 
 import {
   avatarIdentitySeed,
+  BRAND_BLOB_SHAPE_INDEX,
   LOGO_BODY_PATH,
   logoAvatarFrame,
   logoAvatarTraits,
   organicAvatarPath,
   organicBotAvatarFrame,
-  SHIPPED_BOT_AVATAR_SHAPE_KEYS,
   seededLogoAvatarColor,
-  shippedBotAvatarShapePath,
 } from "@rakazo/core";
 import type { ColorTokens } from "@rakazo/ui-tokens";
 import { botEyeColor, tokensForAppearance } from "@rakazo/ui-tokens";
@@ -308,14 +307,21 @@ describe("BotAvatar", () => {
     expect(bodies(view)).toEqual([]);
   });
 
-  it("keeps a shape picked in Avatar Studio", () => {
+  it("draws a retired static shape as the organic body its bot id picks", () => {
     const view = render("#8B5CF6::shape_3");
-    expect(bodies(view)).toEqual([shippedBotAvatarShapePath(3)]);
-    expect(view.querySelectorAll("ellipse")).toHaveLength(2);
+    expect(bodies(view)).toEqual([organicAvatarPath(avatarIdentitySeed("bot-1"))]);
+    expect(view.querySelectorAll("ellipse")).toHaveLength(0);
+    expect(view.querySelectorAll("rect")).toHaveLength(2);
+  });
+
+  it.each([9, 10, 11])("draws shape_%i with its own body", (index) => {
+    const view = render(`#8B5CF6::shape_${index}`);
+    expect(bodies(view)).toEqual([organicBotAvatarFrame(index)?.path]);
+    expect(view.querySelectorAll("rect")).toHaveLength(2);
   });
 
   it("draws the brand blob as an organic avatar, with slanted pill eyes", () => {
-    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const index = BRAND_BLOB_SHAPE_INDEX;
     const view = render(`#8B5CF6::shape_${index}`);
     expect(bodies(view)).toEqual([organicBotAvatarFrame(index)?.path]);
     expect(view.querySelectorAll("ellipse")).toHaveLength(0);
@@ -338,8 +344,8 @@ describe("BotAvatar", () => {
   });
 
   it("keeps an explicitly selected original shape when the stored set is Rakazo", () => {
-    const view = render("#8B5CF6::shape_3", "rakazo");
-    expect(bodies(view)).toEqual([shippedBotAvatarShapePath(3)]);
+    const view = render("#8B5CF6::shape_9", "rakazo");
+    expect(bodies(view)).toEqual([organicBotAvatarFrame(9)?.path]);
   });
   it("updates native SVG hosts with finite six-value matrices and numeric eye props", () => {
     render("#3EC5A8", "rakazo");

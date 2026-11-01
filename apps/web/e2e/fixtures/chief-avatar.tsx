@@ -1,16 +1,16 @@
 import "../../src/styles.css";
 import { I18nProvider } from "@lingui/react";
-import { DEFAULT_BOT_AVATAR_COLOR, SHIPPED_BOT_AVATAR_SHAPE_KEYS } from "@rakazo/core";
+import { BRAND_BLOB_SHAPE_INDEX, DEFAULT_BOT_AVATAR_COLOR } from "@rakazo/core";
 import { BotAvatar } from "@rakazo/ui-web";
 import { createRoot } from "react-dom/client";
 import { bootstrapI18n, i18n } from "../../src/lib/i18n";
 import { BotLookPicker } from "../../src/pages/shell/avatar-studio-popover";
 
-const chief = `${DEFAULT_BOT_AVATAR_COLOR}::shape_${SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling")}`;
+const chief = `${DEFAULT_BOT_AVATAR_COLOR}::shape_${BRAND_BLOB_SHAPE_INDEX}`;
 const sizes = [36, 42, 54, 200];
 const regulars = [
-  { value: "#F97316::shape_3", identity: "regular-shape-a" },
-  { value: "#0EA5E9::shape_7", identity: "regular-shape-b" },
+  { value: "#F97316::shape_3", identity: "regular-retired-shape" },
+  { value: "#0EA5E9::shape_10", identity: "regular-original-body" },
   { value: "#22C55E", identity: "regular-hex" },
 ];
 
