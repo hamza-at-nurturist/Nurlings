@@ -62,6 +62,8 @@ jobs:
 
       # Without Firebase config the APK never registers for push, and a new APK is the only way to add it.
       - name: Require Firebase config
+        # A preview is another package with no Firebase file (see app.config.ts), so it has no push to set up.
+        if: env.PREVIEW != 'true'
         working-directory: apps/mobile
         run: |
           set -euo pipefail
