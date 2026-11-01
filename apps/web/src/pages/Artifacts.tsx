@@ -41,6 +41,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { IconTooltip } from "../components/IconTooltip";
 import { PdfViewer } from "../components/PdfViewer";
 import { SandboxedHtmlViewer } from "../components/SandboxedHtmlViewer";
+import { artifactDataLoader } from "../lib/artifact-data-fork";
 import { decodeArtifactBase64, downloadArtifactBytes } from "../lib/artifact-open";
 import { takeInitialBootstrap } from "../lib/bootstrap";
 import { desktopBridge } from "../lib/desktop";
@@ -98,6 +99,7 @@ export function ArtifactsPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [showUploads, setShowUploads] = useState(false);
   const [maximized, setMaximized] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<ArtifactSummary | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
@@ -152,6 +154,8 @@ export function ArtifactsPage() {
     const now = new Date();
     const query = searchQuery.trim().toLowerCase();
     return items.filter((item) => {
+      // Files people uploaded have no run; bot output does.
+      if (!showUploads && item.runId === null) return false;
       if (!matchesCalendarDateFilter(item.createdAt, dateFilter, now)) return false;
       if (!query) return true;
       return (
@@ -159,14 +163,14 @@ export function ArtifactsPage() {
         (item.description?.toLowerCase().includes(query) ?? false)
       );
     });
-  }, [items, searchQuery, dateFilter]);
+  }, [items, searchQuery, dateFilter, showUploads]);
 
-  const clientFilterActive = searchQuery.trim().length > 0 || dateFilter !== "all";
+  const clientFilterActive = searchQuery.trim().length > 0 || dateFilter !== "all" || !showUploads;
   const autoFetchedCursorRef = useRef<string | null>(null);
 
   useEffect(() => {
     autoFetchedCursorRef.current = null;
-  }, [searchQuery, dateFilter, activeBotId]);
+  }, [searchQuery, dateFilter, activeBotId, showUploads]);
 
   // Search and date filters only see loaded pages, so keep paging until something matches.
   useEffect(() => {
@@ -298,6 +302,9 @@ export function ArtifactsPage() {
               <NativeSelectOption value="week">{t`This week`}</NativeSelectOption>
               <NativeSelectOption value="month">{t`This month`}</NativeSelectOption>
             </NativeSelect>
+            <FilterChip active={showUploads} onClick={() => setShowUploads((on) => !on)}>
+              <Trans>Uploads</Trans>
+            </FilterChip>
             <FilterChip active={activeBotId === null} onClick={() => setActiveBotId(null)}>
               <Trans>All bots</Trans>
             </FilterChip>
@@ -935,9 +942,10 @@ function PreviewPane({
 }
 
 function ArtifactPreview({ artifact, bytes }: { artifact: Artifact; bytes: Uint8Array }) {
+  const loadData = useMemo(() => artifactDataLoader(artifact.botId), [artifact.botId]);
   if (artifact.mimeType === "text/html") {
     const html = new TextDecoder("utf-8").decode(bytes);
-    return <SandboxedHtmlViewer html={html} title={artifact.name} />;
+    return <SandboxedHtmlViewer html={html} title={artifact.name} loadData={loadData} />;
   }
   if (artifact.mimeType === "text/markdown") {
     const text = new TextDecoder("utf-8").decode(bytes);

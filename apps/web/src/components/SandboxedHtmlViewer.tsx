@@ -1,5 +1,6 @@
 import { HTML_VIEWER_PATH } from "@rakazo/contracts/content-security-policy";
 import { useEffect, useRef, useState } from "react";
+import { type ArtifactDataLoader, useArtifactDataRelay } from "../lib/artifact-data-fork";
 
 export const PREVIEW_CSP =
   "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; form-action 'none'; base-uri 'none'";
@@ -27,10 +28,19 @@ function previewDocument(html: string): string {
  * way a srcdoc frame would (which would block the preview's inline scripts). It renders the posted
  * document in a nested sandboxed srcdoc frame under the shell's own CSP.
  */
-export function SandboxedHtmlViewer({ html, title }: { html: string; title: string }) {
+export function SandboxedHtmlViewer({
+  html,
+  title,
+  loadData,
+}: {
+  html: string;
+  title: string;
+  loadData?: ArtifactDataLoader;
+}) {
   const frame = useRef<HTMLIFrameElement>(null);
   // Every shell load starts empty, so each one gets the document again.
   const [loads, setLoads] = useState(0);
+  useArtifactDataRelay(frame, loadData);
   useEffect(() => {
     // The sandboxed shell has an opaque origin, so there is no narrower target origin to name.
     if (loads > 0) frame.current?.contentWindow?.postMessage(previewDocument(html), "*");

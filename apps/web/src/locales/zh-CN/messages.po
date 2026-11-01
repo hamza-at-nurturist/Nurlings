@@ -6409,6 +6409,10 @@ msgstr "立即升级"
 msgid "Upload"
 msgstr "上传"
 
+#: src/pages/Artifacts.tsx
+msgid "Uploads"
+msgstr ""
+
 #: src/lib/ticket-priority.ts
 msgid "Urgent"
 msgstr "紧急"

@@ -6410,6 +6410,10 @@ msgstr "立即升級"
 msgid "Upload"
 msgstr "上傳"
 
+#: src/pages/Artifacts.tsx
+msgid "Uploads"
+msgstr ""
+
 #: src/lib/ticket-priority.ts
 msgid "Urgent"
 msgstr "緊急"

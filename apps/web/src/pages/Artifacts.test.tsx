@@ -58,12 +58,17 @@ vi.mock("@rakazo/ui-web", () => {
 
 import { ArtifactsPage } from "./Artifacts";
 
-function artifact(name: string, id: string, createdAt = new Date().toISOString()) {
+function artifact(
+  name: string,
+  id: string,
+  createdAt = new Date().toISOString(),
+  runId: string | null = "run-1",
+) {
   return {
     id,
     botId: null,
     groupId: null,
-    runId: null,
+    runId,
     name,
     description: null,
     mimeType: "text/markdown",
@@ -239,6 +244,35 @@ it("reopens with cached artifacts and refreshes them in the background", async (
     await act(async () => {
       await vi.waitFor(() => expect(page.container.textContent).toContain("Fresh report"));
     });
+  } finally {
+    await page.cleanup();
+    vi.unstubAllGlobals();
+  }
+});
+
+it("hides uploaded files until Uploads is turned on", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  const now = new Date().toISOString();
+  api.listSpace.mockResolvedValue({
+    items: [
+      artifact("Bot report", "artifact-1", now, "run-1"),
+      artifact("Uploaded notes", "artifact-2", now, null),
+    ],
+    nextCursor: null,
+  });
+  const page = await renderArtifacts();
+  const press = async (label: string) => {
+    const button = [...page.container.querySelectorAll("button")].find(
+      (candidate) => candidate.textContent === label,
+    );
+    await act(async () => button?.click());
+  };
+  try {
+    expect(page.container.textContent).toContain("Bot report");
+    expect(page.container.textContent).not.toContain("Uploaded notes");
+    await press("Filters");
+    await press("Uploads");
+    expect(page.container.textContent).toContain("Uploaded notes");
   } finally {
     await page.cleanup();
     vi.unstubAllGlobals();
