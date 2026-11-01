@@ -16,7 +16,7 @@ import type {
   AiRecipient,
   SettingsScope,
 } from "@rakazo/contracts";
-import { AI_DISCLOSURE_VERSION, AI_PRIVACY_URL } from "@rakazo/contracts";
+import { AI_DISCLOSURE_VERSION } from "@rakazo/contracts";
 import {
   findDefaultVoiceCredential,
   findModelCredential,

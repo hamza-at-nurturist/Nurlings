@@ -9018,7 +9018,9 @@ describe("boards.tickets.list", () => {
   } satisfies Actor;
 
   function listDeps() {
-    const findMany = vi.fn(async (_args: unknown) => [] as unknown[]);
+    type TextMatch = { contains: string };
+    type Where = { OR?: Array<{ title?: TextMatch; description?: TextMatch }> };
+    const findMany = vi.fn(async (_args: { where: Where }) => [] as unknown[]);
     const queryRaw = vi.fn(async (..._args: unknown[]) => [] as unknown[]);
     const runFindMany = vi.fn(async (_args: unknown) => [] as unknown[]);
     const prisma = {

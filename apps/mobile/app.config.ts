@@ -4,7 +4,12 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 // @ts-expect-error TS5097
 import { brandExpoConfig, placeholderProblems, previewIdentity } from "./lib/brand-expo-config.ts";
 
-const RELEASE_PROFILES = new Set(["production", "android-apk", "android-preview-apk", "diagnostic"]);
+const RELEASE_PROFILES = new Set([
+  "production",
+  "android-apk",
+  "android-preview-apk",
+  "diagnostic",
+]);
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   if (RELEASE_PROFILES.has(process.env.EAS_BUILD_PROFILE ?? "")) {

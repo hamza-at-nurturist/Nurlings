@@ -320,6 +320,8 @@ describe("BotAvatar", () => {
     expect(bodies(view)).toEqual([organicBotAvatarFrame(index)?.path]);
     expect(view.querySelectorAll("ellipse")).toHaveLength(0);
     expect(view.querySelectorAll("rect")).toHaveLength(2);
+  });
+
   it("draws the explicitly selected Rakazo set as paths and gradients without a raster image", () => {
     const view = render("#3EC5A8", "rakazo");
     expect(bodies(view)).toContain(LOGO_BODY_PATH);

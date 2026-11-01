@@ -54,7 +54,7 @@ export default function BoardScreen() {
   }, [enabled, router]);
 
   const reload = useCallback(async () => {
-    const result = await rpc<{ tickets: TicketListItem[] }>("tickets/list", {});
+    const result = await rpc("tickets/list", {});
     setTickets(result.tickets);
   }, []);
 

@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 import type { McpServer } from "@rakazo/contracts";
-import { captureScreenshot, completeOnboarding, openIntegrationsAdd, rpc, signup, ui } from "./helpers";
+import {
+  captureScreenshot,
+  completeOnboarding,
+  openIntegrationsAdd,
+  rpc,
+  signup,
+  ui,
+} from "./helpers";
 
 const server: McpServer = {
   id: "mcp-agents-server",

@@ -20,8 +20,8 @@ import {
 import { tokens } from "@rakazo/ui-tokens";
 import type { ComponentProps, CSSProperties } from "react";
 import { memo, useEffect, useId, useMemo, useSyncExternalStore } from "react";
-import { BrandMark } from "./brand-mark.js";
 import { useBotAvatarActivity } from "./bot-avatar-activity.js";
+import { BrandMark } from "./brand-mark.js";
 import { useAvatarMotionVisibility } from "./hooks/use-avatar-motion-visibility.js";
 import { cn } from "./lib/utils.js";
 import { LogoAvatar } from "./logo-avatar.js";

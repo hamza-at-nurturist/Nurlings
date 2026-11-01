@@ -2,8 +2,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
-import { DesktopUpdateController } from "./auto-update";
-import { aboutPanelOptions, isUpstreamCloudSetup } from "./brand-desktop";
+import { DesktopUpdateController } from "./auto-update.js";
+import { aboutPanelOptions, isUpstreamCloudSetup } from "./brand-desktop.js";
 
 const UPSTREAM_NAME = /(?<![\w{])Rakazo(?!\w)/;
 /**

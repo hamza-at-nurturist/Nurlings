@@ -95,7 +95,7 @@ function TicketView({ ticketId }: { ticketId: string }) {
   const activity = useTicketActivity(ticketId, revision);
 
   const load = useCallback(async () => {
-    setTicket(await rpc<Ticket>("tickets/get", { id: ticketId }));
+    setTicket(await rpc("tickets/get", { id: ticketId }));
   }, [ticketId]);
   useEffect(() => {
     void load().then(
@@ -130,7 +130,7 @@ function TicketView({ ticketId }: { ticketId: string }) {
     setBusy(true);
     setError("");
     try {
-      setTicket(await rpc<Ticket>("tickets/update", { id: ticket.id, ...patch }));
+      setTicket(await rpc("tickets/update", { id: ticket.id, ...patch }));
       activity.refresh();
     } catch (cause) {
       setError(errorText(cause));
@@ -145,7 +145,7 @@ function TicketView({ ticketId }: { ticketId: string }) {
     setBusy(true);
     setError("");
     try {
-      setTicket(await rpc<Ticket>("tickets/approve", { id: ticket.id }));
+      setTicket(await rpc("tickets/approve", { id: ticket.id }));
       activity.refresh();
     } catch (cause) {
       setError(errorText(cause));

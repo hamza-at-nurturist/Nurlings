@@ -3,9 +3,7 @@ import { rpc, subscribeApiBase } from "../api";
 
 import { createBoardEnabledStore } from "./enabled-store";
 
-export const boardEnabledStore = createBoardEnabledStore(() =>
-  rpc<{ ticketBoardEnabled?: boolean }>("me"),
-);
+export const boardEnabledStore = createBoardEnabledStore(() => rpc("me"));
 
 // A different server may have a different setting.
 subscribeApiBase(() => {

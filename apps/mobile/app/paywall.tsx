@@ -1,7 +1,7 @@
 import { MenuView } from "@expo/ui/community/menu";
+import { brand } from "@nurlings/brand";
 import type { BillingStatus } from "@rakazo/contracts";
 import {
-  AI_PRIVACY_URL,
   DEFAULT_MONTHLY_CREDIT_AMOUNT,
   MODEL_CREDIT_AMOUNTS,
   ModelCreditAmountSchema,
@@ -424,7 +424,7 @@ export default function Paywall() {
           )}
           <View style={styles.legal}>
             <LegalLink label={t("Terms")} url={TERMS_URL} />
-            <LegalLink label={t("Privacy")} url={AI_PRIVACY_URL} />
+            <LegalLink label={t("Privacy")} url={brand.urls.site} />
           </View>
         </View>
       </View>

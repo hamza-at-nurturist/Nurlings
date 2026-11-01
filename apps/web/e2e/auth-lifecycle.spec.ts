@@ -1,6 +1,6 @@
+import { brand } from "@nurlings/brand";
 import type { Request } from "@playwright/test";
 import { expect, test } from "@playwright/test";
-import { brand } from "@nurlings/brand";
 import { captureScreenshot, completeOnboarding, signup, signupThroughForm, ui } from "./helpers";
 
 test(

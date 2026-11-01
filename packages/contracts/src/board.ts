@@ -159,7 +159,11 @@ export const TicketSchema = z.object({
   dueAt: z.string().nullable().default(null),
   dueHasTime: z.boolean().default(false),
 });
-export type Ticket = z.infer<typeof TicketSchema>;
+/**
+ * The fields the fork added default when a server omits them, so a ticket without them is still a
+ * ticket (upstream's mobile board builds its tickets that way).
+ */
+export type Ticket = z.input<typeof TicketSchema>;
 
 export const ListTicketsInput = z.object({
   boardId: Id.optional(),

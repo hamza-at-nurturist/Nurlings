@@ -112,8 +112,8 @@ export function cardDates(
   const show = (at: string, hasTime: boolean) =>
     formatTicketDate({ at, hasTime }, now, timeZone, labels, locale);
   return {
-    start: ticket.startAt ? show(ticket.startAt, ticket.startHasTime) : null,
-    due: ticket.dueAt ? show(ticket.dueAt, ticket.dueHasTime) : null,
+    start: ticket.startAt ? show(ticket.startAt, ticket.startHasTime ?? false) : null,
+    due: ticket.dueAt ? show(ticket.dueAt, ticket.dueHasTime ?? false) : null,
     overdue: isTicketOverdue(ticket, now),
   };
 }

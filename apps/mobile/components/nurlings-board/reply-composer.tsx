@@ -134,10 +134,10 @@ export function ReplyComposer({
         try {
           const artifactIds: string[] = [];
           for (const file of staged) {
-            const artifact = await rpc<{ id: string }>(
+            const artifact = await rpc(
               "artifacts/create",
               {
-                botId: ownerBotId,
+                botId: ownerBotId ?? undefined,
                 name: file.name,
                 mimeType: file.mimeType,
                 contentBase64: file.contentBase64,
@@ -146,7 +146,7 @@ export function ReplyComposer({
             );
             artifactIds.push(artifact.id);
           }
-          const comment = await rpc<TicketComment>("tickets/comment", {
+          const comment = await rpc("tickets/comment", {
             ticketId,
             body: text,
             ...(mentions.length

@@ -39,10 +39,10 @@ export function useTicketActivity(ticketId: string, revision: number) {
   useEffect(() => {
     let active = true;
     void Promise.all([
-      rpc<TicketComment[]>("tickets/comments", { ticketId }),
-      rpc<TicketEvent[]>("tickets/events", { ticketId }),
-      rpc<Artifact[]>("tickets/files", { ticketId }),
-      rpc<TicketRun[]>("tickets/runs", { ticketId }),
+      rpc("tickets/comments", { ticketId }),
+      rpc("tickets/events", { ticketId }),
+      rpc("tickets/files", { ticketId }),
+      rpc("tickets/runs", { ticketId }),
     ])
       .then(([comments, events, files, runs]) => {
         if (!active) return;
