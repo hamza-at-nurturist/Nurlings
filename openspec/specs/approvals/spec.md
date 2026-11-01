@@ -1,7 +1,7 @@
 # approvals Specification
 
 ## Purpose
-TBD - created by archiving change upstream-sync-2026-11. Update Purpose after archive.
+Defines how a Nurling's gated actions are approved: a member who never saved an Auto Review preference is asked first, and turning Auto on lets the reviewer decide.
 
 ## Requirements
 
