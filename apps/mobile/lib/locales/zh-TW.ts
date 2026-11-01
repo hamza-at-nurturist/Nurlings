@@ -1,4 +1,8 @@
+import { NURLINGS_BOARD_ZH_TW } from "./nurlings-board/zh-TW";
+
 export const ZH_TW_MESSAGES: Record<string, string> = {
+  // Ours first, so upstream's own translation wins where both exist.
+  ...NURLINGS_BOARD_ZH_TW,
   "How other bots see it": "其他機器人如何瞭解它",
   "Share to": "分享到",
   "{count} files": "{count} 個檔案",

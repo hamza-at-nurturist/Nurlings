@@ -71,6 +71,8 @@ vi.mock("./i18n", () => {
   const i18n = { t: (text: string) => text };
   return { useI18n: () => i18n };
 });
+// The Board entry is a fork addition; its flag has its own tests.
+vi.mock("./nurlings-board/enabled", () => ({ useNurlingsBoardEnabled: () => false }));
 vi.mock("./native", () => ({ native: {}, useThemedStyles: () => ({}) }));
 
 let root: Root;

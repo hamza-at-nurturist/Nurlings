@@ -9,6 +9,7 @@ import { createMenuActions, isCreateAction } from "../lib/create-chooser";
 import { useI18n } from "../lib/i18n";
 import { useThemedStyles } from "../lib/native";
 import { useNurlingsBoardEnabled } from "../lib/nurlings-board/enabled";
+import { NURLINGS_BOARD_PATH } from "../lib/nurlings-board/routes";
 import { CREATE_MENU_GAP, createHomeStyles } from "./home-styles";
 import { NativeSymbol } from "./native-symbol";
 
@@ -74,7 +75,7 @@ export function InboxHeader({
           <HeaderButton
             testID="home-board-button"
             accessibilityLabel={t("Board")}
-            onPress={() => router.push("/board")}
+            onPress={() => router.push(NURLINGS_BOARD_PATH)}
           >
             <NativeSymbol ios="rectangle.split.3x1" android="albums-outline" size={17} />
           </HeaderButton>

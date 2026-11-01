@@ -39,6 +39,8 @@ vi.mock("./i18n", () => {
 });
 vi.mock("./material-icons", () => ({ materialIcons: {} }));
 vi.mock("./appearance", () => ({ mobileTokens: () => ({}) }));
+// The Board entry is a fork addition; its flag has its own tests.
+vi.mock("./nurlings-board/enabled", () => ({ useNurlingsBoardEnabled: () => false }));
 vi.mock("./native", () => ({
   native: { page: "white", secondaryLabel: "gray" },
   useThemedStyles: (factory: () => unknown) => factory(),

@@ -697,7 +697,7 @@ describe("identity confirmation", () => {
     expect((await f.request("/request-identity-code", {}, token)).status).toBe(200);
     expect(f.messages.at(-1)).toMatchObject({
       to: "approved@example.test",
-      subject: "Your Rakazo confirmation code",
+      subject: `Your ${brand.name} confirmation code`,
     });
     const code = f.lastCode();
     expect(JSON.stringify(f.data.verification)).not.toContain(code);

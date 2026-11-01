@@ -11,12 +11,12 @@ describe("ticketNotificationRoute", () => {
         ticketId: "t1",
         spaceId: "s1",
       }),
-    ).toEqual({ pathname: "/ticket", params: { ticketId: "t1", spaceId: "s1" } });
+    ).toEqual({ pathname: "/nurlings/ticket", params: { ticketId: "t1", spaceId: "s1" } });
   });
 
   it("reads rakazo-prefixed keys and leaves the space out when absent", () => {
     expect(ticketNotificationRoute({ "rakazo.ticketId": "t2" })).toEqual({
-      pathname: "/ticket",
+      pathname: "/nurlings/ticket",
       params: { ticketId: "t2" },
     });
   });

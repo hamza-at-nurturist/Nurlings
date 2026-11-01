@@ -1,4 +1,8 @@
+import { NURLINGS_BOARD_ES } from "./nurlings-board/es";
+
 export const ES_MESSAGES: Record<string, string> = {
+  // Ours first, so upstream's own translation wins where both exist.
+  ...NURLINGS_BOARD_ES,
   "How other bots see it": "Cómo lo ven otros bots",
   "Share to": "Compartir en",
   "{count} files": "{count} archivos",

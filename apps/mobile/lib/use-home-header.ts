@@ -4,6 +4,7 @@ import type { CreateAction } from "./create-chooser";
 import { createMenuItems } from "./create-chooser";
 import { useI18n } from "./i18n";
 import { useNurlingsBoardEnabled } from "./nurlings-board/enabled";
+import { NURLINGS_BOARD_PATH } from "./nurlings-board/routes";
 
 /** Liquid Glass home header: account on the left; activity, search and create on the right. */
 export function useHomeHeader({
@@ -69,7 +70,7 @@ export function useHomeHeader({
                 accessibilityLabel: t("Board"),
                 identifier: "home-board-button",
                 icon: { type: "sfSymbol" as const, name: "rectangle.split.3x1" },
-                onPress: () => router.push("/board"),
+                onPress: () => router.push(NURLINGS_BOARD_PATH),
               },
             ]
           : []),

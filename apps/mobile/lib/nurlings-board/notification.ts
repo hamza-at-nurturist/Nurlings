@@ -1,5 +1,7 @@
+import { NURLINGS_TICKET_PATH } from "./routes";
+
 export type TicketRoute = {
-  pathname: "/ticket";
+  pathname: typeof NURLINGS_TICKET_PATH;
   params: { ticketId: string; spaceId?: string };
 };
 
@@ -17,5 +19,5 @@ export function ticketNotificationRoute(data: unknown): TicketRoute | null {
   const ticketId = field(record, "ticketId");
   if (!ticketId) return null;
   const spaceId = field(record, "spaceId");
-  return { pathname: "/ticket", params: { ticketId, ...(spaceId ? { spaceId } : {}) } };
+  return { pathname: NURLINGS_TICKET_PATH, params: { ticketId, ...(spaceId ? { spaceId } : {}) } };
 }

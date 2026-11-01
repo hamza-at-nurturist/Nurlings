@@ -44,7 +44,7 @@ function environment(service: ComposeService): Record<string, string | null> {
   );
 }
 
-const ONE_SHOT = ["computer", "data-init"];
+const ONE_SHOT = ["computer", "data-init", "migrate"];
 const GENERATED = {
   POSTGRES_PASSWORD: "SERVICE_PASSWORD_POSTGRES",
   BETTER_AUTH_SECRET: "SERVICE_PASSWORD_64_AUTH",
@@ -58,12 +58,18 @@ const GENERATED = {
  * beyond Compose itself. These checks fail when it drifts from the app or loses a safety property.
  * Which settings the api and worker receive is checked in compose-env.test.ts.
  */
+const waits = (service: string) =>
+  Object.fromEntries(
+    Object.entries(services[service]?.depends_on ?? {}).map(([dep, v]) => [dep, v.condition]),
+  );
+
 describe("the Coolify compose file", () => {
   it("has the stack's services and no updater", () => {
     expect(Object.keys(services).sort()).toEqual([
       "api",
       "computer",
       "data-init",
+      "migrate",
       "postgres",
       "supervisor",
       "web",
@@ -91,7 +97,7 @@ describe("the Coolify compose file", () => {
     const refs = [...source.matchAll(/\$\{NURLINGS_VERSION([^}]*)\}/g)].map((m) => m[1] ?? "");
     expect(refs.length).toBeGreaterThan(0);
     for (const ref of refs) expect(ref.startsWith(":?")).toBe(true);
-    for (const name of ["supervisor", "api", "worker", "web"]) {
+    for (const name of ["supervisor", "migrate", "api", "worker", "web"]) {
       expect(services[name]?.image).toMatch(
         new RegExp(`^${brand.registry.replace(/\./g, "\\.")}/app:\\$\\{NURLINGS_VERSION:\\?`),
       );
@@ -109,6 +115,7 @@ describe("the Coolify compose file", () => {
     expect(firstParty.map(([name]) => name).sort()).toEqual([
       "api",
       "computer",
+      "migrate",
       "supervisor",
       "web",
       "worker",
@@ -170,9 +177,12 @@ describe("the Coolify compose file", () => {
     }
     // The app login and the owner login share one generated database password pair.
     expect(environment(services.api ?? {}).DATABASE_URL).toContain("${SERVICE_PASSWORD_APPDB}");
-    expect(environment(services.api ?? {}).DATABASE_MIGRATION_URL).toContain(
+    // Only the migrate container gets the owner login; the API and worker never see it.
+    expect(environment(services.migrate ?? {}).DATABASE_MIGRATION_URL).toContain(
       "${SERVICE_PASSWORD_POSTGRES}",
     );
+    expect(environment(services.api ?? {})).not.toHaveProperty("DATABASE_MIGRATION_URL");
+    expect(environment(services.worker ?? {})).not.toHaveProperty("DATABASE_MIGRATION_URL");
     for (const [name, service] of Object.entries(services)) {
       for (const [key, value] of Object.entries(environment(service))) {
         if (!/SECRET|TOKEN|PASSWORD|ENCRYPTION_KEY|API_KEY/.test(key) || value === null) continue;
@@ -249,12 +259,10 @@ describe("the Coolify compose file", () => {
       }
     }
     expect(JSON.stringify(services.worker?.healthcheck)).toContain("dist/health-check.js");
-    const waits = (service: string) =>
-      Object.fromEntries(
-        Object.entries(services[service]?.depends_on ?? {}).map(([dep, v]) => [dep, v.condition]),
-      );
+    expect(waits("migrate")).toEqual({ postgres: "service_healthy" });
     expect(waits("api")).toEqual({
       postgres: "service_healthy",
+      migrate: "service_completed_successfully",
       "data-init": "service_completed_successfully",
       supervisor: "service_healthy",
     });
@@ -267,7 +275,9 @@ describe("the Coolify compose file", () => {
   });
 
   it("migrates before the API serves", () => {
-    expect(JSON.stringify(parse(source).services.api.command)).toContain("pnpm db:deploy &&");
+    expect(services.migrate?.command).toEqual(["pnpm", "db:deploy"]);
+    expect(waits("api")).toHaveProperty("migrate", "service_completed_successfully");
+    expect(waits("worker")).toHaveProperty("migrate", "service_completed_successfully");
   });
 
   it("defaults the database to our name and keeps Rakazo out of everything a person sees", () => {

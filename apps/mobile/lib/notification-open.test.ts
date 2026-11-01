@@ -231,9 +231,12 @@ describe("notification space switch", () => {
         ticketId: "ticket-1",
         spaceId: "space-1",
       }),
-    ).toEqual({ pathname: "/ticket", params: { ticketId: "ticket-1", spaceId: "space-1" } });
+    ).toEqual({
+      pathname: "/nurlings/ticket",
+      params: { ticketId: "ticket-1", spaceId: "space-1" },
+    });
     expect(notificationOpenTargetFromLink("rakazo://ticket?ticketId=ticket-1")).toEqual({
-      pathname: "/ticket",
+      pathname: "/nurlings/ticket",
       params: { ticketId: "ticket-1" },
     });
   });

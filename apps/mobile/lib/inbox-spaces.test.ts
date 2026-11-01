@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MobileBot } from "./api";
 import { adoptDeletedSpaceFallback, rpc, selectedSpaceId, selectSpace } from "./api";
@@ -311,12 +312,16 @@ describe("spaceInboxItems", () => {
 
   it("names every bot deletion removes, not only the visible ones", () => {
     expect(deleteSpaceTitle(space({ bots: [bot], botCount: 3 }))).toBe(
-      "Delete Work and its 3 bots?",
+      `Delete Work and its 3 ${brand.bot.plural}?`,
     );
-    expect(deleteSpaceTitle(space({ bots: [], botCount: 1 }))).toBe("Delete Work and its bot?");
+    expect(deleteSpaceTitle(space({ bots: [], botCount: 1 }))).toBe(
+      `Delete Work and its ${brand.bot.singular}?`,
+    );
     expect(deleteSpaceTitle(space({ bots: [bot], botCount: 0 }))).toBe("Delete Work?");
     // Older servers send no count; fall back to the listed bots.
-    expect(deleteSpaceTitle(space({ bots: [bot] }))).toBe("Delete Work and its bot?");
+    expect(deleteSpaceTitle(space({ bots: [bot] }))).toBe(
+      `Delete Work and its ${brand.bot.singular}?`,
+    );
   });
 
   it("never offers deletion for the default space", () => {

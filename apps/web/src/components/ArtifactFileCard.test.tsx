@@ -212,7 +212,7 @@ it("leads the meta line with who added a previewable file", async () => {
       />,
     ),
   );
-  expect(container.textContent).toContain("Runway · 7.3 KB");
+  expect(container.textContent).toContain("Runway · «7.3 KB»");
 });
 
 it("translates every size unit and rolls up instead of 1,024.0 KB or 1,536.0 MB", async () => {

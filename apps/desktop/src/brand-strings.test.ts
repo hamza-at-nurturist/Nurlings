@@ -93,7 +93,7 @@ describe("desktop sources", () => {
     const literals = sources.flatMap((name) =>
       stringLiterals(readFileSync(path.join(import.meta.dirname, name), "utf8")),
     );
-    expect(literals).toContain(" services did not start. Check the output below, then retry.");
+    expect(literals).toContain(" is up to date.");
     expect(literals).toContain("Sign-in callback rejected. Return to ");
     expect(literals.length).toBeGreaterThan(300);
   });

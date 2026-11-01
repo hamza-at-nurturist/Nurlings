@@ -2130,7 +2130,7 @@ describe("outbound destinations", () => {
     expect(isApprovalPausedResult(f.results[2])).toBe(true);
   });
 
-  it("fetches the product docs pages without asking, but not other URLs on that site", async () => {
+  it("asks before fetching upstream's docs pages, since the fork has no docs allow-list", async () => {
     const f = fixture({ builtin: true });
     f.setCalls([
       {
@@ -2138,11 +2138,10 @@ describe("outbound destinations", () => {
         args: { url: "https://rakazo.com/docs/routines.md" },
         executionId: "call-1",
       },
-      { name: "web_fetch", args: { url: "https://rakazo.com/?q=secret" }, executionId: "call-2" },
     ]);
     await f.run();
-    expect(f.fetchedUrls).toEqual(["https://rakazo.com/docs/routines.md"]);
-    expect(isApprovalPausedResult(f.results[1])).toBe(true);
+    expect(f.fetchedUrls).toEqual([]);
+    expect(isApprovalPausedResult(f.results[0])).toBe(true);
   });
 
   it("refuses a URL that is not http(s)", async () => {

@@ -81,12 +81,15 @@ msgid "{0, plural, one {Waiting for sign-in — the link expires in about # minu
 msgstr "{0, plural, one {正在等待登录，链接大约 # 分钟后过期。} other {正在等待登录，链接大约 # 分钟后过期。}}"
 
 #. placeholder {0}: file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "{0} (max {ATTACHMENT_MAX_COUNT} attachments)"
 msgstr "{0}（最多 {ATTACHMENT_MAX_COUNT} 个附件）"
 
 #. placeholder {0}: file.name
 #. placeholder {1}: attachmentSizeLabel(attachmentMaxBytes(bootstrapMe))
+#. placeholder {1}: attachmentSizeLabel(maxBytes)
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "{0} (over {1})"
 msgstr "{0}（超过 {1}）"
@@ -155,6 +158,31 @@ msgstr "{0} TB"
 #: src/pages/ExternalConversationSettings.tsx
 msgid "{0} will still respond to direct mentions."
 msgstr "{0} 被直接 @ 时仍会回复。"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} approved it"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} assigned it to {owner}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} attached {name}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this and assigned it to {owner}"
+msgstr ""
+
+#. placeholder {0}: statuses[line.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} moved it to {0}"
+msgstr ""
 
 #: src/lib/billing.ts
 msgid "{amount} / {period}"
@@ -252,6 +280,10 @@ msgstr "{name} 问"
 msgid "{name} asked: {text}"
 msgstr "{name} 问：{text}"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} couldn't finish, reply to retry"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
 msgid "{name} failed"
@@ -261,6 +293,10 @@ msgstr "{name} 失败"
 #: src/lib/browser-notifications.ts
 msgid "{name} finished"
 msgstr "{name} 已完成"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} is working…"
+msgstr ""
 
 #: src/pages/ModelRoleSettings.tsx
 msgid "{name} options"
@@ -415,6 +451,10 @@ msgstr "{title}，保存为 {savedAs}"
 msgid "{toolCount, plural, one {# tool} other {# tools}}"
 msgstr "{toolCount, plural, one {# 个工具} other {# 个工具}}"
 
+#: src/components/board/BoardView/BoardCard.tsx
+msgid "{workerName} is working…"
+msgstr ""
+
 #. placeholder {0}: mention.name
 #: src/pages/shell/composer.tsx
 msgid "@{0}"
@@ -489,10 +529,12 @@ msgstr "工作区操作"
 msgid "Active"
 msgstr "启用"
 
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/pages/shell/sidebar-header.tsx
 msgid "Activity"
 msgstr "动态"
 
+#: src/components/board/BoardView/QuickAdd.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
@@ -607,6 +649,10 @@ msgstr "添加服务器 URL"
 msgid "Add skills"
 msgstr "添加技能"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Add time"
+msgstr ""
+
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Add to routine"
 msgstr "加入例行任务"
@@ -648,6 +694,7 @@ msgstr "高级..."
 msgid "Agent from another app"
 msgstr ""
 
+#: src/components/board/BoardView/NurlingFilter.tsx
 #: src/pages/PluginsOverlay.tsx
 msgid "All"
 msgstr "全部"
@@ -838,6 +885,9 @@ msgstr "审批模型"
 msgid "Approvals"
 msgstr "审批"
 
+#: src/components/board/BoardView/BoardCard.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsPanel.tsx
 #: src/pages/PluginSubmissionsPanel.tsx
 #: src/pages/shell/message-cards.tsx
@@ -899,6 +949,7 @@ msgstr "{0}"
 msgid "at {timeSelect}"
 msgstr "{timeSelect}"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Attach file"
 msgstr "附加文件"
@@ -973,6 +1024,8 @@ msgstr "Shell 命令可通过 {commandVariable} 使用"
 msgid "Avatar Studio"
 msgstr "头像工作室"
 
+#: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/components/integrations/skills-dialog.tsx
 #: src/pages/AdminAccessPage.tsx
@@ -1022,6 +1075,9 @@ msgstr "阻止"
 msgid "Blocked"
 msgstr "已阻塞"
 
+#: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
 msgid "Board"
@@ -1372,6 +1428,10 @@ msgstr "关闭图表"
 msgid "Close computer"
 msgstr "关闭电脑"
 
+#: src/components/board/TicketModal/TicketImage.tsx
+msgid "Close image"
+msgstr ""
+
 #: src/pages/shell/message-cards.tsx
 msgid "Close image preview"
 msgstr "关闭图片预览"
@@ -1437,6 +1497,10 @@ msgstr "代码"
 msgctxt "email sign-in"
 msgid "Code"
 msgstr "验证码"
+
+#: src/components/board/TicketModal/TicketModal.tsx
+msgid "Collapse"
+msgstr ""
 
 #. placeholder {0}: headerName(group)
 #: src/pages/shell/sidebar-roster.tsx
@@ -1924,8 +1988,10 @@ msgstr "无法忽略"
 msgid "Could not dismiss this server"
 msgstr "无法忽略此服务器"
 
+#. placeholder {0}: file.name
 #. placeholder {0}: props.name
 #: src/components/ArtifactFileCard.tsx
+#: src/components/board/TicketModal/TicketFileCard.tsx
 msgid "Could not download {0}. Try again."
 msgstr "无法下载 {0}。请重试。"
 
@@ -2529,6 +2595,8 @@ msgstr "已拒绝"
 msgid "Deny"
 msgstr "拒绝"
 
+#: src/components/board/TicketModal/ClampedDescription.tsx
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Description"
@@ -2698,6 +2766,14 @@ msgstr "技能草稿"
 msgid "Drag, drop, or paste an image"
 msgstr "拖放或粘贴图片"
 
+#: src/components/board/TicketModal/Properties.tsx
+msgid "Due"
+msgstr ""
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Due {due}"
+msgstr ""
+
 #: src/pages/BotContextMenu.tsx
 msgid "Duplicate"
 msgstr "复制"
@@ -2857,6 +2933,7 @@ msgstr "每周"
 msgid "Executor token"
 msgstr "Executor 令牌"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Expand"
 msgstr "展开"
@@ -2940,6 +3017,11 @@ msgstr "要比较的字段，例如 id, modifiedTime（可选）"
 #: src/pages/SpaceSearch.tsx
 msgid "File"
 msgstr "文件"
+
+#: src/components/board/BoardView/BoardCard.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
+msgid "Files"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Files or folders on the computer"
@@ -3889,6 +3971,7 @@ msgstr "下移"
 msgid "Move them to your shared memory."
 msgstr "把它们移到共享记忆。"
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "移动到"
@@ -3896,6 +3979,11 @@ msgstr "移动到"
 #: src/pages/ModelRoleSettings.tsx
 msgid "Move up"
 msgstr "上移"
+
+#. placeholder {0}: statuses[line.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Moved back to {0}"
+msgstr ""
 
 #: src/components/call/CallCard.tsx
 msgid "Mute"
@@ -3955,6 +4043,7 @@ msgstr "需要输入"
 msgid "Needs takeover"
 msgstr "需要接管"
 
+#: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/computer-overlay.tsx
 #: src/pages/shell/message-view.tsx
@@ -4031,6 +4120,10 @@ msgstr "下一页"
 msgid "Next settings sections"
 msgstr "下一组设置项"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Next week"
+msgstr ""
+
 #: src/pages/PluginsOverlay.tsx
 msgid "No apps match your search."
 msgstr "没有匹配的应用。"
@@ -4055,6 +4148,10 @@ msgstr ""
 #: src/pages/shell/bot-picker.tsx
 msgid "No bots match"
 msgstr "没有匹配的 Bot"
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "No date"
+msgstr ""
 
 #: src/components/AskCard.tsx
 msgid "No longer active"
@@ -4357,6 +4454,7 @@ msgstr "其他模型…"
 msgid "Output"
 msgstr "输出"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/lib/identity-display.ts
 #: src/pages/Board.tsx
 msgid "Owner"
@@ -4552,6 +4650,7 @@ msgstr "上一页"
 msgid "Previous settings sections"
 msgstr "上一组设置项"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/Board.tsx
 msgid "Priority"
 msgstr "优先级"
@@ -4795,6 +4894,8 @@ msgstr "移除"
 
 #. placeholder {0}: attachment.file.name
 #. placeholder {0}: device.name
+#. placeholder {0}: item.file.name
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/components/ComputerDeviceSettings.tsx
 #: src/pages/shell/composer.tsx
 msgid "Remove {0}"
@@ -4831,6 +4932,11 @@ msgstr "移除 Git 事件"
 #: src/components/ModelHeadersEditor.tsx
 msgid "Remove header"
 msgstr "移除请求头"
+
+#. placeholder {0}: mention.name
+#: src/components/board/TicketModal/MentionChip.tsx
+msgid "Remove mention {0}"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Remove message trigger"
@@ -4893,6 +4999,7 @@ msgstr "替换密钥"
 msgid "Replace value"
 msgstr "替换值"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/message-hover-actions.tsx
 #: src/pages/shell/quote-selection-button.tsx
 msgid "Reply"
@@ -5268,6 +5375,7 @@ msgstr "选择 Bot"
 msgid "Self-hosted"
 msgstr "自托管"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Send"
 msgstr "发送"
@@ -5390,6 +5498,10 @@ msgstr "共享记忆"
 msgid "Show"
 msgstr "显示"
 
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Show {hidden} older"
+msgstr ""
+
 #: src/pages/GroupPanel.tsx
 msgid "Show all"
 msgstr "显示全部"
@@ -5402,6 +5514,7 @@ msgstr "显示 Bot"
 msgid "Show list"
 msgstr "显示列表"
 
+#: src/components/board/TicketModal/ClampedDescription.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/ScratchpadSection.tsx
@@ -5516,6 +5629,7 @@ msgid "Skipped"
 msgstr ""
 
 #. placeholder {0}: skipped.join(", ")
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "Skipped {0}"
 msgstr "已跳过 {0}"
@@ -5540,6 +5654,11 @@ msgstr "部分插件无法加载。"
 #: src/pages/shell/agent-import.tsx
 msgid "Some settings are not imported"
 msgstr "部分设置不会导入"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
+msgid "Someone"
+msgstr ""
 
 #: src/App.tsx
 #: src/lib/user-error.ts
@@ -5607,9 +5726,14 @@ msgstr ""
 msgid "SSO is temporarily unavailable. Try again."
 msgstr "SSO 暂时不可用，请重试。"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/shell/computer-overlay.tsx
 msgid "Start"
 msgstr "启动"
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Start {start}"
+msgstr ""
 
 #: src/components/ModelCredits.tsx
 #: src/pages/Paywall.tsx
@@ -5631,6 +5755,7 @@ msgstr "正在开始"
 msgid "Starting…"
 msgstr "正在开始…"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/ActivityList.tsx
 #: src/pages/Board.tsx
 msgid "Status"
@@ -5768,6 +5893,10 @@ msgstr "Teams 消息"
 #: src/pages/RoutineEditor.tsx
 msgid "Teams not enabled"
 msgstr "未启用 Teams"
+
+#: src/components/board/BoardView/QuickAdd.tsx
+msgid "Tell a {noun} what to do…"
+msgstr ""
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Test"
@@ -6005,9 +6134,21 @@ msgstr "此订阅登录在 Rakazo 中尚不可用。请使用部署凭据或选�
 msgid "This week"
 msgstr "本周"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "This weekend"
+msgstr ""
+
 #: src/lib/cron.ts
 msgid "Thursday"
 msgstr "周四"
+
+#: src/components/board/TicketModal/NarrowTicket.tsx
+msgid "Ticket"
+msgstr ""
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Time"
+msgstr ""
 
 #: src/pages/RoutineSchedule.tsx
 msgid "Time of day"
@@ -6021,6 +6162,7 @@ msgstr "时区"
 msgid "Timing may differ"
 msgstr "运行时间可能不同"
 
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 msgid "Title"
 msgstr "标题"
@@ -6042,6 +6184,7 @@ msgstr "待办"
 msgid "To:"
 msgstr "至:"
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/shell/chat-context.tsx
 msgid "Today"
@@ -6050,6 +6193,10 @@ msgstr "今天"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Tokens"
 msgstr "Token"
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Tomorrow"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Tool arguments (JSON)"
@@ -6162,7 +6309,9 @@ msgstr "取消静音"
 msgid "Unpin"
 msgstr "取消置顶"
 
+#. placeholder {0}: item.file.name
 #. placeholder {0}: pending.file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "Unsupported file type: {0}"
 msgstr "不支持的文件类型：{0}"
@@ -6520,17 +6669,25 @@ msgstr "工作区"
 msgid "year"
 msgstr "年"
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/shell/chat-context.tsx
 #: src/pages/shell/sidebar-roster.tsx
 msgid "Yesterday"
 msgstr "昨天"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx
 #: src/pages/shell/shell-sidebar.tsx
 msgid "You"
 msgstr "你"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "You attached {name}"
+msgstr ""
 
 #: src/pages/McpOAuthCallback.tsx
 msgid "You can close this tab if it does not redirect automatically."
@@ -6596,6 +6753,10 @@ msgstr "你的订阅或 API 密钥"
 #: src/pages/Welcome.tsx
 msgid "Your team of always-on agents<0/>that you can give real work to."
 msgstr "你的一支随时在线的 Agent 团队<0/>可以交给它们真正的工作。"
+
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Your turn"
+msgstr ""
 
 #: src/lib/user-error.ts
 msgid "Your voice provider is out of credit."

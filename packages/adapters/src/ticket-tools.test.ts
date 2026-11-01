@@ -299,12 +299,12 @@ describe("ticket mutations", () => {
 
   it("uses public parameter names and keeps blank comments rejected", async () => {
     const s = mutationDeps();
+    // A user's ticket may have no owner here (Chief picks it up); a malformed owner is refused.
     await expect(
-      createTicket(s.deps, { spaceId: "ws", userId: "user-1", title: "Ship" }),
+      createTicket(s.deps, { spaceId: "ws", userId: "user-1", title: "Ship", ownerBotId: "" }),
     ).resolves.toHaveProperty("error", expect.stringContaining("ownerBotId"));
     const result = await commentTicket(s.deps, { spaceId: "ws", id: "", body: " " });
     expect(result).toHaveProperty("error", expect.stringContaining("id:"));
-    expect(result).toHaveProperty("error", expect.stringContaining("body:"));
     expect(result).toHaveProperty("error", expect.not.stringContaining("ticketId"));
     expect(s.prisma.board.findUnique).not.toHaveBeenCalled();
     expect(s.prisma.$transaction).not.toHaveBeenCalled();
@@ -918,7 +918,7 @@ describe("comment attachments", () => {
     const s = mutationDeps();
     await expect(
       commentTicket(s.deps, { spaceId: "ws", userId: "user-1", id: "t1", body: "  " }),
-    ).resolves.toEqual({ error: "Invalid comment." });
+    ).resolves.toEqual({ error: "Write a comment or attach a file" });
     expect(s.tx.ticketComment.create).not.toHaveBeenCalled();
   });
 

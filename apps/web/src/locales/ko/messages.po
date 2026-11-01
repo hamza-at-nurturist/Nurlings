@@ -81,12 +81,15 @@ msgid "{0, plural, one {Waiting for sign-in — the link expires in about # minu
 msgstr ""
 
 #. placeholder {0}: file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "{0} (max {ATTACHMENT_MAX_COUNT} attachments)"
 msgstr "{0} (첨부 파일 최대 {ATTACHMENT_MAX_COUNT}개)"
 
 #. placeholder {0}: file.name
 #. placeholder {1}: attachmentSizeLabel(attachmentMaxBytes(bootstrapMe))
+#. placeholder {1}: attachmentSizeLabel(maxBytes)
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "{0} (over {1})"
 msgstr "{0} ({1} 초과)"
@@ -154,6 +157,31 @@ msgstr "{0} TB"
 #. placeholder {0}: bot.name
 #: src/pages/ExternalConversationSettings.tsx
 msgid "{0} will still respond to direct mentions."
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} approved it"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} assigned it to {owner}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} attached {name}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this and assigned it to {owner}"
+msgstr ""
+
+#. placeholder {0}: statuses[line.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} moved it to {0}"
 msgstr ""
 
 #: src/lib/billing.ts
@@ -252,6 +280,10 @@ msgstr "{name}의 질문"
 msgid "{name} asked: {text}"
 msgstr "{name}의 질문: {text}"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} couldn't finish, reply to retry"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
 msgid "{name} failed"
@@ -261,6 +293,10 @@ msgstr "{name} 실패"
 #: src/lib/browser-notifications.ts
 msgid "{name} finished"
 msgstr "{name} 완료"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} is working…"
+msgstr ""
 
 #: src/pages/ModelRoleSettings.tsx
 msgid "{name} options"
@@ -415,6 +451,10 @@ msgstr "{title}, {savedAs}(으)로 저장"
 msgid "{toolCount, plural, one {# tool} other {# tools}}"
 msgstr "{toolCount, plural, other {도구 #개}}"
 
+#: src/components/board/BoardView/BoardCard.tsx
+msgid "{workerName} is working…"
+msgstr ""
+
 #. placeholder {0}: mention.name
 #: src/pages/shell/composer.tsx
 msgid "@{0}"
@@ -489,10 +529,12 @@ msgstr ""
 msgid "Active"
 msgstr "활성"
 
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/pages/shell/sidebar-header.tsx
 msgid "Activity"
 msgstr "활동"
 
+#: src/components/board/BoardView/QuickAdd.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
@@ -607,6 +649,10 @@ msgstr ""
 msgid "Add skills"
 msgstr ""
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Add time"
+msgstr ""
+
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Add to routine"
 msgstr "자동 실행에 추가"
@@ -648,6 +694,7 @@ msgstr "고급..."
 msgid "Agent from another app"
 msgstr ""
 
+#: src/components/board/BoardView/NurlingFilter.tsx
 #: src/pages/PluginsOverlay.tsx
 msgid "All"
 msgstr ""
@@ -838,6 +885,9 @@ msgstr "승인 모델"
 msgid "Approvals"
 msgstr "승인"
 
+#: src/components/board/BoardView/BoardCard.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsPanel.tsx
 #: src/pages/PluginSubmissionsPanel.tsx
 #: src/pages/shell/message-cards.tsx
@@ -899,6 +949,7 @@ msgstr "{0}에"
 msgid "at {timeSelect}"
 msgstr "{timeSelect}에"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Attach file"
 msgstr "파일 첨부"
@@ -973,6 +1024,8 @@ msgstr "셸 명령에서 {commandVariable}(으)로 사용 가능"
 msgid "Avatar Studio"
 msgstr "아바타 스튜디오"
 
+#: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/components/integrations/skills-dialog.tsx
 #: src/pages/AdminAccessPage.tsx
@@ -1022,6 +1075,9 @@ msgstr "차단"
 msgid "Blocked"
 msgstr ""
 
+#: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
 msgid "Board"
@@ -1372,6 +1428,10 @@ msgstr "차트 닫기"
 msgid "Close computer"
 msgstr "컴퓨터 닫기"
 
+#: src/components/board/TicketModal/TicketImage.tsx
+msgid "Close image"
+msgstr ""
+
 #: src/pages/shell/message-cards.tsx
 msgid "Close image preview"
 msgstr "이미지 미리보기 닫기"
@@ -1437,6 +1497,10 @@ msgstr "코드"
 msgctxt "email sign-in"
 msgid "Code"
 msgstr "인증 코드"
+
+#: src/components/board/TicketModal/TicketModal.tsx
+msgid "Collapse"
+msgstr ""
 
 #. placeholder {0}: headerName(group)
 #: src/pages/shell/sidebar-roster.tsx
@@ -1924,8 +1988,10 @@ msgstr ""
 msgid "Could not dismiss this server"
 msgstr ""
 
+#. placeholder {0}: file.name
 #. placeholder {0}: props.name
 #: src/components/ArtifactFileCard.tsx
+#: src/components/board/TicketModal/TicketFileCard.tsx
 msgid "Could not download {0}. Try again."
 msgstr "{0}을 다운로드하지 못했습니다. 다시 시도해 주세요."
 
@@ -2529,6 +2595,8 @@ msgstr "거부됨"
 msgid "Deny"
 msgstr "거부"
 
+#: src/components/board/TicketModal/ClampedDescription.tsx
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Description"
@@ -2698,6 +2766,14 @@ msgstr "작업 기술 초안"
 msgid "Drag, drop, or paste an image"
 msgstr "이미지를 끌어다 놓거나 붙여넣으세요"
 
+#: src/components/board/TicketModal/Properties.tsx
+msgid "Due"
+msgstr ""
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Due {due}"
+msgstr ""
+
 #: src/pages/BotContextMenu.tsx
 msgid "Duplicate"
 msgstr "복제"
@@ -2857,6 +2933,7 @@ msgstr "매주"
 msgid "Executor token"
 msgstr "Executor 토큰"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Expand"
 msgstr "펼치기"
@@ -2940,6 +3017,11 @@ msgstr "비교할 필드, 예: id, modifiedTime (선택 사항)"
 #: src/pages/SpaceSearch.tsx
 msgid "File"
 msgstr "파일"
+
+#: src/components/board/BoardView/BoardCard.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
+msgid "Files"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Files or folders on the computer"
@@ -3889,6 +3971,7 @@ msgstr "아래로 이동"
 msgid "Move them to your shared memory."
 msgstr "공용 기억으로 옮깁니다."
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "섹션으로 이동"
@@ -3896,6 +3979,11 @@ msgstr "섹션으로 이동"
 #: src/pages/ModelRoleSettings.tsx
 msgid "Move up"
 msgstr "위로 이동"
+
+#. placeholder {0}: statuses[line.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Moved back to {0}"
+msgstr ""
 
 #: src/components/call/CallCard.tsx
 msgid "Mute"
@@ -3955,6 +4043,7 @@ msgstr "입력 필요"
 msgid "Needs takeover"
 msgstr "인수 필요"
 
+#: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/computer-overlay.tsx
 #: src/pages/shell/message-view.tsx
@@ -4031,6 +4120,10 @@ msgstr "다음 페이지"
 msgid "Next settings sections"
 msgstr ""
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Next week"
+msgstr ""
+
 #: src/pages/PluginsOverlay.tsx
 msgid "No apps match your search."
 msgstr "검색 결과가 없습니다."
@@ -4054,6 +4147,10 @@ msgstr ""
 #: src/pages/GroupPanel.tsx
 #: src/pages/shell/bot-picker.tsx
 msgid "No bots match"
+msgstr ""
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "No date"
 msgstr ""
 
 #: src/components/AskCard.tsx
@@ -4357,6 +4454,7 @@ msgstr "다른 모델 직접 입력…"
 msgid "Output"
 msgstr "출력"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/lib/identity-display.ts
 #: src/pages/Board.tsx
 msgid "Owner"
@@ -4552,6 +4650,7 @@ msgstr "이전 페이지"
 msgid "Previous settings sections"
 msgstr ""
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/Board.tsx
 msgid "Priority"
 msgstr ""
@@ -4795,6 +4894,8 @@ msgstr "삭제"
 
 #. placeholder {0}: attachment.file.name
 #. placeholder {0}: device.name
+#. placeholder {0}: item.file.name
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/components/ComputerDeviceSettings.tsx
 #: src/pages/shell/composer.tsx
 msgid "Remove {0}"
@@ -4831,6 +4932,11 @@ msgstr ""
 #: src/components/ModelHeadersEditor.tsx
 msgid "Remove header"
 msgstr "헤더 삭제"
+
+#. placeholder {0}: mention.name
+#: src/components/board/TicketModal/MentionChip.tsx
+msgid "Remove mention {0}"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Remove message trigger"
@@ -4893,6 +4999,7 @@ msgstr "키 교체"
 msgid "Replace value"
 msgstr ""
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/message-hover-actions.tsx
 #: src/pages/shell/quote-selection-button.tsx
 msgid "Reply"
@@ -5268,6 +5375,7 @@ msgstr "대화할 Bot을 선택하세요"
 msgid "Self-hosted"
 msgstr "자체 호스팅"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Send"
 msgstr "보내기"
@@ -5390,6 +5498,10 @@ msgstr "공유 기억"
 msgid "Show"
 msgstr "보기"
 
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Show {hidden} older"
+msgstr ""
+
 #: src/pages/GroupPanel.tsx
 msgid "Show all"
 msgstr ""
@@ -5402,6 +5514,7 @@ msgstr ""
 msgid "Show list"
 msgstr ""
 
+#: src/components/board/TicketModal/ClampedDescription.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/ScratchpadSection.tsx
@@ -5516,6 +5629,7 @@ msgid "Skipped"
 msgstr ""
 
 #. placeholder {0}: skipped.join(", ")
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "Skipped {0}"
 msgstr "{0} 건너뜀"
@@ -5540,6 +5654,11 @@ msgstr ""
 #: src/pages/shell/agent-import.tsx
 msgid "Some settings are not imported"
 msgstr "일부 설정은 가져오지 않습니다"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
+msgid "Someone"
+msgstr ""
 
 #: src/App.tsx
 #: src/lib/user-error.ts
@@ -5607,8 +5726,13 @@ msgstr ""
 msgid "SSO is temporarily unavailable. Try again."
 msgstr "SSO를 일시적으로 사용할 수 없습니다. 다시 시도하세요."
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/shell/computer-overlay.tsx
 msgid "Start"
+msgstr ""
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Start {start}"
 msgstr ""
 
 #: src/components/ModelCredits.tsx
@@ -5631,6 +5755,7 @@ msgstr "시작 중"
 msgid "Starting…"
 msgstr "시작하는 중…"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/ActivityList.tsx
 #: src/pages/Board.tsx
 msgid "Status"
@@ -5767,6 +5892,10 @@ msgstr "Teams 메시지"
 
 #: src/pages/RoutineEditor.tsx
 msgid "Teams not enabled"
+msgstr ""
+
+#: src/components/board/BoardView/QuickAdd.tsx
+msgid "Tell a {noun} what to do…"
 msgstr ""
 
 #: src/components/teach/SkillDraftCard.tsx
@@ -6005,9 +6134,21 @@ msgstr "이 구독 로그인 방식은 아직 Rakazo에서 지원되지 않습�
 msgid "This week"
 msgstr ""
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "This weekend"
+msgstr ""
+
 #: src/lib/cron.ts
 msgid "Thursday"
 msgstr "목요일"
+
+#: src/components/board/TicketModal/NarrowTicket.tsx
+msgid "Ticket"
+msgstr ""
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Time"
+msgstr ""
 
 #: src/pages/RoutineSchedule.tsx
 msgid "Time of day"
@@ -6021,6 +6162,7 @@ msgstr ""
 msgid "Timing may differ"
 msgstr "실행 시간이 달라질 수 있습니다"
 
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 msgid "Title"
 msgstr "역할"
@@ -6042,6 +6184,7 @@ msgstr ""
 msgid "To:"
 msgstr "받는 사람:"
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/shell/chat-context.tsx
 msgid "Today"
@@ -6050,6 +6193,10 @@ msgstr "오늘"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Tokens"
 msgstr "토큰"
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Tomorrow"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Tool arguments (JSON)"
@@ -6162,7 +6309,9 @@ msgstr "음소거 해제"
 msgid "Unpin"
 msgstr "고정 해제"
 
+#. placeholder {0}: item.file.name
 #. placeholder {0}: pending.file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "Unsupported file type: {0}"
 msgstr "지원하지 않는 파일 형식: {0}"
@@ -6520,17 +6669,25 @@ msgstr ""
 msgid "year"
 msgstr ""
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/shell/chat-context.tsx
 #: src/pages/shell/sidebar-roster.tsx
 msgid "Yesterday"
 msgstr "어제"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx
 #: src/pages/shell/shell-sidebar.tsx
 msgid "You"
 msgstr "나"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "You attached {name}"
+msgstr ""
 
 #: src/pages/McpOAuthCallback.tsx
 msgid "You can close this tab if it does not redirect automatically."
@@ -6596,6 +6753,10 @@ msgstr ""
 #: src/pages/Welcome.tsx
 msgid "Your team of always-on agents<0/>that you can give real work to."
 msgstr "언제든 실제 작업을 맡길 수 있는<0/>나만의 Agent 팀"
+
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Your turn"
+msgstr ""
 
 #: src/lib/user-error.ts
 msgid "Your voice provider is out of credit."

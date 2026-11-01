@@ -480,12 +480,14 @@ function PillEyes({
         animatedProps={leftEye}
         width={eyes.rx * 2}
         rx={eyes.rx}
+        fill={botEyeColor}
         transform={`rotate(${eyes.tiltDeg} ${eyes.left.cx} ${eyes.left.cy})`}
       />
       <AnimatedRect
         animatedProps={rightEye}
         width={eyes.rx * 2}
         rx={eyes.rx}
+        fill={botEyeColor}
         transform={`rotate(${eyes.tiltDeg} ${eyes.right.cx} ${eyes.right.cy})`}
       />
     </>
@@ -513,7 +515,7 @@ function OrganicAvatar({
     <Animated.View style={[{ width: size, height: size }, bodyStyle]}>
       <Svg width={size} height={size} viewBox="-60 -60 120 120">
         <Path d={frame?.path ?? organicAvatarPath(seed)} fill={color} />
-        <G transform={frame ? undefined : `rotate(${(seed % 9) - 4})`} fill={botEyeColor}>
+        <G transform={frame ? undefined : `rotate(${(seed % 9) - 4})`}>
           <PillEyes eyes={frame?.eyes ?? ORGANIC_EYES} life={life} units={120} />
         </G>
       </Svg>

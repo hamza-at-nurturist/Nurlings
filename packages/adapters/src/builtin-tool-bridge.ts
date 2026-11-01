@@ -49,6 +49,12 @@ export const CORE_BUILTIN_TOOL_NAMES: ReadonlySet<string> = new Set([
   "search_history",
   "read_history",
   "end_call",
+  // Ticket work is unattended and reports only through these, so they are never a find_tool away.
+  "board_tickets",
+  "ticket_get",
+  "ticket_create",
+  "ticket_update",
+  "ticket_comment",
 ]);
 
 const FLEET_NAMES: ReadonlySet<string> = new Set(FLEET_TOOL_NAMES);

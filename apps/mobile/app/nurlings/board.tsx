@@ -24,6 +24,7 @@ import {
   useBoardStream,
   useRevisions,
 } from "../../lib/nurlings-board/live";
+import { NURLINGS_TICKET_PATH } from "../../lib/nurlings-board/routes";
 import { errorText } from "../../lib/user-error";
 
 /** The Board: a Nurling filter, six paged columns of live cards, and quick-add. */
@@ -101,7 +102,7 @@ export default function BoardScreen() {
 
   function onAction(ticket: TicketListItem, action: CardMenuAction) {
     if (action.type === "open") {
-      router.push({ pathname: "/ticket", params: { ticketId: ticket.id } });
+      router.push({ pathname: NURLINGS_TICKET_PATH, params: { ticketId: ticket.id } });
     } else if (action.type === "approve") {
       void act(() => rpc("tickets/approve", { id: ticket.id }));
     } else if (isMoveTarget(ticket.status, action.status)) {

@@ -81,12 +81,15 @@ msgid "{0, plural, one {Waiting for sign-in — the link expires in about # minu
 msgstr "{0, plural, one {Esperando el inicio de sesión: el enlace vence en aproximadamente # minuto.} other {Esperando el inicio de sesión: el enlace vence en aproximadamente # minutos.}}"
 
 #. placeholder {0}: file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "{0} (max {ATTACHMENT_MAX_COUNT} attachments)"
 msgstr "{0} (máx. {ATTACHMENT_MAX_COUNT} archivos adjuntos)"
 
 #. placeholder {0}: file.name
 #. placeholder {1}: attachmentSizeLabel(attachmentMaxBytes(bootstrapMe))
+#. placeholder {1}: attachmentSizeLabel(maxBytes)
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "{0} (over {1})"
 msgstr "{0} (más de {1})"
@@ -155,6 +158,31 @@ msgstr "{0} TB"
 #: src/pages/ExternalConversationSettings.tsx
 msgid "{0} will still respond to direct mentions."
 msgstr "{0} seguirá respondiendo a las menciones directas."
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} approved it"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} assigned it to {owner}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} attached {name}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this and assigned it to {owner}"
+msgstr ""
+
+#. placeholder {0}: statuses[line.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} moved it to {0}"
+msgstr ""
 
 #: src/lib/billing.ts
 msgid "{amount} / {period}"
@@ -252,6 +280,10 @@ msgstr "{name} pregunta"
 msgid "{name} asked: {text}"
 msgstr "{name} pregunta: {text}"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} couldn't finish, reply to retry"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
 msgid "{name} failed"
@@ -261,6 +293,10 @@ msgstr "{name} falló"
 #: src/lib/browser-notifications.ts
 msgid "{name} finished"
 msgstr "{name} terminó"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} is working…"
+msgstr ""
 
 #: src/pages/ModelRoleSettings.tsx
 msgid "{name} options"
@@ -415,6 +451,10 @@ msgstr "{title}, guardado como {savedAs}"
 msgid "{toolCount, plural, one {# tool} other {# tools}}"
 msgstr "{toolCount, plural, one {# herramienta} other {# herramientas}}"
 
+#: src/components/board/BoardView/BoardCard.tsx
+msgid "{workerName} is working…"
+msgstr ""
+
 #. placeholder {0}: mention.name
 #: src/pages/shell/composer.tsx
 msgid "@{0}"
@@ -489,10 +529,12 @@ msgstr "Acciones del espacio"
 msgid "Active"
 msgstr "Activo"
 
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/pages/shell/sidebar-header.tsx
 msgid "Activity"
 msgstr "Actividad"
 
+#: src/components/board/BoardView/QuickAdd.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
@@ -607,6 +649,10 @@ msgstr "Agregar URL del servidor"
 msgid "Add skills"
 msgstr "Agregar habilidades"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Add time"
+msgstr ""
+
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Add to routine"
 msgstr "Agregar a la rutina"
@@ -648,6 +694,7 @@ msgstr "Avanzado..."
 msgid "Agent from another app"
 msgstr ""
 
+#: src/components/board/BoardView/NurlingFilter.tsx
 #: src/pages/PluginsOverlay.tsx
 msgid "All"
 msgstr "Todas"
@@ -838,6 +885,9 @@ msgstr "Modelo de aprobación"
 msgid "Approvals"
 msgstr "Aprobaciones"
 
+#: src/components/board/BoardView/BoardCard.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsPanel.tsx
 #: src/pages/PluginSubmissionsPanel.tsx
 #: src/pages/shell/message-cards.tsx
@@ -899,6 +949,7 @@ msgstr "a las {0}"
 msgid "at {timeSelect}"
 msgstr "a las {timeSelect}"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Attach file"
 msgstr "Adjuntar archivo"
@@ -973,6 +1024,8 @@ msgstr "Disponible para los comandos de shell como {commandVariable}"
 msgid "Avatar Studio"
 msgstr "Estudio de avatares"
 
+#: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/components/integrations/skills-dialog.tsx
 #: src/pages/AdminAccessPage.tsx
@@ -1022,6 +1075,9 @@ msgstr "Bloquear"
 msgid "Blocked"
 msgstr "Bloqueado"
 
+#: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
 msgid "Board"
@@ -1372,6 +1428,10 @@ msgstr "Cerrar gráfico"
 msgid "Close computer"
 msgstr "Cerrar computadora"
 
+#: src/components/board/TicketModal/TicketImage.tsx
+msgid "Close image"
+msgstr ""
+
 #: src/pages/shell/message-cards.tsx
 msgid "Close image preview"
 msgstr "Cerrar vista previa de imagen"
@@ -1437,6 +1497,10 @@ msgstr "Código"
 msgctxt "email sign-in"
 msgid "Code"
 msgstr "Código"
+
+#: src/components/board/TicketModal/TicketModal.tsx
+msgid "Collapse"
+msgstr ""
 
 #. placeholder {0}: headerName(group)
 #: src/pages/shell/sidebar-roster.tsx
@@ -1924,8 +1988,10 @@ msgstr "No se pudo descartar"
 msgid "Could not dismiss this server"
 msgstr "No se pudo descartar este servidor"
 
+#. placeholder {0}: file.name
 #. placeholder {0}: props.name
 #: src/components/ArtifactFileCard.tsx
+#: src/components/board/TicketModal/TicketFileCard.tsx
 msgid "Could not download {0}. Try again."
 msgstr "No se pudo descargar {0}. Inténtalo de nuevo."
 
@@ -2529,6 +2595,8 @@ msgstr "Denegado"
 msgid "Deny"
 msgstr "Denegar"
 
+#: src/components/board/TicketModal/ClampedDescription.tsx
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Description"
@@ -2698,6 +2766,14 @@ msgstr "Habilidad en borrador"
 msgid "Drag, drop, or paste an image"
 msgstr "Arrastra, suelta o pega una imagen"
 
+#: src/components/board/TicketModal/Properties.tsx
+msgid "Due"
+msgstr ""
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Due {due}"
+msgstr ""
+
 #: src/pages/BotContextMenu.tsx
 msgid "Duplicate"
 msgstr "Duplicar"
@@ -2857,6 +2933,7 @@ msgstr "Cada semana"
 msgid "Executor token"
 msgstr "Token de Executor"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Expand"
 msgstr "Expandir"
@@ -2940,6 +3017,11 @@ msgstr "Campos para comparar, p. ej. id, modifiedTime (opcional)"
 #: src/pages/SpaceSearch.tsx
 msgid "File"
 msgstr "Archivo"
+
+#: src/components/board/BoardView/BoardCard.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
+msgid "Files"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Files or folders on the computer"
@@ -3889,6 +3971,7 @@ msgstr "Bajar"
 msgid "Move them to your shared memory."
 msgstr "Muévelas a tu memoria compartida."
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "Mover a"
@@ -3896,6 +3979,11 @@ msgstr "Mover a"
 #: src/pages/ModelRoleSettings.tsx
 msgid "Move up"
 msgstr "Subir"
+
+#. placeholder {0}: statuses[line.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Moved back to {0}"
+msgstr ""
 
 #: src/components/call/CallCard.tsx
 msgid "Mute"
@@ -3955,6 +4043,7 @@ msgstr "Necesita entrada"
 msgid "Needs takeover"
 msgstr "Necesita toma de control"
 
+#: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/computer-overlay.tsx
 #: src/pages/shell/message-view.tsx
@@ -4031,6 +4120,10 @@ msgstr "Página siguiente"
 msgid "Next settings sections"
 msgstr "Siguientes secciones de configuración"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Next week"
+msgstr ""
+
 #: src/pages/PluginsOverlay.tsx
 msgid "No apps match your search."
 msgstr "Ninguna app coincide con tu búsqueda."
@@ -4055,6 +4148,10 @@ msgstr ""
 #: src/pages/shell/bot-picker.tsx
 msgid "No bots match"
 msgstr "Ningún bot coincide"
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "No date"
+msgstr ""
 
 #: src/components/AskCard.tsx
 msgid "No longer active"
@@ -4357,6 +4454,7 @@ msgstr "Otro modelo…"
 msgid "Output"
 msgstr "Salida"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/lib/identity-display.ts
 #: src/pages/Board.tsx
 msgid "Owner"
@@ -4552,6 +4650,7 @@ msgstr "Página anterior"
 msgid "Previous settings sections"
 msgstr "Secciones de configuración anteriores"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/Board.tsx
 msgid "Priority"
 msgstr "Prioridad"
@@ -4795,6 +4894,8 @@ msgstr "Quitar"
 
 #. placeholder {0}: attachment.file.name
 #. placeholder {0}: device.name
+#. placeholder {0}: item.file.name
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/components/ComputerDeviceSettings.tsx
 #: src/pages/shell/composer.tsx
 msgid "Remove {0}"
@@ -4831,6 +4932,11 @@ msgstr "Quitar evento de Git"
 #: src/components/ModelHeadersEditor.tsx
 msgid "Remove header"
 msgstr "Eliminar encabezado"
+
+#. placeholder {0}: mention.name
+#: src/components/board/TicketModal/MentionChip.tsx
+msgid "Remove mention {0}"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Remove message trigger"
@@ -4893,6 +4999,7 @@ msgstr "Reemplazar clave"
 msgid "Replace value"
 msgstr "Reemplazar valor"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/message-hover-actions.tsx
 #: src/pages/shell/quote-selection-button.tsx
 msgid "Reply"
@@ -5268,6 +5375,7 @@ msgstr "Selecciona un bot"
 msgid "Self-hosted"
 msgstr "Autoalojado"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Send"
 msgstr "Enviar"
@@ -5390,6 +5498,10 @@ msgstr "Memoria compartida"
 msgid "Show"
 msgstr "Mostrar"
 
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Show {hidden} older"
+msgstr ""
+
 #: src/pages/GroupPanel.tsx
 msgid "Show all"
 msgstr "Mostrar todos"
@@ -5402,6 +5514,7 @@ msgstr "Mostrar bots"
 msgid "Show list"
 msgstr "Mostrar lista"
 
+#: src/components/board/TicketModal/ClampedDescription.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/ScratchpadSection.tsx
@@ -5516,6 +5629,7 @@ msgid "Skipped"
 msgstr "Omitido"
 
 #. placeholder {0}: skipped.join(", ")
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "Skipped {0}"
 msgstr "Se omitió {0}"
@@ -5540,6 +5654,11 @@ msgstr "No se pudieron cargar algunos plugins."
 #: src/pages/shell/agent-import.tsx
 msgid "Some settings are not imported"
 msgstr "Algunos ajustes no se importan"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
+msgid "Someone"
+msgstr ""
 
 #: src/App.tsx
 #: src/lib/user-error.ts
@@ -5607,9 +5726,14 @@ msgstr ""
 msgid "SSO is temporarily unavailable. Try again."
 msgstr "SSO no está disponible temporalmente. Inténtalo de nuevo."
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/shell/computer-overlay.tsx
 msgid "Start"
 msgstr "Iniciar"
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Start {start}"
+msgstr ""
 
 #: src/components/ModelCredits.tsx
 #: src/pages/Paywall.tsx
@@ -5631,6 +5755,7 @@ msgstr "Iniciando"
 msgid "Starting…"
 msgstr "Iniciando…"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/ActivityList.tsx
 #: src/pages/Board.tsx
 msgid "Status"
@@ -5768,6 +5893,10 @@ msgstr "Mensaje de Teams"
 #: src/pages/RoutineEditor.tsx
 msgid "Teams not enabled"
 msgstr "Teams no está activado"
+
+#: src/components/board/BoardView/QuickAdd.tsx
+msgid "Tell a {noun} what to do…"
+msgstr ""
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Test"
@@ -6005,9 +6134,21 @@ msgstr "Este inicio de sesión por suscripción aún no está disponible en Raka
 msgid "This week"
 msgstr "Esta semana"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "This weekend"
+msgstr ""
+
 #: src/lib/cron.ts
 msgid "Thursday"
 msgstr "jueves"
+
+#: src/components/board/TicketModal/NarrowTicket.tsx
+msgid "Ticket"
+msgstr ""
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Time"
+msgstr ""
 
 #: src/pages/RoutineSchedule.tsx
 msgid "Time of day"
@@ -6021,6 +6162,7 @@ msgstr "Zona horaria"
 msgid "Timing may differ"
 msgstr "El horario puede variar"
 
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 msgid "Title"
 msgstr "Título"
@@ -6042,6 +6184,7 @@ msgstr "Por hacer"
 msgid "To:"
 msgstr "Para:"
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/shell/chat-context.tsx
 msgid "Today"
@@ -6050,6 +6193,10 @@ msgstr "Hoy"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Tokens"
 msgstr "Tokens"
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Tomorrow"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Tool arguments (JSON)"
@@ -6162,7 +6309,9 @@ msgstr "Activar el sonido"
 msgid "Unpin"
 msgstr "Desfijar"
 
+#. placeholder {0}: item.file.name
 #. placeholder {0}: pending.file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "Unsupported file type: {0}"
 msgstr "Tipo de archivo no compatible: {0}"
@@ -6520,17 +6669,25 @@ msgstr "Espacio de trabajo"
 msgid "year"
 msgstr "año"
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/shell/chat-context.tsx
 #: src/pages/shell/sidebar-roster.tsx
 msgid "Yesterday"
 msgstr "Ayer"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx
 #: src/pages/shell/shell-sidebar.tsx
 msgid "You"
 msgstr "Tú"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "You attached {name}"
+msgstr ""
 
 #: src/pages/McpOAuthCallback.tsx
 msgid "You can close this tab if it does not redirect automatically."
@@ -6596,6 +6753,10 @@ msgstr "Tu suscripción o clave de API"
 #: src/pages/Welcome.tsx
 msgid "Your team of always-on agents<0/>that you can give real work to."
 msgstr "Tu equipo de agentes siempre activos<0/>a los que puedes dar trabajo real."
+
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Your turn"
+msgstr ""
 
 #: src/lib/user-error.ts
 msgid "Your voice provider is out of credit."

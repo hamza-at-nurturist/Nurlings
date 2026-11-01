@@ -109,7 +109,7 @@ describe("mobile i18n", () => {
     resetI18nForTests("es");
     expect(t("Account")).toBe("Cuenta");
     expect(t("Sign in to Rakazo")).toBe(`Inicia sesión en ${brand.name}`);
-    expect(t("New bot")).toBe("Nuevo bot");
+    expect(t("New bot")).toBe(`Nuevo ${brand.bot.singular}`);
     expect(t("{runs} runs, {tokens} tokens", { runs: 3, tokens: 12 })).toBe(
       "3 ejecuciones, 12 tokens",
     );

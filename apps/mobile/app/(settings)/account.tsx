@@ -712,7 +712,9 @@ export default function Account() {
           ) : null}
           {(
             [
-              ...(me?.ticketBoardEnabled ? [{ title: t("Board"), href: "/board" } as const] : []),
+              ...(me?.ticketBoardEnabled
+                ? [{ title: t("Board"), href: "/nurlings/board" } as const]
+                : []),
               { title: t("Artifacts"), href: "/artifacts" },
               { title: t("Models"), href: "/models" },
               { title: t("Voice"), href: "/voice" },

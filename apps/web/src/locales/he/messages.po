@@ -81,12 +81,15 @@ msgid "{0, plural, one {Waiting for sign-in — the link expires in about # minu
 msgstr "{0, plural, one {ממתין להתחברות — הקישור יפוג בעוד כ-# דקה.} other {ממתין להתחברות — הקישור יפוג בעוד כ-# דקות.}}"
 
 #. placeholder {0}: file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "{0} (max {ATTACHMENT_MAX_COUNT} attachments)"
 msgstr "{0} (עד {ATTACHMENT_MAX_COUNT} קבצים מצורפים)"
 
 #. placeholder {0}: file.name
 #. placeholder {1}: attachmentSizeLabel(attachmentMaxBytes(bootstrapMe))
+#. placeholder {1}: attachmentSizeLabel(maxBytes)
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "{0} (over {1})"
 msgstr "{0} (מעל {1})"
@@ -155,6 +158,31 @@ msgstr "{0} TB"
 #: src/pages/ExternalConversationSettings.tsx
 msgid "{0} will still respond to direct mentions."
 msgstr "{0} ימשיך להגיב לאזכורים ישירים."
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} approved it"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} assigned it to {owner}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} attached {name}"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this"
+msgstr ""
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this and assigned it to {owner}"
+msgstr ""
+
+#. placeholder {0}: statuses[line.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} moved it to {0}"
+msgstr ""
 
 #: src/lib/billing.ts
 msgid "{amount} / {period}"
@@ -252,6 +280,10 @@ msgstr "בקשה מאת {name}"
 msgid "{name} asked: {text}"
 msgstr "בקשה מאת {name}: {text}"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} couldn't finish, reply to retry"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: src/lib/browser-notifications.ts
 msgid "{name} failed"
@@ -261,6 +293,10 @@ msgstr "{name} נכשל"
 #: src/lib/browser-notifications.ts
 msgid "{name} finished"
 msgstr "{name} סיים"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} is working…"
+msgstr ""
 
 #: src/pages/ModelRoleSettings.tsx
 msgid "{name} options"
@@ -415,6 +451,10 @@ msgstr "{title}, יישמר בשם {savedAs}"
 msgid "{toolCount, plural, one {# tool} other {# tools}}"
 msgstr "{toolCount, plural, one {# כלי} other {# כלים}}"
 
+#: src/components/board/BoardView/BoardCard.tsx
+msgid "{workerName} is working…"
+msgstr ""
+
 #. placeholder {0}: mention.name
 #: src/pages/shell/composer.tsx
 msgid "@{0}"
@@ -489,10 +529,12 @@ msgstr "פעולות למרחב"
 msgid "Active"
 msgstr "פעיל"
 
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/pages/shell/sidebar-header.tsx
 msgid "Activity"
 msgstr "פעילות"
 
+#: src/components/board/BoardView/QuickAdd.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/pages/McpServersOverlay.tsx
 #: src/pages/PluginsOverlay.tsx
@@ -607,6 +649,10 @@ msgstr "הוספת URL של שרת"
 msgid "Add skills"
 msgstr ""
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Add time"
+msgstr ""
+
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Add to routine"
 msgstr "הוספה לרוטינה"
@@ -648,6 +694,7 @@ msgstr "מתקדם..."
 msgid "Agent from another app"
 msgstr ""
 
+#: src/components/board/BoardView/NurlingFilter.tsx
 #: src/pages/PluginsOverlay.tsx
 msgid "All"
 msgstr ""
@@ -838,6 +885,9 @@ msgstr "מודל אישור"
 msgid "Approvals"
 msgstr "אישורים"
 
+#: src/components/board/BoardView/BoardCard.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/MessagingSettingsPanel.tsx
 #: src/pages/PluginSubmissionsPanel.tsx
 #: src/pages/shell/message-cards.tsx
@@ -899,6 +949,7 @@ msgstr "בשעה {0}"
 msgid "at {timeSelect}"
 msgstr "בשעה {timeSelect}"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Attach file"
 msgstr "צירוף קובץ"
@@ -973,6 +1024,8 @@ msgstr "זמין לפקודות shell בתור {commandVariable}"
 msgid "Avatar Studio"
 msgstr "Avatar Studio"
 
+#: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/components/integrations/skills-dialog.tsx
 #: src/pages/AdminAccessPage.tsx
@@ -1022,6 +1075,9 @@ msgstr "לחסום"
 msgid "Blocked"
 msgstr "חסום"
 
+#: src/components/board/BoardView/BoardView.tsx
+#: src/components/board/TicketModal/NarrowTicket.tsx
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/components/SidebarFooter.tsx
 #: src/pages/Board.tsx
 msgid "Board"
@@ -1372,6 +1428,10 @@ msgstr "סגירת התרשים"
 msgid "Close computer"
 msgstr "סגירת המחשב"
 
+#: src/components/board/TicketModal/TicketImage.tsx
+msgid "Close image"
+msgstr ""
+
 #: src/pages/shell/message-cards.tsx
 msgid "Close image preview"
 msgstr "סגירת התצוגה המקדימה של התמונה"
@@ -1437,6 +1497,10 @@ msgstr "קוד"
 msgctxt "email sign-in"
 msgid "Code"
 msgstr "קוד"
+
+#: src/components/board/TicketModal/TicketModal.tsx
+msgid "Collapse"
+msgstr ""
 
 #. placeholder {0}: headerName(group)
 #: src/pages/shell/sidebar-roster.tsx
@@ -1924,8 +1988,10 @@ msgstr "לא ניתן לסגור"
 msgid "Could not dismiss this server"
 msgstr "לא ניתן לדחות את השרת הזה"
 
+#. placeholder {0}: file.name
 #. placeholder {0}: props.name
 #: src/components/ArtifactFileCard.tsx
+#: src/components/board/TicketModal/TicketFileCard.tsx
 msgid "Could not download {0}. Try again."
 msgstr "לא ניתן להוריד את {0}. אפשר לנסות שוב."
 
@@ -2529,6 +2595,8 @@ msgstr "נדחה"
 msgid "Deny"
 msgstr "דחייה"
 
+#: src/components/board/TicketModal/ClampedDescription.tsx
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Description"
@@ -2698,6 +2766,14 @@ msgstr "טיוטת מיומנות"
 msgid "Drag, drop, or paste an image"
 msgstr "אפשר לגרור, לשחרר או להדביק תמונה"
 
+#: src/components/board/TicketModal/Properties.tsx
+msgid "Due"
+msgstr ""
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Due {due}"
+msgstr ""
+
 #: src/pages/BotContextMenu.tsx
 msgid "Duplicate"
 msgstr "שכפול"
@@ -2857,6 +2933,7 @@ msgstr "כל שבוע"
 msgid "Executor token"
 msgstr "טוקן Executor"
 
+#: src/components/board/TicketModal/TicketModal.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Expand"
 msgstr "הרחבה"
@@ -2940,6 +3017,11 @@ msgstr ""
 #: src/pages/SpaceSearch.tsx
 msgid "File"
 msgstr "קובץ"
+
+#: src/components/board/BoardView/BoardCard.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
+msgid "Files"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Files or folders on the computer"
@@ -3889,6 +3971,7 @@ msgstr "הזזה למטה"
 msgid "Move them to your shared memory."
 msgstr "אפשר להעביר אותם לזיכרון המשותף."
 
+#: src/components/board/BoardView/BoardCard.tsx
 #: src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "העברה אל"
@@ -3896,6 +3979,11 @@ msgstr "העברה אל"
 #: src/pages/ModelRoleSettings.tsx
 msgid "Move up"
 msgstr "הזזה למעלה"
+
+#. placeholder {0}: statuses[line.status]
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Moved back to {0}"
+msgstr ""
 
 #: src/components/call/CallCard.tsx
 msgid "Mute"
@@ -3955,6 +4043,7 @@ msgstr "ממתין לקלט"
 msgid "Needs takeover"
 msgstr "נדרשת השתלטות"
 
+#: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
 #: src/pages/shell/computer-overlay.tsx
 #: src/pages/shell/message-view.tsx
@@ -4031,6 +4120,10 @@ msgstr "העמוד הבא"
 msgid "Next settings sections"
 msgstr ""
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Next week"
+msgstr ""
+
 #: src/pages/PluginsOverlay.tsx
 msgid "No apps match your search."
 msgstr "אין אפליקציות שתואמות לחיפוש."
@@ -4055,6 +4148,10 @@ msgstr ""
 #: src/pages/shell/bot-picker.tsx
 msgid "No bots match"
 msgstr "אין בוטים תואמים"
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "No date"
+msgstr ""
 
 #: src/components/AskCard.tsx
 msgid "No longer active"
@@ -4357,6 +4454,7 @@ msgstr "מודל אחר…"
 msgid "Output"
 msgstr "פלט"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/lib/identity-display.ts
 #: src/pages/Board.tsx
 msgid "Owner"
@@ -4552,6 +4650,7 @@ msgstr "העמוד הקודם"
 msgid "Previous settings sections"
 msgstr ""
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/Board.tsx
 msgid "Priority"
 msgstr "עדיפות"
@@ -4795,6 +4894,8 @@ msgstr "הסרה"
 
 #. placeholder {0}: attachment.file.name
 #. placeholder {0}: device.name
+#. placeholder {0}: item.file.name
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/components/ComputerDeviceSettings.tsx
 #: src/pages/shell/composer.tsx
 msgid "Remove {0}"
@@ -4831,6 +4932,11 @@ msgstr "הסרת אירוע Git"
 #: src/components/ModelHeadersEditor.tsx
 msgid "Remove header"
 msgstr "הסרת header"
+
+#. placeholder {0}: mention.name
+#: src/components/board/TicketModal/MentionChip.tsx
+msgid "Remove mention {0}"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Remove message trigger"
@@ -4893,6 +4999,7 @@ msgstr "החלפת מפתח"
 msgid "Replace value"
 msgstr "החלפת ערך"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/message-hover-actions.tsx
 #: src/pages/shell/quote-selection-button.tsx
 msgid "Reply"
@@ -5268,6 +5375,7 @@ msgstr "בחירת בוט"
 msgid "Self-hosted"
 msgstr "באירוח עצמי"
 
+#: src/components/board/TicketModal/ReplyBox.tsx
 #: src/pages/shell/composer.tsx
 msgid "Send"
 msgstr "שליחה"
@@ -5390,6 +5498,10 @@ msgstr "זיכרון משותף"
 msgid "Show"
 msgstr "הצגה"
 
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Show {hidden} older"
+msgstr ""
+
 #: src/pages/GroupPanel.tsx
 msgid "Show all"
 msgstr ""
@@ -5402,6 +5514,7 @@ msgstr "הצגת בוטים"
 msgid "Show list"
 msgstr "הצגת רשימה"
 
+#: src/components/board/TicketModal/ClampedDescription.tsx
 #: src/pages/KnowledgeSection.tsx
 #: src/pages/PluginsOverlay.tsx
 #: src/pages/ScratchpadSection.tsx
@@ -5516,6 +5629,7 @@ msgid "Skipped"
 msgstr ""
 
 #. placeholder {0}: skipped.join(", ")
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "Skipped {0}"
 msgstr "דולגו: {0}"
@@ -5540,6 +5654,11 @@ msgstr ""
 #: src/pages/shell/agent-import.tsx
 msgid "Some settings are not imported"
 msgstr "חלק מההגדרות לא מיובאות"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
+msgid "Someone"
+msgstr ""
 
 #: src/App.tsx
 #: src/lib/user-error.ts
@@ -5607,8 +5726,13 @@ msgstr ""
 msgid "SSO is temporarily unavailable. Try again."
 msgstr "SSO אינו זמין כרגע. אפשר לנסות שוב."
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/shell/computer-overlay.tsx
 msgid "Start"
+msgstr ""
+
+#: src/components/board/TicketModal/CardDates.tsx
+msgid "Start {start}"
 msgstr ""
 
 #: src/components/ModelCredits.tsx
@@ -5631,6 +5755,7 @@ msgstr "מתחיל"
 msgid "Starting…"
 msgstr "מתחיל…"
 
+#: src/components/board/TicketModal/Properties.tsx
 #: src/pages/ActivityList.tsx
 #: src/pages/Board.tsx
 msgid "Status"
@@ -5768,6 +5893,10 @@ msgstr "הודעת Teams"
 #: src/pages/RoutineEditor.tsx
 msgid "Teams not enabled"
 msgstr "Teams לא מופעל"
+
+#: src/components/board/BoardView/QuickAdd.tsx
+msgid "Tell a {noun} what to do…"
+msgstr ""
 
 #: src/components/teach/SkillDraftCard.tsx
 msgid "Test"
@@ -6005,9 +6134,21 @@ msgstr "התחברות עם המנוי הזה עדיין לא זמינה ב-Raka
 msgid "This week"
 msgstr "השבוע"
 
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "This weekend"
+msgstr ""
+
 #: src/lib/cron.ts
 msgid "Thursday"
 msgstr "יום חמישי"
+
+#: src/components/board/TicketModal/NarrowTicket.tsx
+msgid "Ticket"
+msgstr ""
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Time"
+msgstr ""
 
 #: src/pages/RoutineSchedule.tsx
 msgid "Time of day"
@@ -6021,6 +6162,7 @@ msgstr ""
 msgid "Timing may differ"
 msgstr "התזמון עשוי להשתנות"
 
+#: src/components/board/TicketModal/TicketPane.tsx
 #: src/pages/Board.tsx
 msgid "Title"
 msgstr "כותרת"
@@ -6042,6 +6184,7 @@ msgstr "לביצוע"
 msgid "To:"
 msgstr "אל:"
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/shell/chat-context.tsx
 msgid "Today"
@@ -6050,6 +6193,10 @@ msgstr "היום"
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Tokens"
 msgstr "טוקנים"
+
+#: src/components/board/TicketModal/DatePicker.tsx
+msgid "Tomorrow"
+msgstr ""
 
 #: src/pages/RoutineEditor.tsx
 msgid "Tool arguments (JSON)"
@@ -6162,7 +6309,9 @@ msgstr "ביטול השתקה"
 msgid "Unpin"
 msgstr "ביטול הצמדה"
 
+#. placeholder {0}: item.file.name
 #. placeholder {0}: pending.file.name
+#: src/components/board/TicketModal/use-staged-files.ts
 #: src/pages/shell/use-composer-actions.ts
 msgid "Unsupported file type: {0}"
 msgstr "סוג קובץ לא נתמך: {0}"
@@ -6520,17 +6669,25 @@ msgstr ""
 msgid "year"
 msgstr "שנה"
 
+#: src/components/board/TicketModal/DatePicker.tsx
 #: src/pages/shell/chat-context.tsx
 #: src/pages/shell/sidebar-roster.tsx
 msgid "Yesterday"
 msgstr "אתמול"
 
+#: src/components/board/TicketModal/ActivityFeed.tsx
+#: src/components/board/TicketModal/LatestActivity.tsx
+#: src/components/board/TicketModal/TicketFiles.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 #: src/pages/Shell.tsx
 #: src/pages/shell/message-view.tsx
 #: src/pages/shell/shell-sidebar.tsx
 msgid "You"
 msgstr "אני"
+
+#: src/components/board/TicketModal/ActivityFeed.tsx
+msgid "You attached {name}"
+msgstr ""
 
 #: src/pages/McpOAuthCallback.tsx
 msgid "You can close this tab if it does not redirect automatically."
@@ -6596,6 +6753,10 @@ msgstr ""
 #: src/pages/Welcome.tsx
 msgid "Your team of always-on agents<0/>that you can give real work to."
 msgstr "צוות של סוכנים שזמינים תמיד<0/>שאפשר להטיל עליהם עבודה אמיתית."
+
+#: src/components/board/BoardView/BoardColumn.tsx
+msgid "Your turn"
+msgstr ""
 
 #: src/lib/user-error.ts
 msgid "Your voice provider is out of credit."

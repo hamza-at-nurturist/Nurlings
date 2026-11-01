@@ -105,10 +105,11 @@ describe("mobile app config", () => {
     vi.stubEnv("EAS_BUILD_PROFILE", "development");
     vi.stubEnv("RAKAZO_PASSKEY_DEVELOPER_MODE", "1");
 
+    const base = brandExpoConfig(config);
     expect(appConfig(context(config))).toEqual({
-      ...config,
-      ios: { ...config.ios, associatedDomains: ["webcredentials:app.example.com?mode=developer"] },
-      extra: { ...config.extra, passkeyRpIds: ["app.example.com"] },
+      ...base,
+      ios: { ...base.ios, associatedDomains: ["webcredentials:app.example.com?mode=developer"] },
+      extra: { ...base.extra, passkeyRpIds: ["app.example.com"] },
     });
   });
 

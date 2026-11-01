@@ -40,12 +40,17 @@ type TicketToolDeps = {
 };
 
 function ticketInputError(error: { issues: Array<{ path: PropertyKey[]; message: string }> }) {
+  const seen = new Set<string>();
   return error.issues
     .map(({ path, message }) => {
       const field =
         path[0] === "assigneeBotId" ? "ownerBotId" : path[0] === "ticketId" ? "id" : path.join(".");
+      // One message per field is enough to correct it (a bad date fails two checks).
+      if (seen.has(field)) return null;
+      seen.add(field);
       return field ? `${field}: ${message}` : message;
     })
+    .filter((line): line is string => line !== null)
     .join("; ");
 }
 

@@ -122,6 +122,9 @@ async function runRoutine(
     yield { type: "done" as const, text: "Inbox is clear." };
   });
   const prisma = {
+    // A mutating tool's effect is written under the run's lease, in a transaction.
+    $transaction: vi.fn(async (write: (tx: unknown) => unknown) => write(prisma)),
+    $queryRaw: vi.fn(async () => []),
     run: {
       findUnique: vi.fn(async () => run),
       findUniqueOrThrow: vi.fn(async () => run),

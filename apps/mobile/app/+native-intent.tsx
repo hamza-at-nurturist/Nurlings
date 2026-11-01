@@ -1,4 +1,5 @@
 import { receiveIncomingShare } from "../lib/incoming-share";
+import { nurlingsBoardPath } from "../lib/nurlings-board/links";
 import { closeSettingsSheet, isSettingsLink, linkScreen } from "../lib/settings-sheet";
 
 /** A link to a screen outside settings closes the settings sheet first, so the screen opens on
@@ -8,5 +9,5 @@ export function redirectSystemPath({ path, initial }: { path: string; initial: b
   const isShare = linkScreen(path) === "expo-sharing";
   receiveIncomingShare(isShare, initial);
   if (!isSettingsLink(path)) closeSettingsSheet();
-  return isShare ? "/share" : path;
+  return isShare ? "/share" : nurlingsBoardPath(path);
 }
