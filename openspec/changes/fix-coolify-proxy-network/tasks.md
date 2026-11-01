@@ -14,8 +14,18 @@
   Verify: the runbook test passes.
 - [x] 2.3 Guard the label in `coolify-compose.test.ts`. Verify: the test passes.
 
-## 3. After merge
+## 3. Coolify label escaping
 
-- [ ] 3.1 Redeploy a client server twice and confirm the site answers after each. Verify: no
+- [x] 3.1 Confirm on the test server that the label resolves to the UUID only with "Escape special
+  characters in labels" OFF. Verify: reported by the maintainer from the test server.
+- [x] 3.2 Make the setting a required step in the runbook checklist and the Gateway Timeout entry
+  with the `docker inspect` check, and note it in the compose comment. Verify: the runbook test
+  passes.
+- [x] 3.3 Keep the label guard and extend it to the setting. Verify: `coolify-compose.test.ts`
+  passes.
+
+## 4. After merge
+
+- [ ] 4.1 Redeploy a client server twice and confirm the site answers after each. Verify: no
   Gateway Timeout.
-- [ ] 3.2 Archive the change with `--skip-specs` (a deployment fix has no spec delta).
+- [ ] 4.2 Archive the change with `--skip-specs` (a deployment fix has no spec delta).

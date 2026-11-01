@@ -74,15 +74,19 @@ SSL mode to Full (strict).
 2. Paste the contents of `docker-compose.yml`. Save.
 3. Open the `web` service and set its domain to `https://<client>.nurlings.nurturistai.com`.
    It is the only service with a domain. If Coolify asks for the port, it is `5173`.
-4. Open **Environment Variables**:
+4. Open the resource's **Advanced** settings and turn **Escape special characters in labels**
+   OFF. Required: with it on, Coolify escapes the `$` in the `web` label that pins Traefik to
+   Coolify's network, the label stays a literal `${...}` string, and redeploys can answer Gateway
+   Timeout. Verify it after the first deploy with the command in section 9.
+5. Open **Environment Variables**:
    - Set `NURLINGS_VERSION` to the release tag to deploy (see section 7). Never `latest` or `edge`.
    - Check that the `SERVICE_PASSWORD_*` values and `SERVICE_URL_WEB` / `SERVICE_FQDN_WEB` exist,
      and that the URL shows your domain with no port.
    - Fill any optional values from the table below.
    - Copy `SERVICE_PASSWORD_64_CRYPT` (the encryption key) to the client's password manager now.
-5. **Deploy**. The first start takes a few minutes: it pulls three images and runs migrations.
+6. **Deploy**. The first start takes a few minutes: it pulls three images and runs migrations.
    All services should reach healthy; `computer` and `data-init` run once and exit.
-6. Open the URL and register the first account straight away: the first registered user becomes the
+7. Open the URL and register the first account straight away: the first registered user becomes the
    deployment owner. Then set `SIGNUPS_ENABLED` to `false` (it is `true` until you do) or limit
    registration with `SIGNUP_ALLOWLIST`, and redeploy.
 
@@ -198,7 +202,7 @@ Then **Redeploy** in Coolify to start everything again. Copy backups off the ser
 | Bots start but cannot look anything up | DNS: set `SANDBOX_COMPUTER_DNS` to a public resolver your network allows. |
 | `Blocked request. This host is not allowed` on the web page | The `web` domain does not match the URL you are using. Fix the domain and redeploy. |
 | `worker` shows unhealthy right after a deploy | It reports healthy after about two minutes; look at its logs if it does not. |
-| `Gateway Timeout` after a redeploy | Traefik chose a network the proxy is not on. The `web` label `traefik.docker.network` pins Coolify's resource network. Check it: `docker inspect $(docker ps -qf label=com.docker.compose.project=<resource uuid> -f label=com.docker.compose.service=web) --format '{{ index .Config.Labels "traefik.docker.network" }}'` prints the resource UUID. If the label is missing or wrong, set `NURLINGS_PROXY_NETWORK` to the UUID from the Coolify URL and redeploy. |
+| `Gateway Timeout` after a redeploy | Traefik chose a network the proxy is not on. The `web` label `traefik.docker.network` pins Coolify's resource network. Check it: `docker inspect $(docker ps -qf label=com.docker.compose.project=<resource uuid> -f label=com.docker.compose.service=web) --format '{{ index .Config.Labels "traefik.docker.network" }}'` must print the resource UUID. If it prints `${...}`, **Escape special characters in labels** is on: turn it off under the resource's Advanced settings and redeploy. If the label is missing or wrong otherwise, set `NURLINGS_PROXY_NETWORK` to the UUID from the Coolify URL and redeploy. |
 | Sign-in loops or redirects to `localhost` | `SERVICE_URL_WEB` is empty. Set the `web` domain and redeploy. |
 
 ## 10. The test server
