@@ -14,17 +14,16 @@ pull request SHALL be cancelled.
 - **THEN** the older run is cancelled
 
 ### Requirement: Web E2E runs when the web stack changes
-On a pull request, Web E2E SHALL run only when the change touches `apps/web`, `apps/api`,
-`packages/ui-*`, `packages/chat-ui`, `packages/contracts` or another path the end-to-end stack
-depends on (all of `packages/`, `apps/worker`, `apps/www`, the root build files and the CI and
-Playwright workflows, listed in `scripts/ci-e2e-paths.sh`). On a push to `main` it SHALL always run.
+On a pull request, Web E2E SHALL run only when the change touches something the end-to-end stack
+depends on, as decided by `.github/scripts/changed-areas.sh`. On a push to `main` it SHALL always
+run.
 
 #### Scenario: Web change
 - **WHEN** a pull request changes `apps/web/src/main.tsx`
 - **THEN** Web E2E runs
 
 #### Scenario: Unrelated change
-- **WHEN** a pull request changes only `apps/mobile` or `apps/desktop` files
+- **WHEN** a pull request changes only files the end-to-end stack does not use
 - **THEN** Web E2E is skipped
 
 #### Scenario: Push to main
@@ -43,32 +42,22 @@ pull requests.
 - **WHEN** a commit is pushed to `main`
 - **THEN** both Native computer jobs run
 
-### Requirement: Runs for a merge to main are never cancelled
-Each push to `main` SHALL have a CI run that runs to completion. Only the older run of the same
-pull request SHALL be cancelled by a newer push. The CI concurrency group SHALL therefore be the
-pull request number for pull requests and the commit for every other event, not a branch-wide
-group that keeps only one waiting run.
-
-#### Scenario: Three quick merges
-- **WHEN** a second and a third merge land on `main` while the CI run of an earlier merge is still running
-- **THEN** all three later runs start and finish, and none is cancelled
-
-#### Scenario: New push to a pull request
-- **WHEN** a new commit is pushed to a pull request while its CI is running
-- **THEN** the older run is cancelled
-
 ### Requirement: The Playwright report tolerates a skipped Web E2E
-The Playwright report workflow SHALL finish successfully, with a notice and without publishing
-anything, when the CI run it follows has no Web E2E job or the job was skipped. It SHALL still fail
-when the job is missing for any other reason, such as more than one job with that name.
+The Playwright report workflow SHALL finish successfully, without publishing anything, when the CI
+run it follows skipped Web E2E, and SHALL skip the screenshot gallery with a notice, instead of
+failing, when its storage is not configured.
 
 #### Scenario: Docs-only pull request
 - **WHEN** a pull request changes no end-to-end path and Web E2E is skipped
-- **THEN** the report workflow ends green with a notice and runs no later step
+- **THEN** the report workflow ends green and publishes nothing
 
 #### Scenario: Web change
 - **WHEN** Web E2E ran and finished
 - **THEN** the report workflow reads its result and continues as before
+
+#### Scenario: No gallery storage
+- **WHEN** Web E2E ran but the storage variables are not set
+- **THEN** the report workflow ends green with a notice and the screenshots stay in the run's artifacts
 
 ### Requirement: The Android APK release is Nurlings-branded
 The `release-android-apk` workflow SHALL publish the APK as `nurlings.apk` on a release titled
@@ -98,3 +87,12 @@ on as "Nurlings Preview" with the Android package `com.nurturistai.nurlings.prev
 #### Scenario: Main release
 - **WHEN** the workflow runs without `preview`
 - **THEN** it runs only from `main` and publishes `nurlings.apk` on the `android` release as before
+
+### Requirement: Upstream-only jobs stay off the fork
+Jobs that publish to upstream's Expo project, deploy to upstream's host, push upstream's images,
+run its dependency agent or release its App Store app SHALL run only in `elie222/rakazo`, and the
+brand guard SHALL run with lint and again on the built web app.
+
+#### Scenario: A push to main on the fork
+- **WHEN** a commit is pushed to the fork's `main`
+- **THEN** the mobile update, production deploy, server image and weekly dependency jobs do not run, and the brand checks do

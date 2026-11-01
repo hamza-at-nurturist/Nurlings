@@ -210,8 +210,9 @@ with the comment, and a failed send SHALL keep the draft and attachments.
 
 ### Requirement: Ticket notifications open the ticket
 Tapping a push notification that carries a ticket id (a Nurling mentioned the user on a ticket, a
-ticket is overdue) SHALL open the Ticket screen for that ticket in the notification's space, and
-`rakazo://ticket` links SHALL do the same. A notification without a ticket id SHALL keep opening
+ticket is overdue) SHALL open the Ticket screen at `/nurlings/ticket` for that ticket in the
+notification's space, and `rakazo://ticket` links SHALL do the same. A `rakazo://board` link SHALL
+open the Board screen at `/nurlings/board`. A notification without a ticket id SHALL keep opening
 the Nurling's chat.
 
 #### Scenario: Overdue push
@@ -226,6 +227,10 @@ the Nurling's chat.
 - **WHEN** the user taps a notification with no ticket id
 - **THEN** the Nurling's chat opens as before
 
+#### Scenario: Board link
+- **WHEN** the user opens `rakazo://board`
+- **THEN** the Nurlings Board screen opens
+
 ### Requirement: Board logic is shared between web and mobile
 Board columns, card fields and date labels, quick-add parsing, mention parsing and picker options,
 and the merged activity with its separator rows SHALL be implemented once in `@rakazo/core` and
@@ -234,3 +239,16 @@ used by both the web and the mobile clients.
 #### Scenario: One implementation
 - **WHEN** the rule for which tickets a column shows changes
 - **THEN** it changes in one place and both clients follow
+
+### Requirement: The fork's Board owns its own route
+The Board and Ticket screens SHALL live at `/nurlings/board` and `/nurlings/ticket`, and every
+entry (home header, Settings > Board, push notifications, deep links) SHALL open them. No entry
+SHALL navigate to `/board`, which belongs to the upstream board screen kept unlinked in the tree.
+
+#### Scenario: Settings entry
+- **WHEN** the ticket board is enabled and the user picks Board in Settings
+- **THEN** the Nurlings Board screen opens
+
+#### Scenario: Upstream board unreachable
+- **WHEN** any in-app link or notification is followed
+- **THEN** none navigates to `/board`
