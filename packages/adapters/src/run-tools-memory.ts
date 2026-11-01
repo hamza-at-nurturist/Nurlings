@@ -4,7 +4,7 @@ import { readHistory, searchHistory } from "@rakazo/db";
 import { sharedMemorySaveError } from "./builtin-tools.js";
 import { redactConnectorPayload } from "./connector-safety.js";
 import { MAX_RECALLED_MEMORIES } from "./history-compaction.js";
-import { appendMemoryFact } from "./memory-tools.js";
+import { appendMemoryFact, tagMemoryFact } from "./memory-tools.js";
 import type { RunContext } from "./run-context.js";
 import type { ToolCall, ToolHandlers } from "./run-tool-gate.js";
 
@@ -20,6 +20,17 @@ export function historyMyChatsAllowed(
     source?.role === "user" &&
     source.threadId === run.threadId
   );
+}
+
+/** The ref of the ticket this run is working on, such as NUR-12, or undefined outside ticket runs. */
+async function runTicketRef(ctx: RunContext): Promise<string | undefined> {
+  const { ticketId } = ctx.task;
+  if (!ticketId) return undefined;
+  const ticket = await ctx.deps.prisma.ticket.findFirst({
+    where: { id: ticketId, spaceId: ctx.run.spaceId },
+    select: { number: true, board: { select: { ticketPrefix: true } } },
+  });
+  return ticket ? `${ticket.board.ticketPrefix}-${ticket.number}` : undefined;
 }
 
 async function readHistoryTool(ctx: RunContext, call: ToolCall) {
@@ -64,12 +75,13 @@ export const memoryTools: ToolHandlers = {
     const { deps, runId, bot, thread, context } = ctx;
     const { args } = call;
     const path = String(args.path ?? "").trim() || "MEMORY.md";
+    const fact = tagMemoryFact(String(args.content ?? ""), await runTicketRef(ctx));
     // A fact is added to the document, never replaces it. A concurrent save
     // changes the revision, so re-read and append again.
     for (let attempt = 1; ; attempt += 1) {
       const snapshot = await deps.memory.read({ scope: "bot", botId: bot.id, path }, context);
       const existing = snapshot.documents[0];
-      const content = appendMemoryFact(existing?.content ?? "", String(args.content ?? ""));
+      const content = appendMemoryFact(existing?.content ?? "", fact);
       if (content === (existing?.content ?? "")) return call.finish({ ok: true });
       try {
         await deps.memory.commit(
@@ -144,7 +156,7 @@ export const memoryTools: ToolHandlers = {
     return call.finish(
       await ctx.memory.semantic!.save(
         {
-          content: String(args.content ?? ""),
+          content: tagMemoryFact(String(args.content ?? ""), await runTicketRef(ctx)),
           scope: ctx.memory.scope!,
           botId: bot.id,
           source: { kind: "durable" },

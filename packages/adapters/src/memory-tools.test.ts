@@ -1,6 +1,6 @@
 import type { ConnectorTool } from "@rakazo/adapter-kit";
 import { describe, expect, it } from "vitest";
-import { appendMemoryFact, selectMemoryTools } from "./memory-tools.js";
+import { appendMemoryFact, selectMemoryTools, tagMemoryFact } from "./memory-tools.js";
 
 function tool(name: string): ConnectorTool {
   return { name, description: name, inputSchema: { type: "object", properties: {} } };
@@ -96,5 +96,18 @@ describe("multiline memory facts", () => {
     ]) {
       expect(appendMemoryFact(existing, "Office:\nBerlin")).toBe(`${existing}Office:\nBerlin\n`);
     }
+  });
+});
+
+describe("tagMemoryFact", () => {
+  it("prefixes the ticket ref on a ticket run", () => {
+    expect(tagMemoryFact("  Invoices go to finance  ", "NUR-12")).toBe(
+      "[NUR-12] Invoices go to finance",
+    );
+  });
+
+  it("leaves the fact alone outside a ticket run or when empty", () => {
+    expect(tagMemoryFact("Invoices go to finance", undefined)).toBe("Invoices go to finance");
+    expect(tagMemoryFact("   ", "NUR-12")).toBe("   ");
   });
 });
