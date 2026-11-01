@@ -81,12 +81,18 @@ vi.mock("@expo/ui/community/menu", () => ({
       createElement("button", {
         type: "button",
         "data-testid": "menu-approve",
-        onClick: () => props.onPressAction({ nativeEvent: { event: "approve" } }),
+        onClick: (event: { stopPropagation: () => void }) => {
+          event.stopPropagation(); // a native menu pick never reaches the card behind it
+          props.onPressAction({ nativeEvent: { event: "approve" } });
+        },
       }),
       createElement("button", {
         type: "button",
         "data-testid": "menu-move-blocked",
-        onClick: () => props.onPressAction({ nativeEvent: { event: "move:blocked" } }),
+        onClick: (event: { stopPropagation: () => void }) => {
+          event.stopPropagation();
+          props.onPressAction({ nativeEvent: { event: "move:blocked" } });
+        },
       }),
     ),
 }));
@@ -106,6 +112,20 @@ vi.mock("../i18n", () => ({
 }));
 vi.mock("../../components/bot-avatar", () => ({ BotAvatar: () => null }));
 vi.mock("../../components/native-symbol", () => ({ NativeSymbol: () => null }));
+vi.mock("../../components/nurlings-board/board-drag", () => ({
+  LONG_PRESS_MS: 350,
+  useBoardDrag: () => null,
+  useColumnScroll: () => ({}),
+  ColumnHighlight: () => null,
+}));
+vi.mock("react-native-gesture-handler", () => {
+  // Every builder method returns the builder, so Gesture.Pan().a().b() chains like the real one.
+  const builder: object = new Proxy(() => builder, { get: () => () => builder });
+  return {
+    Gesture: { Pan: () => builder },
+    GestureDetector: (props: { children?: ReactNode }) => props.children,
+  };
+});
 vi.mock("../ripple", () => ({ withAlpha: (color: string) => color }));
 
 import { BoardColumn } from "../../components/nurlings-board/board-column";
@@ -149,6 +169,7 @@ function render(
     root.render(
       createElement(BoardColumn, {
         status,
+        index: 0,
         tickets,
         older: [],
         showOlder: false,
@@ -254,5 +275,20 @@ it("reports a menu pick, a tap, and the older row", () => {
     }
   });
   expect(onShowOlder).toHaveBeenCalled();
+  rows.unmount();
+});
+
+it("gives every card a short named ⋯ button next to a tap that still opens it", () => {
+  const rows = render([ticket({}), ticket({ id: "t2", ref: "NUR-8" })], "review");
+  const labels = [...rows.container.querySelectorAll("button")].map((b) =>
+    b.getAttribute("aria-label"),
+  );
+  expect(labels.filter((label) => label === "More")).toHaveLength(2);
+  act(() =>
+    rows.container.querySelector<HTMLButtonElement>('[data-testid="board-card-t2"]')!.click(),
+  );
+  expect(rows.onAction).toHaveBeenLastCalledWith(expect.objectContaining({ id: "t2" }), {
+    type: "open",
+  });
   rows.unmount();
 });

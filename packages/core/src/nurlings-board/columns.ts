@@ -32,3 +32,8 @@ export function boardColumns(
     };
   });
 }
+
+/** Whether a card in `from` may be moved to `to`: any other column, the rule the web board drops by. */
+export function isMoveTarget(from: TicketStatus, to: TicketStatus): boolean {
+  return from !== to;
+}

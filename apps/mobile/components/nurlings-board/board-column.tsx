@@ -8,11 +8,13 @@ import type { CardMenuAction } from "../../lib/nurlings-board/card-menu";
 import { relativeDayLabels, statusLabels } from "../../lib/nurlings-board/labels";
 import { withAlpha } from "../../lib/ripple";
 import { BoardCard } from "./board-card";
+import { ColumnHighlight, useColumnScroll } from "./board-drag";
 import { Pill, StatusDot } from "./shared";
 
 /** One column page: its header, then its cards. */
 export function BoardColumn({
   status,
+  index,
   tickets,
   older,
   showOlder,
@@ -27,6 +29,8 @@ export function BoardColumn({
   onAction,
 }: {
   status: TicketStatus;
+  /** Position among the columns, which the drag uses to find the column under a card. */
+  index: number;
   tickets: TicketListItem[];
   older: TicketListItem[];
   showOlder: boolean;
@@ -44,6 +48,7 @@ export function BoardColumn({
   const tokens = useMobileTokens();
   const shown = showOlder ? [...tickets, ...older] : tickets;
   const yourTurn = status === "review" && shown.length > 0;
+  const scroll = useColumnScroll<TicketListItem>(index);
   const now = new Date();
   const labels = relativeDayLabels();
   return (
@@ -57,6 +62,7 @@ export function BoardColumn({
         },
       ]}
     >
+      <ColumnHighlight index={index} color={tokens.muted} />
       <View style={styles.header} accessibilityRole="header">
         <StatusDot status={status} tokens={tokens} />
         <Text
@@ -79,6 +85,7 @@ export function BoardColumn({
         ) : null}
       </View>
       <FlatList
+        {...scroll}
         data={shown}
         keyExtractor={(ticket) => ticket.id}
         nestedScrollEnabled

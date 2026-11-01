@@ -1,6 +1,6 @@
 import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import { WORKING_RUN_STATUSES } from "@rakazo/core";
-import { boardColumns } from "@rakazo/core/nurlings-board";
+import { boardColumns, isMoveTarget } from "@rakazo/core/nurlings-board";
 import { typeScale } from "@rakazo/ui-tokens";
 import { useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
@@ -104,7 +104,7 @@ export default function BoardScreen() {
       router.push({ pathname: "/ticket", params: { ticketId: ticket.id } });
     } else if (action.type === "approve") {
       void act(() => rpc("tickets/approve", { id: ticket.id }));
-    } else if (action.status !== ticket.status) {
+    } else if (isMoveTarget(ticket.status, action.status)) {
       const status: TicketStatus = action.status;
       // Shown now; the reload after the call puts the card back if the server refused.
       setTickets((rows) => rows.map((row) => (row.id === ticket.id ? { ...row, status } : row)));
