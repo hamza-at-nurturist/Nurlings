@@ -123,6 +123,26 @@ docker compose up -d --wait
 Pin a release tag or a `sha-<full-commit>` tag rather than `edge` or `latest` so a client only
 moves when you decide. To roll back, set the previous tag and run the same two commands.
 
+### Before a release that syncs with upstream
+
+A release that merges a large stretch of upstream (the November 2026 sync is 699 commits) runs
+migrations that drop columns and tables the previous release still reads. Normally the old and new
+API run side by side for a few seconds while migrations apply, and every migration is written to
+tolerate that. These releases are the exception, so for each client server:
+
+1. **Back up the database first**, for example `pg_dump -Fc` of the Postgres container, and keep
+   the dump for a day after the release has run.
+2. **Deploy at a quiet hour**, when nobody is chatting or running a ticket.
+3. **Expect a brief error window** (a few seconds up to a minute) in which requests from the old API
+   fail until the new one is serving. Nothing needs doing; reload the page if it shows an error.
+
+One migration (`-- deferred` in its first line) is held back by the migrate step and applied on the
+next deploy, so it never lands in the same run as the code that stops using what it drops.
+
+Stdio MCP servers (local MCP commands) can now only be added or edited by an admin. Set
+`RAKAZO_ADMIN_EMAILS` to the admin account's verified email in the server's environment (Coolify
+variables for a Coolify install); servers added earlier keep running without it.
+
 ## Why the updater stays off
 
 The server has no self-update path: the API has no update route and reads no updater address. The

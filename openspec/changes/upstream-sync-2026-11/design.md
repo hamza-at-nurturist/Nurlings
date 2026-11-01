@@ -135,19 +135,29 @@ admin account's email. Existing stdio servers keep running; checking this is a p
 
 ## Upstream overlap
 
-Files upstream changed that we also edit; our edit kept minimal. (Seeded from the dry run; the final
-list is written during the merge and replaces this section before the PR.)
+Files upstream changed that we also edit, with our edit kept as small as the merge allowed (written
+from the real merge).
 
-| File | Our edit | Resolution |
+| File | Our edit | Why |
 | --- | --- | --- |
-| `packages/db/prisma/migrations/20261025210001_runs_task_id_idx_concurrent/migration.sql` | none today | `IF NOT EXISTS` (upstream file edited) |
-| `apps/api/src/router.ts`, `app.ts` | board/ticket routes, `asTenant`, ticket hooks | keep ours, take the rest |
-| `packages/adapters/src/{executor,job-reconciler,background-job-handlers,builtin-tools,ticket-tools}.ts` | ticket tools and hooks, `ticket.dates` job | keep ours |
-| `apps/worker/src/index.ts` | `ticket.dates` registration | keep ours |
-| `packages/db/prisma/schema.prisma` | ticket models | union |
-| `apps/mobile/app/index.tsx`, `account.tsx`, `_layout.tsx`, `+native-intent.tsx` | Board entry, route repoint, screens | one-line edits where possible |
-| `packages/contracts/src/bot-avatar.ts`, `packages/ui-web/src/bot-avatar.tsx`, `apps/mobile/components/bot-avatar.tsx` | color format, brand mark | keep ours |
-| `deploy/coolify/docker-compose.yml`, README | label, `RAKAZO_ADMIN_EMAILS` | keep, add |
+| `packages/db/prisma/migrations/20261025210001_runs_task_id_idx_concurrent/migration.sql` | `IF NOT EXISTS` | Our earlier migration already created `runs_taskId_idx`; the only upstream migration edited |
+| `packages/db/prisma/schema.prisma` | union of models, one duplicate `runs` index removed | Both sides declared `@@index([taskId])` |
+| `apps/api/src/routes/boards.ts` | ticket cards, approve, events, runs, files, comment attachments and mentions | Upstream moved the board routes out of `router.ts`; our ticket handlers live there now |
+| `apps/api/src/{app.ts,ai-consent.ts,messaging-inbound.ts}`, `apps/worker/src/index.ts` | `ticketBoardEnabled`, `ticket.dates` reconciler, brand name, privacy link from the brand | Fork features |
+| `packages/adapters/src/{run-tools-tasks,run-context,executor,run-effects,run-replies,pi-runtime,pi-runtime-subagent,ticket-tools,builtin-tools,builtin-tool-bridge,builtin-skills,job-reconciler,background-job-handlers}.ts` | ticket tools (files, dates, mentions), brand names in prompts, ticket tools in the core toolset, the built-in "Rakazo" docs skill removed | Upstream split the executor into modules; edits re-applied there |
+| `packages/auth/src/{index,email,welcome-email,referral-email,plugin-submission-email}.ts(x)` | brand name in every email, no upstream links or founder sign-off | Emails moved to React Email templates |
+| `packages/core/src/bot-avatar-colors.ts`, `packages/contracts/src/{bot-avatar,board}.ts` | `#hex::shape_N` resolves to its hex; nine shapes and one selectable icon set; `Ticket` is the input type | Fork defaults |
+| `packages/db/src/approval-settings.ts`, `apps/api/src/routes/account.ts`, `packages/adapters/src/run-trust.ts` | one `DEFAULT_AUTO_REVIEW`, off | Upstream defaults Auto Review on |
+| `apps/mobile/{app.config.ts,app.json,eas.json}` and locales `de ja nl ru zh es zh-TW` | brand identity, preview profile, Board copy | Rebrand |
+| `apps/mobile/{components/inbox-header.tsx,lib/use-home-header.ts}` | Board button | Upstream moved the home header out of `app/index.tsx` |
+| `apps/mobile/app/{+native-intent.tsx,(settings)/account.tsx}` | rewrite of old `board` and `ticket` links; Settings > Board href | Route move |
+| `apps/mobile/components/bot-avatar.tsx`, `packages/ui-web/src/bot-avatar.tsx`, `apps/mobile/components/thread-composer.tsx` | brand blob shape and eyes; brand mark | Fork avatar |
+| `apps/web/src/pages/{Board.tsx,Auth.tsx}`, `components/{SidebarFooter,ArtifactFileCard}.tsx`, `pages/shell/{use-computer,message-view,avatar-studio-popover}.tsx` | `BoardView` route, brand intro animation, brand links, file meta, boot watch, brand loader, hex color | Fork features |
+| `.github/workflows/{ci,publish-server-image,publish-playwright-report,release-android-apk,weekly-dependencies,release-mobile}.yml` | repository guards, brand checks, preview input, gallery-storage check | Fork infra |
+| `deploy/coolify/docker-compose.yml`, `deploy/coolify/README.md` | `migrate` service, upstream's new settings passed through, `RAKAZO_ADMIN_EMAILS`, the web label and README step kept | Take upstream compose changes |
+| `infra/compose/docker-compose.{images,prod}.yml` | fork registry on the new `migrate` image | Registry default |
+| `apps/web/e2e/*` (about 40 specs) | `ui()` wrapping of brand wording | Rebrand |
+| Test files that pinned upstream behavior we changed | updated with the change | e.g. Auto Review default, ticket owner, docs fetch allow-list |
 
 ## Risks
 
