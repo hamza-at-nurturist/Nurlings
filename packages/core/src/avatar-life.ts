@@ -512,8 +512,25 @@ export function avatarFollowStrength(state: AvatarState, tool: AvatarTool = "non
 
 /** Pointer follow reach in avatar units: the eyes lead, the body goes a third of the way. */
 export const AVATAR_FOLLOW_REACH = { eyes: 9, body: 3.2 } as const;
-/** Pointer distance (px) at which follow reaches full strength. */
-export const AVATAR_FOLLOW_RANGE = 180;
+/** An avatar follows the pointer only inside this many avatar sizes, and never under the floor (px). */
+export const AVATAR_FOLLOW_RADIUS_SIZES = 2.5;
+export const AVATAR_FOLLOW_RADIUS_MIN = 120;
+
+/** How far from an avatar's centre the pointer still pulls its gaze. */
+export function avatarFollowRadius(size: number): number {
+  return Math.max(AVATAR_FOLLOW_RADIUS_MIN, size * AVATAR_FOLLOW_RADIUS_SIZES);
+}
+
+/**
+ * The pull on an avatar of `size` px with the pointer `distance` px from its centre: 1 up to the
+ * avatar's edge, easing (smoothstep) to 0 at the follow radius, 0 beyond it.
+ */
+export function avatarFollowPull(distance: number, size: number): number {
+  const edge = size / 2;
+  const radius = avatarFollowRadius(size);
+  const t = Math.min(1, Math.max(0, (radius - distance) / (radius - edge)));
+  return t * t * (3 - 2 * t);
+}
 
 /** Prop swap timings, from the storyboard: the old prop drops, the new one pops in. */
 export const AVATAR_SWAP_OUT_MS = 240;

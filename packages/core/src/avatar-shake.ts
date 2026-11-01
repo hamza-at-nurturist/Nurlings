@@ -1,8 +1,8 @@
 /** Direction changes that make a shake, inside the window below. */
-export const AVATAR_SHAKE_TURNS = 6;
-export const AVATAR_SHAKE_WINDOW_MS = 900;
+export const AVATAR_SHAKE_TURNS = 10;
+export const AVATAR_SHAKE_WINDOW_MS = 1500;
 /** Smallest pointer step (px) on an axis that counts as movement. */
-export const AVATAR_SHAKE_STEP = 10;
+export const AVATAR_SHAKE_STEP = 16;
 /** How long avatars stay dizzy after a shake. */
 export const AVATAR_DIZZY_MS = 2400;
 

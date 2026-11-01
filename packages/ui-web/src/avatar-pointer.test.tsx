@@ -85,6 +85,27 @@ describe("shared avatar pointer", () => {
     observer.disconnect();
   });
 
+  it("follows only a nearby pointer and eases off toward the follow radius", async () => {
+    const container = await mount(<BotAvatar color="#14B8A6" identity="maya" size={48} />);
+    const svg = container.querySelector("svg") as SVGSVGElement;
+    svg.getBoundingClientRect = () =>
+      ({ left: 0, top: 0, width: 48, height: 48, right: 48, bottom: 48 }) as DOMRect;
+    const gx = () => Number(svg.style.getPropertyValue("--gx"));
+    flush();
+    move(24 + 30, 24);
+    flush();
+    const near = gx();
+    move(24 + 90, 24);
+    flush();
+    const mid = gx();
+    move(24 + 400, 24);
+    flush();
+    expect(near).toBeGreaterThan(mid);
+    expect(mid).toBeGreaterThan(0);
+    expect(gx()).toBe(0);
+    expect(Number(svg.style.getPropertyValue("--gy"))).toBeCloseTo(0);
+  });
+
   it("makes avatars dizzy after a shake, but not asleep or thinking ones, then calms them", async () => {
     vi.useFakeTimers();
     const container = await mount(
