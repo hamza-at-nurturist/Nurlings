@@ -52,6 +52,7 @@ export function ChatTitleAvatar({
       status={status}
       composing={composing}
       muted={bot.notifyOnFinish === false}
+      name={bot.name}
     />
   );
 }

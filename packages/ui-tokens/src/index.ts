@@ -381,4 +381,3 @@ export function renderTokensCss(): string {
     renderBlock('[data-theme="light"]', "light", webLightTokens),
   ].join("\n\n")}\n`;
 }
-export * from "./avatar-illustration.js";

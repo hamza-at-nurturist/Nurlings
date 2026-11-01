@@ -13,7 +13,8 @@ import {
 } from "@rakazo/core";
 import type { AvatarStateSource } from "@rakazo/core/avatar-state-react";
 import { useAvatarState, useToolSwap } from "@rakazo/core/avatar-state-react";
-import { AVATAR_ILLUSTRATION as ink, tokens } from "@rakazo/ui-tokens";
+import { tokens } from "@rakazo/ui-tokens";
+import { AVATAR_ILLUSTRATION as ink } from "@rakazo/ui-tokens/avatar-illustration";
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { registerAvatarPointer } from "./avatar-pointer.js";

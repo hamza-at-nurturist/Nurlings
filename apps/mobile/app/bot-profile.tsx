@@ -121,6 +121,7 @@ export default function BotProfile() {
             identity={bot.id}
             size={96}
             status={bot.status}
+            name={bot.name}
           />
         ) : (
           <View style={styles.avatarSpace} />

@@ -3,6 +3,7 @@ import type { AvatarMotionMode, AvatarState, LogoAvatarActivity } from "@rakazo/
 import {
   AVATAR_LID_CLOSE,
   AVATAR_MOTION_UNITS,
+  AVATAR_STILL_MAX_SIZE,
   avatarClip,
   avatarClock,
   avatarFrame,
@@ -25,7 +26,8 @@ import {
   usesLogoAvatar,
 } from "@rakazo/core";
 import { useAvatarState, useToolSwap } from "@rakazo/core/avatar-state-react";
-import { AVATAR_ILLUSTRATION, botEyeColor } from "@rakazo/ui-tokens";
+import { botEyeColor } from "@rakazo/ui-tokens";
+import { AVATAR_ILLUSTRATION } from "@rakazo/ui-tokens/avatar-illustration";
 import { memo, useEffect, useMemo, useSyncExternalStore } from "react";
 import { Image, Pressable, View } from "react-native";
 import Animated, {
@@ -50,7 +52,7 @@ import {
   SleepZs,
   SweatDrop,
   ThinkingDots as ThinkingPulse,
-  ToolProp,
+  ToolSlot,
 } from "./avatar-props";
 import { LogoAvatar } from "./logo-avatar";
 import { NativeSymbol } from "./native-symbol";
@@ -322,7 +324,9 @@ function LegacyBotAvatar({
     reducedMotion,
   });
   const propTool = avatarStateValue === "working" ? working.tool : "none";
-  const swap = useToolSwap(propTool, false);
+  // A still avatar (24 pt and smaller, Reduce Motion, off screen) switches props at once.
+  const moving = clock === "running" && !reducedMotion && size > AVATAR_STILL_MAX_SIZE;
+  const swap = useToolSwap(propTool, moving);
   const view = organicAvatarView({
     state: avatarStateValue,
     working,
@@ -336,6 +340,15 @@ function LegacyBotAvatar({
   const bodyStyle = useBodyStyle(life, size);
   const gaze = TOOL_GAZE[view.tool];
   const cap = lidCap(view);
+  // The eyes blink as the old prop drops.
+  useEffect(() => {
+    if (swap.phase !== "out") return;
+    life.lidCap.value = withTiming(0.08, { duration: 100 });
+    const timer = setTimeout(() => {
+      life.lidCap.value = withTiming(cap, { duration: 140 });
+    }, 110);
+    return () => clearTimeout(timer);
+  }, [swap.phase, life, cap]);
   useEffect(() => {
     life.gazeX.value = withTiming(gaze.x, { duration: 300 });
     life.gazeY.value = withTiming(gaze.y, { duration: 300 });
@@ -391,7 +404,9 @@ function LegacyBotAvatar({
       ) : null}
       {view.look === "orbit" ? <OrbitDot color={fillColor} size={size} /> : null}
       {picture}
-      {view.look === "tool" ? <ToolProp tool={view.tool} anchors={anchors} size={size} /> : null}
+      {view.look === "tool" ? (
+        <ToolSlot tool={view.tool} phase={swap.phase} anchors={anchors} size={size} />
+      ) : null}
       {view.long ? <SweatDrop size={size} /> : null}
       {view.animated && avatarStateValue === "thinking" ? (
         <ThinkingPulse color={fillColor} size={size} />

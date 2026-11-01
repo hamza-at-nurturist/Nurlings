@@ -50,7 +50,14 @@ vi.mock("react-native-reanimated", () => {
   return {
     default: { View: view, createAnimatedComponent: (component: unknown) => component },
     cancelAnimation: () => undefined,
-    Easing: { in: 0, out: 0, inOut: (v: unknown) => v, quad: 0, cubic: 0, linear: 0 },
+    Easing: {
+      in: (v: unknown) => v,
+      out: (v: unknown) => v,
+      inOut: (v: unknown) => v,
+      quad: 0,
+      cubic: 0,
+      linear: 0,
+    },
     ReduceMotion: { Never: "never" },
     useAnimatedProps: () => ({}),
     useAnimatedStyle: () => ({}),
@@ -133,6 +140,20 @@ describe("organic avatar states on mobile", () => {
       }),
     );
   };
+
+  /** A later tool-called event for the same run. */
+  let seq = 1;
+  const feedToolAgain = (tool: string) =>
+    act(() =>
+      mobileLogoAvatarActivity.apply("test", {
+        threadId: "t1",
+        seq: ++seq,
+        botId: "bot-1",
+        runId: "r1",
+        type: "agent.tool.called",
+        payload: { name: "any_tool", executionId: `e${seq}`, tool },
+      }),
+    );
 
   it.each([
     ["waiting_input", "pip-needs", {}],
@@ -295,5 +316,57 @@ describe("organic avatar states on mobile", () => {
     render({ color: "data:image/png;base64,AAAA", status: "running", motion: "lazy" });
     expect(container.querySelector('[aria-label="Working"]')).not.toBeNull();
     expect(has("avatar-orbit")).toBe(false);
+  });
+
+  describe("tool swap", () => {
+    const slot = () =>
+      container.querySelector('[data-testid^="avatar-slot-"]')?.getAttribute("data-testid");
+    const prop = () =>
+      container.querySelector('[data-testid^="avatar-prop-"]')?.getAttribute("data-testid");
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
+    it("drops the old prop for 240 ms, then pops the new one in for 500 ms, then rests", () => {
+      feedTool("write");
+      render({ status: "running" });
+      act(() => vi.advanceTimersByTime(2000));
+      expect(slot()).toBe("avatar-slot-rest");
+      expect(prop()).toBe("avatar-prop-write");
+      feedToolAgain("computer");
+      expect(slot()).toBe("avatar-slot-out");
+      expect(prop()).toBe("avatar-prop-write");
+      act(() => vi.advanceTimersByTime(239));
+      expect(slot()).toBe("avatar-slot-out");
+      act(() => vi.advanceTimersByTime(1));
+      expect(slot()).toBe("avatar-slot-in");
+      expect(prop()).toBe("avatar-prop-computer");
+      expect(has("avatar-burst")).toBe(true);
+      act(() => vi.advanceTimersByTime(500));
+      expect(slot()).toBe("avatar-slot-rest");
+      expect(has("avatar-burst")).toBe(false);
+    });
+
+    it("replaces the pending prop when the tool changes during the drop", () => {
+      feedTool("write");
+      render({ status: "running" });
+      act(() => vi.advanceTimersByTime(2000));
+      feedToolAgain("computer");
+      act(() => vi.advanceTimersByTime(100));
+      feedToolAgain("search");
+      act(() => vi.advanceTimersByTime(240));
+      expect(slot()).toBe("avatar-slot-in");
+      expect(prop()).toBe("avatar-prop-search");
+    });
+
+    it("switches at once under Reduce Motion and for a 24 pt avatar", () => {
+      control.reduced = true;
+      feedTool("write");
+      render({ status: "running" });
+      feedToolAgain("computer");
+      expect(container.querySelector('[data-testid^="avatar-slot-"]')).toBeNull();
+      control.reduced = false;
+      render({ status: "running", size: 24 });
+      expect(container.querySelector('[data-testid^="avatar-prop-"]')).toBeNull();
+    });
   });
 });

@@ -1,5 +1,6 @@
-import type { AvatarTool } from "@rakazo/core";
-import { AVATAR_ILLUSTRATION as ink } from "@rakazo/ui-tokens";
+import type { AvatarSwapPhase, AvatarTool } from "@rakazo/core";
+import { AVATAR_SWAP_IN_MS, AVATAR_SWAP_OUT_MS } from "@rakazo/core";
+import { AVATAR_ILLUSTRATION as ink } from "@rakazo/ui-tokens/avatar-illustration";
 import { useEffect } from "react";
 import Animated, {
   Easing,
@@ -9,6 +10,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
+  withSpring,
   withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle, Ellipse, G, Path, Rect } from "react-native-svg";
@@ -264,6 +266,87 @@ export interface PropAnchors {
   pad: { x: number; y: number };
   lens: { x: number; y: number };
   laptop: { x: number; y: number };
+}
+
+/** The swap timings, from the shared reducer's constants, are applied by `ToolSlot`. */
+const DROP_UNITS = 14;
+
+/**
+ * Holds the prop on screen through a tool swap: while the old prop is `out` it drops and fades, and
+ * when the new one is `in` it pops in with a ring burst. At rest it is just the prop.
+ */
+export function ToolSlot({
+  tool,
+  phase,
+  anchors,
+  size,
+}: {
+  tool: AvatarTool;
+  phase: AvatarSwapPhase;
+  anchors: PropAnchors;
+  size: number;
+}) {
+  const drop = useSharedValue(0);
+  const pop = useSharedValue(1);
+  const burst = useSharedValue(0);
+  const k = unit(size);
+  useEffect(() => {
+    if (phase === "out") {
+      drop.value = withTiming(1, { duration: AVATAR_SWAP_OUT_MS, easing: Easing.in(Easing.quad) });
+    } else if (phase === "in") {
+      drop.value = 0;
+      pop.value = 0.2;
+      pop.value = withSpring(1, { duration: AVATAR_SWAP_IN_MS, dampingRatio: 0.55 });
+      burst.value = 0;
+      burst.value = withTiming(1, { duration: AVATAR_SWAP_IN_MS, easing: Easing.out(Easing.quad) });
+    } else {
+      drop.value = 0;
+      pop.value = 1;
+      burst.value = 1;
+    }
+  }, [phase, drop, pop, burst]);
+  const slot = useAnimatedStyle(() => ({
+    opacity: phase === "out" ? 1 - drop.value : Math.min(1, pop.value * 2),
+    transform: [{ translateY: drop.value * DROP_UNITS * k }, { scale: 0.85 + 0.15 * pop.value }],
+  }));
+  const ring = useAnimatedStyle(() => ({
+    opacity: phase === "in" ? 0.7 * (1 - burst.value) : 0,
+    transform: [{ scale: 0.5 + 1.1 * burst.value }],
+  }));
+  const centre =
+    tool === "search"
+      ? anchors.lens
+      : { x: 0, y: tool === "write" ? anchors.pad.y : anchors.laptop.y + 14 };
+  return (
+    <>
+      <Animated.View
+        pointerEvents="none"
+        testID={`avatar-slot-${phase}`}
+        style={[FILL, { width: size, height: size }, slot]}
+      >
+        <ToolProp tool={tool} anchors={anchors} size={size} />
+      </Animated.View>
+      {phase === "in" ? (
+        <Animated.View
+          pointerEvents="none"
+          testID="avatar-burst"
+          style={[
+            {
+              position: "absolute",
+              left: size / 2 + centre.x * STORYBOARD * (size / 120) - 12 * k,
+              top: size / 2 + centre.y * STORYBOARD * (size / 120) - 12 * k,
+              width: 24 * k,
+              height: 24 * k,
+              borderRadius: 12 * k,
+              borderWidth: 1.5,
+              borderColor: ink.white,
+            },
+            ring,
+          ]}
+        />
+      ) : null}
+    </>
+  );
 }
 
 /** The prop for a tool, drawn at the body's anchors. */

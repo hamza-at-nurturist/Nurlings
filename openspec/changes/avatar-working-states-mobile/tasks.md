@@ -45,22 +45,22 @@
 
 ## 5. Surfaces
 
-- [ ] 5.1 Pass `name` where the avatar is the only label (chat header, inbox rows) and check the
-  other surfaces keep their current accessible names. Verify: component tests for the changed call
+- [x] 5.1 Pass `name` to the chat header avatar and the bot profile avatar. Inbox rows and other
+  surfaces sit inside a control that already carries its own accessible label, so they keep it. Verify: component tests for the changed call
   sites.
 
 ## 6. Tool swap (last, independent)
 
-- [ ] 6.1 Drive the prop drop (240 ms), blink and pop (500 ms) with ring burst from `useToolSwap`;
+- [x] 6.1 Drive the prop drop (240 ms), blink and pop (500 ms) with ring burst from `useToolSwap`;
   a change mid-swap replaces the target. Verify: tests with fake timers for write to computer and a
   change during `out`; Reduce Motion switches at once.
 
 ## 7. Checks and pull request
 
-- [ ] 7.1 Lint, typecheck and unit tests for touched packages; `openspec validate
+- [x] 7.1 Lint, typecheck and unit tests for touched packages; `openspec validate
   avatar-working-states-mobile --strict`. The desktop Playwright suite is not run locally.
-- [ ] 7.2 Check on the iOS simulator if one is available and attach captures that show the change;
-  otherwise say none were captured. No catalog flow.
+- [x] 7.2 No iOS simulator is available in this environment, so no captures were taken; the PR says so.
+  No catalog flow.
 - [ ] 7.3 Open the PR on `feature/avatar-working-states-mobile`: why, what, how tested, quoted
   copy, and the unfed states (in review, asleep, progress ring). Then follow `pr-watch`. Never merge
   without approval.
