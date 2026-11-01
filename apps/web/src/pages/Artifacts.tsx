@@ -41,6 +41,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { IconTooltip } from "../components/IconTooltip";
 import { PdfViewer } from "../components/PdfViewer";
 import { SandboxedHtmlViewer } from "../components/SandboxedHtmlViewer";
+import { artifactDataLoader } from "../lib/artifact-data-fork";
 import { decodeArtifactBase64, downloadArtifactBytes } from "../lib/artifact-open";
 import { takeInitialBootstrap } from "../lib/bootstrap";
 import { desktopBridge } from "../lib/desktop";
@@ -941,9 +942,10 @@ function PreviewPane({
 }
 
 function ArtifactPreview({ artifact, bytes }: { artifact: Artifact; bytes: Uint8Array }) {
+  const loadData = useMemo(() => artifactDataLoader(artifact.botId), [artifact.botId]);
   if (artifact.mimeType === "text/html") {
     const html = new TextDecoder("utf-8").decode(bytes);
-    return <SandboxedHtmlViewer html={html} title={artifact.name} />;
+    return <SandboxedHtmlViewer html={html} title={artifact.name} loadData={loadData} />;
   }
   if (artifact.mimeType === "text/markdown") {
     const text = new TextDecoder("utf-8").decode(bytes);

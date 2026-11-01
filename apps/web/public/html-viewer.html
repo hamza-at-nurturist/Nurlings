@@ -2,7 +2,16 @@
 // Loaded from the network (not srcdoc) so the app's CSP is not inherited. frame-src about: allows
 // the nested srcdoc and rejects navigations the sandbox and inner CSP do not block.
 addEventListener("message", (event) => {
-  if (event.source !== parent || parent === window || typeof event.data !== "string") return;
-  document.getElementById("preview").srcdoc = event.data;
+  const frame = document.getElementById("preview");
+  const data = event.data;
+  // A dashboard asks the app for a data artifact; the app answers through here.
+  if (event.source === frame.contentWindow) {
+    if (data && data.type === "nurlings:data" && typeof data.id === "string" && typeof data.name === "string")
+      parent.postMessage({ type: "nurlings:data", id: data.id, name: data.name }, "*");
+    return;
+  }
+  if (event.source !== parent || parent === window) return;
+  if (typeof data === "string") frame.srcdoc = data;
+  else if (data && data.type === "nurlings:data:result") frame.contentWindow.postMessage(data, "*");
 });
 </script>
