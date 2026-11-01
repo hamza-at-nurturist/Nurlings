@@ -1,6 +1,6 @@
 import { ChatMarkdown } from "@rakazo/chat-ui/native";
 import type { Artifact, Bot, TicketComment, TicketRun, TicketStatus } from "@rakazo/contracts";
-import { botHexColor, WORKING_RUN_STATUSES } from "@rakazo/core";
+import { botHexColor, resolvePersonaColorDef, WORKING_RUN_STATUSES } from "@rakazo/core";
 import type {
   ActivityActor,
   ActivityItem,
@@ -14,7 +14,6 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { dateLocaleForUi, useI18n } from "../../lib/i18n";
 import { useMobileTokens, useResolvedAppearance } from "../../lib/native";
 import { statusLabels } from "../../lib/nurlings-board/labels";
-import { withAlpha } from "../../lib/ripple";
 import { BotAvatar } from "../bot-avatar";
 import { TimeSeparator } from "../time-separator";
 import { FileRow, ImageThumb } from "./ticket-files";
@@ -137,13 +136,31 @@ export function ActivityFeed({
           <Text style={[typeScale.secondary, { color: tokens.foreground }]}>
             {splitMentions(comment.body, targets).map((segment, index) => {
               if (segment.type === "text") return segment.text;
-              const hex = segment.target.color ? botHexColor(segment.target.color) : undefined;
+              const color = segment.target.color;
+              if (segment.target.kind === "bot" && color) {
+                return (
+                  <Text
+                    key={`${index}-${segment.text}`}
+                    style={{
+                      color: resolvePersonaColorDef(segment.target.id, botHexColor(color) ?? color)
+                        .light,
+                      fontWeight: fontWeight.semibold,
+                    }}
+                  >
+                    {/* An inline view sits on the baseline; this lowers it to centre on the capitals. */}
+                    <View style={{ width: 21, height: 16, transform: [{ translateY: 3 }] }}>
+                      <BotAvatar color={color} identity={segment.target.id} size={16} />
+                    </View>
+                    {segment.text}
+                  </Text>
+                );
+              }
               return (
                 <Text
                   key={`${index}-${segment.text}`}
                   style={{
-                    backgroundColor: hex ? withAlpha(hex, 0.16) : tokens.muted,
-                    color: hex ?? tokens.foreground,
+                    backgroundColor: tokens.muted,
+                    color: tokens.foreground,
                     fontWeight: fontWeight.semibold,
                   }}
                 >
