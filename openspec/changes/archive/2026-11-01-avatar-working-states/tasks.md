@@ -56,9 +56,9 @@
 
 ## 6. Pull request
 
-- [ ] 6.1 Open the PR on `feature/avatar-working-states`; the description says why, what and how it
+- [x] 6.1 Open the PR on `feature/avatar-working-states`; the description says why, what and how it
   was tested, quotes any new copy, and states the mobile split and the cursor degrade. If `gh` is
   unauthenticated, say so and use the GitHub tools.
-- [ ] 6.2 Stay with the PR until CI is green and review comments are handled; never merge without
+- [x] 6.2 Stay with the PR until CI is green and review comments are handled; never merge without
   approval.
 - [ ] 6.3 Archive the change after the PR merges. Open the mobile change next.
