@@ -152,3 +152,34 @@ describe("glint on light bodies", () => {
     expect(teal?.getAttribute("data-glint-tone")).toBeNull();
   });
 });
+
+describe("dizzy reset", () => {
+  it("calms an avatar that stops following while dizzy, even with other avatars on the page", async () => {
+    vi.useFakeTimers();
+    const render = (size: number) => (
+      <>
+        <BotAvatar color="#14B8A6" identity="a" size={size} />
+        <BotAvatar color="#14B8A6" identity="b" size={48} />
+      </>
+    );
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    await act(async () => root.render(render(48)));
+    const svg = () => container.querySelector("svg") as SVGSVGElement;
+    svg().getBoundingClientRect = () =>
+      ({ left: 100, top: 80, width: 48, height: 48, right: 148, bottom: 128 }) as DOMRect;
+    await act(async () => {
+      for (let i = 0; i < 12; i += 1) {
+        vi.advanceTimersByTime(60);
+        move(i % 2 ? 100 : 160, 100);
+      }
+    });
+    expect(svg().getAttribute("data-dizzy")).toBe("true");
+    await act(async () => root.render(render(24)));
+    await act(async () => root.render(render(48)));
+    expect(svg().getAttribute("data-dizzy")).toBe("false");
+    act(() => root.unmount());
+    container.remove();
+  });
+});

@@ -148,12 +148,17 @@ export function OrganicAvatar({
     if (still) return;
     const element = ref.current;
     if (!element) return;
-    return registerAvatarPointer({
+    const unregister = registerAvatarPointer({
       element,
       strength: () => followRef.current,
       reach,
       onDizzy: setShaken,
     });
+    return () => {
+      unregister();
+      // The controller no longer knows this avatar, so nothing else would ever calm it.
+      setShaken(false);
+    };
   }, [ref, still, reach]);
   useEffect(() => {
     // jsdom has no SMIL clock, so these are optional.
