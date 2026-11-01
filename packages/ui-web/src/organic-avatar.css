@@ -34,6 +34,14 @@
   stroke: var(--rakazo-av-eye);
   opacity: 0.16;
 }
+/* A white or very light body: a darker glint, since white would vanish. */
+.rakazo-organic-avatar[data-glint-tone="light"] .rakazo-av-catch {
+  fill: var(--rakazo-av-ink);
+}
+.rakazo-organic-avatar[data-glint-tone="light"] .rakazo-av-gloss {
+  stroke: var(--rakazo-av-glint-dark);
+  opacity: 0.4;
+}
 .rakazo-organic-avatar[data-glint="true"] .rakazo-av-catch {
   opacity: 1;
 }

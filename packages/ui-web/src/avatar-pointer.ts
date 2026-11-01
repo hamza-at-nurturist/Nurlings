@@ -1,4 +1,9 @@
-import { AVATAR_DIZZY_MS, avatarFollowPull, createShakeDetector } from "@rakazo/core";
+import {
+  AVATAR_DIZZY_MS,
+  avatarFollowPull,
+  avatarFollowRadius,
+  createShakeDetector,
+} from "@rakazo/core";
 
 /**
  * One pointer controller for every avatar on the page. It owns a single pointermove and pointerdown
@@ -12,14 +17,15 @@ export interface AvatarPointerTarget {
   strength: () => number;
   /** Scales the reach for bodies whose eyes sit near the edge. */
   reach: number;
+  /** Called when a shake near this avatar starts or ends its dizziness. */
+  onDizzy: (on: boolean) => void;
 }
 
 const targets = new Set<AvatarPointerTarget>();
-const dizzyListeners = new Set<(on: boolean) => void>();
+const dizzy = new Set<AvatarPointerTarget>();
 const detector = createShakeDetector();
 let pointer: { x: number; y: number } | null = null;
 let queued = false;
-let dizzyOn = false;
 let dizzyTimer: ReturnType<typeof setTimeout> | undefined;
 
 function aim() {
@@ -29,7 +35,7 @@ function aim() {
     let gx = 0;
     let gy = 0;
     const strength = target.strength();
-    if (pointer && strength > 0 && !dizzyOn) {
+    if (pointer && strength > 0 && !dizzy.has(target)) {
       const rect = el.getBoundingClientRect();
       const dx = pointer.x - (rect.left + rect.width / 2);
       const dy = pointer.y - (rect.top + rect.height / 2);
@@ -49,21 +55,34 @@ function queue() {
   requestAnimationFrame(aim);
 }
 
-function setDizzy(on: boolean) {
-  dizzyOn = on;
-  for (const listener of dizzyListeners) listener(on);
+function clearDizzy() {
+  detector.reset();
+  for (const target of dizzy) target.onDizzy(false);
+  dizzy.clear();
+  queue();
+}
+
+/** A shake makes the avatars near the pointer dizzy, not every avatar on the page. */
+function startDizzy(at: { x: number; y: number }) {
+  for (const target of targets) {
+    const rect = target.element.getBoundingClientRect();
+    const distance = Math.hypot(
+      at.x - (rect.left + rect.width / 2),
+      at.y - (rect.top + rect.height / 2),
+    );
+    if (distance > avatarFollowRadius(rect.width) || dizzy.has(target)) continue;
+    dizzy.add(target);
+    target.onDizzy(true);
+  }
+  clearTimeout(dizzyTimer);
+  dizzyTimer = setTimeout(clearDizzy, AVATAR_DIZZY_MS);
   queue();
 }
 
 function onMove(event: PointerEvent) {
   pointer = { x: event.clientX, y: event.clientY };
-  if (!dizzyOn && detector.push(event.clientX, event.clientY, performance.now())) {
-    setDizzy(true);
-    clearTimeout(dizzyTimer);
-    dizzyTimer = setTimeout(() => {
-      detector.reset();
-      setDizzy(false);
-    }, AVATAR_DIZZY_MS);
+  if (dizzy.size === 0 && detector.push(event.clientX, event.clientY, performance.now())) {
+    startDizzy(pointer);
   }
   queue();
 }
@@ -91,10 +110,9 @@ function detach() {
   window.removeEventListener("blur", onLeave);
   document.removeEventListener("pointerleave", onLeave);
   clearTimeout(dizzyTimer);
-  detector.reset();
+  clearDizzy();
   pointer = null;
   queued = false;
-  if (dizzyOn) setDizzy(false);
 }
 
 /** Register an avatar for following; returns the unregister function. */
@@ -104,17 +122,7 @@ export function registerAvatarPointer(target: AvatarPointerTarget): () => void {
   queue();
   return () => {
     targets.delete(target);
+    dizzy.delete(target);
     if (targets.size === 0) detach();
   };
 }
-
-/** Subscribe to the shared dizzy flag; avatars read it with useSyncExternalStore. */
-export function subscribeAvatarDizzy(listener: () => void): () => void {
-  const notify = () => listener();
-  dizzyListeners.add(notify);
-  return () => {
-    dizzyListeners.delete(notify);
-  };
-}
-
-export const avatarDizzySnapshot = (): boolean => dizzyOn;
