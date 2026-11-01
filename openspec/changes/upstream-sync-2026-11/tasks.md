@@ -2,10 +2,8 @@
 
 ## 1. Approval and preconditions
 
-- [ ] 1.1 Maintainer approves this proposal and design, including the migration decision (defer the
-  destructive migrations to a follow-up deploy, or apply all at once). Verify: explicit approval in
-  the session.
-- [ ] 1.2 Maintainer confirms a `pg_dump` of the production database exists. Verify: stated in the
+- [x] 1.1 Maintainer approves this proposal and design, including the migration decision (apply all in one deploy, approved). Verify: explicit approval in the session.
+- [x] 1.2 Maintainer confirms a `pg_dump` of the production database exists. Verify: stated in the
   session.
 - [ ] 1.3 PR #72 (board touch drag) is merged. Verify: `main` contains it. If it is still open at
   approval, stop and ask before continuing.
@@ -36,9 +34,7 @@
   matches the merged tree.
 - [ ] 3.2 Make `20261025210001_runs_task_id_idx_concurrent` use `IF NOT EXISTS`. Verify: migrate on
   a copy of the current production schema succeeds.
-- [ ] 3.3 Apply the migration decision: defer the destructive migrations (or split the
-  `account_settings` drops) and check every held-back column for NOT NULL without default. Verify:
-  `migrate diff` shows only the deferred drops.
+- [ ] 3.3 Add the runbook note for client servers (back up, deploy at a quiet hour, expect a brief error window) to `docs/nurlings-deployment.md`, and state the side-by-side exception in the PR. Verify: note present.
 - [ ] 3.4 Run `prisma migrate deploy` on a fresh database and on a copy of the current schema.
   Verify: both succeed; the old release's queries still run against the migrated copy.
 
@@ -63,7 +59,7 @@
 - [ ] 5.2 Audit credit plans, own-connection charges and computer allowances for enforcement
   outside `deps.billing`. Gate what is found. Verify: API and web tests with no Stripe configured:
   runs not blocked, no paywall, upgrade button or credit meter; mobile shows none.
-- [ ] 5.3 Pass `RAKAZO_ADMIN_EMAILS` through the Coolify compose and document it. Verify: compose
+- [ ] 5.3 Pass `RAKAZO_ADMIN_EMAILS` through the Coolify compose as an optional empty-default variable and document it in the README. Verify: compose
   tests pass; existing stdio MCP servers still start with it set.
 - [ ] 5.4 New upstream branded emails (referral, day-1) use `brand` or are off. Verify: brand check
   and an email test.
@@ -89,4 +85,3 @@
 - [ ] 7.3 After merge: archive this change and dispatch the preview APK build
   (`release-android-apk.yml`, input `preview`). The maintainer tests board, tickets, drag, approvals
   and push on a phone.
-- [ ] 7.4 Follow-up change to restore the deferred migrations once the sync release is live.

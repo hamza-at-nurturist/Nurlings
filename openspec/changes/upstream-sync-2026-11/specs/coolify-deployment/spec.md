@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Admin accounts can be named
-The compose file SHALL pass `RAKAZO_ADMIN_EMAILS` through to the API and worker without a default
+The compose file SHALL pass `RAKAZO_ADMIN_EMAILS` through to the API and worker as an optional variable with an empty default
 value, and the deployment guide SHALL say it lists the accounts allowed to add local (stdio) MCP
 servers.
 
