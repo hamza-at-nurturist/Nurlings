@@ -22,6 +22,28 @@ const SKILLS: Array<{ name: string; description: string; body: string }> = [
 4. Synthesize a verdict: ship, ship after fixes, or do not ship. List the confirmed findings ordered by severity, each with its location and failure scenario, then any open questions. If nothing survived verification, say so plainly instead of inventing nitpicks.`,
   },
   {
+    name: "Dashboards",
+    description: "Build a clean HTML dashboard artifact: layout, charts, tiles",
+    body: `Build a dashboard as one self-contained HTML file and attach it with attach_file, giving it a name and a one-line description. To refresh it, attach again with the exact same name so it becomes a new version.
+
+The page runs isolated: no network, no external scripts, fonts or images, so inline everything (CSS, JavaScript, SVG, data) and embed the numbers in the file.
+
+Look: monochrome. Ink text on a plain surface, muted greys for secondary text and borders, one accent only for a real status (red problem, green ok, amber warning). Follow the viewer with \`prefers-color-scheme\`. System font, no decoration, generous spacing, rounded 8px cards.
+
+\`\`\`html
+<style>
+:root{--bg:#fff;--fg:#111;--muted:#6b6b6b;--line:#e5e5e5;--card:#fafafa}
+@media(prefers-color-scheme:dark){:root{--bg:#111;--fg:#f2f2f2;--muted:#9a9a9a;--line:#2a2a2a;--card:#181818}}
+body{margin:0;padding:24px;background:var(--bg);color:var(--fg);font:14px system-ui,sans-serif}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
+.tile b{display:block;font-size:28px}.tile span{color:var(--muted)}
+</style>
+\`\`\`
+
+Layout: a title, a row of stat tiles (one big number plus a short label), then one chart or table per question the user asked. Draw charts as inline SVG: bars for comparing, lines for change over time, no pie charts, label axes and units, start bars at zero. Tables get right-aligned numbers. Show an empty state in words when there is no data. Keep it to what the user asked for; do not add sections to fill space.`,
+  },
+  {
     name: "Nurlings",
     description: "How to use or set up Nurlings: chat apps, computer, billing, hosting",
     body: `Nurlings is Nurturist AI's product. Nurturist AI is a small AI automation agency that builds workflow systems, AI agents and CRM automations for real estate wholesalers and investors, senior care, and service businesses.

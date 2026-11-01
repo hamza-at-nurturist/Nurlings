@@ -5343,6 +5343,10 @@ msgid "Search apps"
 msgstr "Search apps"
 
 #: src/pages/Artifacts.tsx
+msgid "Uploads"
+msgstr "Uploads"
+
+#: src/pages/Artifacts.tsx
 msgid "Search artifacts…"
 msgstr "Search artifacts…"
 
