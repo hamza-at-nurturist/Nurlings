@@ -121,7 +121,7 @@
 [data-state="idle"] .rakazo-av-shell {
   animation: rakazo-av-breathe 4s ease-in-out infinite;
 }
-[data-state="idle"] .rakazo-av-pill {
+[data-state="idle"] .rakazo-av-pills {
   animation: rakazo-av-blink 5.2s ease-in-out infinite;
 }
 [data-state="idle"] .rakazo-av-eyes {
