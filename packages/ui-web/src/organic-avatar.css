@@ -26,6 +26,14 @@
   stroke-linecap: round;
   opacity: 0.5;
 }
+/* An ink-bodied face (Chief): ink catchlights on the page-colored eyes and a faint page-colored gloss. */
+.rakazo-organic-avatar[data-glint-tone="ink"] .rakazo-av-catch {
+  fill: var(--rakazo-av-ink);
+}
+.rakazo-organic-avatar[data-glint-tone="ink"] .rakazo-av-gloss {
+  stroke: var(--rakazo-av-eye);
+  opacity: 0.16;
+}
 .rakazo-organic-avatar[data-glint="true"] .rakazo-av-catch {
   opacity: 1;
 }

@@ -56,6 +56,17 @@ test("avatars show every state, the three tool props and the working variants", 
   await captureScreenshot(page, testInfo, "avatar-states");
 });
 
+test("every body in the picker is drawn with its gloss", async ({ page }, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 1120, height: 600 });
+  await page.goto("/e2e/fixtures/avatar-states.html");
+  const bodies = page.locator('[data-row="bodies"] svg');
+  await expect(bodies).toHaveCount(14);
+  await expect(bodies.locator(".rakazo-av-gloss")).toHaveCount(14);
+  await expect(bodies.first()).toHaveAttribute("data-glint-tone", "ink");
+  await captureScreenshot(page, testInfo, "avatar-bodies");
+});
+
 test("shaking the pointer makes avatars dizzy, but not sleeping or thinking ones", async ({
   page,
 }) => {

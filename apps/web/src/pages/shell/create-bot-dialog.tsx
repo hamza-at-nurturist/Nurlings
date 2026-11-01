@@ -24,7 +24,7 @@ import { useRef, useState } from "react";
 import { errorText } from "../../lib/user-error";
 import { BotLookPicker } from "./avatar-studio-popover";
 
-/** One preview identity per organic look, so the dialog can show a body before the bot has an id. */
+/** One preview identity per organic look: the starting body, drawn before the bot has an id. */
 const ORGANIC_IDENTITIES = ORGANIC_AVATAR_LOOKS.map(organicAvatarSampleIdentity);
 
 function pick<T>(options: readonly T[]): T {
@@ -137,16 +137,12 @@ export function CreateBotDialog({
           ) : null}
           <BotLookPicker
             value={look.value}
-            identity={avatarSet === "rakazo" ? previewId : look.identity}
-            organicIdentities={ORGANIC_IDENTITIES}
             avatarSet={avatarSet}
             onAvatarSetChange={(set, value) => {
               setAvatarSet(set);
               setLook((current) => ({ ...current, value }));
             }}
-            onChange={(value, identity) => {
-              setLook((current) => ({ value, identity: identity ?? current.identity }));
-            }}
+            onChange={(value) => setLook((current) => ({ ...current, value }))}
           />
           <DialogFooter>
             <Button type="button" variant="outline" disabled={submitting} onClick={onCancel}>

@@ -6,6 +6,8 @@ import {
   AVATAR_STATES,
   type AvatarState,
   avatarBusySince,
+  avatarFollowPull,
+  avatarFollowRadius,
   avatarFollowStrength,
   avatarMotionState,
   avatarState,
@@ -183,14 +185,20 @@ describe("shake detector", () => {
       fired = detector.push(i % 2 ? 100 : 100 + step, 50, i * gap) || fired;
     return fired;
   };
-  it("fires on six quick direction changes inside 900 ms", () => {
-    expect(zigzag(9, 100)).toBe(true);
+  it("fires on ten direction changes inside 1.5 s", () => {
+    expect(zigzag(12, 100)).toBe(true);
+  });
+  it("does not fire on a quick six-turn wiggle", () => {
+    expect(zigzag(8, 100)).toBe(false);
   });
   it("does not fire on slow movement", () => {
-    expect(zigzag(9, 300)).toBe(false);
+    expect(zigzag(12, 300)).toBe(false);
   });
-  it("does not fire on tiny jitter", () => {
-    expect(zigzag(20, 20, 6)).toBe(false);
+  it("does not fire when each move is under 16px", () => {
+    expect(zigzag(30, 20, 15)).toBe(false);
+  });
+  it("fires when each move is 16px", () => {
+    expect(zigzag(12, 100, 16)).toBe(true);
   });
   it("does not fire on a straight sweep", () => {
     const detector = createShakeDetector();
@@ -200,9 +208,25 @@ describe("shake detector", () => {
   });
   it("forgets turns after reset", () => {
     const detector = createShakeDetector();
-    for (let i = 0; i < 9; i += 1) detector.push(i % 2 ? 100 : 140, 50, i * 100);
+    for (let i = 0; i < 11; i += 1) detector.push(i % 2 ? 100 : 140, 50, i * 100);
     detector.reset();
     expect(detector.push(100, 50, 1000)).toBe(false);
     expect(AVATAR_DIZZY_MS).toBe(2400);
+  });
+});
+
+describe("avatar follow pull", () => {
+  it("is 1 at the edge, 0 at and past the radius, and eases in between", () => {
+    expect(avatarFollowPull(24, 48)).toBe(1);
+    expect(avatarFollowPull(avatarFollowRadius(48), 48)).toBe(0);
+    expect(avatarFollowPull(400, 48)).toBe(0);
+    const samples = [30, 50, 70, 90, 110].map((d) => avatarFollowPull(d, 48));
+    for (let i = 1; i < samples.length; i += 1) expect(samples[i]).toBeLessThan(samples[i - 1]!);
+    expect(samples[0]).toBeLessThan(1);
+    expect(samples.at(-1)).toBeGreaterThan(0);
+  });
+  it("uses 2.5 sizes with a 120px floor", () => {
+    expect(avatarFollowRadius(32)).toBe(120);
+    expect(avatarFollowRadius(96)).toBe(240);
   });
 });

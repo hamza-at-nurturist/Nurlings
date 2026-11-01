@@ -130,7 +130,6 @@ describe("CreateBotDialog", () => {
   it("sends the organic family the preview draws", async () => {
     const onCreate = vi.fn(async (_input: CreateBotDialogInput) => undefined);
     await render(onCreate);
-    await click(button("Shape 2"));
     await click(button("Color #10B981"));
     const preview = document.querySelector(".rakazo-organic-avatar");
     const family = Number(preview?.getAttribute("data-shape-family"));
@@ -142,15 +141,42 @@ describe("CreateBotDialog", () => {
       avatarFamily: family,
       avatarSet: "organic",
     });
-    expect(family).toBe(ORGANIC_AVATAR_LOOKS[1]);
+    expect(ORGANIC_AVATAR_LOOKS).toContain(family);
+  });
+
+  it("pins an organic family when its chip is picked", async () => {
+    const onCreate = vi.fn(async (_input: CreateBotDialogInput) => undefined);
+    await render(onCreate);
+    await click(button("Color #F97316"));
+    // Shape 5 is the first pinned family (Chief and the three original bodies come first).
+    await click(button("Shape 5"));
+    await typeName("Scout");
+    await click(button("Create"));
+    expect(onCreate).toHaveBeenLastCalledWith({
+      name: "Scout",
+      color: "#F97316::shape_12",
+      avatarSet: "organic",
+    });
+  });
+
+  it("returns to the preview body when Default is picked after a chip", async () => {
+    const onCreate = vi.fn(async (_input: CreateBotDialogInput) => undefined);
+    await render(onCreate);
+    await click(button("Color #F97316"));
+    await click(button("Shape 5"));
+    await click(button("Default"));
+    await typeName("Scout");
+    await click(button("Create"));
+    expect(onCreate.mock.lastCall?.[0]).toMatchObject({ color: "#F97316" });
+    expect(onCreate.mock.lastCall?.[0]).toHaveProperty("avatarFamily");
   });
 
   it("sends an original body without an organic family", async () => {
     const onCreate = vi.fn(async (_input: CreateBotDialogInput) => undefined);
     await render(onCreate);
     await click(button("Color #F97316"));
-    // The brand blob follows the organic looks in the grid.
-    await click(button(`Shape ${ORGANIC_AVATAR_LOOKS.length + 1}`));
+    // Chief is the first chip.
+    await click(button("Shape 1"));
     await typeName("Scout");
     await click(button("Create"));
     expect(onCreate).toHaveBeenCalledWith({

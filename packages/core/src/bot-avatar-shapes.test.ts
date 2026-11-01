@@ -1,9 +1,16 @@
 import { BOT_AVATAR_SHAPE_COUNT } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
 import {
+  avatarIdentitySeed,
+  ORGANIC_AVATAR_FAMILY_COUNT,
+  organicAvatarFamily,
+  organicAvatarPath,
+} from "./avatar-shape.js";
+import {
   BRAND_BLOB_SHAPE_INDEX,
   organicBotAvatarFrame,
   PICKABLE_ORGANIC_SHAPE_INDEXES,
+  PINNED_FAMILY_FIRST_SHAPE_INDEX,
   SHIPPED_BOT_AVATAR_CENTER,
   SHIPPED_BOT_AVATAR_SHAPE_KEYS,
   SHIPPED_BOT_AVATAR_SHAPES,
@@ -92,7 +99,7 @@ describe("shipped bot avatar shapes", () => {
   it("gives the brand blob an organic frame, centred in the organic box with its eyes inside", () => {
     expect(organicBotAvatarFrame(0)).toBeUndefined();
     expect(organicBotAvatarFrame(7)).toBeUndefined();
-    expect(organicBotAvatarFrame(12)).toBeUndefined();
+    expect(organicBotAvatarFrame(22)).toBeUndefined();
     const index = BRAND_BLOB_SHAPE_INDEX;
     const frame = organicBotAvatarFrame(index);
     if (!frame) throw new Error("the brand blob has an organic frame");
@@ -102,7 +109,12 @@ describe("shipped bot avatar shapes", () => {
     expect(bounds.maxX - bounds.minX).toBeCloseTo(108, 0);
     expect(bounds.minX).toBeGreaterThanOrEqual(-60);
     expect(bounds.maxX).toBeLessThanOrEqual(60);
-    expect(frame.eyes).toMatchObject({ kind: "pill", tiltDeg: 13.5 });
+    // The storyboard's Chief: eyes at [6, -11], leaned -13 degrees, scaled 0.72.
+    expect(frame.eyes).toMatchObject({ kind: "pill", tiltDeg: -13, rx: 3.24, ry: 7.2 });
+    expect((frame.eyes.left.cx + frame.eyes.right.cx) / 2).toBeCloseTo(6, 1);
+    expect((frame.eyes.left.cy + frame.eyes.right.cy) / 2).toBeCloseTo(-11, 1);
+    expect(frame.gloss).toBe("M-14 -17 C-11 -24 -5 -27 2 -27");
+    expect(frame.glint).toBe("ink");
     for (const eye of [frame.eyes.left, frame.eyes.right]) {
       expect(eye.cx).toBeGreaterThan(bounds.minX);
       expect(eye.cx).toBeLessThan(bounds.maxX);
@@ -110,7 +122,9 @@ describe("shipped bot avatar shapes", () => {
   });
 
   it("keeps the brand blob and the original bodies inside the shape count", () => {
-    expect(PICKABLE_ORGANIC_SHAPE_INDEXES).toEqual([8, 9, 10, 11]);
+    expect(PICKABLE_ORGANIC_SHAPE_INDEXES).toEqual([
+      8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+    ]);
     expect(Math.max(...PICKABLE_ORGANIC_SHAPE_INDEXES)).toBe(BOT_AVATAR_SHAPE_COUNT - 1);
     for (const index of PICKABLE_ORGANIC_SHAPE_INDEXES)
       expect(organicBotAvatarFrame(index)).toBeDefined();
@@ -151,5 +165,20 @@ describe("shipped bot avatar shapes", () => {
     const paths = [9, 10, 11].map((index) => organicBotAvatarFrame(index)?.path);
     expect(new Set(paths).size).toBe(3);
     expect(paths).not.toContain(organicBotAvatarFrame(BRAND_BLOB_SHAPE_INDEX)?.path);
+  });
+});
+
+describe("pinned organic families", () => {
+  it("pins family f at shape_{12 + f} with its own body and the standard eyes", () => {
+    for (let family = 0; family < ORGANIC_AVATAR_FAMILY_COUNT; family += 1) {
+      const frame = organicBotAvatarFrame(PINNED_FAMILY_FIRST_SHAPE_INDEX + family);
+      expect(frame?.path).toBe(organicAvatarPath(family));
+      expect(frame?.eyes).toMatchObject({ kind: "pill", rx: 3.5, ry: 12, tiltDeg: 0 });
+    }
+  });
+
+  it("leaves shape_0 to shape_7 drawing the bot's own body and does not move the hash", () => {
+    for (let index = 0; index < 8; index += 1) expect(organicBotAvatarFrame(index)).toBeUndefined();
+    expect(organicAvatarFamily("bot-1")).toBe(avatarIdentitySeed("bot-1") % 10);
   });
 });

@@ -1,4 +1,4 @@
-import { AVATAR_DIZZY_MS, AVATAR_FOLLOW_RANGE, createShakeDetector } from "@rakazo/core";
+import { AVATAR_DIZZY_MS, avatarFollowPull, createShakeDetector } from "@rakazo/core";
 
 /**
  * One pointer controller for every avatar on the page. It owns a single pointermove and pointerdown
@@ -34,7 +34,7 @@ function aim() {
       const dx = pointer.x - (rect.left + rect.width / 2);
       const dy = pointer.y - (rect.top + rect.height / 2);
       const dist = Math.hypot(dx, dy) || 1;
-      const pull = Math.min(1, dist / AVATAR_FOLLOW_RANGE) * strength * target.reach;
+      const pull = avatarFollowPull(dist, rect.width) * strength * target.reach;
       gx = (dx / dist) * pull;
       gy = (dy / dist) * pull;
     }
