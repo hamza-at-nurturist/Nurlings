@@ -6,6 +6,7 @@ import { parse } from "yaml";
 
 interface ComposeService {
   image?: string;
+  command?: string[];
   ports?: unknown;
   container_name?: unknown;
   extra_hosts?: unknown;
@@ -272,6 +273,16 @@ describe("the Coolify compose file", () => {
       computer: "service_completed_successfully",
       "data-init": "service_completed_successfully",
     });
+  });
+
+  it("leaves billing off: Stripe is set only by an operator, never by a default", () => {
+    const api = environment(services.api ?? {});
+    for (const name of ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID"]) {
+      expect(api, name).toHaveProperty(name);
+      // A bare name is passed through only when set, so nothing turns credit plans on by itself.
+      expect(api[name], name).toBeNull();
+    }
+    expect(environment(services.worker ?? {})).not.toHaveProperty("STRIPE_SECRET_KEY");
   });
 
   it("migrates before the API serves", () => {

@@ -27,6 +27,12 @@ export type ApprovalRuleInput = { effect: string; matchKind: string; matchValue:
 export type AutoReviewPreference = { enabled: boolean; skipApprovals: boolean };
 
 /**
+ * What a member who never saved the setting gets. Nurlings asks before running an action until
+ * the member turns Auto on (upstream defaults Auto on), so there is one default to read and write.
+ */
+export const DEFAULT_AUTO_REVIEW: AutoReviewPreference = { enabled: false, skipApprovals: false };
+
+/**
  * Approval rules and auto review are confirmations: the account's copy, or the Space's
  * override. Every call reads or writes the copy that applies unless it names one.
  */

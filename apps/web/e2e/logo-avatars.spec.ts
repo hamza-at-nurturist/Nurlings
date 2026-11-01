@@ -3,6 +3,9 @@ import { expect, test } from "@playwright/test";
 import { BOT_AVATAR_COLORS } from "@rakazo/core";
 import { captureScreenshot, ui } from "./helpers";
 
+// Upstream's Rakazo icon set is not offered in a Nurlings build (see SELECTABLE_BOT_AVATAR_SETS).
+test.skip(true, "The Rakazo icon set is hidden in this build");
+
 test.use({ viewport: { width: 1260, height: 1000 } });
 
 test("renders the real logo in every requested pose in both themes", async ({ page }, testInfo) => {

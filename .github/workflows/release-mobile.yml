@@ -20,7 +20,8 @@ concurrency:
 jobs:
   ios:
     name: Build iOS and submit it for App Store review
-    if: github.ref == 'refs/heads/main'
+    # Upstream's App Store app. The fork ships APKs with release-android-apk.
+    if: github.repository == 'elie222/rakazo' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
@@ -97,6 +98,7 @@ jobs:
 
   android:
     name: Android APK
+    if: github.repository == 'elie222/rakazo'
     uses: ./.github/workflows/release-android-apk.yml
     permissions:
       contents: write

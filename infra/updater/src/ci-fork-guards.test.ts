@@ -30,6 +30,18 @@ describe("the fork's CI differences", () => {
     expect(workflow.jobs["deploy-production"]?.if).toContain(upstreamOnly);
   });
 
+  it("keeps upstream's scheduled dependency agent and App Store release off the fork", () => {
+    for (const [file, jobs] of [
+      ["weekly-dependencies.yml", ["update"]],
+      ["release-mobile.yml", ["ios", "android"]],
+    ] as const) {
+      const other = parse(readFileSync(path.join(repoRoot, ".github/workflows", file), "utf8")) as {
+        jobs: Record<string, Job>;
+      };
+      for (const job of jobs) expect(other.jobs[job]?.if, `${file} ${job}`).toContain(upstreamOnly);
+    }
+  });
+
   it("checks the brand with lint and on the built web app", () => {
     const run = (job: string) => (workflow.jobs[job]?.steps ?? []).map((step) => step.run ?? "");
     expect(run("static-checks")).toContain("pnpm brand:check");

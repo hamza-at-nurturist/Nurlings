@@ -6,6 +6,7 @@ import {
   BOT_INSTRUCTIONS_MAX_LENGTH,
   BOT_NAME_MAX_LENGTH,
   resolveBotAvatarSet,
+  SELECTABLE_BOT_AVATAR_SETS,
 } from "@rakazo/contracts";
 import {
   credentialForModel,
@@ -839,19 +840,21 @@ export default function BotSettingsScreen() {
                 </Text>
               </Pressable>
             ) : null}
-            <MenuPicker
-              label={t("Icon set")}
-              choices={[
-                { key: "organic", label: t("Original") },
-                { key: "rakazo", label: t("Rakazo") },
-              ]}
-              value={avatarSet}
-              onChange={(next) => {
-                setAvatarSet(resolveBotAvatarSet(next));
-                setColor((current) => avatarColor(current));
-              }}
-              plain
-            />
+            {SELECTABLE_BOT_AVATAR_SETS.length > 1 ? (
+              <MenuPicker
+                label={t("Icon set")}
+                choices={[
+                  { key: "organic", label: t("Original") },
+                  { key: "rakazo", label: t("Rakazo") },
+                ]}
+                value={avatarSet}
+                onChange={(next) => {
+                  setAvatarSet(resolveBotAvatarSet(next));
+                  setColor((current) => avatarColor(current));
+                }}
+                plain
+              />
+            ) : null}
             <Text style={{ color: tokens.mutedForeground, marginTop: 16, fontSize: 14 }}>
               {t("Color")}
             </Text>

@@ -10,6 +10,7 @@ import { approvalModeFromPreference, approvalPreferenceFromMode } from "@rakazo/
 import { urlSite } from "@rakazo/core/egress";
 import {
   auditLogOrganization,
+  DEFAULT_AUTO_REVIEW,
   findAutoReviewPreference,
   findDefaultVoiceCredential,
   findModelCredential,
@@ -239,7 +240,7 @@ export function accountRoutes(ctx: RouterContext) {
             input.mode
               ? approvalPreferenceFromMode(input.mode)
               : { enabled: input.enabled, skipApprovals: input.skipApprovals },
-            { enabled: true, skipApprovals: false },
+            DEFAULT_AUTO_REVIEW,
             input.scope,
           ),
         );
@@ -383,8 +384,8 @@ async function loadAutoReviewSettings(deps: RouterDeps, actor: Actor, scope?: Se
     findAutoReviewPreference(deps.prisma, actor, scope),
   ]);
   const stored = {
-    enabled: preference?.enabled ?? true,
-    skipApprovals: preference?.skipApprovals ?? false,
+    enabled: preference?.enabled ?? DEFAULT_AUTO_REVIEW.enabled,
+    skipApprovals: preference?.skipApprovals ?? DEFAULT_AUTO_REVIEW.skipApprovals,
   };
   const settings = { ...stored, mode: approvalModeFromPreference(stored) };
   const deploymentChecker = role.primarySource === "deployment" ? role.primary : null;

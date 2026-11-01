@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  DEFAULT_AUTO_REVIEW,
   findAutoReviewPreference,
   listApprovalRules,
   removeApprovalRule,
@@ -139,5 +140,12 @@ describe("auto review", () => {
       update: { enabled: true },
     });
     expect(client.userActionAutoReviewPreference.upsert).not.toHaveBeenCalled();
+  });
+});
+
+describe("the default a member who never saved Auto Review gets", () => {
+  it("asks before running an action, in every place that reads or writes it", () => {
+    // Nurlings keeps "run actions without asking" off until the member turns it on.
+    expect(DEFAULT_AUTO_REVIEW).toEqual({ enabled: false, skipApprovals: false });
   });
 });

@@ -1071,13 +1071,14 @@ describe("connector read-only metadata and approval enforcement", () => {
       },
     );
 
-    it("reviews automatically when no approval mode was ever saved", async () => {
+    // Nurlings asks first until a member turns Auto on; upstream reviews automatically instead.
+    it("asks the person when no approval mode was ever saved", async () => {
       reviewMock.mockResolvedValue({ decision: "pass", model: "scripted/checker" });
       const f = fixture({ catalog, name: "demo_send_message", savedPreference: false });
       await f.run();
-      expect(reviewMock).toHaveBeenCalledOnce();
-      expect(f.execute).toHaveBeenCalledOnce();
-      expect(f.pauseRunForInput).not.toHaveBeenCalled();
+      expect(reviewMock).not.toHaveBeenCalled();
+      expect(f.execute).not.toHaveBeenCalled();
+      expect(f.pauseRunForInput).toHaveBeenCalledOnce();
     });
 
     it("redacts run secrets from automatic review task and bot context", async () => {

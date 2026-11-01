@@ -135,10 +135,9 @@ export function botHexColor(color: string | undefined | null): string | undefine
   return hex && HEX_COLOR.test(hex) ? hex : undefined;
 }
 
-export function resolvePersonaColorDef(
-  identity: string,
-  explicitColor?: string | null,
-): BotColorDef {
+export function resolvePersonaColorDef(identity: string, storedColor?: string | null): BotColorDef {
+  // A stored color can be "#hex::shape_N"; only the part before "::" is the color.
+  const explicitColor = botHexColor(storedColor) ?? storedColor;
   if (explicitColor) {
     const clean = explicitColor.toLowerCase();
     const foundById = BOT_COLOR_LIST.find((c) => c.id === clean || c.name.toLowerCase() === clean);

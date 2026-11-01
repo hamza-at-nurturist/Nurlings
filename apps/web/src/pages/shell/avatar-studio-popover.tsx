@@ -1,7 +1,7 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import type { BotAvatarSet } from "@rakazo/contracts";
-import { resolveBotAvatarSet } from "@rakazo/contracts";
+import { resolveBotAvatarSet, SELECTABLE_BOT_AVATAR_SETS } from "@rakazo/contracts";
 import { SHIPPED_BOT_AVATAR_SHAPE_KEYS } from "@rakazo/core";
 import {
   BOT_AVATAR_COLORS,
@@ -56,21 +56,23 @@ export function BotLookPicker({
 
   return (
     <div className="space-y-4">
-      <Tabs
-        value={avatarSet}
-        onValueChange={(next) =>
-          onAvatarSetChange?.(resolveBotAvatarSet(next), defaultBotAvatarValue(value))
-        }
-      >
-        <TabsList className="w-full" aria-label={t`Icon set`}>
-          <TabsTrigger value="organic" className="flex-1">
-            <Trans>Original</Trans>
-          </TabsTrigger>
-          <TabsTrigger value="rakazo" className="flex-1">
-            <Trans>Rakazo</Trans>
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {SELECTABLE_BOT_AVATAR_SETS.length > 1 ? (
+        <Tabs
+          value={avatarSet}
+          onValueChange={(next) =>
+            onAvatarSetChange?.(resolveBotAvatarSet(next), defaultBotAvatarValue(value))
+          }
+        >
+          <TabsList className="w-full" aria-label={t`Icon set`}>
+            <TabsTrigger value="organic" className="flex-1">
+              <Trans>Original</Trans>
+            </TabsTrigger>
+            <TabsTrigger value="rakazo" className="flex-1">
+              <Trans>Rakazo</Trans>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      ) : null}
       {avatarSet === "organic" ? (
         <div>
           {organicIdentities ? null : (

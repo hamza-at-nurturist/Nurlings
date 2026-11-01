@@ -2,7 +2,12 @@ import type { MessageBlock } from "@rakazo/contracts";
 import type { ActionApprovalRule } from "@rakazo/core";
 import { connectorKindFromToolName, inboundRoutinePrompts, siteAlwaysAllowed } from "@rakazo/core";
 import { sitesInText, urlSite } from "@rakazo/core/egress";
-import { findAutoReviewPreference, listApprovalRules, storedBatchActions } from "@rakazo/db";
+import {
+  DEFAULT_AUTO_REVIEW,
+  findAutoReviewPreference,
+  listApprovalRules,
+  storedBatchActions,
+} from "@rakazo/db";
 import { SITE_SENDING_TOOLS } from "./approval-ask.js";
 import { boundDirectApprovalDetails, catalogApprovalDetails } from "./approval-effect.js";
 import type { ExecutorDeps } from "./executor-deps.js";
@@ -96,8 +101,8 @@ export function createRunTrustLoaders(
       userId: run.userId,
       spaceId: run.spaceId,
     }).then((row) => ({
-      enabled: row?.enabled ?? true,
-      skipApprovals: row?.skipApprovals ?? false,
+      enabled: row?.enabled ?? DEFAULT_AUTO_REVIEW.enabled,
+      skipApprovals: row?.skipApprovals ?? DEFAULT_AUTO_REVIEW.skipApprovals,
     }));
     return autoReviewPreferencePromise;
   };
