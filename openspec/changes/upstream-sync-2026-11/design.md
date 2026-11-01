@@ -1,0 +1,177 @@
+# Design
+
+## Approach
+
+One merge commit of `upstream/main` (`14101fca`) into `chore/upstream-sync-2026-11`, cut from `main`
+after PR #72 merges. Conflicts are resolved in follow-up commits, one per area: workflows and CI,
+API and worker, adapters and schema, mobile, web, locales, deploy. After the merge, a handful of
+"fix the fallout" commits (route move, billing gate, admin emails, migration fixes). No squash, no
+rebase, no cherry-pick, so the next sync's merge base is this merge.
+
+Local branch tracking is unset, so a plain `git push` cannot go to `main`; the branch is pushed
+explicitly.
+
+## Decisions
+
+### 1. Migrations
+
+54 new upstream migrations, all `packages/db/prisma/migrations/*`, none modified, none removed.
+
+Ordering against ours. Prisma applies unapplied migrations in name order on a fresh database, and
+on production only applies the ones not yet in `_prisma_migrations`. Ours:
+
+| Ours | Touches |
+| --- | --- |
+| `20261024130000_ticket_events`, `20261024140000_ticket_mentions` | `tickets`, `ticket_events`, `tasks` |
+| `20261025120000_ticket_needs_user`, `20261025130000_ticket_comment_attachments`, `20261025140000_ticket_dates` | `tickets`, `ticket_comments`, `tasks` |
+| `20261025150000_runs_taskid_idx_concurrent`, `20261025150001_artifacts_runid_idx_concurrent` | indexes on `runs`, `artifacts` |
+
+Upstream's first dozen (`20261024150000_model_roles` to `20261025210003_*`) sort between and after
+ours. No upstream migration alters `tickets`, `ticket_*` or `tasks` columns; the only overlap is the
+duplicate `runs_taskId_idx` below. New migrations of ours after the sync use a timestamp later than
+`20261112120000` so they sort after everything upstream has shipped.
+
+Classification (everything else is a new table, a new nullable or defaulted column, a new index or
+a backfill):
+
+| Migration | Statement | Previous release reads it? | Plan |
+| --- | --- | --- | --- |
+| `20261025210001_runs_task_id_idx_concurrent` | `CREATE INDEX "runs_taskId_idx"` duplicates ours | n/a | Edit to `IF NOT EXISTS` (overlap) |
+| `20261025140000_drop_space_backup_models` | `DROP TABLE space_backup_models` | maybe | Defer |
+| `20261025180000_drop_model_preference_default` | drop `isDefault` + 2 indexes | yes (`space_model_preferences`) | Defer |
+| `20261025200000_account_settings` | `DROP TABLE account_source, space_setting_signatures` after moving data | yes | Defer the two drops (see below) |
+| `20261102120000_drop_unused_referral_tables` | drop `billing_card_fingerprints`, `referrals.createdAt` | no (new tables) | Safe, ships |
+| `20261103120000_drop_dead_bot_and_referral_columns` | drop `bots.title`, `bots.selfUpdateInstructions`, referral columns | yes for `bots` | Defer |
+| `20261108120000_drop_pending_instructions_run` | drop `bots.pendingInstructionsRunId` | yes | Defer |
+| `20261104120001..3_*_drop_concurrent` | drop three indexes | performance only | Ships |
+| `20261029150000_space_availability` | drop `secrets_scope_check` | relaxes a check | Ships |
+| `20261109120000_audit_events` | `REVOKE UPDATE` on the new table | no | Ships |
+
+`account_settings` is one file that both moves data into new tables and drops two old ones, so it
+cannot be held back as a unit without losing the data move. Preferred handling: keep the file as is
+if `account_source` and `space_setting_signatures` are not read by the previous release (I will
+check against `main`); otherwise split the drops into a follow-up migration that we own, named after
+the sync. Either way, no edit to a file that has already been applied anywhere.
+
+Mechanism for "Defer": move the directory out of `migrations/` into
+`openspec/changes/upstream-sync-2026-11/deferred-migrations/` in a single commit titled
+"Defer non-additive upstream migrations", and a follow-up change restores them after the sync
+release is live. Risks: later migrations that assume a dropped state (none found in the 54), and
+`schema.prisma` no longer matching the database (columns present but unknown to Prisma, harmless
+for reads and for inserts unless NOT NULL without default; checked per column in task 3.3).
+
+Verification: `prisma migrate deploy` on a fresh database, then on a restored copy of the current
+production schema (dump of the last released state), and `prisma migrate diff` between the migrated
+database and `schema.prisma` shows only the deferred drops.
+
+### 2. Board and ticket routes
+
+Today `app/(nurlings)/board.tsx` and `ticket.tsx` resolve to `/board` and `/ticket`. After the
+merge upstream's `app/board.tsx` also resolves to `/board`; Expo Router would pick one by file
+order, silently.
+
+Change: `git mv app/(nurlings) app/nurlings`. Routes become `/nurlings/board` and `/nurlings/ticket`.
+Update every reference (all in fork-owned files except two single lines):
+
+- `app/index.tsx` header Board button, two `router.push("/board")` calls (fork edit, minimal).
+- `app/nurlings/board.tsx`: `router.push({ pathname: "/nurlings/ticket", ... })`.
+- `lib/nurlings-board/notification.ts` and its type: `pathname: "/nurlings/ticket"`; tests updated.
+- `lib/notification-open.ts` target type if it names the paths.
+- `rakazo://ticket` deep link and `rakazo://board`: still accepted. `+native-intent.tsx` rewrites an
+  incoming `/ticket` or `/board` link to `/nurlings/...` before routing (needed because upstream's
+  `/board` now exists and `/ticket` would 404). Push payloads already delivered to devices keep
+  working because they carry the link or the ticket id, not the path.
+- `_layout.tsx`: register `nurlings/board` and `nurlings/ticket` screens with the same options as
+  today.
+- `account.tsx` upstream line 715: `href: "/board"` becomes `"/nurlings/board"`, one line. It is the
+  Settings > Board entry; it stays gated on `ticketBoardEnabled`.
+- Upstream's `app/board.tsx`, `components/board-list*.tsx`, `lib/board.ts` and tests are not edited
+  and not deleted. After the repoint nothing links to `/board`, so their screen is unreachable; it
+  still typechecks and its tests still pass. If upstream's `_layout.tsx` registers a `board`
+  screen, it stays registered.
+- Test: a mobile test asserting that the home Board button, the Settings entry, a ticket
+  notification tap and `rakazo://board` / `rakazo://ticket` links all resolve to our
+  `/nurlings/...` screens, and that no navigation target equals `/board`.
+
+PR #72 changes `board.tsx` and `BoardView.tsx` (uses a shared `isMoveTarget`). The move happens
+after it merges, so the rename carries its changes; no concurrent edits.
+
+### 3. Billing off must stay off
+
+Upstream gates credits on `deps.billing?.modelCreditsEnabled` (hosted provider, onboarding "credits"
+option, account routes, consent) and shows paywall UI from the bootstrap `billingEnabled`. Two
+different expressions are used: `routes/shared.ts` sets `billingEnabled: Boolean(deps.billing)`,
+`app.ts` sets it from `modelCreditsEnabled`. With no Stripe variables `deps.billing` is undefined,
+so both are false today. The risk is a code path added by the 699 commits that checks credits or an
+allowance without that guard (run dispatch, computer allowances, own-connection charges, the
+`SubscriptionGate`, Settings entries, upgrade buttons, mobile paywall screens).
+
+Plan: after the merge, audit the credit, plan, allowance and paywall checks in the API, adapters,
+worker, web and mobile. Anything found that is not behind `deps.billing` or `billingEnabled` gets
+gated, with the lowest-level guard (server side), and is noted in the PR. Add API and web tests with
+billing unset: a bot run is not blocked, no paywall renders, no upgrade button or credit meter
+appears, Settings has no billing section, mobile shows no credit UI.
+
+### 4. Stdio MCP is admin-only
+
+Upstream `assertMcpStdioAdmin` allows only users listed in `RAKAZO_ADMIN_EMAILS` (verified email,
+lowercased). Our Coolify compose passes the `MCP_STDIO_*` variables but not `RAKAZO_ADMIN_EMAILS`, so
+after the sync nobody could add or change a stdio server, and existing ones would only run for as
+long as nobody edits them. Fix: pass `RAKAZO_ADMIN_EMAILS` through in `deploy/coolify/docker-compose.yml`
+(passthrough, no value, matching the compose-env allowlist test), document it next to
+`MCP_STDIO_ENABLED` in `docs/nurlings-deployment.md`. The operator must set it in Coolify to the
+admin account's email. Existing stdio servers keep running; checking this is a post-merge task.
+
+### 5. Defaults we keep
+
+- "Run actions without asking" default OFF: after the merge, check the default of the upstream
+  setting that holds it (account settings, approval rules, new approval replay code) is still false
+  for new users and for the new `user_action_approval_rules` backfill, with a test.
+- Bot color `#hex::shape_N`: only the `#hex` before `::` is the color, including mention chips.
+  `packages/contracts/src/bot-avatar.ts` conflicts, which is where upstream parses colors. Keep the
+  tolerant parse and test mention chips.
+- `NUR` ticket prefix; board and ticket modal designs unchanged.
+
+### 6. Marketing site and Coolify
+
+- `apps/www`: keep ours. If upstream pages (Grok Bot alternatives, other Rakazo copy) arrive in the
+  merge they are deleted in a "Keep our marketing pages" commit and the sitemap/nav are checked.
+- Coolify: keep the `traefik.docker.network=${NURLINGS_PROXY_NETWORK:-${COOLIFY_RESOURCE_UUID:?...}}`
+  web label and the README step to turn off "Escape special characters in labels". Take other
+  upstream compose changes that apply; `coolify-compose` and `compose-env` tests must stay green.
+
+## Upstream overlap
+
+Files upstream changed that we also edit; our edit kept minimal. (Seeded from the dry run; the final
+list is written during the merge and replaces this section before the PR.)
+
+| File | Our edit | Resolution |
+| --- | --- | --- |
+| `packages/db/prisma/migrations/20261025210001_runs_task_id_idx_concurrent/migration.sql` | none today | `IF NOT EXISTS` (upstream file edited) |
+| `apps/api/src/router.ts`, `app.ts` | board/ticket routes, `asTenant`, ticket hooks | keep ours, take the rest |
+| `packages/adapters/src/{executor,job-reconciler,background-job-handlers,builtin-tools,ticket-tools}.ts` | ticket tools and hooks, `ticket.dates` job | keep ours |
+| `apps/worker/src/index.ts` | `ticket.dates` registration | keep ours |
+| `packages/db/prisma/schema.prisma` | ticket models | union |
+| `apps/mobile/app/index.tsx`, `account.tsx`, `_layout.tsx`, `+native-intent.tsx` | Board entry, route repoint, screens | one-line edits where possible |
+| `packages/contracts/src/bot-avatar.ts`, `packages/ui-web/src/bot-avatar.tsx`, `apps/mobile/components/bot-avatar.tsx` | color format, brand mark | keep ours |
+| `deploy/coolify/docker-compose.yml`, README | label, `RAKAZO_ADMIN_EMAILS` | keep, add |
+
+## Risks
+
+1. **Destructive migrations**: see decision 1; needs your call.
+2. **Size**: 97 conflicted files and ~2,500 changed. Mitigated by grouping and by typecheck, lint
+   and tests after each group.
+3. **Native build**: mobile gains native modules (`expo-haptics` from #72 and whatever upstream
+   added), so the result needs a new preview APK, not an OTA update.
+4. **Billing leakage**: decision 3.
+5. **Locale growth**: new upstream strings in web `.po` files and mobile catalogs; `brand:check`
+   and the reviewed `bot → Nurling` snapshots must pass.
+6. **Desktop Playwright** is not run locally; CI's virtual-display job covers it.
+
+## Verification
+
+`pnpm typecheck`, `pnpm lint`, unit tests across the workspace, `pnpm brand:check` (and `--built`
+after a web build), `openspec validate --strict`, Prisma migrate on a fresh database and on a
+restored copy of the current schema, then CI green on the PR. Native-only mobile UI cannot be
+captured by CI; the preview APK after merge covers board, tickets, drag, approvals and push on a
+phone.
