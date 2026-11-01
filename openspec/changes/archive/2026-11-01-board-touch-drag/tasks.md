@@ -30,42 +30,41 @@
 
 ## 5. Drag layer
 
-Tasks 5.1 to 6.3 are implemented and type-checked. Their "on a device" checks need the
-maintainer's preview build, so they stay unticked until then.
+Tasks 5.1 to 6.3 were checked on a device by the maintainer on a preview native build.
 
-- [ ] 5.1 Add the drag store (shared values: dragged ticket, finger x/y, grab offset, hovered
+- [x] 5.1 Add the drag store (shared values: dragged ticket, finger x/y, grab offset, hovered
   index) and the long-press pan on each card, lifting with scale and shadow. Verify: `tsc`
   passes; on a device the card lifts after the hold and a quick tap still opens the ticket.
-- [ ] 5.2 Render the floating copy overlay in `BoardPages`; leave the origin slot dimmed. Verify:
+- [x] 5.2 Render the floating copy overlay in `BoardPages`; leave the origin slot dimmed. Verify:
   on a device the copy follows the finger and the list does not re-render while moving.
-- [ ] 5.3 Add `expo-haptics` (`expo install`) and call a light impact on lift and on a valid drop.
+- [x] 5.3 Add `expo-haptics` (`expo install`) and call a light impact on lift and on a valid drop.
   Verify: `pnpm --filter @rakazo/mobile check` passes (`expo install --check`); the package's own
   manifest declares `VIBRATE`; on a device both platforms give a tap on lift.
-- [ ] 5.4 Disable pager and column list scrolling while a card is lifted. Verify: on a device
+- [x] 5.4 Disable pager and column list scrolling while a card is lifted. Verify: on a device
   neither scrolls from touch during a drag.
 
 ## 6. Auto-scroll, highlight, drop
 
-- [ ] 6.1 Frame-driven edge auto-scroll: horizontal on the pager (snap to nearest page on
+- [x] 6.1 Frame-driven edge auto-scroll: horizontal on the pager (snap to nearest page on
   release), vertical on the column under the finger, speed from `edgeScrollSpeed`. Verify:
   on a device, holding at each edge scrolls and speeds up nearer the edge; stops on release.
-- [ ] 6.2 Highlight the hovered valid column using the muted token. Verify: on a device the
+- [x] 6.2 Highlight the hovered valid column using the muted token. Verify: on a device the
   column under the card highlights, its own column does not.
-- [ ] 6.3 On release call `onAction(ticket, { type: "move", status })` for a valid hovered
+- [x] 6.3 On release call `onAction(ticket, { type: "move", status })` for a valid hovered
   column, otherwise snap back. Verify: on a device a drop moves the card at once; with the
   network off the card returns and the error shows; a drop on its own column or between columns
   changes nothing.
 
 ## 7. Pull request
 
-- [ ] 7.1 Open the PR from `feature/board-touch-drag` with Why, What and How tested in words,
+- [x] 7.1 Open the PR from `feature/board-touch-drag` with Why, What and How tested in words,
   the proposed copy quoted (`More`, accessible name only), and a note that the drag UI is
   native-only and CI cannot capture it. Verify: PR description reviewed against `AGENTS.md`.
-- [ ] 7.2 Stay with the PR until CI is terminal and review comments are handled
+- [x] 7.2 Stay with the PR until CI is terminal and review comments are handled
   (`pr-watch`); do not merge. Verify: checks on the head commit are green or each failure is
   explained and fixed.
 
 ## 8. After merge
 
-- [ ] 8.1 Archive the change. Verify: `openspec archive board-touch-drag` and the main
+- [x] 8.1 Archive the change. Verify: `openspec archive board-touch-drag` and the main
   `mobile-board` spec shows the drag requirements.

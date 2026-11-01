@@ -37,5 +37,5 @@
 ## 6. Wrap-up
 
 - [x] 6.1 `openspec validate avatar-polish --strict`, typecheck, lint, unit tests, Lingui catalogs.
-- [ ] 6.2 PR with why/what/how tested, E2E screenshot, plain-words title. Archive
+- [x] 6.2 PR with why/what/how tested, E2E screenshot, plain-words title. Archive
   `avatar-working-states` first, then this change, after merge.
