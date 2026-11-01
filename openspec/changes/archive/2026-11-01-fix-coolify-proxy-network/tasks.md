@@ -28,4 +28,4 @@
 
 - [ ] 4.1 Redeploy a client server twice and confirm the site answers after each. Verify: no
   Gateway Timeout.
-- [ ] 4.2 Archive the change with `--skip-specs` (a deployment fix has no spec delta).
+- [x] 4.2 Archive the change with `--skip-specs` (a deployment fix has no spec delta).
