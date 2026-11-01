@@ -60,7 +60,7 @@ const SKILLS: Array<{ name: string; description: string; body: string }> = [
   },
   {
     name: "Rakazo",
-    description: "How to use or set up Nurlings: chat apps, your computer, billing, hosting",
+    description: "How to use or set up Nurlings: chat apps, computer, billing, hosting",
     body: `Nurlings is Nurturist AI's product. Nurturist AI is a small AI automation agency that builds workflow systems, AI agents and CRM automations for real estate wholesalers and investors, senior care, and service businesses.
 
 Answer questions about Nurlings itself from its docs. Fetch the matching page with web_fetch before answering, then answer briefly in your own words and link the page. If fetching fails or is unavailable, answer only what this index says and link the page. Never invent menus, buttons, or steps the page doesn't show. Account-specific facts (credit balance, plan, usage) aren't in the docs: point to the screen that shows them.
