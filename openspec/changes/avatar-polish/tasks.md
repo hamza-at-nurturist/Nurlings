@@ -2,7 +2,7 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal and the picker option in `design.md`. Verify: explicit
+- [x] 1.1 Maintainer approves the proposal and the picker option in `design.md`. Verify: explicit
   approval in the session. No code before this.
 
 ## 2. Cursor follow

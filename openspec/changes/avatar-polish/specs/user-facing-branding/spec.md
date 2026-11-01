@@ -22,7 +22,7 @@ rerender avatars on pointer moves.
 - **WHEN** the pointer changes direction six times within 900 ms
 - **THEN** no avatar becomes dizzy
 
-#### Scenario: Shaking the pointer hard
+#### Scenario: Shaking the pointer
 - **WHEN** the pointer changes direction ten times within 1.5 seconds, each move at least 16px
 - **THEN** every visible avatar except asleep and thinking shows spiral eyes and orbiting stars for
   about 2.4 seconds
@@ -58,6 +58,8 @@ SHALL be appended after the existing indexes so no existing bot's body changes.
 #### Scenario: Existing organic bots unchanged
 - **WHEN** a bot stores a plain `#hex` colour
 - **THEN** its organic body is the same family as before this change
+
+## ADDED Requirements
 
 ### Requirement: Chief's face and highlight sit inside its body
 Chief SHALL draw its eyes at the storyboard position, lean and scale, and its gloss arc SHALL be its
