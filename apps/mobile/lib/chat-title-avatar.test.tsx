@@ -32,8 +32,23 @@ vi.mock("react-native", () => ({
     ),
 }));
 vi.mock("../components/bot-avatar", () => ({
-  BotAvatar: ({ color, size, muted }: { color: string; size: number; muted: boolean }) =>
-    createElement("i", { "data-color": color, "data-size": size, "data-muted": String(muted) }),
+  BotAvatar: ({
+    color,
+    size,
+    muted,
+    name,
+  }: {
+    color: string;
+    size: number;
+    muted: boolean;
+    name?: string;
+  }) =>
+    createElement("i", {
+      "data-color": color,
+      "data-size": size,
+      "data-muted": String(muted),
+      "data-name": name,
+    }),
 }));
 vi.mock("./native", () => ({ useThemedStyles: <T,>(factory: () => T) => factory() }));
 vi.mock("./appearance", () => ({ mobileTokens: () => ({ secondary: "secondary-fill" }) }));
@@ -90,6 +105,7 @@ it("draws the bot's avatar on the very first render when the inbox already loade
   expect(avatar()?.getAttribute("data-color")).toBe(helper.color);
   expect(avatar()?.getAttribute("data-size")).toBe(String(CHAT_TITLE_AVATAR_SIZE));
   expect(avatar()?.getAttribute("data-muted")).toBe("true");
+  expect(avatar()?.getAttribute("data-name")).toBe("Helper");
 });
 
 it("holds the avatar's place at its final size until an unknown bot arrives", () => {

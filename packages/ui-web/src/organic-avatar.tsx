@@ -5,15 +5,18 @@ import {
   avatarGlossPath,
   avatarIdentitySeed,
   avatarPropAnchors,
+  isLightAvatarColor,
   isRunWaitingOnUser,
   isRunWorking,
   organicAvatarPath,
   svgPathBounds,
 } from "@rakazo/core";
+import type { AvatarStateSource } from "@rakazo/core/avatar-state-react";
+import { useAvatarState, useToolSwap } from "@rakazo/core/avatar-state-react";
 import { tokens } from "@rakazo/ui-tokens";
+import { AVATAR_ILLUSTRATION as ink } from "@rakazo/ui-tokens/avatar-illustration";
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { AVATAR_ILLUSTRATION as ink } from "./avatar-illustration.js";
 import { registerAvatarPointer } from "./avatar-pointer.js";
 import { useAvatarMotionVisibility } from "./hooks/use-avatar-motion-visibility.js";
 import { cn } from "./lib/utils.js";
@@ -27,8 +30,6 @@ import {
   SearchProp,
   WriteProp,
 } from "./organic-avatar-props.js";
-import type { AvatarStateSource } from "./use-avatar-state.js";
-import { useAvatarState, useToolSwap } from "./use-avatar-state.js";
 import "./organic-avatar.css";
 
 export interface OrganicAvatarProps extends AvatarStateSource {
@@ -77,15 +78,6 @@ function eyeSpecs(frame: OrganicBotAvatarFrame | undefined): EyeSpec[] {
     ry: frame.eyes.ry,
     tilt,
   }));
-}
-
-/** True for a body so light that a white glint would vanish on it. */
-function isLightColor(color: string): boolean {
-  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim())?.[1];
-  if (!hex) return false;
-  const full = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
-  const [r, g, b] = [0, 2, 4].map((i) => Number.parseInt(full.slice(i, i + 2), 16));
-  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b! > 200;
 }
 
 const reducedMotionMedia = "(prefers-reduced-motion: reduce)";
@@ -185,7 +177,7 @@ export function OrganicAvatar({
       data-dizzy={dizzy}
       data-swapping={swapping}
       data-glint="true"
-      data-glint-tone={frame?.glint ?? (isLightColor(color) ? "light" : undefined)}
+      data-glint-tone={frame?.glint ?? (isLightAvatarColor(color) ? "light" : undefined)}
       data-paused={!visible}
       data-shape-family={seed % 10}
       data-eye-pattern={seed % 4}

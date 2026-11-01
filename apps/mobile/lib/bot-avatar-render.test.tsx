@@ -118,6 +118,7 @@ vi.mock("react-native-svg", () => {
       );
   return {
     default: element("svg"),
+    Circle: element("circle"),
     Ellipse: element("ellipse"),
     G: element("g"),
     Path: element("path"),
@@ -230,7 +231,10 @@ describe("BotAvatar", () => {
   }
 
   const bodies = (view: HTMLElement) =>
-    Array.from(view.querySelectorAll("path"), (path) => path.dataset.d);
+    Array.from(
+      view.querySelectorAll('path:not([data-fill="none"])'),
+      (path) => (path as HTMLElement).dataset.d,
+    );
 
   it("preserves the shared native tap reactions on the Rakazo set", () => {
     nativeMotion.reduced = false;

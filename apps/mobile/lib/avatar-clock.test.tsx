@@ -71,6 +71,7 @@ vi.mock("react-native-reanimated", () => {
     useReducedMotion: () => false,
     useSharedValue: (value: unknown) => useState(() => new Shared(value))[0],
     withSpring: (value: unknown) => value,
+    withRepeat: (value: unknown) => value,
     withTiming: (to: number, config?: { duration?: number }) => ({
       timing: true,
       to,
@@ -80,7 +81,14 @@ vi.mock("react-native-reanimated", () => {
 });
 vi.mock("react-native-svg", () => {
   const element = ({ children }: { children?: ReactNode }) => createElement("div", null, children);
-  return { default: element, Ellipse: element, G: element, Path: element, Rect: element };
+  return {
+    default: element,
+    Circle: element,
+    Ellipse: element,
+    G: element,
+    Path: element,
+    Rect: element,
+  };
 });
 vi.mock("react-native", () => ({
   View: ({ children }: { children?: ReactNode }) => createElement("div", null, children),
@@ -101,7 +109,7 @@ const bot = { id: "bot-1", color: "#2A92FE::shape_2", status: "running" };
 function body([from, to]: readonly [number, number]) {
   for (const style of styles.slice(from, to).reverse()) {
     const transform = onUI(style).transform as Array<Record<string, unknown>> | undefined;
-    if (!transform?.some((step) => "rotate" in step)) continue;
+    if (!transform?.some((step) => "scaleX" in step)) continue;
     const rotate = Number.parseFloat(String(transform.find((step) => "rotate" in step)?.rotate));
     const translateY = Number(transform.find((step) => "translateY" in step)?.translateY);
     return { rotate, translateY };

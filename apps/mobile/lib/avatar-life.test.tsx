@@ -28,7 +28,6 @@ import {
   AvatarViewportScope,
   AWAKE_MS,
   createAvatarViewport,
-  MORPH_SPRING,
 } from "./avatar-life";
 
 const CLOCK_MS = 24 * 60 * 60 * 1000;
@@ -63,6 +62,7 @@ vi.mock("react-native-reanimated", () => {
     useAnimatedStyle: (worklet: () => unknown) => worklet(),
     useReducedMotion: () => motion.reducedMotion,
     useSharedValue: <T,>(value: T) => useRef({ value }).current,
+    withRepeat: (value: unknown) => value,
     withSpring: (value: unknown, config?: Record<string, number>) => {
       motion.springs.push([value, config]);
       return value;
@@ -76,7 +76,14 @@ vi.mock("react-native-reanimated", () => {
 vi.mock("react-native-svg", () => {
   const element = ({ children, fill }: { children?: ReactNode; fill?: string }) =>
     createElement("div", { "data-fill": fill }, children);
-  return { default: element, Ellipse: element, G: element, Path: element, Rect: element };
+  return {
+    default: element,
+    Circle: element,
+    Ellipse: element,
+    G: element,
+    Path: element,
+    Rect: element,
+  };
 });
 vi.mock("react-native", () => ({
   View: ({
@@ -115,6 +122,7 @@ vi.mock("./native", () => ({
 }));
 
 const SHAPE = "#2A92FE::shape_2";
+const PHOTO = "data:image/png;base64,AAAA";
 
 describe("avatar motion on mobile", () => {
   let root: Root;
@@ -161,19 +169,21 @@ describe("avatar motion on mobile", () => {
     expect(awake()).toBe(1);
   });
 
-  it("keeps every other avatar still, even while its bot works, and keeps the working dot", () => {
+  it("keeps every other avatar still, even while its bot works, and keeps a photo's working dot", () => {
     render(<BotAvatar color={SHAPE} identity="bot-1" size={28} status="running" />);
     wait(30_000);
     expect(clockStarted()).toBe(false);
+    expect(workingDot()).toBeNull();
+    render(<BotAvatar color={PHOTO} identity="bot-p" size={28} status="running" />);
     expect(workingDot()).not.toBeNull();
   });
 
   it("draws the working dot as a green disc ringed in the surface colour, sized for the avatar", () => {
-    render(<BotAvatar color={SHAPE} identity="bot-1" size={62} status="running" motion="lazy" />);
+    render(<BotAvatar color={PHOTO} identity="bot-p" size={62} status="running" motion="lazy" />);
     expect(workingDot()?.getAttribute("data-bg")).toBe("#3FA266");
     expect(workingDot()?.getAttribute("data-ring")).toBe("#FFF");
     expect(Number(workingDot()?.getAttribute("data-width"))).toBeCloseTo(12 + 2 * 62 * 0.046);
-    render(<BotAvatar color={SHAPE} identity="bot-1" size={28} status="running" />);
+    render(<BotAvatar color={PHOTO} identity="bot-p" size={28} status="running" />);
     expect(Number(workingDot()?.getAttribute("data-width"))).toBeCloseTo(10 + 2 * 28 * 0.046);
   });
 
@@ -185,11 +195,7 @@ describe("avatar motion on mobile", () => {
     expect(workingDot()).toBeNull();
   });
 
-  it("turns into the typing dots while the bot writes its reply, and back into its face after", () => {
-    render(
-      <BotAvatar color={SHAPE} identity="bot-1" size={28} status="running" motion="running" />,
-    );
-    expect(motion.springs.at(-1)?.[0]).toBe(0);
+  it("keeps its face while the bot writes its reply: no typing-dot morph", () => {
     render(
       <BotAvatar
         color={SHAPE}
@@ -200,18 +206,7 @@ describe("avatar motion on mobile", () => {
         composing
       />,
     );
-    expect(motion.springs.at(-1)).toEqual([1, MORPH_SPRING]);
-    render(
-      <BotAvatar color={SHAPE} identity="bot-1" size={28} status="running" motion="running" />,
-    );
-    expect(motion.springs.at(-1)).toEqual([0, MORPH_SPRING]);
-  });
-
-  it("drops the chat header's working dot while the bot writes, and keeps it a still picture", () => {
-    render(<BotAvatar color={SHAPE} identity="bot-1" size={28} status="running" composing />);
-    expect(workingDot()).toBeNull();
-    expect(clockStarted()).toBe(false);
-    expect(motion.springs.at(-1)?.[0]).toBe(0);
+    expect(motion.springs.some(([, config]) => config?.duration === 520)).toBe(false);
   });
 
   it("leaves the working dot off the chat's working avatar, which is the sign itself", () => {
@@ -245,7 +240,7 @@ describe("avatar motion on mobile", () => {
     expect(awake()).toBe(0);
   });
 
-  it("keeps a writing bot's face under Reduce Motion instead of turning it into moving dots", () => {
+  it("keeps a writing bot's face under Reduce Motion", () => {
     motion.reducedMotion = true;
     render(
       <BotAvatar
@@ -258,8 +253,7 @@ describe("avatar motion on mobile", () => {
       />,
     );
     expect(awake()).toBe(0);
-    expect(motion.springs).not.toContainEqual([1, MORPH_SPRING]);
-    expect(motion.springs.at(-1)?.[0]).toBe(0);
+    expect(motion.springs.some(([, config]) => config?.duration === 520)).toBe(false);
   });
 
   it("holds a photo's place with a plain circle while the photo loads", () => {
@@ -371,7 +365,8 @@ describe("activity mark", () => {
 
   it("shows each working member of a group in turn, every 2 s", () => {
     render(<ActivityMark bots={bots} atBottom />);
-    const shown = () => container.querySelector("[data-fill]")?.getAttribute("data-fill");
+    const shown = () =>
+      container.querySelector('[data-fill]:not([data-fill="none"])')?.getAttribute("data-fill");
     expect(shown()).toBe("#2A92FE");
     act(() => vi.advanceTimersByTime(2000));
     expect(shown()).toBe("#FF781C");
@@ -394,7 +389,8 @@ describe("activity mark", () => {
         <ActivityMark bots={[photo, bots[0]!]} atBottom />
       </AvatarScreenFocus>,
     );
-    const drawnShown = () => container.querySelector("[data-fill]") !== null;
+    const drawnShown = () =>
+      container.querySelector('[data-fill]:not([data-fill="none"])') !== null;
     act(() => vi.advanceTimersByTime(6000));
     expect(drawnShown()).toBe(false);
     expect(pulsing()).toBe(false);
@@ -448,9 +444,9 @@ describe("activity mark", () => {
     expect(container.querySelector("button")).not.toBeNull();
   });
 
-  it("turns into the typing dots while its bot writes", () => {
+  it("keeps its face while its bot writes", () => {
     render(<ActivityMark bots={[{ ...bots[0]!, composing: true }]} atBottom />);
-    expect(motion.springs).toContainEqual([1, MORPH_SPRING]);
+    expect(motion.springs.some(([, config]) => config?.duration === 520)).toBe(false);
   });
 
   it("shows plain typing dots instead of a photo, including a photo member's turn in a group", () => {
@@ -460,7 +456,7 @@ describe("activity mark", () => {
     expect(dots()).toBe(3);
     expect(container.querySelector("button")).toBeNull();
     act(() => vi.advanceTimersByTime(2000));
-    expect(container.querySelector("[data-fill]")).not.toBeNull();
+    expect(container.querySelector('[data-fill]:not([data-fill="none"])')).not.toBeNull();
     act(() => vi.advanceTimersByTime(2000));
     expect(dots()).toBe(3);
   });

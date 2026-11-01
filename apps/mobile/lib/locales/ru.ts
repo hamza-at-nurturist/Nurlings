@@ -737,6 +737,12 @@ export const RU_MESSAGES: Record<string, string> = {
   "Waiting…": "Ожидание…",
   "What this bot is for": "Для чего нужен этот бот",
   Working: "Выполняется",
+  thinking: "думает",
+  "needs you": "ждёт вас",
+  "in review": "на проверке",
+  blocked: "заблокирован",
+  done: "готово",
+  asleep: "спит",
   "Working…": "Выполняется…",
   "Work stopped, but the thread could not refresh: {detail}":
     "Работа остановлена, но диалог не удалось обновить: {detail}",

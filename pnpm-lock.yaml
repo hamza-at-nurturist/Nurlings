@@ -984,6 +984,9 @@ importers:
       mdast-util-to-hast:
         specifier: 13.2.1
         version: 13.2.1
+      react:
+        specifier: 19.2.3
+        version: 19.2.3
       remark-gfm:
         specifier: 4.0.1
         version: 4.0.1
@@ -1003,6 +1006,9 @@ importers:
       '@types/d3-dsv':
         specifier: 3.0.7
         version: 3.0.7
+      '@types/react':
+        specifier: 19.2.18
+        version: 19.2.18
       fast-check:
         specifier: 4.10.2
         version: 4.10.2
