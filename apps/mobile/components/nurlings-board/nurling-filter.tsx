@@ -21,6 +21,7 @@ export function NurlingFilter({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.scroller}
       contentContainerStyle={styles.row}
       keyboardShouldPersistTaps="handled"
     >
@@ -68,6 +69,8 @@ export function NurlingFilter({
 }
 
 const styles = StyleSheet.create({
+  // A horizontal ScrollView grows to fill a column by default, which left a gap under the row.
+  scroller: { flexGrow: 0 },
   row: { alignItems: "center", gap: 4, paddingHorizontal: 16, paddingVertical: 6 },
   all: { height: 36, borderRadius: 18, paddingHorizontal: 14, justifyContent: "center" },
   avatar: {
