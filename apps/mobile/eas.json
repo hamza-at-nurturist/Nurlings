@@ -24,7 +24,8 @@
       "extends": "production",
       "android": {
         "buildType": "apk"
-      }
+      },
+      "environment": "production"
     },
     "android-preview-apk": {
       "extends": "production",
@@ -35,6 +36,10 @@
       "android": {
         "buildType": "apk"
       }
+    },
+    "diagnostic": {
+      "extends": "production",
+      "channel": "diagnostic"
     }
   },
   "submit": {

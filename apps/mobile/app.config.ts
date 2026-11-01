@@ -4,7 +4,7 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 // @ts-expect-error TS5097
 import { brandExpoConfig, placeholderProblems, previewIdentity } from "./lib/brand-expo-config.ts";
 
-const RELEASE_PROFILES = new Set(["production", "android-apk", "android-preview-apk"]);
+const RELEASE_PROFILES = new Set(["production", "android-apk", "android-preview-apk", "diagnostic"]);
 
 export default ({ config }: ConfigContext): ExpoConfig => {
   if (RELEASE_PROFILES.has(process.env.EAS_BUILD_PROFILE ?? "")) {
@@ -38,12 +38,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   const rpId = passkeyRpId(process.env.EXPO_PUBLIC_API_URL);
   if (rpId) {
     // Native passkeys only work for domains the binary is associated with, so the app reads the
-    // same list at runtime to hide passkeys on other servers.
+    // same list at runtime to hide passkeys on other servers. Developer mode makes a
+    // development-signed build fetch the association file itself, for a server on a private
+    // network or VPN that Apple's CDN cannot reach.
+    const mode = process.env.RAKAZO_PASSKEY_DEVELOPER_MODE === "1" ? "?mode=developer" : "";
     result = {
       ...result,
       ios: {
         ...result.ios,
-        associatedDomains: [...(result.ios?.associatedDomains ?? []), `webcredentials:${rpId}`],
+        associatedDomains: [
+          ...(result.ios?.associatedDomains ?? []),
+          `webcredentials:${rpId}${mode}`,
+        ],
       },
       extra: { ...result.extra, passkeyRpIds: [rpId] },
     };

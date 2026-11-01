@@ -1,5 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import { brand } from "@nurlings/brand";
+import type { NavLink } from "@rakazo/contracts";
 import {
   AppMarkStack,
   Button,
@@ -13,11 +14,14 @@ import {
   Download,
   FolderOpen,
   Gauge,
+  Link2,
   LogOut,
   Plug,
+  ScrollText,
   Settings,
   Smartphone,
   SquareKanban,
+  UserPlus,
   UserRound,
 } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
@@ -35,10 +39,14 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onIntegrations: () => void;
+  onSkills: () => void;
   onBoard?: () => void;
+  links?: NavLink[];
+  onLink?: (link: NavLink) => void;
   onArtifacts: () => void;
   onSettings: () => void;
   onUsage: () => void;
+  onInvite?: () => void;
   onLogOut: () => void;
   signingOut: boolean;
   logOutError: string | null;
@@ -59,16 +67,20 @@ export function SidebarFooter({
   open,
   onOpenChange,
   onIntegrations,
+  onSkills,
   onBoard,
+  links = [],
+  onLink,
   onArtifacts,
   onSettings,
   onUsage,
+  onInvite,
   onLogOut,
   signingOut,
   logOutError,
 }: Props) {
-  const { t } = useLingui();
   const mobileUrl = mobileAppUrl(navigator.userAgent);
+  const { t } = useLingui();
   const update = useSidebarUpdate();
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const pillRef = useRef<HTMLButtonElement>(null);
@@ -147,11 +159,58 @@ export function SidebarFooter({
             <Button
               variant="ghost"
               className="h-9 w-full justify-start gap-2.5 font-normal"
+              aria-label={t`Settings`}
+              onClick={onSettings}
+            >
+              <Settings className="text-muted-foreground" strokeWidth={1.75} />
+              <Trans>Settings</Trans>
+            </Button>
+            <Button
+              variant="ghost"
+              className="h-9 w-full justify-start gap-2.5 font-normal"
+              onClick={onSkills}
+            >
+              <ScrollText className="text-muted-foreground" strokeWidth={1.75} />
+              <Trans>Skills</Trans>
+            </Button>
+            <Button
+              variant="ghost"
+              className="h-9 w-full justify-start gap-2.5 font-normal"
+              onClick={onArtifacts}
+            >
+              <FolderOpen className="text-muted-foreground" strokeWidth={1.75} />
+              <Trans>Artifacts</Trans>
+            </Button>
+            {onBoard ? (
+              <Button
+                variant="ghost"
+                className="h-9 w-full justify-start gap-2.5 font-normal"
+                onClick={onBoard}
+              >
+                <SquareKanban className="text-muted-foreground" strokeWidth={1.75} />
+                <Trans>Board</Trans>
+              </Button>
+            ) : null}
+            {links.map((link) => (
+              <Button
+                key={link.id}
+                variant="ghost"
+                className="h-9 w-full justify-start gap-2.5 font-normal"
+                onClick={() => onLink?.(link)}
+              >
+                <Link2 className="text-muted-foreground" strokeWidth={1.75} />
+                {link.label}
+              </Button>
+            ))}
+            <Button
+              variant="ghost"
+              className="h-9 w-full justify-start gap-2.5 font-normal"
               onClick={onUsage}
             >
               <Gauge className="text-muted-foreground" strokeWidth={1.75} />
               <Trans>Usage</Trans>
             </Button>
+            <div className="my-1 border-t border-border" />
             {mobileUrl ? (
               <a
                 className={`${buttonVariants({ variant: "ghost" })} h-9 w-full justify-start gap-2.5 font-normal`}
@@ -163,6 +222,16 @@ export function SidebarFooter({
                 <Trans>Get the mobile app</Trans>
               </a>
             ) : null}
+            {onInvite ? (
+              <Button
+                variant="ghost"
+                className="h-9 w-full justify-start gap-2.5 font-normal"
+                onClick={onInvite}
+              >
+                <UserPlus className="text-muted-foreground" strokeWidth={1.75} />
+                <Trans>Invite friends</Trans>
+              </Button>
+            ) : null}
             <a
               className={`${buttonVariants({ variant: "ghost" })} h-9 w-full justify-start gap-2.5 font-normal`}
               href={DOCS_URL}
@@ -172,33 +241,6 @@ export function SidebarFooter({
               <BookOpen className="text-muted-foreground" strokeWidth={1.75} />
               <Trans>Docs</Trans>
             </a>
-            {onBoard ? (
-              <Button
-                variant="ghost"
-                className="h-9 w-full justify-start gap-2.5 font-normal"
-                onClick={onBoard}
-              >
-                <SquareKanban className="text-muted-foreground" strokeWidth={1.75} />
-                <Trans>Board</Trans>
-              </Button>
-            ) : null}
-            <Button
-              variant="ghost"
-              className="h-9 w-full justify-start gap-2.5 font-normal"
-              onClick={onArtifacts}
-            >
-              <FolderOpen className="text-muted-foreground" strokeWidth={1.75} />
-              <Trans>Artifacts</Trans>
-            </Button>
-            <Button
-              variant="ghost"
-              className="h-9 w-full justify-start gap-2.5 font-normal"
-              aria-label={t`Settings`}
-              onClick={onSettings}
-            >
-              <Settings className="text-muted-foreground" strokeWidth={1.75} />
-              <Trans>Settings</Trans>
-            </Button>
             <div className="my-1 border-t border-border" />
             <Button
               variant="ghost"
@@ -223,7 +265,7 @@ export function SidebarFooter({
           variant="outline"
           ref={pillRef}
           onClick={onIntegrations}
-          className="h-9 min-w-0 flex-1 justify-between rounded-full bg-sidebar-accent hover:border-foreground/30 hover:bg-sidebar-accent dark:hover:bg-sidebar-accent"
+          className="h-9 min-w-0 flex-1 justify-between bg-sidebar-accent hover:border-foreground/30 hover:bg-sidebar-accent dark:hover:bg-sidebar-accent"
         >
           <span ref={labelRef} className="min-w-0 truncate">
             <Trans>Connect apps</Trans>

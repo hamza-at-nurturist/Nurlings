@@ -34,13 +34,23 @@ export const DEFAULT_DESKTOP_ENV: DesktopEnvironment = {
   bindHost: "127.0.0.1",
   preservePrimaryDisplay: true,
 };
+/** Rebuildable tool caches live outside the saved home. Tools create these under /tmp. */
+export const COMPUTER_CACHE_ENV = {
+  XDG_CACHE_HOME: "/tmp/rakazo-cache/xdg",
+  npm_config_cache: "/tmp/rakazo-cache/npm",
+  PIP_CACHE_DIR: "/tmp/rakazo-cache/pip",
+  PLAYWRIGHT_BROWSERS_PATH: "/tmp/rakazo-cache/ms-playwright",
+  UV_CACHE_DIR: "/tmp/rakazo-cache/uv",
+};
+
 function gatewayHost(host = "127.0.0.1") {
-  if (host !== "localhost" && !isIPv4(host)) throw new Error("invalid screen gateway bind host");
+  if (host !== "localhost" && host !== "::" && !isIPv4(host))
+    throw new Error("invalid screen gateway bind host");
   return host;
 }
 
 function gatewayProbeHost(host: string) {
-  return host === "0.0.0.0" ? "127.0.0.1" : host;
+  return host === "0.0.0.0" ? "127.0.0.1" : host === "::" ? "::1" : host;
 }
 
 export function screenPorts(index: number, env = DEFAULT_DESKTOP_ENV) {
@@ -215,7 +225,7 @@ function browserLauncherCommand(
     '  if [ -n "$_kept" ]; then export LD_PRELOAD="$_kept"; else unset LD_PRELOAD; fi',
     "  unset _kept _rest _entry",
     "fi",
-    `exec "$browser" --test-type --no-sandbox --disable-dev-shm-usage --disable-gpu --enable-unsafe-swiftshader --no-first-run --no-default-browser-check --disable-session-crashed-bubble --hide-crash-restore-bubble --password-store=basic --start-maximized --remote-debugging-address=127.0.0.1 --remote-debugging-port=${layout.debugPort} --user-data-dir=${shellQuote(browserProfilePathForScreen(screenId, env))} "$@"`,
+    `exec "$browser" --test-type --no-sandbox --disable-dev-shm-usage --disable-gpu --enable-unsafe-swiftshader --no-first-run --no-default-browser-check --disable-session-crashed-bubble --hide-crash-restore-bubble --password-store=basic --restore-last-session --start-maximized --remote-debugging-address=127.0.0.1 --remote-debugging-port=${layout.debugPort} --user-data-dir=${shellQuote(browserProfilePathForScreen(screenId, env))} "$@"`,
   ].join("\n");
 }
 
@@ -781,6 +791,20 @@ print(index)
   ].join("\n");
 }
 
+/**
+ * Run `argv` with DISPLAY on the screen assigned to `screenId`, so screen tools in a bot's
+ * shell see its own desktop. Without an assignment the inherited DISPLAY stays.
+ */
+export function screenDisplayArgv(argv: readonly string[], screenId: string, displayStart: number) {
+  const slot = `${REGISTRY}/${browserKeyForScreen(screenId)}.slot`;
+  const program = [
+    `index=$(sed -n 1p ${shellQuote(slot)} 2>/dev/null)`,
+    `case "$index" in ''|*[!0-9]*) ;; *) DISPLAY=:$((index + ${displayStart})); export DISPLAY ;; esac`,
+    'exec "$@"',
+  ].join("\n");
+  return ["sh", "-c", program, "sh", ...argv];
+}
+
 /** Tear down before freeing a slot; failed teardown leaves it reserved for retry. */
 export function releaseDesktopCommand(
   screenId: string,
@@ -805,13 +829,17 @@ export function releaseDesktopCommand(
   ].join("\n");
 }
 
-/** Guard a control transition with the persisted allocation and execution fence. */
+/**
+ * Guard a control transition with the persisted allocation and execution fence.
+ * Revoking without a token ends any control on the display but keeps its slot, fence,
+ * view, and browser for the bot's next run.
+ */
 export function desktopControlCommand(
   screenId: string,
   leaseId: string | undefined,
   env: DesktopEnvironment,
   interactive: boolean,
-  token: string,
+  token?: string,
 ) {
   return [
     ...registryLockCommand(screenId),

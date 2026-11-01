@@ -1,16 +1,16 @@
 // @vitest-environment jsdom
 
 import type * as UiWeb from "@rakazo/ui-web";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ComponentProps, ReactNode } from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { MemoryRouter } from "react-router-dom";
-import { expect, it, vi } from "vitest";
+import { beforeEach, expect, it, vi } from "vitest";
 
 const api = vi.hoisted(() => ({
   boards: { subscribe: vi.fn() },
   bots: { list: vi.fn() },
-  me: vi.fn(async () => ({ timezone: "America/New_York" })),
   tickets: {
     list: vi.fn(),
     update: vi.fn(),
@@ -19,7 +19,12 @@ const api = vi.hoisted(() => ({
     comments: vi.fn(),
   },
 }));
-vi.mock("../lib/rpc", () => ({ rpc: api }));
+vi.mock("../lib/rpc", () => ({
+  rpc: api,
+  rpcForSpace: () => api,
+  createSpaceRpc: () => api,
+  selectedSpaceId: () => null,
+}));
 vi.mock("../lib/relative-time", () => ({ formatRelativeTime: () => "5m ago" }));
 vi.mock("./WindowChrome", () => ({ WindowChrome: () => null }));
 vi.mock("@lingui/react/macro", () => {
@@ -35,7 +40,6 @@ vi.mock("@rakazo/chat-ui/web", () => ({
 vi.mock("@rakazo/ui-web", async (importOriginal) => {
   const Container = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
   return {
-    Badge: (props: ComponentProps<"span">) => <span {...props} />,
     Button: (props: ComponentProps<"button">) => <button {...props} />,
     buttonVariants: (await importOriginal<typeof UiWeb>()).buttonVariants,
     Dialog: Container,
@@ -49,29 +53,15 @@ vi.mock("@rakazo/ui-web", async (importOriginal) => {
   };
 });
 
-vi.mock("../components/board/TicketModal/TicketModal", () => ({
-  TicketModal: (props: {
-    ticket: { id: string; status: string; assigneeBotId: string | null };
-    bots: unknown[];
-    revision: number;
-    onClose: () => void;
-    onChanged: () => Promise<void>;
-  }) => (
-    <div
-      data-testid="ticket-modal"
-      data-ticket={props.ticket.id}
-      data-status={props.ticket.status}
-      data-owner={props.ticket.assigneeBotId ?? ""}
-      data-bots={props.bots.length}
-      data-revision={props.revision}
-    >
-      <button type="button" data-testid="modal-close" onClick={props.onClose} />
-      <button type="button" data-testid="modal-changed" onClick={() => void props.onChanged()} />
-    </div>
-  ),
-}));
-
 import { UpstreamBoardPage as BoardPage } from "./Board";
+
+/** Query results reach components on a timer, real or fake. */
+async function settle() {
+  await act(async () => {
+    if (vi.isFakeTimers()) await vi.advanceTimersByTimeAsync(0);
+    else await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
 
 function bot(id: string, name: string) {
   return { id, name };
@@ -104,6 +94,11 @@ function ticket(
   };
 }
 
+let client: QueryClient;
+beforeEach(() => {
+  client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+});
+
 async function renderBoard(stream?: AsyncIterable<{ ticketId?: string }>, refusal?: unknown) {
   api.boards.subscribe.mockReset();
   api.boards.subscribe.mockResolvedValue(
@@ -117,11 +112,15 @@ async function renderBoard(stream?: AsyncIterable<{ ticketId?: string }>, refusa
   const root = createRoot(container);
   await act(async () =>
     root.render(
-      <MemoryRouter initialEntries={["/app/board"]}>
-        <BoardPage />
-      </MemoryRouter>,
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={["/app/board"]}>
+          <BoardPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
     ),
   );
+  // Let query results reach the screen.
+  await settle();
   return {
     container,
     async cleanup() {
@@ -131,93 +130,57 @@ async function renderBoard(stream?: AsyncIterable<{ ticketId?: string }>, refusa
   };
 }
 
-it("renders status columns and opens the ticket modal for the clicked ticket", async () => {
+it("renders status columns and opens a ticket with comments", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   api.bots.list.mockResolvedValue([bot("bot-1", "Helper")]);
   api.tickets.list.mockResolvedValue({
     tickets: [ticket("Ship", "ticket-1", "todo", "RAK-1", "bot-1", "Details")],
   });
+  api.tickets.comments.mockResolvedValue([
+    {
+      id: "comment-1",
+      body: "Ready",
+      authorName: "Board tester",
+      createdAt: "2026-10-10T10:00:00Z",
+    },
+    { id: "comment-2", body: "Reviewed", authorName: "Helper", createdAt: "2026-10-10T10:01:00Z" },
+  ]);
   const page = await renderBoard();
   try {
     expect(
       Array.from(page.container.querySelectorAll("h2")).map((node) => node.textContent),
     ).toEqual(["To do", "In progress", "In review", "Blocked", "Done", "Won't do"]);
-    expect(page.container.querySelector('[data-testid="ticket-modal"]')).toBeNull();
     await act(async () =>
       (
         page.container.querySelector('[data-testid="board-card-ticket-1"]') as HTMLButtonElement
       ).click(),
     );
-    const modal = page.container.querySelector('[data-testid="ticket-modal"]') as HTMLElement;
-    expect(modal.dataset.ticket).toBe("ticket-1");
-    expect(modal.dataset.bots).toBe("1");
-    expect(page.container.querySelector("form")).toBeNull();
-    await act(async () =>
-      (page.container.querySelector('[data-testid="modal-close"]') as HTMLButtonElement).click(),
+    await settle();
+    expect(page.container.querySelector('[data-testid="ticket-description"]')?.textContent).toBe(
+      "Details",
     );
-    expect(page.container.querySelector('[data-testid="ticket-modal"]')).toBeNull();
-  } finally {
-    await page.cleanup();
-  }
-});
-
-it("marks only the cards that need the user", async () => {
-  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-  api.bots.list.mockResolvedValue([bot("bot-1", "Helper")]);
-  api.tickets.list.mockResolvedValue({
-    tickets: [
-      { ...ticket("Pick a region", "ticket-1", "blocked", "RAK-1", "bot-1"), needsUser: true },
-      { ...ticket("Ship", "ticket-2", "doing", "RAK-2", "bot-1"), needsUser: false },
-    ],
-  });
-  const page = await renderBoard();
-  try {
-    const badge = (id: string) =>
-      page.container.querySelector(
-        `[data-testid="board-card-${id}"] [data-testid="ticket-needs-you"]`,
-      );
-    expect(badge("ticket-1")?.textContent).toBe("Needs you");
-    expect(badge("ticket-2")).toBeNull();
-  } finally {
-    await page.cleanup();
-  }
-});
-
-it("shows a card's dates in the user's timezone only when it has some", async () => {
-  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-  vi.useFakeTimers({ now: new Date("2026-10-26T16:00:00Z"), toFake: ["Date"] });
-  api.bots.list.mockResolvedValue([bot("bot-1", "Helper")]);
-  api.tickets.list.mockResolvedValue({
-    tickets: [
-      {
-        ...ticket("Lease", "ticket-1", "doing", "RAK-1", "bot-1"),
-        startAt: "2026-10-27T13:00:00.000Z",
-        startHasTime: false,
-        dueAt: "2026-10-30T19:00:00.000Z",
-        dueHasTime: true,
-      },
-      {
-        ...ticket("Late", "ticket-2", "doing", "RAK-2", "bot-1"),
-        dueAt: "2026-10-25T03:59:00.000Z",
-        dueHasTime: false,
-      },
-      ticket("Plain", "ticket-3", "doing", "RAK-3", "bot-1"),
-    ],
-  });
-  const page = await renderBoard();
-  try {
-    const dates = (id: string) =>
-      page.container.querySelector(`[data-testid="board-card-${id}"] [data-testid="card-dates"]`);
-    expect(dates("ticket-1")?.querySelector('[data-testid="card-dates-shown"]')?.textContent).toBe(
-      "Tomorrow –Fri 3 PM",
+    expect(page.container.querySelector('[data-testid="ticket-comments"]')?.textContent).toContain(
+      "Ready",
     );
-    expect(dates("ticket-1")?.querySelector(".sr-only")?.textContent).toBe(
-      "Start Tomorrow, Due Fri 3 PM",
-    );
-    expect(dates("ticket-2")?.querySelector(".text-destructive")?.textContent).toBe("Oct 24");
-    expect(dates("ticket-3")).toBeNull();
+    const comments = page.container.querySelector('[data-testid="ticket-comments"]')!;
+    expect(comments.textContent).toContain("Board tester");
+    expect(comments.textContent).toContain("Helper");
+    expect(Array.from(comments.querySelectorAll("time")).map((node) => node.textContent)).toEqual([
+      "5m ago",
+      "5m ago",
+    ]);
+    expect(
+      Array.from(page.container.querySelectorAll("select")).every(
+        (node) => node.className === "w-full",
+      ),
+    ).toBe(true);
+    const submitButtons = page.container.querySelectorAll('button[type="submit"]');
+    expect(Array.from(submitButtons).map((node) => node.parentElement?.className)).toEqual([
+      "flex justify-end",
+      "flex justify-end",
+    ]);
+    expect(api.tickets.comments).toHaveBeenCalledWith({ ticketId: "ticket-1" }, expect.anything());
   } finally {
-    vi.useRealTimers();
     await page.cleanup();
   }
 });
@@ -281,12 +244,14 @@ function liveStream() {
   };
 }
 
-it("hands the open ticket its latest state and a revision for its own events only", async () => {
+it("saves only edits and refreshes comments for the open ticket", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   api.bots.list.mockResolvedValue([bot("bot-1", "Helper"), bot("bot-2", "Other")]);
   api.tickets.list.mockResolvedValue({
     tickets: [ticket("Ship", "ticket-1", "todo", "RAK-1", "bot-1", "Details")],
   });
+  api.tickets.comments.mockReset().mockResolvedValue([{ id: "comment-1", body: "Ready" }]);
+  api.tickets.update.mockReset().mockResolvedValue({});
   const live = liveStream();
   const page = await renderBoard(live.stream);
   try {
@@ -295,22 +260,33 @@ it("hands the open ticket its latest state and a revision for its own events onl
         page.container.querySelector('[data-testid="board-card-ticket-1"]') as HTMLButtonElement
       ).click(),
     );
-    const modal = () => page.container.querySelector('[data-testid="ticket-modal"]') as HTMLElement;
-    const before = Number(modal().dataset.revision);
+    await settle();
+    const calls = api.tickets.comments.mock.calls.length;
     await act(async () => live.event("ticket-2"));
-    expect(Number(modal().dataset.revision)).toBe(before);
+    expect(api.tickets.comments).toHaveBeenCalledTimes(calls);
+    api.tickets.comments.mockResolvedValue([{ id: "comment-2", body: "Bot progress" }]);
     api.tickets.list.mockResolvedValue({
       tickets: [ticket("Ship", "ticket-1", "doing", "RAK-1", "bot-2", "Details")],
     });
     await act(async () => live.event("ticket-1"));
-    expect(Number(modal().dataset.revision)).toBe(before + 1);
-    expect(modal().dataset.status).toBe("doing");
-    expect(modal().dataset.owner).toBe("bot-2");
-    api.tickets.list.mockClear();
-    await act(async () =>
-      (page.container.querySelector('[data-testid="modal-changed"]') as HTMLButtonElement).click(),
+    await settle();
+    expect(page.container.querySelector('[data-testid="ticket-comments"]')?.textContent).toContain(
+      "Bot progress",
     );
-    expect(api.tickets.list).toHaveBeenCalledTimes(1);
+    const input = page.container.querySelector("input")!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
+        input,
+        "Ship today",
+      );
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () =>
+      page.container
+        .querySelector("form")!
+        .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+    );
+    expect(api.tickets.update).toHaveBeenCalledWith({ id: "ticket-1", title: "Ship today" });
   } finally {
     await page.cleanup();
   }
@@ -366,9 +342,12 @@ it.each(["end", "error"] as const)(
       const calls = api.tickets.list.mock.calls.length;
       api.tickets.list.mockResolvedValue({ tickets: [ticket("After reconnect", "ticket-1")] });
       await act(async () => vi.advanceTimersByTimeAsync(1_000));
+      await settle();
       expect(api.boards.subscribe).toHaveBeenCalledTimes(2);
       expect(api.tickets.list).toHaveBeenCalledTimes(calls + 1);
-      expect(page.container.textContent).toContain("After reconnect");
+      await act(async () => {
+        await vi.waitFor(() => expect(page.container.textContent).toContain("After reconnect"));
+      });
       await act(async () => reconnected.end());
       await page.cleanup();
       await act(async () => vi.advanceTimersByTimeAsync(5_000));
@@ -413,5 +392,111 @@ it("renders the back control as a plain link", async () => {
   } finally {
     await page.cleanup();
     vi.unstubAllGlobals();
+  }
+});
+
+it("reopens with cached tickets and refreshes them in the background", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  api.bots.list.mockResolvedValue([bot("bot-1", "Helper")]);
+  api.tickets.list.mockReset().mockResolvedValue({ tickets: [ticket("Cached", "ticket-1")] });
+  const first = await renderBoard();
+  expect(first.container.textContent).toContain("Cached");
+  await first.cleanup();
+  await client.invalidateQueries();
+
+  let finish: (value: { tickets: ReturnType<typeof ticket>[] }) => void = () => undefined;
+  api.tickets.list.mockImplementation(() => new Promise((resolve) => (finish = resolve)));
+  const page = await renderBoard();
+  try {
+    // Painted from the cache while the refresh is still out.
+    expect(page.container.textContent).toContain("Cached");
+    await act(async () => finish({ tickets: [ticket("Fresh", "ticket-1")] }));
+    await act(async () => {
+      await vi.waitFor(() => expect(page.container.textContent).toContain("Fresh"));
+    });
+  } finally {
+    await page.cleanup();
+    vi.unstubAllGlobals();
+  }
+});
+
+async function openTicketAndComment(page: { container: HTMLElement }, text: string) {
+  await act(async () =>
+    (
+      page.container.querySelector('[data-testid="board-card-ticket-1"]') as HTMLButtonElement
+    ).click(),
+  );
+  await settle();
+  const box = page.container.querySelector<HTMLTextAreaElement>('textarea[aria-label="Comment"]')!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(box, text);
+    box.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  const form = box.closest("form")!;
+  await act(async () =>
+    form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+  );
+}
+
+function commentsText(page: { container: HTMLElement }) {
+  return page.container.querySelector('[data-testid="ticket-comments"]')?.textContent ?? "";
+}
+
+it("shows every comment when one is posted before the first read lands", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  api.bots.list.mockResolvedValue([bot("bot-1", "Helper")]);
+  api.tickets.list.mockResolvedValue({
+    tickets: [ticket("Ship", "ticket-1", "todo", "RAK-1", "bot-1")],
+  });
+  const posted = { id: "comment-2", body: "New note", createdAt: "2026-10-10T10:01:00Z" };
+  const earlier = { id: "comment-1", body: "Ready", createdAt: "2026-10-10T10:00:00Z" };
+  // The first read never answers; the read after posting has both.
+  api.tickets.comments
+    .mockReset()
+    .mockImplementationOnce(() => new Promise(() => undefined))
+    .mockResolvedValue([earlier, posted]);
+  api.tickets.comment.mockReset().mockResolvedValue(posted);
+  const page = await renderBoard();
+  try {
+    await openTicketAndComment(page, "New note");
+    await settle();
+    await vi.waitFor(() => {
+      expect(commentsText(page)).toContain("Ready");
+      expect(commentsText(page)).toContain("New note");
+    });
+  } finally {
+    await page.cleanup();
+  }
+});
+
+it("does not repeat a posted comment a refresh already brought", async () => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  api.bots.list.mockResolvedValue([bot("bot-1", "Helper")]);
+  api.tickets.list.mockResolvedValue({
+    tickets: [ticket("Ship", "ticket-1", "todo", "RAK-1", "bot-1")],
+  });
+  const earlier = { id: "comment-1", body: "Ready", createdAt: "2026-10-10T10:00:00Z" };
+  const posted = { id: "comment-2", body: "New note", createdAt: "2026-10-10T10:01:00Z" };
+  api.tickets.comments.mockReset().mockResolvedValue([earlier]);
+  let answerPost!: (row: typeof posted) => void;
+  api.tickets.comment
+    .mockReset()
+    .mockImplementation(() => new Promise((resolve) => (answerPost = resolve)));
+  const live = liveStream();
+  const page = await renderBoard(live.stream);
+  try {
+    await openTicketAndComment(page, "New note");
+    // A live refresh lands with the new comment before the post answers.
+    api.tickets.comments.mockResolvedValue([earlier, posted]);
+    await act(async () => live.event("ticket-1"));
+    await settle();
+    expect(commentsText(page)).toContain("New note");
+    // Every later read hangs, so only the post's own write can change the list now.
+    api.tickets.comments.mockImplementation(() => new Promise(() => undefined));
+    await act(async () => answerPost(posted));
+    await settle();
+    expect(commentsText(page).split("New note")).toHaveLength(2);
+  } finally {
+    await page.cleanup();
   }
 });

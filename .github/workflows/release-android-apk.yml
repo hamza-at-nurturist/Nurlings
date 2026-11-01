@@ -7,6 +7,7 @@ on:
         description: "Build this branch as the Nurlings Preview app (separate package, prerelease android-preview) and leave the main release untouched"
         type: boolean
         default: false
+  workflow_call:
 
 permissions:
   contents: read
@@ -58,6 +59,17 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Verify mobile project
         run: pnpm --filter @rakazo/mobile check
+
+      # Without Firebase config the APK never registers for push, and a new APK is the only way to add it.
+      - name: Require Firebase config
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          vars="$(eas env:list production --format short)"
+          if ! grep -q '^GOOGLE_SERVICES_JSON=' <<< "$vars"; then
+            echo "Set the GOOGLE_SERVICES_JSON file variable in the EAS production environment (see docs/mobile-release.md)." >&2
+            exit 1
+          fi
 
       # EAS signs with the project's managed Android keystore. Mobile OTA updates are off in the
       # rebrand, so a new APK is the only way to update an installed one.

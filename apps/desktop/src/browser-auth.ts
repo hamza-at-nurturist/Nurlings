@@ -1,4 +1,5 @@
-import { createServer, type Server } from "node:http";
+import type { Server } from "node:http";
+import { createServer } from "node:http";
 import { brand } from "@nurlings/brand";
 import type { RakazoDesktopOAuthCallback } from "@rakazo/contracts";
 import { LOOPBACK_HOSTS } from "./oauth-callback.js";

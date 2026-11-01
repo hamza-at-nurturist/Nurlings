@@ -1,10 +1,12 @@
 import { I18nProvider } from "@lingui/react";
 import type { Bot, Me, ModelCatalogEntry } from "@rakazo/contracts";
 import { defaultCronPreset } from "@rakazo/core";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { AskCard } from "../../src/components/AskCard";
 import { bootstrapI18n, i18n } from "../../src/lib/i18n";
+import { queryClient } from "../../src/lib/query";
 import type { RoutineDraftState } from "../../src/pages/RoutineEditor";
 import { RoutineEditor } from "../../src/pages/RoutineEditor";
 import { SettingsOverlay } from "../../src/pages/SettingsOverlay";
@@ -131,11 +133,6 @@ function fill(element: HTMLInputElement, value: string) {
 function ModelShot() {
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    document
-      .querySelector<HTMLButtonElement>(
-        '[data-testid="bot-settings-advanced"] > button[aria-expanded="false"]',
-      )
-      ?.click();
     const timer = window.setTimeout(() => setReady(true), 400);
     return () => window.clearTimeout(timer);
   }, []);
@@ -217,6 +214,7 @@ function ApprovalShot() {
 
 const subscriptionMe: Me = {
   ticketBoardEnabled: false,
+  navLinks: [],
   phoneCallsEnabled: false,
   userId: "user-demo",
   email: "ada@example.test",
@@ -231,6 +229,7 @@ const subscriptionMe: Me = {
   computerHost: "docker",
   canChooseHostComputer: true,
   sandboxProvider: "docker",
+  mcpStdioEnabled: false,
   avatarStyle: "organic",
   billingEnabled: false,
 };
@@ -243,7 +242,7 @@ const subscriptionCatalog: ModelCatalogEntry[] = [
     label: "Claude Sonnet 5.5",
     billing: "",
     auth: "both",
-    oauthLabel: "Sign in with Claude Pro/Max",
+    oauthLabel: "Sign in with Claude",
     authHint: "Claude Pro/Max / key",
     subscription: true,
     signIn: "auth-url",
@@ -258,7 +257,7 @@ const subscriptionCatalog: ModelCatalogEntry[] = [
     billing:
       "Sign in with ChatGPT Plus or Pro. Uses your OpenAI subscription. Rakazo does not pay.",
     auth: "oauth",
-    oauthLabel: "Sign in with ChatGPT Plus/Pro",
+    oauthLabel: "Sign in with ChatGPT",
     authHint: "ChatGPT Plus/Pro",
     subscription: true,
     signIn: "device-code",
@@ -286,7 +285,7 @@ function SubscriptionShot() {
   useEffect(() => {
     const timer = window.setInterval(() => {
       const text = document.body.textContent ?? "";
-      if (text.includes("Sign in with Claude Pro/Max") && text.includes("Claude Sonnet 5.5")) {
+      if (text.includes("Sign in with Claude") && text.includes("Claude Sonnet 5.5")) {
         setReady(true);
         window.clearInterval(timer);
       }
@@ -335,6 +334,8 @@ void bootstrapI18n("en").then(() => {
       <CreateShot />
     );
   createRoot(document.getElementById("root")!).render(
-    <I18nProvider i18n={i18n}>{shot}</I18nProvider>,
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider i18n={i18n}>{shot}</I18nProvider>
+    </QueryClientProvider>,
   );
 });

@@ -115,7 +115,6 @@ const me = {
 const bot = {
   id: "bot-a",
   name: "Alpha",
-  title: "Research",
   notifyOnFinish: true,
   threadId: "thread-bot-a",
   updatedAt: "2026-10-10T12:30:00.000Z",

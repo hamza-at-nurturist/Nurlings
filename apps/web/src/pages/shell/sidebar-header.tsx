@@ -1,19 +1,21 @@
 import { useLingui } from "@lingui/react/macro";
 import type { Bot } from "@rakazo/contracts";
 import { Button, Popover, PopoverContent, PopoverTrigger } from "@rakazo/ui-web";
-import { Bell, PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Bell, PanelLeftClose, PanelLeftOpen, Plus, Search } from "lucide-react";
 import { IconTooltip } from "../../components/IconTooltip";
 import { desktopBridge } from "../../lib/desktop";
 import type { Panel } from "../../lib/right-panel-state";
 import { WindowChrome } from "../WindowChrome";
 import { BotCreatePicker } from "./bot-picker";
-import { isCreateMenuHotkey } from "./command-palette-hotkey";
 
 export function SidebarHeader({
   mini = false,
+  createMenuOpen,
+  setCreateMenuOpen,
   activityMode,
   toggleActivityMode,
+  searchOpen = false,
+  onSearch,
   setBotsSidebarCollapsedPref,
   bots,
   setMobileSidebarOpen,
@@ -21,11 +23,14 @@ export function SidebarHeader({
   navigate,
   setNewSpaceOpen,
   setCreateBotOpen,
-  setPickerInfoTopic,
 }: {
   mini?: boolean;
+  createMenuOpen: boolean;
+  setCreateMenuOpen: (open: boolean) => void;
   activityMode: boolean;
   toggleActivityMode: () => void;
+  searchOpen?: boolean;
+  onSearch?: () => void;
   setBotsSidebarCollapsedPref: (collapsed: boolean) => void;
   bots: Bot[];
   setMobileSidebarOpen: (open: boolean) => void;
@@ -33,20 +38,9 @@ export function SidebarHeader({
   navigate: (path: string) => void;
   setNewSpaceOpen: (open: boolean) => void;
   setCreateBotOpen: (open: boolean) => void;
-  setPickerInfoTopic: (topic: "group" | "space") => void;
 }) {
   const { t } = useLingui();
-  const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const hasWindowChrome = Boolean(desktopBridge());
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (!isCreateMenuHotkey(event)) return;
-      event.preventDefault();
-      setCreateMenuOpen(true);
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
   const toggleLabel = mini ? t`Show bots` : t`Minimize bots`;
   return (
     <div
@@ -54,6 +48,21 @@ export function SidebarHeader({
     >
       {!mini || hasWindowChrome ? <WindowChrome /> : null}
       <div className={`relative flex items-center ${mini ? "flex-col gap-0.5" : "gap-2.5"}`}>
+        {onSearch ? (
+          <IconTooltip label={t`Search`}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t`Search`}
+              aria-pressed={searchOpen}
+              data-testid="sidebar-search-trigger"
+              onClick={onSearch}
+              className="app-no-drag flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground/70 hover:text-foreground/75"
+            >
+              <Search size={15} strokeWidth={1.8} aria-hidden="true" />
+            </Button>
+          </IconTooltip>
+        ) : null}
         <IconTooltip label={t`Activity`}>
           <Button
             variant="ghost"
@@ -95,11 +104,11 @@ export function SidebarHeader({
         <Popover open={createMenuOpen} onOpenChange={setCreateMenuOpen}>
           <IconTooltip label={t`Create`}>
             <PopoverTrigger
-              className="app-no-drag flex size-7 items-center justify-center rounded-full text-[21px] text-muted-foreground/70 outline-none hover:text-foreground/75 focus-visible:ring-2 focus-visible:ring-ring"
+              className="app-no-drag flex size-7 items-center justify-center rounded-full text-muted-foreground/70 outline-none hover:text-foreground/75 focus-visible:ring-2 focus-visible:ring-ring"
               aria-label={t`Create`}
               data-testid="create-menu-trigger"
             >
-              +
+              <Plus size={15} strokeWidth={1.8} aria-hidden="true" />
             </PopoverTrigger>
           </IconTooltip>
           {/* Unmount with the state change so the panel it opens never coexists with the menu. */}
@@ -129,16 +138,6 @@ export function SidebarHeader({
                   setCreateMenuOpen(false);
                   setMobileSidebarOpen(false);
                   setNewSpaceOpen(true);
-                }}
-                onShowGroupInfo={() => {
-                  setCreateMenuOpen(false);
-                  setMobileSidebarOpen(false);
-                  setPickerInfoTopic("group");
-                }}
-                onShowSpaceInfo={() => {
-                  setCreateMenuOpen(false);
-                  setMobileSidebarOpen(false);
-                  setPickerInfoTopic("space");
                 }}
               />
             </PopoverContent>
