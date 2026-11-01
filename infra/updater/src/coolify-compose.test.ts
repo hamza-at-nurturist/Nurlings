@@ -15,6 +15,7 @@ interface ComposeService {
   /** A list of `KEY=value` strings or a map. */
   environment?: Record<string, unknown> | string[];
   healthcheck?: unknown;
+  labels?: string[] | Record<string, string>;
   depends_on?: Record<string, { condition?: string }>;
 }
 
@@ -196,6 +197,25 @@ describe("the Coolify compose file", () => {
         Object.keys(environment(service)).filter((key) => key.startsWith("SERVICE_FQDN")),
       ).toEqual([]);
     }
+  });
+
+  it("pins Traefik to Coolify's resource network on web, with no server-specific UUID", () => {
+    const labels = services.web?.labels;
+    expect(Array.isArray(labels)).toBe(true);
+    const network = (labels as string[]).filter((label) =>
+      label.startsWith("traefik.docker.network="),
+    );
+    expect(network).toHaveLength(1);
+    const value = network[0]?.slice("traefik.docker.network=".length) ?? "";
+    // An override first, then the UUID Coolify provides; with neither the deploy fails loudly,
+    // so an empty value can never become the label.
+    expect(value).toMatch(/^\$\{NURLINGS_PROXY_NETWORK:-\$\{COOLIFY_RESOURCE_UUID:\?[^}]+\}\}$/);
+    expect(value).not.toMatch(/[0-9a-z]{24}/);
+    for (const [name, service] of Object.entries(services)) {
+      if (name !== "web")
+        expect({ name, labels: service.labels }).toEqual({ name, labels: undefined });
+    }
+    expect(readFileSync(readmeFile, "utf8")).toMatch(/Gateway Timeout[^\n]*NURLINGS_PROXY_NETWORK/);
   });
 
   it("leaves sign-up open until the operator closes it after the first account", () => {
