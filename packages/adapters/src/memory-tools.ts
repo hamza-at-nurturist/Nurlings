@@ -25,3 +25,9 @@ export function appendMemoryFact(existing: string, fact: string): string {
     return existing;
   return existing ? `${existing}${existing.endsWith("\n") ? "" : "\n"}${next}\n` : `${next}\n`;
 }
+
+/** Marks a fact with the ticket it was learned on, so notes can be searched by ref. */
+export function tagMemoryFact(fact: string, ticketRef: string | undefined): string {
+  const text = fact.trim();
+  return ticketRef && text ? `[${ticketRef}] ${text}` : fact;
+}
