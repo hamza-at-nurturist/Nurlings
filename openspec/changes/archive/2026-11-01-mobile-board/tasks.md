@@ -99,15 +99,15 @@
 ## 8. Checks and PR
 
 - [ ] 8.0 Check the diff against `design.md` "Existing upstream files touched". Verify: `git diff --stat origin/main` lists no upstream file outside that table.
-- [ ] 8.1 Typecheck, Biome, unit tests for core, adapters, web and mobile. Verify: `pnpm
+- [x] 8.1 Typecheck, Biome, unit tests for core, adapters, web and mobile. Verify: `pnpm
   --filter @rakazo/core test`, `@rakazo/web test`, `@rakazo/mobile test`, `@rakazo/mobile
   check`, and the repo lint all pass. The desktop Playwright suite is not run locally.
-- [ ] 8.2 Open the PR on `feature/mobile-board` with Why / What / Testing, the quoted copy table
+- [x] 8.2 Open the PR on `feature/mobile-board` with Why / What / Testing, the quoted copy table
   and a plain statement that native mobile UI cannot be captured by CI (no screenshot link),
   plus what the maintainer should try on the preview APK. Verify: PR open.
-- [ ] 8.3 Follow `.agents/skills/pr-watch/SKILL.md` with `pr-digest --watch` until CI is
+- [x] 8.3 Follow `.agents/skills/pr-watch/SKILL.md` with `pr-digest --watch` until CI is
   terminal; fix every actionable failure or comment. Verify: checks green on the head commit,
   nothing unresolved. Do not merge. No release tag; tell the maintainer when it is ready for a
   preview APK build.
-- [ ] 8.4 After the maintainer merges, archive the change on its own `chore/archive-mobile-board`
+- [x] 8.4 After the maintainer merges, archive the change on its own `chore/archive-mobile-board`
   PR. Verify: `openspec validate --strict`.
