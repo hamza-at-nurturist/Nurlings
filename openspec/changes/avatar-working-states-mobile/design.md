@@ -79,8 +79,8 @@ and the blink and ring burst. If it slips, everything before it ships.
 
 An avatar with a `name` is `accessibilityRole="image"` with label "{name}, {state}"; without `name`
 it stays out of the accessibility tree, as now. State words need strings. Mobile already has
-"Working". The others (idle, thinking, needs you, in review, blocked, done, asleep) would be new
-accessible-name-only strings; see Decisions.
+"Working". The others (thinking, needs you, in review, blocked, done, asleep) are new accessible-name-only
+strings. Idle has none: an idle avatar is named by the Nurling's name alone.
 
 ### 9. Pips and body color
 
@@ -98,15 +98,15 @@ illustration `dull` color as on web.
 - Prop artwork anchors computed in core use a 120-unit box; the web scales the storyboard's 140-unit
   space by 0.857. The same scale is used so the props line up.
 
-## Decisions for the maintainer
+## Decisions (approved)
 
-1. **Hook home.** Move `useAvatarState` / `useToolSwap` into `@rakazo/chat-ui` (recommended), or put
-   a React-free clock in core with thin per-app hooks.
-2. **Accessible-name strings.** Add seven lowercase state words to the mobile catalog and all seven
-   non-English catalogs, or label with the existing "Working" and a short state-only name. Quoted
-   in the PR either way.
-3. **Static avatars.** Pip on every avatar with a status, animation only where the clock runs
-   (recommended), or leave `static` avatars exactly as they are.
-4. **Screenshots.** The iOS catalog has no fixture with a running Nurling, and AGENTS.md forbids
-   adding feature flags to shared tooling. Recommended: no catalog flow, state in the PR that
-   native screenshots were not captured by CI, and attach simulator captures if I take any.
+1. **Hook home.** `useAvatarState` / `useToolSwap` move into `@rakazo/chat-ui` and are re-exported from
+   `ui-web`. Before moving, check they have no DOM or web-only imports; if any do, split those out
+   first.
+2. **Accessible-name strings.** Six new lowercase state words in all eight mobile catalogs: thinking,
+   needs you, in review, blocked, done, asleep. "Working" already exists. There is no string for idle:
+   an idle avatar's accessible name is just the Nurling's name. None is visible text.
+3. **Static avatars.** The pip shows on any avatar with a status; props and animation run only where
+   the motion clock runs. The green working dot and typing-dot morph go away for organic avatars only.
+4. **Screenshots.** No iOS catalog flow. Simulator captures are attached if any are taken; otherwise
+   the PR says none were captured.

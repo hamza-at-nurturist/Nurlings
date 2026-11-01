@@ -2,7 +2,7 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal, `design.md` and its four decisions. Verify: explicit
+- [x] 1.1 Maintainer approves the proposal, `design.md` and its four decisions. Verify: explicit
   approval in the session. No code before this.
 
 ## 2. Shared plumbing
@@ -10,8 +10,8 @@
 - [ ] 2.1 Move `avatar-illustration.ts` to `packages/ui-tokens` and import it from there in
   `ui-web`. Verify: `ui-web` and `ui-tokens` unit tests pass; the file is the only place with prop
   hex literals, and mobile files added by this change contain none.
-- [ ] 2.2 Move `useAvatarState` and `useToolSwap` to the agreed shared package, re-export from
-  `ui-web`. Verify: the moved tests pass in the new home and web tests still pass unchanged.
+- [ ] 2.2 Check `useAvatarState` and `useToolSwap` for DOM or web-only imports and split any out;
+  then move them to `@rakazo/chat-ui` and re-export from `ui-web`. Verify: the moved tests pass in the new home and web tests still pass unchanged.
 - [ ] 2.3 Mark the core functions mobile needs in worklets with `"worklet"` only where used. Verify:
   core unit tests unchanged and green.
 
@@ -24,8 +24,9 @@
 - [ ] 3.2 Draw pips with the warning, destructive and success tokens, the glint, the blocked dull
   body, sleep z's and the long-run sweat drop; remove the working dot and typing-dot morph for
   organic avatars only. Verify: render tests; the logo set and photo avatars render as before.
-- [ ] 3.3 Accessible names with the state ("Chief, working") and the agreed strings. Verify: tests
-  for name and role, a nameless avatar stays hidden, and `i18n.test.ts` passes for every catalog.
+- [ ] 3.3 Accessible names with the state ("Chief, working") and the six new strings
+  (thinking, needs you, in review, blocked, done, asleep); an idle avatar is named by the Nurling's
+  name alone. Verify: tests for name and role, a nameless avatar stays hidden, and `i18n.test.ts` passes for every catalog.
 
 ## 4. Working looks and props
 
@@ -35,7 +36,7 @@
 - [ ] 4.2 Pencil on notepad, magnifier and laptop (screen facing the Nurling) at the shared anchors,
   eyes settling on the prop. Verify: render tests for each tool and anchor position on two bodies.
 - [ ] 4.3 Still rules: 24 pt and smaller and Reduce Motion render no props and no animation, only the
-  pip; `static` avatars follow the agreed rule. Verify: render tests at 24, 25 and 54 pt with Reduce
+  pip; `static` avatars show the pip when given a status and nothing else. Verify: render tests at 24, 25 and 54 pt with Reduce
   Motion on and off.
 - [ ] 4.4 Calm gaze: no touch handling added; idle clips and blinks as today. Verify: a test that the
   avatar registers no gesture or pointer handler.
@@ -57,7 +58,7 @@
 - [ ] 7.1 Lint, typecheck and unit tests for touched packages; `openspec validate
   avatar-working-states-mobile --strict`. The desktop Playwright suite is not run locally.
 - [ ] 7.2 Check on the iOS simulator if one is available and attach captures that show the change;
-  otherwise say none were captured. Add a catalog flow only if approved.
+  otherwise say none were captured. No catalog flow.
 - [ ] 7.3 Open the PR on `feature/avatar-working-states-mobile`: why, what, how tested, quoted
   copy, and the unfed states (in review, asleep, progress ring). Then follow `pr-watch`. Never merge
   without approval.

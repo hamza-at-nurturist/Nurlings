@@ -46,8 +46,12 @@ no animation; only its pip SHALL tell the state.
 
 ### Requirement: Mobile avatars are named with their state
 A named mobile avatar SHALL have an accessible name that includes its state, such as "Chief,
-working", and SHALL add no visible text.
+working", except idle, where the name is the Nurling's name alone. It SHALL add no visible text.
 
 #### Scenario: Name
 - **WHEN** Chief's avatar shows working on mobile
 - **THEN** its accessible name is "Chief, working"
+
+#### Scenario: Idle
+- **WHEN** a named avatar is idle
+- **THEN** its accessible name is the Nurling's name only

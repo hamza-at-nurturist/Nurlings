@@ -26,7 +26,7 @@ Nurlings, so it should say the same thing the web does, with the same shared sta
 - **Shared illustration colors.** The prop colors move from `ui-web` to `@rakazo/ui-tokens` as one
   constants file that web re-exports, so mobile reuses them and no hex is copied. The body keeps the
   Nurling's own color; pips use only the warning, destructive and success tokens.
-- **Accessible names include the state** ("Chief, working"). No visible copy is added.
+- **Accessible names include the state** ("Chief, working"); idle keeps just the Nurling's name. Six accessible-name-only strings are added, no visible copy.
 - **Shared hooks.** The React state hooks that turn run status into state, long-run clock and swap
   phase move out of `ui-web` into a package mobile can import, so web and mobile run the same code.
   Only drawing and animation stay platform-specific (see `design.md`).
@@ -47,4 +47,4 @@ Nurlings, so it should say the same thing the web does, with the same shared sta
 `apps/mobile/components/bot-avatar.tsx` (organic path) and new avatar files beside it,
 `apps/mobile/lib` (state hook wiring, state names), `packages/ui-tokens` (illustration colors),
 `packages/ui-web` (re-export, hooks move), one new shared hooks home (see `design.md`), mobile locale
-catalogs only if new accessible-name strings are approved. No new dependency, no migration.
+catalogs (six accessible-name strings). No new dependency, no migration.
