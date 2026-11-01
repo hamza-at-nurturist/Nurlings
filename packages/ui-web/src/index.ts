@@ -11,7 +11,11 @@ export {
   Wordmark,
 } from "./bot-avatar.js";
 export type { BotAvatarActivitySource } from "./bot-avatar-activity.js";
-export { BotAvatarActivityProvider } from "./bot-avatar-activity.js";
+export {
+  BotAvatarActivityProvider,
+  type BotAvatarLive,
+  BotAvatarStateNamesProvider,
+} from "./bot-avatar-activity.js";
 export { BrandAnimation } from "./brand-animation.js";
 export { BrandMark } from "./brand-mark.js";
 export * from "./components/ui/alert-dialog.js";

@@ -3,27 +3,28 @@ import type { BotAvatarSet } from "@rakazo/contracts";
 import { BOT_AVATAR_SHAPE_COUNT } from "@rakazo/contracts";
 import type { BotColorDef, LogoAvatarActivity } from "@rakazo/core";
 import {
-  ACTIVE_RUN_STATUSES,
-  avatarIdentitySeed,
   BOT_AVATAR_COLORS,
   BOT_COLOR_LIST,
+  BRAND_BLOB_SHAPE_INDEX,
   DEFAULT_BOT_AVATAR_COLOR,
-  type OrganicBotAvatarFrame,
-  organicAvatarPath,
+  isRunWaitingOnUser,
+  isRunWorking,
   organicBotAvatarFrame,
   resolvePersonaColorDef,
   SHIPPED_BOT_AVATAR_SHAPE_KEYS,
   SHIPPED_BOT_AVATAR_SHAPES,
-  type shippedBotAvatarEyes,
 } from "@rakazo/core";
-import { tokens } from "@rakazo/ui-tokens";
-import type { ComponentProps, CSSProperties } from "react";
-import { memo, useEffect, useMemo, useSyncExternalStore } from "react";
-import { useBotAvatarActivity } from "./bot-avatar-activity.js";
+import type { ComponentProps } from "react";
+import { memo, useMemo } from "react";
+import {
+  useBotAvatarActivity,
+  useBotAvatarLive,
+  useBotAvatarStateNames,
+} from "./bot-avatar-activity.js";
 import { BrandMark } from "./brand-mark.js";
-import { useAvatarMotionVisibility } from "./hooks/use-avatar-motion-visibility.js";
 import { cn } from "./lib/utils.js";
 import { LogoAvatar } from "./logo-avatar.js";
+import { OrganicAvatar } from "./organic-avatar.js";
 import "./styles.css";
 
 export type { BotColorDef };
@@ -82,6 +83,14 @@ export interface BotAvatarProps {
   size?: number;
   status?: string;
   identity?: string;
+  /** The Nurling's name. With it the avatar is named "{name}, {state}"; without it it is decorative. */
+  name?: string;
+  /** The status of the ticket this avatar stands for, on views that show one. */
+  ticketStatus?: string;
+  /** The Nurling's computer is asleep. */
+  asleep?: boolean;
+  /** Real progress of the run, 0 to 1, when known. The ring shows only then. */
+  progress?: number | null;
   className?: string;
 }
 
@@ -92,9 +101,13 @@ export const BotAvatar = memo(function BotAvatar({
   size = 36,
   status,
   identity = "",
+  name,
+  ticketStatus,
+  asleep,
+  progress,
   className,
 }: BotAvatarProps) {
-  const isWorking = ACTIVE_RUN_STATUSES.some((s) => s === status);
+  const isWorking = isRunWorking(status) || isRunWaitingOnUser(status);
 
   const parsed = useMemo(() => parseBotAvatar(color, identity), [color, identity]);
   const effectiveId = identity || parsed.color || "agent";
@@ -159,45 +172,39 @@ export const BotAvatar = memo(function BotAvatar({
   const frame =
     parsed.shapeIndex === undefined ? undefined : organicBotAvatarFrame(parsed.shapeIndex);
   return (
-    <OrganicAvatar
+    <LiveOrganicAvatar
       color={colorDef.hex}
       identity={effectiveId}
       size={size}
-      isWorking={isWorking}
+      status={status}
+      ticketStatus={ticketStatus}
+      asleep={asleep}
+      progress={progress}
+      active={isWorking}
       frame={frame}
+      reach={parsed.shapeIndex === BRAND_BLOB_SHAPE_INDEX ? 0.55 : 1}
+      name={name}
       className={className}
     />
   );
 });
 
-/** The two eyes of a shape: ellipses, or tilted pills for the brand blob. */
-function ShapeEyes({
-  eyes,
-  fill,
-  className,
-}: {
-  eyes: ReturnType<typeof shippedBotAvatarEyes>;
-  fill?: string;
-  className?: string;
-}) {
+/** An organic avatar that listens for its busy run's tool and reply writing only while that run is active. */
+function LiveOrganicAvatar({
+  active,
+  identity,
+  ...props
+}: ComponentProps<typeof OrganicAvatar> & { active: boolean; identity: string }) {
+  const live = useBotAvatarLive(identity, active);
+  const stateNames = useBotAvatarStateNames();
   return (
-    <g fill={fill} className={className}>
-      {[eyes.left, eyes.right].map(({ cx, cy }) =>
-        eyes.kind === "pill" ? (
-          <rect
-            key={cx}
-            x={cx - eyes.rx}
-            y={cy - eyes.ry}
-            width={eyes.rx * 2}
-            height={eyes.ry * 2}
-            rx={eyes.rx}
-            transform={`rotate(${eyes.tiltDeg} ${cx} ${cy})`}
-          />
-        ) : (
-          <ellipse key={cx} cx={cx} cy={cy} rx={eyes.rx} ry={eyes.ry} />
-        ),
-      )}
-    </g>
+    <OrganicAvatar
+      {...props}
+      identity={identity}
+      tool={live.tool}
+      composing={live.composing}
+      stateNames={stateNames}
+    />
   );
 }
 
@@ -208,117 +215,6 @@ function LiveLogoAvatar({
 }: ComponentProps<typeof LogoAvatar> & { status?: string }) {
   const activity = useBotAvatarActivity(props.identity ?? "", status);
   return <LogoAvatar {...props} activity={activity} />;
-}
-
-function OrganicAvatar({
-  color,
-  identity,
-  size,
-  isWorking,
-  frame,
-  className,
-}: {
-  color: string;
-  identity?: string;
-  size: number;
-  isWorking: boolean;
-  /** A fixed body and eyes to draw instead of the seeded organic ones. */
-  frame?: OrganicBotAvatarFrame;
-  className?: string;
-}) {
-  const reducedMotion = useSyncExternalStore(
-    subscribeToReducedMotion,
-    reducedMotionSnapshot,
-    () => false,
-  );
-  const { ref, visible } = useAvatarMotionVisibility(!reducedMotion);
-  useEffect(() => {
-    // jsdom has no SMIL clock, so these are optional.
-    if (visible) ref.current?.unpauseAnimations?.();
-    else ref.current?.pauseAnimations?.();
-  }, [ref, visible]);
-  const seed = avatarIdentitySeed(identity || color || DEFAULT_BOT_AVATAR_COLOR);
-  const duration = `${4.8 + (seed % 24) / 10}s`;
-  const shapeA = frame?.path ?? organicAvatarPath(seed);
-  const shapeB = frame ? shapeA : organicAvatarPath(seed, 0.42);
-
-  return (
-    <svg
-      ref={ref}
-      viewBox="-60 -60 120 120"
-      aria-hidden="true"
-      className={cn("rakazo-organic-avatar overflow-visible select-none", className)}
-      data-working={isWorking}
-      data-paused={!visible}
-      data-shape-family={seed % 10}
-      data-eye-pattern={seed % 4}
-      style={{
-        width: size,
-        height: size,
-        flex: "none",
-      }}
-    >
-      {(["idle", "working"] as const).map((mode) => (
-        <path
-          key={mode}
-          className={`rakazo-organic-avatar-body rakazo-organic-avatar-body-${mode}`}
-          d={shapeA}
-          fill={color}
-          style={
-            {
-              "--rakazo-organic-path": `path("${shapeA}")`,
-              filter:
-                mode === "working"
-                  ? `drop-shadow(0 0 ${Math.round(size * 0.16)}px ${color})`
-                  : "drop-shadow(0 2px 3px rgba(0,0,0,.34))",
-            } as CSSProperties
-          }
-        >
-          {/* Only a working body morphs. A late <animate> joins the svg clock mid-loop. */}
-          {!reducedMotion && !frame && mode === "working" && isWorking ? (
-            <animate
-              attributeName="d"
-              values={`${shapeA};${shapeB};${shapeA}`}
-              dur={duration}
-              repeatCount="indefinite"
-            />
-          ) : null}
-        </path>
-      ))}
-      <g transform={frame ? undefined : `rotate(${(seed % 9) - 4})`}>
-        {(["idle", "working"] as const).map((mode) => (
-          <g
-            key={mode}
-            className={`rakazo-organic-avatar-eyes rakazo-organic-avatar-eyes-${mode}`}
-            fill={tokens.background}
-            // Off-centre eyes blink about their own centre.
-            style={frame ? { transformBox: "fill-box", transformOrigin: "center" } : undefined}
-          >
-            {frame ? (
-              <ShapeEyes eyes={frame.eyes} />
-            ) : (
-              <>
-                <rect x="-14" y="-12" width="7" height="24" rx="3.5" />
-                <rect x="7" y="-12" width="7" height="24" rx="3.5" />
-              </>
-            )}
-          </g>
-        ))}
-      </g>
-    </svg>
-  );
-}
-
-const reducedMotionMedia = "(prefers-reduced-motion: reduce)";
-
-function reducedMotionSnapshot(): boolean {
-  return window.matchMedia(reducedMotionMedia).matches;
-}
-
-function subscribeToReducedMotion(onChange: () => void): () => void {
-  const media = window.matchMedia(reducedMotionMedia);
-  media.addEventListener("change", onChange);
-  return () => media.removeEventListener("change", onChange);
 }
 
 export function BotShapePreview({

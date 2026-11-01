@@ -936,6 +936,10 @@ msgstr "成果物"
 msgid "Ask"
 msgstr "確認"
 
+#: src/components/AvatarStateNames.tsx
+msgid "asleep"
+msgstr ""
+
 #: src/pages/shell/computer-panel.tsx
 msgid "Asleep"
 msgstr "スリープ中"
@@ -1070,6 +1074,10 @@ msgstr "請求"
 #: src/components/ApprovalRulesSettings.tsx
 msgid "Block"
 msgstr "ブロック"
+
+#: src/components/AvatarStateNames.tsx
+msgid "blocked"
+msgstr ""
 
 #: src/lib/ticket-status.ts
 msgid "Blocked"
@@ -2722,6 +2730,10 @@ msgstr "ドキュメントが変更されました。最新版を編集するに
 msgid "Don’t have an account?"
 msgstr "アカウントをお持ちでないですか？"
 
+#: src/components/AvatarStateNames.tsx
+msgid "done"
+msgstr ""
+
 #: src/components/AccountDataSettings.tsx
 #: src/components/ToolActivityDisclosure.tsx
 #: src/lib/ticket-status.ts
@@ -3296,6 +3308,10 @@ msgstr "完了しました"
 msgid "Icon set"
 msgstr ""
 
+#: src/components/AvatarStateNames.tsx
+msgid "idle"
+msgstr ""
+
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "これが聞こえたら、音声の準備は完了です。"
@@ -3333,6 +3349,10 @@ msgstr "データをインポート"
 #: src/lib/ticket-status.ts
 msgid "In progress"
 msgstr "進行中"
+
+#: src/components/AvatarStateNames.tsx
+msgid "in review"
+msgstr ""
 
 #: src/lib/ticket-status.ts
 msgid "In review"
@@ -4042,6 +4062,10 @@ msgstr "入力が必要"
 #: src/pages/ActivityList.tsx
 msgid "Needs takeover"
 msgstr "引き継ぎが必要"
+
+#: src/components/AvatarStateNames.tsx
+msgid "needs you"
+msgstr ""
 
 #: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
@@ -5987,6 +6011,10 @@ msgstr "ファイルまたは選択内容が一致しなくなりました。も
 msgid "These saved settings can't be read. Remove it and add it again."
 msgstr "保存された設定を読み取れません。削除してから再度追加してください。"
 
+#: src/components/AvatarStateNames.tsx
+msgid "thinking"
+msgstr ""
+
 #: src/components/call/CallCard.tsx
 #: src/pages/ModelRoleSettings.tsx
 #: src/pages/RoutineEditor.tsx
@@ -6646,6 +6674,10 @@ msgstr "対応しない"
 #: src/components/SignupSurvey.tsx
 msgid "Work"
 msgstr "仕事"
+
+#: src/components/AvatarStateNames.tsx
+msgid "working"
+msgstr ""
 
 #: src/pages/shell/agent-import.tsx
 msgid "Working instructions"

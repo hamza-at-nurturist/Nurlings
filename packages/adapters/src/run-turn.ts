@@ -10,6 +10,7 @@ import {
   TransientModelError,
 } from "@rakazo/adapter-kit";
 import {
+  avatarToolCategory,
   containsSecret,
   displayName,
   humanizeToolName,
@@ -454,6 +455,12 @@ async function pauseForTakeover(ctx: RunContext, event: RuntimeEvent<"takeover">
   });
 }
 
+/** The tool-called payload; `tool` is the avatar category, present only for mapped built-in tools. */
+export function toolCalledPayload(name: string, executionId: string) {
+  const tool = avatarToolCategory(name);
+  return tool ? { name, executionId, tool } : { name, executionId };
+}
+
 /** Show the tool step, stop a repeating loop, and run the tool for scripted runtimes. */
 async function onToolCalled(ctx: RunContext, event: RuntimeEvent<"tool">): Promise<boolean> {
   const { deps, run, runId, bot, thread } = ctx;
@@ -475,7 +482,7 @@ async function onToolCalled(ctx: RunContext, event: RuntimeEvent<"tool">): Promi
     botId: bot.id,
     type: "agent.tool.called",
     runId,
-    payload: { name: event.name, executionId: event.executionId },
+    payload: toolCalledPayload(event.name, event.executionId),
   });
   await showNarrationStatus(ctx, heldNote);
   tryFlushPendingTools(reply);

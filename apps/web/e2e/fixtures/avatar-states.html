@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avatar states</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: var(--background);
+        color: var(--foreground);
+        font: 13px ui-sans-serif, system-ui, sans-serif;
+      }
+      #root { display: flex; flex-direction: column; gap: 28px; }
+      h2 { margin: 0 0 10px; font-size: 13px; font-weight: 600; color: var(--muted-foreground); }
+      .row { display: flex; flex-wrap: wrap; gap: 28px; }
+      .case { display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 96px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/e2e/fixtures/avatar-states.tsx"></script>
+  </body>
+</html>

@@ -43,8 +43,9 @@ that ticket. Background (ticket) runs keep today's rule: they do not drive a cha
   else `orbit` for a running run; else `ripple` for `queued`/`leased`, where nothing has started and
   no progress can exist. The orbit dot stays the default.
 - `long`: true after 3 minutes of continuous work (`AVATAR_LONG_RUN_MS = 180_000`). Continuous means
-  the state stays `working`; the clock restarts when the Nurling leaves working (waiting for you,
-  done, idle). A tool swap does not reset it.
+  the state stays working or thinking (a run flips between them every time it writes text, so
+  counting working alone would never reach 3 minutes); the clock restarts when the Nurling leaves
+  both (waiting for you, done, idle). A tool swap does not reset it.
 
 3 minutes is a judgement call: long enough that ordinary tool bursts never trigger it, short
 enough that a stuck-feeling run gets a tired look before the user wonders. It is one constant.
@@ -77,8 +78,8 @@ instead of silently becoming `none`.
 Why stamp the event rather than let each client run the map: the product rule says the backend owns
 the decision and the frontend renders the value. The existing client projection uses a name list in
 core; this change makes the worker the one caller, and clients read `payload.tool`. Old events
-without it read as `none`, so replay and mixed-version clients are safe. The optional field is added
-to the event schema. No vendor logic, no new env var.
+without it read as `none`, so replay and mixed-version clients are safe. The payload is an untyped record
+in the contract, so no schema change is needed. No vendor logic, no new env var.
 
 The "rakazo" logo set keeps its own `READING/WRITING/COMPUTER` sets for now. They overlap in intent;
 merging them is a follow-up so that set's behaviour does not change here.
@@ -137,3 +138,17 @@ affected.
   seeded bodies use their computed bounds. Visual check in the screenshot.
 - Gloss arcs for the new bodies exist; Chief's and the seeded bodies need one. The storyboard has
   Chief's. Seeded bodies derive it from the same inner-contour routine used for the new bodies.
+
+## As built
+
+- State names for accessible names come from a `BotAvatarStateNamesProvider`; the web app supplies
+  translated ones, so avatars in `ui-web` add no copy of their own. An avatar with a `name` is an
+  image named "{name}, {state}"; without one it stays decorative, because the name is usually beside it.
+- `BotAvatar` accepts `ticketStatus`, `asleep` and `progress`. No web surface supplies them yet (no
+  signal for asleep or progress exists, and the board cards keep their column as the status), so
+  in review, asleep and the ring are drawn and tested but only run status, composing and the tool
+  reach real avatars today.
+- The glint (catchlight and gloss arc) is on for every organic avatar. Bodies without a stored gloss
+  (the seeded ones) get an arc derived from their bounds.
+- The old working morph and glow on the organic body is replaced by the storyboard's working look.
+  Idle avatars now breathe, blink and drift as in the storyboard instead of holding still.

@@ -1,0 +1,851 @@
+/* Organic avatar states. Ported from the approved storyboard: names are prefixed, colors come from
+   the bot (--c0) and the status tokens; the fixed illustration colors live in avatar-illustration.ts. */
+
+.rakazo-organic-avatar {
+  overflow: visible;
+  flex: none;
+}
+.rakazo-organic-avatar * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.rakazo-av-fill {
+  fill: var(--c0);
+}
+.rakazo-av-pill rect {
+  fill: var(--rakazo-av-eye);
+}
+.rakazo-av-catch {
+  fill: var(--rakazo-av-white);
+  opacity: 0;
+}
+.rakazo-av-gloss {
+  fill: none;
+  stroke: var(--rakazo-av-white);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+.rakazo-organic-avatar[data-glint="true"] .rakazo-av-catch {
+  opacity: 1;
+}
+.rakazo-organic-avatar[data-glint="false"] .rakazo-av-gloss {
+  opacity: 0;
+}
+.rakazo-av-happy,
+.rakazo-av-shut,
+.rakazo-av-spiral,
+.rakazo-av-stars {
+  opacity: 0;
+}
+.rakazo-av-happy,
+.rakazo-av-shut {
+  fill: none;
+  stroke: var(--rakazo-av-eye);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.rakazo-av-sp {
+  fill: none;
+  stroke: var(--rakazo-av-eye);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.rakazo-av-stars circle {
+  fill: var(--warning);
+}
+.rakazo-av-dots,
+.rakazo-av-orbit {
+  opacity: 0;
+}
+.rakazo-av-dots circle {
+  fill: var(--c0);
+}
+.rakazo-av-orb {
+  fill: var(--c0);
+}
+.rakazo-av-trail {
+  fill: none;
+  stroke: var(--c0);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  opacity: 0.4;
+  stroke-dasharray: 46 331;
+  stroke-dashoffset: 46;
+}
+.rakazo-av-pip-ring {
+  fill: var(--card);
+}
+.rakazo-av-pip-warn {
+  fill: var(--warning);
+}
+.rakazo-av-pip-hollow {
+  fill: none;
+  stroke: var(--warning);
+  stroke-width: 3.5;
+}
+.rakazo-av-pip-bad {
+  fill: var(--destructive);
+}
+.rakazo-av-pip-good {
+  fill: var(--success);
+}
+.rakazo-av-tick {
+  fill: none;
+  stroke: var(--rakazo-av-white);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rakazo-av-z {
+  opacity: 0;
+  font: 600 15px sans-serif;
+  fill: var(--c0);
+}
+.rakazo-av-sweat {
+  opacity: 0;
+  fill: var(--muted-foreground);
+}
+
+/* Cursor follow: the controller sets --gx and --gy (-1..1) per avatar; the eyes lead, the body follows. */
+.rakazo-av-gaze {
+  transform: translate(calc(var(--gx, 0) * 9px), calc(var(--gy, 0) * 9px));
+  transition: transform 0.16s ease-out;
+}
+.rakazo-av-look {
+  transform: translate(calc(var(--gx, 0) * 3.2px), calc(var(--gy, 0) * 3.2px));
+  transition: transform 0.16s ease-out;
+}
+
+/* Idle */
+[data-state="idle"] .rakazo-av-shell {
+  animation: rakazo-av-breathe 4s ease-in-out infinite;
+}
+[data-state="idle"] .rakazo-av-pill {
+  animation: rakazo-av-blink 5.2s ease-in-out infinite;
+}
+[data-state="idle"] .rakazo-av-eyes {
+  animation: rakazo-av-drift 7s ease-in-out infinite;
+}
+@keyframes rakazo-av-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.025);
+  }
+}
+@keyframes rakazo-av-blink {
+  0%,
+  90%,
+  100% {
+    transform: scaleY(1);
+  }
+  93% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes rakazo-av-drift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  35% {
+    transform: translate(-3px, 1px);
+  }
+  70% {
+    transform: translate(2px, -1px);
+  }
+}
+
+/* Thinking */
+[data-state="thinking"] .rakazo-av-shell {
+  animation: rakazo-av-collapse 3.4s ease-in-out infinite;
+}
+[data-state="thinking"] .rakazo-av-dots {
+  animation: rakazo-av-dots-show 3.4s ease-in-out infinite;
+}
+[data-state="thinking"] .rakazo-av-dots circle {
+  animation: rakazo-av-dot-pulse 0.9s ease-in-out infinite;
+}
+[data-state="thinking"] .rakazo-av-dots circle:nth-child(2) {
+  animation-delay: 0.15s;
+}
+[data-state="thinking"] .rakazo-av-dots circle:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes rakazo-av-collapse {
+  0%,
+  4% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  14% {
+    transform: scale(0.22);
+    opacity: 1;
+  }
+  18%,
+  82% {
+    transform: scale(0.22);
+    opacity: 0;
+  }
+  86% {
+    transform: scale(0.22);
+    opacity: 1;
+  }
+  98%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes rakazo-av-dots-show {
+  0%,
+  14% {
+    opacity: 0;
+  }
+  18%,
+  82% {
+    opacity: 1;
+  }
+  86%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes rakazo-av-dot-pulse {
+  0%,
+  100% {
+    transform: scale(0.65);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Working: orbit dot */
+[data-state="working"][data-look="orbit"] .rakazo-av-orbit {
+  opacity: 1;
+  animation: rakazo-av-spin 2.4s linear infinite;
+}
+[data-state="working"][data-look="orbit"] .rakazo-av-shell {
+  animation: rakazo-av-work 1.2s ease-in-out infinite;
+}
+[data-state="working"][data-look="orbit"] .rakazo-av-pill {
+  transform: scaleY(0.78);
+}
+[data-state="working"][data-look="orbit"] .rakazo-av-eyes {
+  animation: rakazo-av-scan 2.4s ease-in-out infinite;
+}
+@keyframes rakazo-av-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes rakazo-av-work {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+@keyframes rakazo-av-scan {
+  0%,
+  100% {
+    transform: translate(-3px, 0);
+  }
+  50% {
+    transform: translate(3px, 0);
+  }
+}
+
+/* Needs you */
+[data-state="needs"] .rakazo-av-shell {
+  animation: rakazo-av-lean 2.8s ease-out infinite;
+}
+[data-state="needs"] .rakazo-av-eyes {
+  animation: rakazo-av-look-at-you 2.8s ease-out infinite;
+}
+[data-state="needs"] .rakazo-av-pip,
+[data-state="review"] .rakazo-av-pip {
+  animation: rakazo-av-pulse 1.2s ease-in-out infinite;
+}
+@keyframes rakazo-av-lean {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  18%,
+  82% {
+    transform: rotate(7deg) translate(2px, -2px);
+  }
+}
+@keyframes rakazo-av-look-at-you {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  18%,
+  82% {
+    transform: translate(-5px, 2px) scale(1.12);
+  }
+}
+@keyframes rakazo-av-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+/* In review */
+[data-state="review"] .rakazo-av-eyes {
+  animation: rakazo-av-widen 3s ease-out infinite;
+}
+[data-state="review"] .rakazo-av-shell {
+  animation: rakazo-av-breathe 4s ease-in-out infinite;
+}
+[data-state="review"] .rakazo-av-pip {
+  animation-duration: 2s;
+}
+@keyframes rakazo-av-widen {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  14%,
+  70% {
+    transform: scale(1.3) translate(0, -1px);
+  }
+}
+
+/* Blocked */
+[data-state="blocked"] .rakazo-av-fill {
+  fill: color-mix(in srgb, var(--c0) 55%, var(--rakazo-av-dull));
+}
+[data-state="blocked"] .rakazo-av-shell {
+  animation: rakazo-av-slump 3.6s ease-out infinite;
+}
+[data-state="blocked"] .rakazo-av-pill {
+  animation: rakazo-av-flatten 3.6s ease-out infinite;
+}
+@keyframes rakazo-av-slump {
+  0%,
+  100% {
+    transform: scale(1, 1) translateY(0);
+  }
+  15%,
+  85% {
+    transform: scale(1.03, 0.93) translateY(3px);
+  }
+}
+@keyframes rakazo-av-flatten {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  15%,
+  85% {
+    transform: scale(1.5, 0.3);
+  }
+}
+
+/* Done */
+[data-state="done"] .rakazo-av-shell {
+  animation: rakazo-av-hop 3.6s ease-out infinite;
+}
+[data-state="done"] .rakazo-av-pills {
+  animation: rakazo-av-hide 3.6s ease-out infinite;
+}
+[data-state="done"] .rakazo-av-happy {
+  animation: rakazo-av-show 3.6s ease-out infinite;
+}
+@keyframes rakazo-av-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  8% {
+    transform: translateY(2px) scale(1.06, 0.9);
+  }
+  20% {
+    transform: translateY(-16px) scale(0.96, 1.05);
+  }
+  32% {
+    transform: translateY(0) scale(1.06, 0.9);
+  }
+  40% {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes rakazo-av-hide {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  8%,
+  82% {
+    opacity: 0;
+  }
+}
+@keyframes rakazo-av-show {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  8%,
+  82% {
+    opacity: 1;
+  }
+}
+
+/* Asleep */
+[data-state="asleep"] .rakazo-av-pills {
+  opacity: 0;
+}
+[data-state="asleep"] .rakazo-av-shut {
+  opacity: 1;
+}
+[data-state="asleep"] .rakazo-av-shell {
+  animation: rakazo-av-sleep-breath 5s ease-in-out infinite;
+}
+[data-state="asleep"] .rakazo-av-z {
+  animation: rakazo-av-float-z 3.3s ease-out infinite;
+}
+[data-state="asleep"] .rakazo-av-z2 {
+  animation-delay: 1.1s;
+}
+[data-state="asleep"] .rakazo-av-z3 {
+  animation-delay: 2.2s;
+}
+@keyframes rakazo-av-sleep-breath {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03, 1.045);
+  }
+}
+@keyframes rakazo-av-float-z {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.8);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(8px, -16px) scale(1.15);
+  }
+}
+
+/* Working: ripples, ring */
+.rakazo-av-ripples circle {
+  fill: none;
+  stroke: var(--c0);
+  stroke-width: 2.5;
+  opacity: 0;
+}
+[data-look="ripple"] .rakazo-av-ripples circle {
+  animation: rakazo-av-ripple 2s ease-out infinite;
+}
+[data-look="ripple"] .rakazo-av-ripples circle:nth-child(2) {
+  animation-delay: 1s;
+}
+[data-look="ripple"] .rakazo-av-shell {
+  animation: rakazo-av-breathe 2s ease-in-out infinite;
+}
+@keyframes rakazo-av-ripple {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+.rakazo-av-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 3;
+}
+.rakazo-av-prog {
+  fill: none;
+  stroke: var(--c0);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transition: stroke-dashoffset 0.6s ease-out;
+}
+[data-look="ring"] .rakazo-av-shell {
+  animation: rakazo-av-breathe 3s ease-in-out infinite;
+}
+
+/* Working: long run */
+[data-long="true"][data-state="working"] .rakazo-av-orbit {
+  opacity: 0;
+  animation: none;
+}
+[data-long="true"][data-state="working"] .rakazo-av-shell,
+[data-long="true"][data-state="thinking"] .rakazo-av-shell {
+  animation: rakazo-av-tired 3.4s ease-in-out infinite;
+}
+[data-long="true"][data-state="working"] .rakazo-av-pill {
+  transform: scaleY(0.62);
+}
+[data-long="true"][data-state="working"] .rakazo-av-sweat {
+  animation: rakazo-av-drip 3.4s ease-in infinite;
+}
+@keyframes rakazo-av-tired {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.045, 1.02);
+  }
+}
+@keyframes rakazo-av-drip {
+  0%,
+  20% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  35% {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 0.9;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* Props */
+.rakazo-av-scribble {
+  fill: none;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+[data-look="write"] .rakazo-av-eyes {
+  animation: rakazo-av-follow-pen 3.4s linear infinite;
+}
+[data-look="write"] .rakazo-av-shell {
+  animation: rakazo-av-breathe 3.4s ease-in-out infinite;
+}
+@keyframes rakazo-av-follow-pen {
+  0% {
+    transform: translate(-4px, 5px);
+  }
+  55%,
+  100% {
+    transform: translate(4px, 5px);
+  }
+}
+.rakazo-av-lens-fill {
+  opacity: 0.28;
+}
+.rakazo-av-lens-ring {
+  fill: none;
+  stroke-width: 3.4;
+}
+.rakazo-av-lens-glint {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+.rakazo-av-lens-handle {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.rakazo-av-lens-spark {
+  opacity: 0.9;
+}
+[data-look="search"] .rakazo-av-lens {
+  animation: rakazo-av-circle-lens 2.8s ease-in-out infinite;
+}
+[data-look="search"] .rakazo-av-eyes {
+  animation: rakazo-av-follow-lens 2.8s ease-in-out infinite;
+}
+[data-look="search"] .rakazo-av-lens-spark {
+  animation: rakazo-av-found 1.4s ease-in-out infinite;
+}
+@keyframes rakazo-av-circle-lens {
+  0%,
+  100% {
+    transform: translate(-6px, 0);
+  }
+  25% {
+    transform: translate(0, -5px);
+  }
+  50% {
+    transform: translate(6px, 0);
+  }
+  75% {
+    transform: translate(0, 5px);
+  }
+}
+@keyframes rakazo-av-follow-lens {
+  0%,
+  100% {
+    transform: translate(2px, -1px);
+  }
+  25% {
+    transform: translate(4px, -4px);
+  }
+  50% {
+    transform: translate(7px, -1px);
+  }
+  75% {
+    transform: translate(4px, 2px);
+  }
+}
+@keyframes rakazo-av-found {
+  0%,
+  100% {
+    transform: scale(0.4);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.rakazo-av-bit {
+  fill: var(--c0);
+  opacity: 0;
+}
+[data-look="computer"] .rakazo-av-eyes {
+  transform: translate(0, 5px);
+}
+.rakazo-av-ln {
+  transform-origin: left center;
+  animation: rakazo-av-typeln 2.4s steps(6, end) infinite;
+}
+.rakazo-av-ln-2 {
+  fill: var(--c0);
+  animation-delay: 0.5s;
+}
+.rakazo-av-cursor {
+  fill: var(--rakazo-av-white);
+  animation: rakazo-av-blinkc 0.7s steps(2) infinite;
+}
+.rakazo-av-glow {
+  opacity: 0.26;
+  animation: rakazo-av-flick 1.6s ease-in-out infinite;
+}
+.rakazo-av-lid-logo {
+  fill: var(--c0);
+}
+[data-look="computer"] .rakazo-av-lid {
+  animation: rakazo-av-tap 0.36s ease-in-out infinite alternate;
+}
+[data-look="computer"] .rakazo-av-lid-logo {
+  animation: rakazo-av-logo-blink 1.4s ease-in-out infinite;
+}
+[data-look="computer"] .rakazo-av-bit {
+  animation: rakazo-av-rise 1.8s ease-out infinite;
+}
+[data-look="computer"] .rakazo-av-bit-2 {
+  animation-delay: 0.9s;
+}
+@keyframes rakazo-av-flick {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.32;
+  }
+}
+@keyframes rakazo-av-typeln {
+  0% {
+    transform: scaleX(0.1);
+  }
+  60%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+@keyframes rakazo-av-blinkc {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes rakazo-av-tap {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(1px);
+  }
+}
+@keyframes rakazo-av-logo-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes rakazo-av-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  15% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+
+.rakazo-av-prop,
+.rakazo-av-prop-shadow {
+  filter: drop-shadow(1.5px 3px 2px color-mix(in srgb, var(--rakazo-av-shadow) 50%, transparent));
+}
+.rakazo-av-twinkle {
+  fill: var(--rakazo-av-white);
+  opacity: 0;
+  animation: rakazo-av-twinkle 2.4s ease-in-out infinite;
+}
+.rakazo-av-twinkle-2 {
+  animation-delay: 1.2s;
+}
+@keyframes rakazo-av-twinkle {
+  0%,
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(0.3) rotate(0);
+  }
+  82% {
+    opacity: 1;
+    transform: scale(1) rotate(45deg);
+  }
+}
+
+/* Swapping props: the old one drops, the Nurling blinks, the new one pops in */
+.rakazo-av-slot[data-phase="out"] {
+  animation: rakazo-av-prop-out 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+.rakazo-av-slot[data-phase="in"] {
+  animation: rakazo-av-prop-in 500ms cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+@keyframes rakazo-av-prop-out {
+  to {
+    transform: translateY(16px) scale(0.3) rotate(-12deg);
+    opacity: 0;
+  }
+}
+@keyframes rakazo-av-prop-in {
+  from {
+    transform: translateY(18px) scale(0.2) rotate(14deg);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.rakazo-av-poof {
+  fill: none;
+  stroke: var(--rakazo-av-white);
+  stroke-width: 2;
+  opacity: 0;
+  animation: rakazo-av-poof 500ms ease-out;
+}
+@keyframes rakazo-av-poof {
+  from {
+    transform: scale(0.3);
+    opacity: 0.85;
+  }
+  to {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+.rakazo-organic-avatar[data-swapping="true"] .rakazo-av-pills {
+  animation: rakazo-av-swap-blink 500ms ease-in-out;
+}
+@keyframes rakazo-av-swap-blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  38%,
+  62% {
+    transform: scaleY(0.1);
+  }
+}
+
+/* Dizzy: spiral eyes, a wobble, stars circling overhead */
+.rakazo-organic-avatar[data-dizzy="true"] .rakazo-av-shell {
+  animation: rakazo-av-wobble 0.55s ease-in-out infinite;
+}
+.rakazo-organic-avatar[data-dizzy="true"] .rakazo-av-eyes,
+.rakazo-organic-avatar[data-dizzy="true"] .rakazo-av-pill {
+  animation: none;
+}
+.rakazo-organic-avatar[data-dizzy="true"] .rakazo-av-pills,
+.rakazo-organic-avatar[data-dizzy="true"] .rakazo-av-happy,
+.rakazo-organic-avatar[data-dizzy="true"] .rakazo-av-shut {
+  animation: none;
+  opacity: 0;
+}
+.rakazo-organic-avatar[data-dizzy="true"] .rakazo-av-spiral,
+.rakazo-organic-avatar[data-dizzy="true"] .rakazo-av-stars {
+  opacity: 1;
+}
+.rakazo-organic-avatar[data-dizzy="true"] .rakazo-av-sp {
+  animation: rakazo-av-spin 0.6s linear infinite;
+}
+@keyframes rakazo-av-wobble {
+  0%,
+  100% {
+    transform: rotate(-7deg);
+  }
+  50% {
+    transform: rotate(7deg);
+  }
+}
+
+/* An avatar of 24px or less, or under reduced motion, stays still: only the pip tells the state. */
+.rakazo-organic-avatar[data-still="true"] * {
+  animation: none !important;
+  transition: none !important;
+}
+.rakazo-organic-avatar[data-still="true"] .rakazo-av-pip {
+  transform: scale(1.6);
+}
+.rakazo-organic-avatar[data-still="true"][data-state="blocked"] .rakazo-av-pill {
+  transform: scale(1.5, 0.3);
+}
+.rakazo-organic-avatar[data-paused="true"] * {
+  animation-play-state: paused !important;
+}

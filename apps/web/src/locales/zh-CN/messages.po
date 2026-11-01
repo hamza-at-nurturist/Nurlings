@@ -936,6 +936,10 @@ msgstr "产物"
 msgid "Ask"
 msgstr "询问"
 
+#: src/components/AvatarStateNames.tsx
+msgid "asleep"
+msgstr ""
+
 #: src/pages/shell/computer-panel.tsx
 msgid "Asleep"
 msgstr "休眠中"
@@ -1070,6 +1074,10 @@ msgstr "账单"
 #: src/components/ApprovalRulesSettings.tsx
 msgid "Block"
 msgstr "阻止"
+
+#: src/components/AvatarStateNames.tsx
+msgid "blocked"
+msgstr ""
 
 #: src/lib/ticket-status.ts
 msgid "Blocked"
@@ -2722,6 +2730,10 @@ msgstr "文档已更改。请重新打开以编辑最新版本。"
 msgid "Don’t have an account?"
 msgstr "还没有账户？"
 
+#: src/components/AvatarStateNames.tsx
+msgid "done"
+msgstr ""
+
 #: src/components/AccountDataSettings.tsx
 #: src/components/ToolActivityDisclosure.tsx
 #: src/lib/ticket-status.ts
@@ -3296,6 +3308,10 @@ msgstr "我做完了"
 msgid "Icon set"
 msgstr "图标集"
 
+#: src/components/AvatarStateNames.tsx
+msgid "idle"
+msgstr ""
+
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "如果听到了，说明语音已就绪。"
@@ -3333,6 +3349,10 @@ msgstr "导入数据"
 #: src/lib/ticket-status.ts
 msgid "In progress"
 msgstr "进行中"
+
+#: src/components/AvatarStateNames.tsx
+msgid "in review"
+msgstr ""
 
 #: src/lib/ticket-status.ts
 msgid "In review"
@@ -4042,6 +4062,10 @@ msgstr "需要输入"
 #: src/pages/ActivityList.tsx
 msgid "Needs takeover"
 msgstr "需要接管"
+
+#: src/components/AvatarStateNames.tsx
+msgid "needs you"
+msgstr ""
 
 #: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
@@ -5987,6 +6011,10 @@ msgstr "这些文件或选择已不再匹配。请重新选择文件。"
 msgid "These saved settings can't be read. Remove it and add it again."
 msgstr "这些已保存的设置读不出来。请移除后再添加一次。"
 
+#: src/components/AvatarStateNames.tsx
+msgid "thinking"
+msgstr ""
+
 #: src/components/call/CallCard.tsx
 #: src/pages/ModelRoleSettings.tsx
 #: src/pages/RoutineEditor.tsx
@@ -6646,6 +6674,10 @@ msgstr "不做"
 #: src/components/SignupSurvey.tsx
 msgid "Work"
 msgstr "工作"
+
+#: src/components/AvatarStateNames.tsx
+msgid "working"
+msgstr ""
 
 #: src/pages/shell/agent-import.tsx
 msgid "Working instructions"

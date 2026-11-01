@@ -76,7 +76,7 @@ test("photo avatar animations stay still when reduced motion is enabled", async 
   expect(second).toEqual(first);
 });
 
-test("organic avatars hold still while idle and stop working motion while offscreen or hidden", async ({
+test("organic avatars show their state and stop moving while offscreen or hidden", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -84,78 +84,33 @@ test("organic avatars hold still while idle and stop working motion while offscr
   const avatar = page.locator(".avatar-organic");
   await expect(avatar).toBeVisible();
   const motion = () =>
-    avatar.evaluate((svg: SVGSVGElement) => {
-      const states = (mode: string) =>
-        [
-          ...svg.querySelectorAll(
-            `.rakazo-organic-avatar-body-${mode}, .rakazo-organic-avatar-eyes-${mode}`,
+    avatar.evaluate((svg: SVGSVGElement) => ({
+      clockPaused: svg.animationsPaused(),
+      states: [
+        ...new Set(
+          [...svg.querySelectorAll("*")].flatMap((element) =>
+            element
+              .getAnimations()
+              .filter((track) => track instanceof CSSAnimation)
+              .map((track) => track.playState),
           ),
-        ].flatMap((element) =>
-          element
-            .getAnimations()
-            .filter((track) => track instanceof CSSAnimation)
-            .map((track) => track.playState),
-        );
-      return {
-        clockPaused: svg.animationsPaused(),
-        morphing: ["idle", "working"].filter((mode) =>
-          svg.querySelector(`.rakazo-organic-avatar-body-${mode} animate`),
         ),
-        idle: [...new Set(states("idle"))],
-        working: [...new Set(states("working"))],
-      };
-    });
-  // Idle avatars draw no frames: SVG motion repaints on the main thread.
-  expect(await motion()).toEqual({
-    clockPaused: false,
-    morphing: [],
-    idle: [],
-    working: ["paused"],
-  });
-  const clock = await avatar.evaluate((svg: SVGSVGElement) => svg.getCurrentTime());
-  await page.waitForTimeout(400);
-  expect(await avatar.evaluate((svg: SVGSVGElement) => svg.getCurrentTime())).toBeGreaterThan(
-    clock,
-  );
+      ],
+    }));
+  await expect(avatar).toHaveAttribute("data-state", "idle");
+  expect(await motion()).toEqual({ clockPaused: false, states: ["running"] });
 
-  // The working morph joins the running svg clock instead of restarting it, and fades in.
-  const handoff = await avatar.evaluate(async (svg) => {
-    const body = (mode: string) =>
-      svg.querySelector<SVGPathElement>(`.rakazo-organic-avatar-body-${mode}`)!;
-    const before = svg.getCurrentTime();
-    svg.parentElement!.querySelector("button")!.click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    return {
-      before,
-      time: svg.getCurrentTime(),
-      start: body("working").querySelector("animate")?.getStartTime(),
-      fading: body("working")
-        .getAnimations()
-        .some((track) => track instanceof CSSTransition && track.transitionProperty === "opacity"),
-    };
-  });
-  expect(handoff.time).toBeGreaterThanOrEqual(handoff.before);
-  expect(handoff.start).toBeLessThan(handoff.before);
-  expect(handoff.fading).toBe(true);
+  await avatar.evaluate((svg) => svg.parentElement!.querySelector("button")!.click());
+  await expect(avatar).toHaveAttribute("data-state", "working");
+  await expect(avatar).toHaveAttribute("data-look", "orbit");
   await expect(avatar).toHaveAttribute("data-working", "true");
-  expect(await motion()).toEqual({
-    clockPaused: false,
-    morphing: ["working"],
-    idle: [],
-    working: ["running"],
-  });
+  await expect(avatar.locator(".rakazo-av-orbit")).toHaveCSS("animation-name", "rakazo-av-spin");
 
-  const stopped = {
-    clockPaused: true,
-    morphing: ["working"],
-    idle: [],
-    working: ["paused"],
-  };
   await avatar.evaluate((svg) => {
     svg.closest<HTMLElement>(".avatar-example")!.style.marginTop = "2200px";
   });
   await expect(avatar).toHaveAttribute("data-paused", "true");
-  expect(await motion()).toEqual(stopped);
+  expect(await motion()).toEqual({ clockPaused: true, states: ["paused"] });
   await avatar.evaluate((svg) => {
     svg.closest<HTMLElement>(".avatar-example")!.style.marginTop = "0";
   });
@@ -168,7 +123,7 @@ test("organic avatars hold still while idle and stop working motion while offscr
     }, hidden);
   await setHidden(true);
   await expect(avatar).toHaveAttribute("data-paused", "true");
-  expect(await motion()).toEqual(stopped);
+  expect(await motion()).toEqual({ clockPaused: true, states: ["paused"] });
   await setHidden(false);
   await expect(avatar).toHaveAttribute("data-paused", "false");
   expect((await motion()).clockPaused).toBe(false);

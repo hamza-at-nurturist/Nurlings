@@ -199,3 +199,43 @@ it("publishes a background-only fallback change without exposing its activity", 
   expect(s.getActivity("bot-a", "running")).toBe("working");
   expect(notifications).toBe(1);
 });
+
+describe("avatar tool and composing for organic avatars", () => {
+  it("carries the category the worker sent and drops it when the tool completes", () => {
+    const s = createLogoAvatarActivityStore();
+    s.hydrate("chat", snapshot(0));
+    expect(s.getLive("bot-a")).toEqual({ tool: "none", composing: false });
+    s.apply(
+      "chat",
+      event(1, "agent.tool.called", { name: "web_search", executionId: "a", tool: "search" }),
+    );
+    expect(s.getLive("bot-a").tool).toBe("search");
+    s.apply("chat", event(2, "agent.tool.called", { name: "other", executionId: "b" }));
+    expect(s.getLive("bot-a").tool).toBe("none");
+    s.apply("chat", event(3, "agent.tool.completed", { executionId: "b" }));
+    expect(s.getLive("bot-a").tool).toBe("search");
+    s.apply("chat", event(4, "agent.tool.completed", { executionId: "a" }));
+    expect(s.getLive("bot-a").tool).toBe("none");
+  });
+
+  it("notifies subscribers when only the tool changes", () => {
+    const s = createLogoAvatarActivityStore();
+    let calls = 0;
+    s.subscribe(() => calls++);
+    s.hydrate("chat", snapshot(0));
+    s.apply("chat", event(1, "agent.tool.called", { name: "a", executionId: "a", tool: "write" }));
+    const before = calls;
+    s.apply(
+      "chat",
+      event(2, "agent.tool.called", { name: "b", executionId: "b", tool: "computer" }),
+    );
+    expect(calls).toBeGreaterThan(before);
+  });
+
+  it("reports composing", () => {
+    const s = createLogoAvatarActivityStore();
+    s.hydrate("chat", snapshot(0));
+    s.apply("chat", event(1, "thread.progress", { streaming: true, delta: "Hello" }));
+    expect(s.getLive("bot-a").composing).toBe(true);
+  });
+});

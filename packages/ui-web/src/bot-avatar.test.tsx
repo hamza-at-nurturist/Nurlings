@@ -163,17 +163,16 @@ describe("BotAvatar", () => {
     expect(html).toContain("rakazo-organic-avatar");
   });
 
-  it("morphs the organic body only while working", () => {
-    const morphing = (status: string) =>
-      [
-        ...renderToString(<BotAvatar color="#8B5CF6" status={status} />).matchAll(
-          /rakazo-organic-avatar-body-(idle|working)"[^>]*>(<animate)?/g,
-        ),
-      ]
-        .filter((match) => match[2])
-        .map((match) => match[1]);
-    expect(morphing("idle")).toEqual([]);
-    expect(morphing("running")).toEqual(["working"]);
+  it("shows the working state only while a run works", () => {
+    const stateOf = (status?: string) =>
+      renderToString(<BotAvatar color="#8B5CF6" status={status} />).match(
+        /data-state="(\w+)"/,
+      )?.[1];
+    expect(stateOf()).toBe("idle");
+    expect(stateOf("running")).toBe("working");
+    expect(stateOf("waiting_input")).toBe("needs");
+    expect(stateOf("failed")).toBe("blocked");
+    expect(stateOf("completed")).toBe("idle");
   });
 
   it("draws every plain-colour bot with the organic body", () => {
@@ -203,10 +202,10 @@ describe("BotAvatar", () => {
     const html = renderToString(<BotAvatar color={`#8B5CF6::shape_${index}`} identity="maya" />);
     expect(html).toContain(frame?.path);
     expect(html).not.toContain(organicAvatarPath(avatarIdentitySeed("maya")));
-    // The gloss arc is stored with the body but not drawn yet.
+    // The stored gloss arc is drawn, and there are two pill eyes.
     expect(frame?.gloss).toMatch(/^M/);
-    expect(html).not.toContain(frame?.gloss);
-    expect(html.match(/<rect/g)).toHaveLength(4);
+    expect(html).toContain(frame?.gloss);
+    expect(html.match(/<rect/g)).toHaveLength(2);
     expect(html).not.toContain("<animate");
   });
 
@@ -214,7 +213,7 @@ describe("BotAvatar", () => {
     const fallback = resolvePersonaColorDef("maya", "#zzzzzz");
     const html = renderToString(<BotAvatar color="#zzzzzz" identity="maya" />);
     expect(html).toContain("rakazo-organic-avatar");
-    expect(html).toContain(`fill="${fallback.hex}"`);
+    expect(html).toContain(`--c0:${fallback.hex}`);
     expect(html).not.toContain("#zzzzzz");
   });
 
@@ -227,12 +226,11 @@ describe("BotAvatar", () => {
     expect(html).toContain("rakazo-organic-avatar");
     expect(html).not.toContain("rakazo-bot-avatar");
     expect(html).not.toContain("url(#bot-ink-");
-    expect(html).toContain(`fill="${colorDef.hex}"`);
+    expect(html).toContain(`--c0:${colorDef.hex}`);
     expect(html).toContain(organicBotAvatarFrame(index)?.path);
-    // Two pills in each of the idle and working eye groups.
-    expect(html.match(/<rect/g)).toHaveLength(4);
+    expect(html.match(/<rect/g)).toHaveLength(2);
     expect(html).not.toContain("<ellipse");
-    expect(html).toContain("rotate(13.5 ");
+    expect(html).toContain("rotate(13.5)");
     // The blob keeps its outline, so there is nothing to morph between.
     expect(html).not.toContain("<animate");
   });
@@ -257,9 +255,7 @@ describe("BotAvatar", () => {
     const blob = render(`#8B5CF6::shape_${index}`, "chief", "running");
     expect(blob).toContain('data-working="true"');
     expect(blob).toMatch(/data-eye-pattern="[0-3]"/);
-    expect(blob).toContain("rakazo-organic-avatar-eyes-idle");
-    expect(blob).toContain("rakazo-organic-avatar-eyes-working");
-    expect(blob).toContain("rakazo-organic-avatar-body-working");
+    expect(blob).toContain('data-state="working"');
     expect(blob).not.toContain("rakazo-bot-avatar-ring");
 
     const patterns = new Set(

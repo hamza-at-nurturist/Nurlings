@@ -8,7 +8,8 @@ import {
   avatarEase,
   avatarTrackValue,
 } from "./avatar-clips.js";
-import { isRunWorking } from "./run-state.js";
+import type { AvatarTool } from "./avatar-tool.js";
+import { isRunWaitingOnUser, isRunWorking } from "./run-state.js";
 
 /**
  * Life for bot avatars, played flat on our shapes. A resting avatar is a still picture;
@@ -392,4 +393,158 @@ export function avatarPokeFrame(
   const value = p > 0 && p < 1 ? avatarTrackValue(POKE_KEYS[poke], p) : null;
   if (!value) return { rotate: 0, translateY: 0, scaleY: 1, eyeY: 0 };
   return { rotate: value[0]!, translateY: value[1]!, scaleY: value[2]!, eyeY: value[3]! };
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Avatar states: what an organic avatar shows. Pure data and functions, shared by web and mobile.
+ * ------------------------------------------------------------------------------------------- */
+
+export const AVATAR_STATES = [
+  "idle",
+  "thinking",
+  "working",
+  "needs",
+  "review",
+  "blocked",
+  "done",
+  "asleep",
+] as const;
+export type AvatarState = (typeof AVATAR_STATES)[number];
+
+/** A finished run shows done this long, then rests. */
+export const AVATAR_DONE_MS = 4000;
+/** Continuous work (working or thinking) this long reads as a long run: slower breath, tired eyes. */
+export const AVATAR_LONG_RUN_MS = 180_000;
+
+export interface AvatarStateInput {
+  /** The bot's latest run status. */
+  runStatus?: string | null;
+  /** The bot is writing its reply text. */
+  composing?: boolean;
+  /** Milliseconds since the latest run completed; omit when it has not just completed. */
+  completedAgoMs?: number | null;
+  /** The status of the ticket this avatar stands for, on views that show one. */
+  ticketStatus?: string | null;
+  /** The bot's computer is asleep. Nothing supplies this yet. */
+  asleep?: boolean;
+  /** The run is background work (tickets) that must not drive a chat avatar. */
+  background?: boolean;
+}
+
+/**
+ * The one mapping from what the product already knows to an avatar state. First match wins:
+ * asleep, needs you, blocked, in review, working or thinking, done, idle. No new statuses.
+ */
+export function avatarState(input: AvatarStateInput): AvatarState {
+  const run = input.background ? undefined : input.runStatus;
+  if (input.asleep) return "asleep";
+  if (isRunWaitingOnUser(run)) return "needs";
+  if (run === "failed" || input.ticketStatus === "blocked") return "blocked";
+  if (input.ticketStatus === "review") return "review";
+  if (isRunWorking(run)) return input.composing ? "thinking" : "working";
+  const justDone =
+    run === "completed" &&
+    input.completedAgoMs !== null &&
+    input.completedAgoMs !== undefined &&
+    input.completedAgoMs < AVATAR_DONE_MS;
+  if (justDone || input.ticketStatus === "done" || input.ticketStatus === "closed") return "done";
+  return "idle";
+}
+
+/** The older three-state view of an avatar state, for the pose and clip system. */
+export function avatarMotionState(state: AvatarState): AvatarLifeState {
+  if (state === "working") return "working";
+  if (state === "thinking") return "thinking";
+  return "idle";
+}
+
+/**
+ * When the current stretch of continuous work began: kept while the avatar is working or thinking,
+ * cleared when it is not. Pass the result back in on the next change.
+ */
+export function avatarBusySince(
+  since: number | null,
+  state: AvatarState,
+  now: number,
+): number | null {
+  return state === "working" || state === "thinking" ? (since ?? now) : null;
+}
+
+export type AvatarWorkingLook = "tool" | "ring" | "orbit" | "ripple";
+
+export interface AvatarWorking {
+  look: AvatarWorkingLook;
+  /** The prop to show; `none` unless the look is `tool`. */
+  tool: AvatarTool;
+  long: boolean;
+}
+
+/**
+ * How a working avatar looks. A queued or leased run has started nothing and has no progress, so it
+ * ripples. Otherwise a known tool shows its prop, a known progress (0 to 1) shows the ring, and the
+ * orbit dot is the default.
+ */
+export function avatarWorking(input: {
+  status?: string | null;
+  tool?: AvatarTool;
+  progress?: number | null;
+  busyMs?: number;
+}): AvatarWorking {
+  const tool = input.tool ?? "none";
+  const long = (input.busyMs ?? 0) >= AVATAR_LONG_RUN_MS;
+  if (input.status === "queued" || input.status === "leased")
+    return { look: "ripple", tool: "none", long };
+  if (tool !== "none") return { look: "tool", tool, long };
+  const progress = input.progress;
+  if (typeof progress === "number" && Number.isFinite(progress))
+    return { look: "ring", tool: "none", long };
+  return { look: "orbit", tool: "none", long };
+}
+
+/** How far the eyes follow the pointer, 0 to 1, per state; props that hold the gaze follow less. */
+export function avatarFollowStrength(state: AvatarState, tool: AvatarTool = "none"): number {
+  if (state === "working") return tool === "computer" ? 0.3 : tool === "none" ? 1 : 0;
+  if (state === "thinking" || state === "asleep") return 0;
+  if (state === "needs") return 0.5;
+  if (state === "blocked") return 0.4;
+  return 1;
+}
+
+/** Pointer follow reach in avatar units: the eyes lead, the body goes a third of the way. */
+export const AVATAR_FOLLOW_REACH = { eyes: 9, body: 3.2 } as const;
+/** Pointer distance (px) at which follow reaches full strength. */
+export const AVATAR_FOLLOW_RANGE = 180;
+
+/** Prop swap timings, from the storyboard: the old prop drops, the new one pops in. */
+export const AVATAR_SWAP_OUT_MS = 240;
+export const AVATAR_SWAP_IN_MS = 500;
+
+export type AvatarSwapPhase = "rest" | "out" | "in";
+export interface AvatarSwap {
+  /** The prop on screen (during `out`, the one dropping). */
+  shown: AvatarTool;
+  /** The prop it is moving to; equals `shown` at rest. */
+  target: AvatarTool;
+  phase: AvatarSwapPhase;
+}
+
+export function avatarSwapStart(tool: AvatarTool): AvatarSwap {
+  return { shown: tool, target: tool, phase: "rest" };
+}
+
+/** A new tool: at rest the old prop starts to drop; mid-swap the pending target is replaced. */
+export function avatarSwapTo(swap: AvatarSwap, tool: AvatarTool): AvatarSwap {
+  if (swap.phase === "rest") {
+    return tool === swap.shown ? swap : { shown: swap.shown, target: tool, phase: "out" };
+  }
+  if (swap.phase === "out") return { ...swap, target: tool };
+  // The new prop has just popped in: it drops again.
+  return tool === swap.shown ? swap : { shown: swap.shown, target: tool, phase: "out" };
+}
+
+/** The next phase once the current one's time is up: out, then in, then rest. */
+export function avatarSwapAdvance(swap: AvatarSwap): AvatarSwap {
+  if (swap.phase === "out") return { shown: swap.target, target: swap.target, phase: "in" };
+  if (swap.phase === "in") return { ...swap, phase: "rest" };
+  return swap;
 }

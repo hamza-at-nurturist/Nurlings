@@ -936,6 +936,10 @@ msgstr ""
 msgid "Ask"
 msgstr "पूछें"
 
+#: src/components/AvatarStateNames.tsx
+msgid "asleep"
+msgstr ""
+
 #: src/pages/shell/computer-panel.tsx
 msgid "Asleep"
 msgstr "स्लीप में"
@@ -1070,6 +1074,10 @@ msgstr ""
 #: src/components/ApprovalRulesSettings.tsx
 msgid "Block"
 msgstr "ब्लॉक करें"
+
+#: src/components/AvatarStateNames.tsx
+msgid "blocked"
+msgstr ""
 
 #: src/lib/ticket-status.ts
 msgid "Blocked"
@@ -2722,6 +2730,10 @@ msgstr "दस्तावेज़ बदल गया है। नवीन�
 msgid "Don’t have an account?"
 msgstr "खाता नहीं है?"
 
+#: src/components/AvatarStateNames.tsx
+msgid "done"
+msgstr ""
+
 #: src/components/AccountDataSettings.tsx
 #: src/components/ToolActivityDisclosure.tsx
 #: src/lib/ticket-status.ts
@@ -3296,6 +3308,10 @@ msgstr "मेरा काम हो गया"
 msgid "Icon set"
 msgstr ""
 
+#: src/components/AvatarStateNames.tsx
+msgid "idle"
+msgstr ""
+
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "अगर आपने वह सुना, तो आवाज़ तैयार है।"
@@ -3332,6 +3348,10 @@ msgstr "डेटा आयात करें"
 
 #: src/lib/ticket-status.ts
 msgid "In progress"
+msgstr ""
+
+#: src/components/AvatarStateNames.tsx
+msgid "in review"
 msgstr ""
 
 #: src/lib/ticket-status.ts
@@ -4042,6 +4062,10 @@ msgstr "इनपुट चाहिए"
 #: src/pages/ActivityList.tsx
 msgid "Needs takeover"
 msgstr "नियंत्रण लेना ज़रूरी"
+
+#: src/components/AvatarStateNames.tsx
+msgid "needs you"
+msgstr ""
 
 #: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
@@ -5987,6 +6011,10 @@ msgstr "ये फ़ाइलें या विकल्प अब मेल 
 msgid "These saved settings can't be read. Remove it and add it again."
 msgstr ""
 
+#: src/components/AvatarStateNames.tsx
+msgid "thinking"
+msgstr ""
+
 #: src/components/call/CallCard.tsx
 #: src/pages/ModelRoleSettings.tsx
 #: src/pages/RoutineEditor.tsx
@@ -6645,6 +6673,10 @@ msgstr ""
 
 #: src/components/SignupSurvey.tsx
 msgid "Work"
+msgstr ""
+
+#: src/components/AvatarStateNames.tsx
+msgid "working"
 msgstr ""
 
 #: src/pages/shell/agent-import.tsx
