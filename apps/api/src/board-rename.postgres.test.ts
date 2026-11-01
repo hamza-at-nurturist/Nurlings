@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { brand } from "@nurlings/brand";
 import { createRouterClient } from "@orpc/server";
 import type { Actor } from "@rakazo/contracts";
 import type { PrismaClient } from "@rakazo/db";
@@ -158,7 +159,7 @@ describe.skipIf(!enabled).sequential("board prefix rename (PostgreSQL)", () => {
         prisma.board.findUniqueOrThrow({ where: { id: boardId } }),
       );
       expect(board.name).toBe("General");
-      expect(board.ticketPrefix).toBe("RAK");
+      expect(board.ticketPrefix).toBe(brand.ticketPrefix);
       expect(board.nextNumber).toBe(2);
       expect(
         await runAsSystem("board rename assertion", () =>

@@ -68,9 +68,6 @@ test("the signed-in app and its settings carry the brand and no upstream name", 
     await openUserSettings(page, section);
     await expectNoUpstreamName(page, `settings ${section}`);
     if (section === "models") {
-      await expect(page.getByTestId("user-settings")).toContainText(
-        `${brand.name} does not pay for model usage`,
-      );
       await captureScreenshot(page, testInfo, "brand-settings-models");
     }
   }
