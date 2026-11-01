@@ -5,8 +5,8 @@ import { AVATAR_DONE_MS, AVATAR_LONG_RUN_MS } from "@rakazo/core";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { AvatarStateSource } from "./use-avatar-state.js";
-import { useAvatarState, useToolSwap } from "./use-avatar-state.js";
+import type { AvatarStateSource } from "@rakazo/core/avatar-state-react";
+import { useAvatarState, useToolSwap } from "@rakazo/core/avatar-state-react";
 
 let snapshot: unknown;
 function Probe({ source, animate = true }: { source: AvatarStateSource; animate?: boolean }) {
@@ -95,7 +95,7 @@ describe("avatar colors", () => {
       "organic-avatar-props.tsx",
       "organic-avatar.css",
       "avatar-pointer.ts",
-      "use-avatar-state.ts",
+      "../../core/src/avatar-state-react.ts",
     ]) {
       const text = readFileSync(new URL(file, import.meta.url), "utf8");
       expect(text.match(/#[0-9a-fA-F]{3,8}\b/g) ?? [], file).toEqual([]);

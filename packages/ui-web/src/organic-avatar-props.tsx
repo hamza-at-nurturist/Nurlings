@@ -1,4 +1,4 @@
-import { AVATAR_ILLUSTRATION as ink } from "./avatar-illustration.js";
+import { AVATAR_ILLUSTRATION as ink } from "@rakazo/ui-tokens";
 
 /** Pieces of the organic avatar drawn in the 140-unit storyboard space (scaled by the caller). */
 

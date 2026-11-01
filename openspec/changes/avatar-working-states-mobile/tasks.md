@@ -7,11 +7,13 @@
 
 ## 2. Shared plumbing
 
-- [ ] 2.1 Move `avatar-illustration.ts` to `packages/ui-tokens` and import it from there in
+- [x] 2.1 Move `avatar-illustration.ts` to `packages/ui-tokens` and import it from there in
   `ui-web`. Verify: `ui-web` and `ui-tokens` unit tests pass; the file is the only place with prop
   hex literals, and mobile files added by this change contain none.
-- [ ] 2.2 Check `useAvatarState` and `useToolSwap` for DOM or web-only imports and split any out;
-  then move them to `@rakazo/chat-ui` and re-export from `ui-web`. Verify: the moved tests pass in the new home and web tests still pass unchanged.
+- [x] 2.2 Check `useAvatarState` and `useToolSwap` for DOM or web-only imports (none: React, timers
+  and core only), then move them to a shared package. `@rakazo/chat-ui` would make a package cycle
+  (it depends on `ui-web`, which would import it), so they live at `@rakazo/core/avatar-state-react`,
+  a subpath with an optional `react` peer. Web imports them from there. Verify: the moved tests pass in the new home and web tests still pass unchanged.
 - [ ] 2.3 Mark the core functions mobile needs in worklets with `"worklet"` only where used. Verify:
   core unit tests unchanged and green.
 

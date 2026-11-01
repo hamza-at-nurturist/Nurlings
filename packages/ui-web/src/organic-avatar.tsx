@@ -13,7 +13,7 @@ import {
 import { tokens } from "@rakazo/ui-tokens";
 import type { CSSProperties } from "react";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { AVATAR_ILLUSTRATION as ink } from "./avatar-illustration.js";
+import { AVATAR_ILLUSTRATION as ink } from "@rakazo/ui-tokens";
 import { registerAvatarPointer } from "./avatar-pointer.js";
 import { useAvatarMotionVisibility } from "./hooks/use-avatar-motion-visibility.js";
 import { cn } from "./lib/utils.js";
@@ -27,8 +27,8 @@ import {
   SearchProp,
   WriteProp,
 } from "./organic-avatar-props.js";
-import type { AvatarStateSource } from "./use-avatar-state.js";
-import { useAvatarState, useToolSwap } from "./use-avatar-state.js";
+import type { AvatarStateSource } from "@rakazo/core/avatar-state-react";
+import { useAvatarState, useToolSwap } from "@rakazo/core/avatar-state-react";
 import "./organic-avatar.css";
 
 export interface OrganicAvatarProps extends AvatarStateSource {

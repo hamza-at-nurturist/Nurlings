@@ -100,8 +100,9 @@ illustration `dull` color as on web.
 
 ## Decisions (approved)
 
-1. **Hook home.** `useAvatarState` / `useToolSwap` move into `@rakazo/chat-ui` and are re-exported from
-   `ui-web`. Before moving, check they have no DOM or web-only imports; if any do, split those out
+1. **Hook home.** `useAvatarState` / `useToolSwap` move to shared code. As built: `@rakazo/chat-ui`
+   depends on `ui-web`, so importing it from `ui-web` would be a package cycle; they live at the
+   `@rakazo/core/avatar-state-react` subpath instead (optional `react` peer), used by web and mobile. Before moving, check they have no DOM or web-only imports; if any do, split those out
    first.
 2. **Accessible-name strings.** Six new lowercase state words in all eight mobile catalogs: thinking,
    needs you, in review, blocked, done, asleep. "Working" already exists. There is no string for idle:
