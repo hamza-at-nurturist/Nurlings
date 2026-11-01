@@ -37,32 +37,25 @@ a backfill):
 | Migration | Statement | Previous release reads it? | Plan |
 | --- | --- | --- | --- |
 | `20261025210001_runs_task_id_idx_concurrent` | `CREATE INDEX "runs_taskId_idx"` duplicates ours | n/a | Edit to `IF NOT EXISTS` (overlap) |
-| `20261025140000_drop_space_backup_models` | `DROP TABLE space_backup_models` | maybe | Defer |
-| `20261025180000_drop_model_preference_default` | drop `isDefault` + 2 indexes | yes (`space_model_preferences`) | Defer |
-| `20261025200000_account_settings` | `DROP TABLE account_source, space_setting_signatures` after moving data | yes | Defer the two drops (see below) |
+| `20261025140000_drop_space_backup_models` | `DROP TABLE space_backup_models` | maybe | Ships (approved exception) |
+| `20261025180000_drop_model_preference_default` | drop `isDefault` + 2 indexes | yes (`space_model_preferences`) | Ships (approved exception) |
+| `20261025200000_account_settings` | `DROP TABLE account_source, space_setting_signatures` after moving data | yes | Ships as is (approved exception) |
 | `20261102120000_drop_unused_referral_tables` | drop `billing_card_fingerprints`, `referrals.createdAt` | no (new tables) | Safe, ships |
-| `20261103120000_drop_dead_bot_and_referral_columns` | drop `bots.title`, `bots.selfUpdateInstructions`, referral columns | yes for `bots` | Defer |
-| `20261108120000_drop_pending_instructions_run` | drop `bots.pendingInstructionsRunId` | yes | Defer |
+| `20261103120000_drop_dead_bot_and_referral_columns` | drop `bots.title`, `bots.selfUpdateInstructions`, referral columns | yes for `bots` | Ships (approved exception) |
+| `20261108120000_drop_pending_instructions_run` | drop `bots.pendingInstructionsRunId` | yes | Ships (approved exception) |
 | `20261104120001..3_*_drop_concurrent` | drop three indexes | performance only | Ships |
 | `20261029150000_space_availability` | drop `secrets_scope_check` | relaxes a check | Ships |
 | `20261109120000_audit_events` | `REVOKE UPDATE` on the new table | no | Ships |
 
-`account_settings` is one file that both moves data into new tables and drops two old ones, so it
-cannot be held back as a unit without losing the data move. Preferred handling: keep the file as is
-if `account_source` and `space_setting_signatures` are not read by the previous release (I will
-check against `main`); otherwise split the drops into a follow-up migration that we own, named after
-the sync. Either way, no edit to a file that has already been applied anywhere.
-
-Mechanism for "Defer": move the directory out of `migrations/` into
-`openspec/changes/upstream-sync-2026-11/deferred-migrations/` in a single commit titled
-"Defer non-additive upstream migrations", and a follow-up change restores them after the sync
-release is live. Risks: later migrations that assume a dropped state (none found in the 54), and
-`schema.prisma` no longer matching the database (columns present but unknown to Prisma, harmless
-for reads and for inserts unless NOT NULL without default; checked per column in task 3.3).
+Maintainer decision: all migrations apply in one deploy, unchanged except the `IF NOT EXISTS` fix.
+Nothing is held back. This knowingly breaks the side-by-side rule for the rollout window (queries on
+`bots`, `space_model_preferences` and the dropped tables fail on the old API until it is replaced),
+accepted because deploys are the test server and a few client servers at quiet hours. The runbook
+note tells operators to back up, deploy at a quiet hour and expect a brief error window.
 
 Verification: `prisma migrate deploy` on a fresh database, then on a restored copy of the current
 production schema (dump of the last released state), and `prisma migrate diff` between the migrated
-database and `schema.prisma` shows only the deferred drops.
+database and `schema.prisma` shows no drift.
 
 ### 2. Board and ticket routes
 
@@ -118,7 +111,7 @@ Upstream `assertMcpStdioAdmin` allows only users listed in `RAKAZO_ADMIN_EMAILS`
 lowercased). Our Coolify compose passes the `MCP_STDIO_*` variables but not `RAKAZO_ADMIN_EMAILS`, so
 after the sync nobody could add or change a stdio server, and existing ones would only run for as
 long as nobody edits them. Fix: pass `RAKAZO_ADMIN_EMAILS` through in `deploy/coolify/docker-compose.yml`
-(passthrough, no value, matching the compose-env allowlist test), document it next to
+(optional, empty default, never an email in the repo; matching the compose-env allowlist test), document it next to
 `MCP_STDIO_ENABLED` in `docs/nurlings-deployment.md`. The operator must set it in Coolify to the
 admin account's email. Existing stdio servers keep running; checking this is a post-merge task.
 
@@ -158,7 +151,7 @@ list is written during the merge and replaces this section before the PR.)
 
 ## Risks
 
-1. **Destructive migrations**: see decision 1; needs your call.
+1. **Destructive migrations**: accepted exception, decision 1.
 2. **Size**: 97 conflicted files and ~2,500 changed. Mitigated by grouping and by typecheck, lint
    and tests after each group.
 3. **Native build**: mobile gains native modules (`expo-haptics` from #72 and whatever upstream

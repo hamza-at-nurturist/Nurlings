@@ -24,7 +24,7 @@ Nurlings branding, fork infrastructure or the ticket board.
   and upstream's new `app/board.tsx` (#2859) would collide with it. Upstream's board stays in the
   tree, untouched and unlinked.
 - Gate anything upstream enforces for billing behind billing being configured (see design).
-- Pass `RAKAZO_ADMIN_EMAILS` through the Coolify compose, because stdio MCP servers become
+- Pass `RAKAZO_ADMIN_EMAILS` through the Coolify compose as an optional variable with an empty default (never commit an email; the maintainer sets the value in Coolify), because stdio MCP servers become
   admin-only upstream (see design).
 - Fix the one migration collision found in advance (see "Database").
 
@@ -71,14 +71,12 @@ the unapplied upstream ones run. The full list is in `design.md`.
    settings, vault credentials, referral outcome, `hasArgs`). They are one-off and additive in
    effect. `audit_events` revokes `UPDATE` on the new table from `rakazo_app`; nothing old reads it.
 
-**Decision for you (2):** I recommend a **two-step deploy**. This PR holds back the destructive
-migrations (point 2) by moving those directories out of `migrations/` in one clearly labelled
-commit, and a small follow-up change restores them after the sync release is live and the old API
-is gone. Held-back columns that stay in the database are harmless to the new code, which no longer
-reads them (I will check each for NOT NULL without default before relying on that). The alternative
-is to apply everything at once and accept a few seconds of errors on the affected queries during the
-rollout, which breaks the AGENTS.md rule. Held-back migrations change the migrate history only by
-being absent; they apply cleanly later and the later sync of upstream does not touch them again.
+**Decision (maintainer, approved):** apply all migrations in one deploy, no two-step. Our
+deployments are the test server and a few client servers redeployed at quiet hours, so a brief error
+window while the old API runs against the migrated schema is accepted. This is a deliberate
+**exception to the AGENTS.md side-by-side migration rule**, and the PR description states it. Upstream's
+migrations stay unchanged except the `IF NOT EXISTS` fix in point 1. A runbook note for client servers
+(back up, deploy at a quiet hour, expect a brief error window) goes in `docs/nurlings-deployment.md`.
 
 ### Conflict list and planned resolution
 
@@ -107,7 +105,7 @@ admin-only (check our setup still works); the audit log.
   board, link and push taps keep working), `coolify-deployment` (admin emails passthrough),
   `user-facing-branding` (new upstream strings get the brand pass; expected unchanged).
 - About 2,500 files change, mostly upstream code already reviewed upstream.
-- Adds up to 54 migrations (fewer if you pick the two-step deploy for the destructive ones).
+- Adds 54 migrations in one deploy.
 - Not a release. No tag is created or pushed; I will tell you when it is ready for you to cut one.
 
 ## Timing
