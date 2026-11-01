@@ -14,8 +14,9 @@
   and core only), then move them to a shared package. `@rakazo/chat-ui` would make a package cycle
   (it depends on `ui-web`, which would import it), so they live at `@rakazo/core/avatar-state-react`,
   a subpath with an optional `react` peer. Web imports them from there. Verify: the moved tests pass in the new home and web tests still pass unchanged.
-- [ ] 2.3 Mark the core functions mobile needs in worklets with `"worklet"` only where used. Verify:
-  core unit tests unchanged and green.
+- [x] 2.3 Core functions stay plain: mobile keeps its prop motion in `lib/avatar-prop-motion.ts`
+  (worklets over plain numbers), so core needs no `"worklet"` additions. Verify: core unit tests unchanged
+  and green.
 
 ## 3. States and pips
 
@@ -61,7 +62,7 @@
   avatar-working-states-mobile --strict`. The desktop Playwright suite is not run locally.
 - [x] 7.2 No iOS simulator is available in this environment, so no captures were taken; the PR says so.
   No catalog flow.
-- [ ] 7.3 Open the PR on `feature/avatar-working-states-mobile`: why, what, how tested, quoted
+- [x] 7.3 Open the PR on `feature/avatar-working-states-mobile`: why, what, how tested, quoted
   copy, and the unfed states (in review, asleep, progress ring). Then follow `pr-watch`. Never merge
   without approval.
-- [ ] 7.4 Archive the change after the PR merges.
+- [x] 7.4 Archive the change after the PR merges.
