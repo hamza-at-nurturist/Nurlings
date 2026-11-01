@@ -57,3 +57,12 @@ describe("botHexColor", () => {
     expect(botHexColor(undefined)).toBeUndefined();
   });
 });
+
+describe("resolvePersonaColorDef with a stored color that carries a shape", () => {
+  it("uses only the hex before '::', so mention chips and tints match the bot", () => {
+    for (const stored of ["#8B5CF6::shape_3", "#8b5cf6::shape_8", "#8B5CF6"]) {
+      expect(resolvePersonaColorDef("bot-1", stored).hex.toLowerCase(), stored).toBe("#8b5cf6");
+    }
+    expect(resolvePersonaColorDef("bot-1", "#123456::shape_2").light).toBe("#123456");
+  });
+});

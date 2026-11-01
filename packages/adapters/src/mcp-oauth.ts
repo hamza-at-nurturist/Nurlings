@@ -22,15 +22,17 @@ import { brand } from "@nurlings/brand";
 import type { SecretStore } from "@rakazo/adapter-kit";
 import { SecretStoreUnavailableError } from "@rakazo/adapter-kit";
 import {
-  isLocalMcpHost,
+  isLocalhostOrLoopbackIp,
+  MCP_OAUTH_CLIENT_REQUIRED,
   mcpOAuthEnvReferences,
   parseMcpOAuthAuthorizationParams,
 } from "@rakazo/contracts";
 import { readBoundedResponseBytes } from "@rakazo/core";
 import type { Prisma, PrismaClient } from "@rakazo/db";
-import { runAsSystem } from "@rakazo/db";
+import { availableInSpace, itemSecretIn, runAsSystem } from "@rakazo/db";
 import { getLogger } from "@rakazo/logging";
 import { sanitizeConnectorError } from "./connector-safety.js";
+import { MCP_DYNAMIC_REGISTRATION_UNSUPPORTED, needsMcpOAuthClient } from "./mcp-server-health.js";
 import { secureFetch, validateUrl, withEndpointOriginFallback } from "./mcp-transport.js";
 import type { RemoteTransportDependencies } from "./remote-mcp.js";
 import { persistPreparedSecret } from "./secret-persistence.js";
@@ -47,6 +49,8 @@ type OAuthState = {
 
 export type OAuthMaterial = {
   secret?: string;
+  /** Stdio launch arguments. */
+  args?: string[];
   env?: Record<string, string>;
   /** Credential files for a stdio server: the env variable that receives the file's
    * path, and the content template, which may use `{{oauth.*}}` references. */
@@ -77,30 +81,11 @@ export function oauthMaterialSecrets(material: OAuthMaterial): string[] {
     add(client.client_secret);
   }
   for (const [key, value] of Object.entries(material.headers ?? {})) {
-    if (isAuthHeaderKey(key)) {
-      // Cookie / X-Session / Authorization always carry auth material, including short values.
-      add(value);
-    } else if (
-      isExplicitCredentialKey(key) &&
-      looksLikeSecretValue(value, { allowNumeric: true })
-    ) {
-      add(value);
-    } else if (
-      isAmbiguousCredentialKey(key) &&
-      looksLikeSecretValue(value, { allowNumeric: false })
-    ) {
-      add(value);
-    }
+    // Cookie / X-Session / Authorization always carry auth material, including short values.
+    if (isAuthHeaderKey(key) || isConfiguredSecret(key, value)) add(value);
   }
   for (const [key, value] of Object.entries(material.env ?? {})) {
-    if (isExplicitCredentialKey(key) && looksLikeSecretValue(value, { allowNumeric: true })) {
-      add(value);
-    } else if (
-      isAmbiguousCredentialKey(key) &&
-      looksLikeSecretValue(value, { allowNumeric: false })
-    ) {
-      add(value);
-    }
+    if (isConfiguredSecret(key, value)) add(value);
   }
   // A file without references is a literal credential (for example a service-account key).
   // One that uses references is covered by the grant values it embeds.
@@ -112,6 +97,17 @@ export function oauthMaterialSecrets(material: OAuthMaterial): string[] {
       add(content);
   }
   return [...new Set(values)];
+}
+
+/** Redaction replaces substrings, so a short value under a neutral name would mangle output. */
+const MIN_NEUTRAL_SECRET_LENGTH = 8;
+
+/** A user can put a credential under any env or header name, so only short or ordinary
+ * config values under names that do not say credential stay visible. */
+function isConfiguredSecret(key: string, value: string): boolean {
+  if (isExplicitCredentialKey(key)) return looksLikeSecretValue(value, { allowNumeric: true });
+  if (!looksLikeSecretValue(value, { allowNumeric: false })) return false;
+  return isAmbiguousCredentialKey(key) || value.trim().length >= MIN_NEUTRAL_SECRET_LENGTH;
 }
 
 /** Headers whose values are credentials even when short (e.g. Cookie, X-Session). */
@@ -248,6 +244,16 @@ export class McpOAuthServerMismatchError extends Error {
   }
 }
 
+/** The authorization server cannot register a client, so the user must enter one. */
+export class McpOAuthClientRequiredError extends Error {
+  readonly code = MCP_OAUTH_CLIENT_REQUIRED;
+  /** @param revision The server revision the attempt used. */
+  constructor(readonly revision: number) {
+    super(MCP_DYNAMIC_REGISTRATION_UNSUPPORTED);
+    this.name = "McpOAuthClientRequiredError";
+  }
+}
+
 export class McpReauthorizationRequiredError extends Error {
   readonly code = "MCP_REAUTHORIZATION_REQUIRED";
   constructor(readonly serverId: string) {
@@ -277,6 +283,8 @@ type ProviderOptions = {
   onPersisted?: (record: { id: string; ref: string; material: OAuthMaterial }) => void;
   /** Renews the grant under the server's credential lock and returns the grant now stored. */
   refresh?: (heldRefreshToken: string) => Promise<TokenGrant>;
+  /** The instance opt-in that lets OAuth URLs use plain HTTP on a private network. */
+  allowPrivateEndpoint?: boolean;
 };
 
 /** Refresh before expiry to cover clock skew and request time. */
@@ -306,10 +314,13 @@ function accessTokenExpired(oauth: OAuthState | undefined): boolean {
 // advertise an internal alias for their public origin, so cross-host
 // resources are allowed, but malformed or cleartext resources are rejected
 // and the SDK falls back to deriving the resource from the server URL.
-function canonicalResource(resource: string | undefined): URL | undefined {
+function canonicalResource(
+  resource: string | undefined,
+  allowPrivateEndpoint = false,
+): URL | undefined {
   if (!resource) return undefined;
   try {
-    return validateUrl(resource);
+    return validateUrl(resource, { allowPrivateEndpoint });
   } catch {
     return undefined;
   }
@@ -499,7 +510,10 @@ export class StoredMcpOAuthProvider implements OAuthClientProvider {
   async redirectToAuthorization(url: URL): Promise<void> {
     let authorizationUrl: URL;
     try {
-      authorizationUrl = validateUrl(url, { allowHttpLocalhost: true });
+      authorizationUrl = validateUrl(url, {
+        allowHttpLocalhost: true,
+        allowPrivateEndpoint: this.options.allowPrivateEndpoint,
+      });
     } catch (error) {
       if (!this.options.onAuthorization) {
         await this.invalidateCredentials("tokens");
@@ -531,7 +545,7 @@ export class StoredMcpOAuthProvider implements OAuthClientProvider {
     return verifier;
   }
   async validateResourceURL(_serverUrl: string | URL, resource?: string): Promise<URL | undefined> {
-    return canonicalResource(resource);
+    return canonicalResource(resource, this.options.allowPrivateEndpoint);
   }
   async saveDiscoveryState(value: OAuthDiscoveryState): Promise<void> {
     this.oauth().discoveryState = value;
@@ -609,7 +623,7 @@ function oauthFetch(
   publicError: (error: unknown, message: string) => Error;
 } {
   const url = new URL(endpoint);
-  const localHttp = url.protocol === "http:" && isLocalMcpHost(url.hostname);
+  const localHttp = url.protocol === "http:" && isLocalhostOrLoopbackIp(url.hostname);
   const headers = {
     ...material.headers,
     ...(material.secret
@@ -837,6 +851,7 @@ async function requestRefresh(
   material: OAuthMaterial,
   refreshToken: string,
   fetchFn: typeof fetch,
+  allowPrivateEndpoint: boolean,
 ): Promise<OAuthTokens> {
   const discovery = material.oauth?.discoveryState;
   const clientInformation = material.oauthClient
@@ -848,7 +863,7 @@ async function requestRefresh(
     metadata: discovery.authorizationServerMetadata,
     clientInformation,
     refreshToken,
-    resource: canonicalResource(discovery.resourceMetadata?.resource),
+    resource: canonicalResource(discovery.resourceMetadata?.resource, allowPrivateEndpoint),
     fetchFn: (input, init) =>
       fetchFn(input, { ...init, signal: AbortSignal.timeout(REFRESH_REQUEST_TIMEOUT_MS) }),
   });
@@ -947,8 +962,7 @@ export class McpOAuthBroker {
     const server = await this.prisma.mcpServer.findFirst({
       where: {
         id: input.serverId,
-        spaceId: input.spaceId,
-        userId: input.userId,
+        ...availableInSpace(input),
         enabled: true,
       },
     });
@@ -1011,6 +1025,7 @@ export class McpOAuthBroker {
       }
     } catch (error) {
       if (error instanceof McpOAuthServerMismatchError) throw error;
+      if (needsMcpOAuthClient(error)) throw new McpOAuthClientRequiredError(server.revision);
       if (!authorizationUrl) throw networkFetch.publicError(error, "Could not start MCP OAuth");
     } finally {
       await networkFetch.close().catch(() => undefined);
@@ -1096,8 +1111,7 @@ export class McpOAuthBroker {
       const server = await this.prisma.mcpServer.findFirst({
         where: {
           id: session.serverId,
-          spaceId: input.spaceId,
-          userId: input.userId,
+          ...availableInSpace(input),
           enabled: true,
         },
       });
@@ -1136,7 +1150,7 @@ export class McpOAuthBroker {
     // The exchange sends the client secret: check it against the binding stored now, not
     // the one this flow started with, in case an overlapping flow bound the client first.
     const current = await this.prisma.mcpServer.findFirst({
-      where: { id: pending.serverId, spaceId: input.spaceId, userId: input.userId },
+      where: { id: pending.serverId, ...availableInSpace(input) },
       select: { id: true, endpoint: true, secretId: true },
     });
     if (current) {
@@ -1197,11 +1211,11 @@ export class McpOAuthBroker {
 
   async disconnect(input: { serverId: string; spaceId: string; userId: string }): Promise<void> {
     const server = await this.prisma.mcpServer.findFirst({
-      where: { id: input.serverId, spaceId: input.spaceId, userId: input.userId },
+      where: { id: input.serverId, ...availableInSpace(input) },
     });
     if (!server?.secretId) return;
     const row = await this.prisma.secret.findFirst({
-      where: { id: server.secretId, spaceId: input.spaceId, userId: input.userId },
+      where: { id: server.secretId, ...itemSecretIn(input) },
     });
     if (!row) return;
     const material = await this.read(row.ciphertext, row.id);
@@ -1215,7 +1229,7 @@ export class McpOAuthBroker {
   ): Promise<{ material: OAuthMaterial; secretId?: string }> {
     if (!server.secretId) return { material: {} };
     const row = await this.prisma.secret.findFirst({
-      where: { id: server.secretId, spaceId: context.spaceId, userId: context.userId },
+      where: { id: server.secretId, ...itemSecretIn(context) },
     });
     return row
       ? { material: await this.read(row.ciphertext, row.id), secretId: row.id }
@@ -1258,6 +1272,7 @@ export class McpOAuthBroker {
                 ),
             }
           : {}),
+        allowPrivateEndpoint: this.allowPrivateEndpoint,
         ...options,
       },
     );
@@ -1302,7 +1317,14 @@ export class McpOAuthBroker {
                 return { grant: { tokens: oauth?.tokens, obtainedAt: oauth?.obtainedAt } };
               let grant: TokenGrant;
               try {
-                grant = { tokens: await requestRefresh(material, current, network.fetch) };
+                grant = {
+                  tokens: await requestRefresh(
+                    material,
+                    current,
+                    network.fetch,
+                    this.allowPrivateEndpoint,
+                  ),
+                };
                 grant.obtainedAt = Date.now();
               } catch (error) {
                 // Under the lock `current` is the stored token, so a rejection
@@ -1408,6 +1430,7 @@ export class McpOAuthBroker {
       } else delete nextMaterial.oauth;
       const hasMaterial = Boolean(
         nextMaterial.secret ||
+          nextMaterial.args?.length ||
           Object.keys(nextMaterial.env ?? {}).length ||
           Object.keys(nextMaterial.files ?? {}).length ||
           Object.keys(nextMaterial.headers ?? {}).length ||
@@ -1452,7 +1475,7 @@ export class McpOAuthBroker {
     expectedEndpoint?: string | null,
   ): Promise<MaterialSnapshot> {
     const server = await tx.mcpServer.findFirst({
-      where: { id: serverId, spaceId: context.spaceId, userId: context.userId },
+      where: { id: serverId, ...availableInSpace(context) },
       select: { endpoint: true, secretId: true },
     });
     if (!server) throw new McpCredentialRefusedError("MCP server is unavailable");
@@ -1462,7 +1485,7 @@ export class McpOAuthBroker {
       );
     const secret = server.secretId
       ? await tx.secret.findFirst({
-          where: { id: server.secretId, spaceId: context.spaceId, userId: context.userId },
+          where: { id: server.secretId, ...itemSecretIn(context) },
         })
       : null;
     return { server, secret };
@@ -1492,8 +1515,8 @@ export class McpOAuthBroker {
     incrementRevision = false,
   ): Promise<boolean> {
     const server = await tx.mcpServer.findFirst({
-      where: { id: serverId, spaceId: context.spaceId, userId: context.userId },
-      select: { endpoint: true, secretId: true },
+      where: { id: serverId, ...availableInSpace(context) },
+      select: { endpoint: true, secretId: true, spaceId: true, allSpaces: true },
     });
     if (!server) throw new McpCredentialRefusedError("MCP server is unavailable");
     if (
@@ -1505,15 +1528,20 @@ export class McpOAuthBroker {
       await tx.$queryRaw`SELECT id FROM secrets WHERE id = ${server.secretId} FOR UPDATE`;
     const current = server.secretId
       ? await tx.secret.findFirst({
-          where: { id: server.secretId, spaceId: context.spaceId, userId: context.userId },
+          where: { id: server.secretId, ...itemSecretIn(context) },
         })
       : null;
     if (current?.ciphertext !== snapshot.secret?.ciphertext) return false;
+    // A server available beyond this space keeps its credential on the account, for every space.
+    const shared =
+      server.allSpaces ||
+      server.spaceId !== context.spaceId ||
+      (await tx.mcpServerSpace.count({ where: { serverId } })) > 0;
     if (stored)
       await tx.secret.create({
         data: {
           id: stored.id,
-          spaceId: context.spaceId,
+          spaceId: shared ? null : context.spaceId,
           userId: context.userId,
           kind: "mcp",
           ciphertext: stored.ciphertext,

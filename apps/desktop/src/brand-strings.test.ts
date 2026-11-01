@@ -2,8 +2,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
-import { DesktopUpdateController } from "./auto-update";
-import { aboutPanelOptions, isUpstreamCloudSetup } from "./brand-desktop";
+import { DesktopUpdateController } from "./auto-update.js";
+import { aboutPanelOptions, isUpstreamCloudSetup } from "./brand-desktop.js";
 
 const UPSTREAM_NAME = /(?<![\w{])Rakazo(?!\w)/;
 /**
@@ -93,7 +93,7 @@ describe("desktop sources", () => {
     const literals = sources.flatMap((name) =>
       stringLiterals(readFileSync(path.join(import.meta.dirname, name), "utf8")),
     );
-    expect(literals).toContain(" services did not start. Check the output below, then retry.");
+    expect(literals).toContain(" is up to date.");
     expect(literals).toContain("Sign-in callback rejected. Return to ");
     expect(literals.length).toBeGreaterThan(300);
   });

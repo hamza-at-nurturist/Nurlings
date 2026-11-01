@@ -14,7 +14,7 @@
     "export:brand": "pnpm --filter @nurlings/brand export:assets"
   },
   "devDependencies": {
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "typescript": "7.0.2",
     "vitest": "4.1.12"
   }

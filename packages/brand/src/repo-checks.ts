@@ -125,6 +125,10 @@ export const expoConfigCheck: BrandCheck = {
 const SERVER_TEXT_FILES = [
   "packages/auth/src/index.ts",
   "packages/auth/src/account-security.ts",
+  "packages/auth/src/email.tsx",
+  "packages/auth/src/welcome-email.tsx",
+  "packages/auth/src/referral-email.tsx",
+  "packages/auth/src/plugin-submission-email.tsx",
   "apps/api/src/messaging-inbound.ts",
   "apps/api/src/team-chat-bridge.ts",
   "packages/core/src/self-update.ts",
@@ -134,12 +138,13 @@ const SERVER_TEXT_FILES = [
   // Prompts sent to models: the fallback system prompts, helper prompt, approval resume text, and
   // the summarizer, safety-checker and engagement-judge instructions.
   "packages/adapters/src/pi-runtime.ts",
+  "packages/adapters/src/pi-runtime-subagent.ts",
+  "packages/adapters/src/run-effects.ts",
   "packages/adapters/src/executor.ts",
   "packages/adapters/src/history-compaction.ts",
   "packages/adapters/src/compacted-summary.ts",
   "packages/adapters/src/automated-messages.ts",
   "packages/adapters/src/auto-review.ts",
-  "packages/adapters/src/builtin-skills.ts",
   "apps/api/src/team-chat-judge.ts",
 ];
 /**

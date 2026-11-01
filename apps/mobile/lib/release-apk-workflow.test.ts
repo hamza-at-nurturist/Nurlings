@@ -11,8 +11,9 @@ const easConfig = JSON.parse(
 ) as { build: Record<string, { extends?: string; android?: { buildType?: string } }> };
 
 describe("Android APK release workflow", () => {
-  it("only runs on demand, from main or as an explicit preview, with release credentials", () => {
+  it("only runs on demand or from release-mobile, from main or as an explicit preview, with release credentials", () => {
     expect(workflow).toMatch(/^on:\n {2}workflow_dispatch:\n {4}inputs:\n {6}preview:/m);
+    expect(workflow).toMatch(/^ {2}workflow_call:\n\n/m);
     expect(workflow).toContain("permissions:\n  contents: read");
     expect(workflow).toContain("if: github.ref == 'refs/heads/main' || inputs.preview");
     expect(workflow).toContain("persist-credentials: false");
@@ -31,6 +32,7 @@ describe("Android APK release workflow", () => {
     expect(easConfig.build["android-apk"]).toEqual({
       extends: "production",
       android: { buildType: "apk" },
+      environment: "production",
     });
     expect(workflow).toContain('--profile "$EAS_PROFILE"');
     expect(workflow).toContain("inputs.preview && 'android-preview-apk' || 'android-apk'");

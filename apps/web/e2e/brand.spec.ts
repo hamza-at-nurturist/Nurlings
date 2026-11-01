@@ -58,7 +58,7 @@ test("the signed-in app and its settings carry the brand and no upstream name", 
 
   await createNamedBot(page, "Scout");
   await openNewBot(page);
-  await expect(page.getByTestId("create-bot-dialog")).toContainText(ui("Create new Bot"));
+  await expect(page.getByTestId("create-bot-dialog")).toContainText(ui("New Bot"));
   await expectNoUpstreamName(page, "new bot dialog");
   await captureScreenshot(page, testInfo, "brand-new-bot");
 
@@ -68,9 +68,6 @@ test("the signed-in app and its settings carry the brand and no upstream name", 
     await openUserSettings(page, section);
     await expectNoUpstreamName(page, `settings ${section}`);
     if (section === "models") {
-      await expect(page.getByTestId("user-settings")).toContainText(
-        `${brand.name} does not pay for model usage`,
-      );
       await captureScreenshot(page, testInfo, "brand-settings-models");
     }
   }

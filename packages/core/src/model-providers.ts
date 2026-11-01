@@ -1,8 +1,11 @@
-import type { ModelCatalogEntry } from "@rakazo/contracts";
+import type { ModelApiProtocol, ModelCatalogEntry } from "@rakazo/contracts";
 import {
   canonicalPiProviderId,
+  DEFAULT_MODEL_MAX_TOKENS,
   normalizeOpenAiCompatibleBaseUrl,
+  OPENAI_COMPATIBLE_PROVIDER_ID,
   selectCompatibleModelCredential,
+  withConnectionName,
 } from "@rakazo/contracts";
 import { matchesSearchQuery } from "./search.js";
 
@@ -16,7 +19,31 @@ export const COMPATIBLE_THINKING_LEVELS = [
   "max",
 ] as const;
 
+/**
+ * Effort choices by wire protocol. Anthropic Messages maps every level to a
+ * budget, and pi-ai's budgets top out at the "high" level, so the two levels
+ * above it are not offered for that protocol.
+ */
+export function compatibleThinkingLevels(
+  apiProtocol: ModelApiProtocol | undefined,
+): readonly (typeof COMPATIBLE_THINKING_LEVELS)[number][] {
+  return apiProtocol === "anthropic-messages"
+    ? COMPATIBLE_THINKING_LEVELS.filter((level) => level !== "xhigh" && level !== "max")
+    : COMPATIBLE_THINKING_LEVELS;
+}
+
 const THINKING_LEVELS = ["off", ...COMPATIBLE_THINKING_LEVELS] as const;
+
+/**
+ * The max-tokens field for a connection. An OpenAI-compatible endpoint always sends a limit, so
+ * an unsaved one shows the default it would get; catalog providers leave it blank to use theirs.
+ */
+export function connectionMaxTokensField(providerId: string, stored: number | undefined): string {
+  if (providerId === OPENAI_COMPATIBLE_PROVIDER_ID) {
+    return String(stored ?? DEFAULT_MODEL_MAX_TOKENS);
+  }
+  return stored !== undefined ? String(stored) : "";
+}
 
 /**
  * Map a staged effort onto the levels a model actually supports.
@@ -216,7 +243,7 @@ function freeFormChoice(credential: CredentialModelRef, modelId: string): Connec
     key: modelOptionKey(credential.provider, modelId),
     provider: credential.provider,
     modelId,
-    label: `${credential.label} · ${modelId}`,
+    label: withConnectionName(modelId, credential.label),
     providerLabel: credential.label,
     modelLabel: modelId,
   };
@@ -229,7 +256,7 @@ function catalogChoices(providerModels: readonly CatalogModelRef[]): ConnectedMo
       key: modelOptionKey(entry.provider, modelId),
       provider: entry.provider,
       modelId,
-      label: `${entry.providerName ?? entry.provider} · ${entry.label}`,
+      label: withConnectionName(entry.label, entry.providerName ?? entry.provider),
       providerLabel: entry.providerName ?? entry.provider,
       modelLabel: entry.label,
       images: entry.images,
@@ -350,7 +377,9 @@ export function groupModelChoices(choices: readonly ChatModelChoice[], query: st
     // The catalog has no vendor field. Its display convention is "Vendor: Model".
     const vendor = choice.modelLabel?.match(/^([^:]+): (.+)$/);
     const heading = choice.providerLabel
-      ? [choice.providerLabel, vendor?.[1]].filter(Boolean).join(" · ")
+      ? vendor?.[1]
+        ? withConnectionName(vendor[1], choice.providerLabel)
+        : choice.providerLabel
       : undefined;
     const key = heading ? `provider:${heading}` : "ungrouped";
     let section = sections.find((entry) => entry.key === key);

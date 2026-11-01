@@ -55,7 +55,8 @@ describe("web catalog seam", () => {
     for (const locale of UI_LOCALES) {
       await activateUiLocale(locale);
       expect(i18n.locale).toBe(locale);
-      expect(JSON.stringify(i18n.messages), locale).not.toContain("Rakazo");
+      // Ids stay as upstream wrote them (some are the English text); what people see is the values.
+      expect(JSON.stringify(Object.values(i18n.messages)), locale).not.toContain("Rakazo");
     }
   });
 
@@ -101,58 +102,65 @@ describe("the bot → Nurling rule on the real English catalog", () => {
       [
         "["All bots"]",
         "["Allow cross-space bot communication"]",
-        "["Available to this bot's shell commands as ",["commandVariable"]]",
+        "["Bot is watching, not acting"]",
         "["Bot models"]",
         "["Bot screen preview"]",
         "["Bot screen"]",
-        "["Bot to link"]",
         "["Bot"]",
         "["Bot"]",
         "["Bot's model"]",
         "["Bots and browser automation"]",
         "["Bots with their own computer and browser"]",
         "["Bots"]",
-        "["Can edit and organise bots it creates"]",
+        "["Cancel new bot"]",
+        "["Chat with your bot from Slack."]",
         "["Choose a bot shape, color, or upload an image"]",
-        "["Choose a bot…"]",
         "["Computers are available. Reload or open a bot to continue."]",
+        "["Connect a model in Settings before running bots."]",
         "["Could not create bot"]",
         "["Could not create your bot"]",
         "["Could not delete bot"]",
         "["Could not load bots. Reload to try again."]",
-        "["Create new Bot"]",
+        "["Could not update bot access"]",
         "["Customize bot avatar"]",
         "["Docker limits access to your computer for added security. Using ",["hostLabel"]," lets bots work with your local files and tools."]",
+        "["Every bot in this space reads these notes and keeps them up to date."]",
         "["Filter bots"]",
         "["How other bots see it"]",
+        "["In this bot"]",
         "["Its bots and groups are kept and leave the section."]",
         "["Its conversation, files, and routines will be permanently deleted. Bots it created stay in your list."]",
+        "["Let bots use this computer"]",
+        "["Lets bots save and recall facts by meaning, alongside MEMORY.md."]",
         "["Local access lets bots run commands without asking. Avoid it on shared or public servers."]",
         "["Manage the bots it creates"]",
         "["Minimize bots"]",
+        "["Name this bot"]",
         "["Name your Bot"]",
+        "["New bot"]",
         "["No bots match"]",
         "["No bots"]",
-        "["Only empty spaces can be deleted. Delete its bots and groups first."]",
         "["Private workspace with its own bots and groups."]",
-        "["Remove ",["secretName"],"? This bot will no longer be able to use it."]",
+        "["Remove ",["secretName"],"? Bots will no longer be able to use it."]",
         "["Resize bots sidebar"]",
         "["Runs when this bot receives a verified message from this provider."]",
-        "["Search bots and switch conversations"]",
+        "["Search bots, actions, and settings"]",
         "["Select a bot"]",
-        "["Shared chat with ",["GROUP_MEMBER_MIN"],"-",["GROUP_MEMBER_MAX"]," bots. They all reply in the same thread."]",
         "["Show bots"]",
-        "["Switch bot"]",
+        "["Skills join the library all your bots share."]",
+        "["The bot can use the file but won't see the picture."]",
         "["Their own model is cleared. You can pick one again in each bot."]",
         "["This bot runs on this computer, not a Linux desktop. Shell and files use your home folder."]",
+        "["This bot"]",
         "["This server cannot be assigned without a bot."]",
+        "["Use in this bot"]",
         "["What this bot is for"]",
         "["Where should bots run?"]",
         "["bot"]",
         "[["0","plural",{"one":["#"," bot has its own model:"],"other":["#"," bots have their own model:"]}]]",
         "[["0","plural",{"one":["Switch ","#"," bot to the space default?"],"other":["Switch ","#"," bots to the space default?"]}]]",
+        "[["botCount","plural",{"one":["Delete ",["name"]," and its ","#"," bot?"],"other":["Delete ",["name"]," and its ","#"," bots?"]}]]",
         "[["moved","plural",{"one":["#"," bot now uses the space default."],"other":["#"," bots now use the space default."]}]]",
-        "[["remaining"]," left · bot is watching, not acting"]",
       ]
     `);
   });
@@ -187,6 +195,7 @@ describe("locales that keep their own word for a bot", () => {
         "ru",
         "tr",
         "zh-CN",
+        "zh-TW",
       ]
     `);
   });

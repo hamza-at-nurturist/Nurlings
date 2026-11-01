@@ -135,17 +135,15 @@ export function botHexColor(color: string | undefined | null): string | undefine
   return hex && HEX_COLOR.test(hex) ? hex : undefined;
 }
 
-export function resolvePersonaColorDef(
-  identity: string,
-  explicitColor?: string | null,
-): BotColorDef {
+export function resolvePersonaColorDef(identity: string, storedColor?: string | null): BotColorDef {
+  // A stored color can be "#hex::shape_N"; only the part before "::" is the color.
+  const explicitColor = botHexColor(storedColor) ?? storedColor;
   if (explicitColor) {
     const clean = explicitColor.toLowerCase();
     const foundById = BOT_COLOR_LIST.find((c) => c.id === clean || c.name.toLowerCase() === clean);
     if (foundById) return foundById;
     const foundByHex = BOT_COLOR_LIST.find((c) => c.hex.toLowerCase() === clean);
     if (foundByHex) return foundByHex;
-    // If custom hex, synthesize gradient
     if (/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(explicitColor)) {
       const isBright = isColorBright(explicitColor);
       return {

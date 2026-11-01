@@ -101,6 +101,18 @@ describe("mobile app config", () => {
     });
   });
 
+  it("asks a development build to fetch the association itself in developer mode", () => {
+    vi.stubEnv("EAS_BUILD_PROFILE", "development");
+    vi.stubEnv("RAKAZO_PASSKEY_DEVELOPER_MODE", "1");
+
+    const base = brandExpoConfig(config);
+    expect(appConfig(context(config))).toEqual({
+      ...base,
+      ios: { ...base.ios, associatedDomains: ["webcredentials:app.example.com?mode=developer"] },
+      extra: { ...base.extra, passkeyRpIds: ["app.example.com"] },
+    });
+  });
+
   it.each([
     "http://app.example.com",
     "https://localhost:3100",

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
-import { brandSetupHtml, brandSetupScript, brandSetupStyles, SETUP_LOGO } from "./brand-setup";
+import { brandSetupHtml, brandSetupScript, brandSetupStyles, SETUP_LOGO } from "./brand-setup.js";
 
 const read = (file: string) => readFileSync(path.resolve(import.meta.dirname, file), "utf8");
 const html = read("setup.html");

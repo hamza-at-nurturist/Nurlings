@@ -19,6 +19,8 @@ const DEFAULT_TICKET_PRIORITY: TicketPriority = "normal";
 export const TICKET_TITLE_MAX_LENGTH = 200;
 export const TICKET_DESCRIPTION_MAX_LENGTH = 20_000;
 const TICKET_PREFIX_MAX_LENGTH = 12;
+// Ticket numbers are stored as PostgreSQL Int values.
+const TICKET_NUMBER_MAX = 2_147_483_647;
 export const TICKET_COMMENT_MAX_LENGTH = 10_000;
 
 const TicketPrefixSchema = z
@@ -45,7 +47,9 @@ export function parseTicketRef(
   if (!rawPrefix || !rawNumber) return null;
   const prefix = rawPrefix.toUpperCase();
   if (expectedPrefix !== undefined && prefix !== expectedPrefix.trim().toUpperCase()) return null;
-  return { prefix, number: Number(rawNumber) };
+  const number = Number(rawNumber);
+  if (number > TICKET_NUMBER_MAX) return null;
+  return { prefix, number };
 }
 
 export const BoardSchema = z.object({
@@ -155,7 +159,11 @@ export const TicketSchema = z.object({
   dueAt: z.string().nullable().default(null),
   dueHasTime: z.boolean().default(false),
 });
-export type Ticket = z.infer<typeof TicketSchema>;
+/**
+ * The fields the fork added default when a server omits them, so a ticket without them is still a
+ * ticket (upstream's mobile board builds its tickets that way).
+ */
+export type Ticket = z.input<typeof TicketSchema>;
 
 export const ListTicketsInput = z.object({
   boardId: Id.optional(),

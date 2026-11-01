@@ -10,6 +10,8 @@ export {
   resolvePersonaColorDef,
   Wordmark,
 } from "./bot-avatar.js";
+export type { BotAvatarActivitySource } from "./bot-avatar-activity.js";
+export { BotAvatarActivityProvider } from "./bot-avatar-activity.js";
 export { BrandAnimation } from "./brand-animation.js";
 export { BrandMark } from "./brand-mark.js";
 export * from "./components/ui/alert-dialog.js";
@@ -52,4 +54,6 @@ export * from "./components/ui/toggle-group.js";
 export * from "./components/ui/tooltip.js";
 export { GroupAvatar, type GroupAvatarMember, type GroupAvatarProps } from "./group-avatar.js";
 export { cn } from "./lib/utils.js";
+export { LogoAvatar } from "./logo-avatar.js";
 export { ModelThinkingOptions } from "./model-thinking-options.js";
+export { SectionHeading } from "./section-heading.js";

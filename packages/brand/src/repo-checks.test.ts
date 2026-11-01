@@ -140,15 +140,15 @@ describe("serverTextCheck", () => {
   });
 
   it("names the file and line of a leak in a scanned source", async () => {
-    const repo = await scratch(["packages/auth/src/index.ts"]);
-    await repo.edit("packages/auth/src/index.ts", (text) =>
+    const repo = await scratch(["packages/auth/src/email.tsx"]);
+    await repo.edit("packages/auth/src/email.tsx", (text) =>
       text.replace(
         ["`Verify your ", "$", "{brand.name} email`"].join(""),
         "`Verify your Rakazo email`",
       ),
     );
     const problems = await serverTextCheck.run(repo.dir);
-    expect(problems.some((problem) => problem.startsWith("packages/auth/src/index.ts:"))).toBe(
+    expect(problems.some((problem) => problem.startsWith("packages/auth/src/email.tsx:"))).toBe(
       true,
     );
   });

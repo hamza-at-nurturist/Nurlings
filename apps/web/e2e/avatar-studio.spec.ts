@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, signup, ui } from "./helpers";
+import { captureScreenshot, completeOnboarding, openBotPanelTab, signup, ui } from "./helpers";
 
 test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo) => {
   const stamp = Date.now();
@@ -20,6 +20,9 @@ test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo
   await expect(studio.getByRole("tab", { name: "Upload", exact: true })).toBeVisible();
   await expect(studio.getByTestId("avatar-studio-bot-tab")).toBeVisible();
 
+  // The Rakazo icon set draws upstream's logo, so a Nurlings build offers only the original shapes
+  // and no set switcher.
+  await expect(studio.getByRole("tablist", { name: "Icon set" })).toHaveCount(0);
   const defaultLook = studio.getByTestId("avatar-studio-default");
   const wedge = studio.getByRole("button", { name: "wedge", exact: true });
   // Sign-up gives Chief the brand blob shape, so the studio opens on it rather than on Default.
@@ -51,4 +54,5 @@ test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo
   await expect(studio.locator(".rakazo-organic-avatar")).toHaveCount(1);
 
   await captureScreenshot(page, testInfo, "avatar-studio-bot-tab");
+  await studio.getByRole("button", { name: "Done", exact: true }).click();
 });

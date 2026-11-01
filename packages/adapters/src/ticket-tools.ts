@@ -38,6 +38,22 @@ type TicketToolDeps = {
   ticketBoardEnabled?: boolean;
   onTicketChange?: TicketChangeNotifier;
 };
+
+function ticketInputError(error: { issues: Array<{ path: PropertyKey[]; message: string }> }) {
+  const seen = new Set<string>();
+  return error.issues
+    .map(({ path, message }) => {
+      const field =
+        path[0] === "assigneeBotId" ? "ownerBotId" : path[0] === "ticketId" ? "id" : path.join(".");
+      // One message per field is enough to correct it (a bad date fails two checks).
+      if (seen.has(field)) return null;
+      seen.add(field);
+      return field ? `${field}: ${message}` : message;
+    })
+    .filter((line): line is string => line !== null)
+    .join("; ");
+}
+
 const STATUS_ERROR = `status must be one of ${TicketStatusSchema.options.join(", ")}.`;
 function coerceInputStatus(value: string) {
   const parsed = TicketStatusSchema.safeParse(value);
@@ -91,14 +107,6 @@ function clearableDates(input: { start?: unknown; due?: unknown }) {
     start: input.start === "" ? null : input.start,
     due: input.due === "" ? null : input.due,
   };
-}
-/** A bad date gets its own message, so a Nurling can correct it; anything else stays generic. */
-function invalidTicketError(error: { issues: Array<{ path: PropertyKey[]; message: string }> }) {
-  const issue = error.issues.find(
-    (item) => item.path.length === 0 || item.path[0] === "start" || item.path[0] === "due",
-  );
-  if (!issue) return "Invalid ticket.";
-  return issue.path.length ? `${String(issue.path[0])}: ${issue.message}` : issue.message;
 }
 const LIST_TICKETS_LIMIT = 50;
 const LIST_DESCRIPTION_CHARS = 200;
@@ -226,7 +234,7 @@ export async function createTicket(
     ...clearableDates(input),
     assigneeBotId: input.ownerBotId ?? input.botId,
   });
-  if (!parsed.success) return { error: invalidTicketError(parsed.error) };
+  if (!parsed.success) return { error: ticketInputError(parsed.error) };
   const data = parsed.data;
   // A user's ticket without an owner goes to Chief to hand on, or stays unowned without one.
   const triage = data.assigneeBotId === undefined;
@@ -300,7 +308,7 @@ export async function updateTicket(
     ...clearableDates(input),
     assigneeBotId: input.ownerBotId,
   });
-  if (!parsed.success) return { error: invalidTicketError(parsed.error) };
+  if (!parsed.success) return { error: ticketInputError(parsed.error) };
   const data = parsed.data;
   if (data.assigneeBotId && !(await ownBotInSpace(deps, input, data.assigneeBotId)))
     return { error: "Unknown bot." };
@@ -400,7 +408,7 @@ export async function commentTicket(
     body: input.body,
     artifactIds: input.attachments?.map((block) => block.artifactId),
   });
-  if (!parsed.success) return { error: "Invalid comment." };
+  if (!parsed.success) return { error: ticketInputError(parsed.error) };
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const ticket = await findTicket(deps.prisma, input.spaceId, board, { id: input.id });
   if (!ticket) return { error: "Ticket not found." };

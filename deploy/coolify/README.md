@@ -118,6 +118,7 @@ Only `NURLINGS_VERSION` is mandatory. Everything else works empty.
 | `MAX_UPLOAD_SIZE_MB` | optional | no | Per-file upload limit, default `10`. |
 | `CONTENT_ENCRYPTION` | optional | no | `on` (default) or `off`. |
 | `TICKET_BOARD_ENABLED` | optional | no | `false` by default. Set it to `true` to turn on the ticket board. |
+| `RAKAZO_ADMIN_EMAILS` | optional | no | Comma-separated emails of the admin accounts (verified addresses). Only an admin can add or edit a local (stdio) MCP server, and only when `MCP_STDIO_ENABLED=true`. Empty by default, which means nobody can; servers already added keep running. Set it in Coolify, never in the repository. |
 | `RAKAZO_COMPUTER_MEMORY` | optional | no | RAM limit per bot computer, default `2g`. |
 | `RAKAZO_COMPUTER_CPUS` | optional | no | CPU limit per bot computer, default `2`. |
 | `SANDBOX_COMPUTER_DNS` | optional | no | DNS servers for bot computers, default `1.1.1.1,1.0.0.1`. |

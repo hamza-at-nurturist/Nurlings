@@ -1,6 +1,14 @@
 import { createHash } from "node:crypto";
 import type { AgentContextStrategy, CacheCapabilities } from "@rakazo/adapter-kit";
-import { MODEL_CONTEXT_TOO_SMALL_ERROR } from "@rakazo/core";
+import {
+  MODEL_CONTEXT_TOO_SMALL_ERROR,
+  shortenedTextLength,
+  textBoundary,
+  truncatePlainText,
+  VERBATIM_TOOL_RESULT_TOO_LARGE_ERROR,
+} from "@rakazo/core";
+import type { VerbatimMcpServers } from "./verbatim-mcp-result.js";
+import { isVerbatimMcpResult, toolCallIdentity } from "./verbatim-mcp-result.js";
 
 export type ContextStrategy = AgentContextStrategy;
 export interface ContextMessage {
@@ -31,6 +39,8 @@ export interface ContextSelectionOptions {
   cacheWarmth?: "likely-warm" | "likely-cold" | "unknown";
   /** Keep tool protocol intact while shortening oversized result bodies. */
   truncateToolResults?: boolean;
+  /** Servers that asked to keep tool results whole. Those results are never cut. */
+  verbatimMcpServers?: VerbatimMcpServers;
 }
 export class ContextBudgetError extends Error {
   constructor(
@@ -38,11 +48,13 @@ export class ContextBudgetError extends Error {
     public readonly availableTokens: number,
     /** Instructions and tools alone fill the window, so no conversation can fit. */
     modelTooSmall = false,
+    message?: string,
   ) {
     super(
-      modelTooSmall
-        ? MODEL_CONTEXT_TOO_SMALL_ERROR
-        : "Required context exceeds the model context budget",
+      message ??
+        (modelTooSmall
+          ? MODEL_CONTEXT_TOO_SMALL_ERROR
+          : "Required context exceeds the model context budget"),
     );
     this.name = "ContextBudgetError";
   }
@@ -201,17 +213,21 @@ function shortenHistoryResult(
   // Snapshot text is only navigation; original reference offsets retain exact evidence.
   for (const snapshot of Array.isArray(payload.snapshots) ? payload.snapshots : []) {
     if (!snapshot || typeof snapshot !== "object") continue;
-    if (typeof snapshot.topic === "string") snapshot.topic = snapshot.topic.slice(0, 80);
-    if (typeof snapshot.outcome === "string") snapshot.outcome = snapshot.outcome.slice(0, 80);
+    if (typeof snapshot.topic === "string") snapshot.topic = truncatePlainText(snapshot.topic, 80);
+    if (typeof snapshot.outcome === "string")
+      snapshot.outcome = truncatePlainText(snapshot.outcome, 80);
   }
   payload.contextTruncated = true;
   let encoded = JSON.stringify(payload);
   while (encoded.length > size) {
     const longest = refs.reduce<HistoryTextReference | undefined>(
-      (best, ref) => (!best || ref.text.length > best.text.length ? ref : best),
+      (best, ref) =>
+        shortenedTextLength(ref.text) > 0 && (!best || ref.text.length > best.text.length)
+          ? ref
+          : best,
       undefined,
     );
-    if (!longest || longest.text.length < 2) {
+    if (!longest) {
       return JSON.stringify({
         untrusted: true,
         contextTruncated: true,
@@ -224,7 +240,7 @@ function shortenHistoryResult(
         },
       });
     }
-    longest.text = longest.text.slice(0, Math.floor(longest.text.length / 2));
+    longest.text = longest.text.slice(0, shortenedTextLength(longest.text));
     longest.nextTextOffset = longest.textOffset + longest.text.length;
     longest.truncated = true;
     encoded = JSON.stringify(payload);
@@ -424,8 +440,19 @@ export function shortenToolResultText(
     shortenHistoryResult(source, size, tool) ??
     shortenMcpEnvelope(source, size, marker) ??
     shortenStructuredResult(source, size, marker) ??
-    `${source.slice(0, Math.floor(size / 2))}\n${afterUse ? OMITTED_AFTER_USE : OMITTED_TEXT_BEFORE_USE}\n${source.slice(-Math.floor(size / 2))}`
+    shortenPlainText(source, size, afterUse ? OMITTED_AFTER_USE : OMITTED_TEXT_BEFORE_USE)
   );
+}
+
+/** Keep the head and tail halves of plain text around an omission marker. */
+export function shortenPlainText(
+  source: string,
+  size: number,
+  marker = OMITTED_TEXT_BEFORE_USE,
+): string {
+  const half = Math.floor(size / 2);
+  const tail = textBoundary(source, source.length - half);
+  return `${truncatePlainText(source, half)}\n${marker}\n${source.slice(tail)}`;
 }
 interface Group {
   indexes: number[];
@@ -555,6 +582,7 @@ export function selectContext<T extends ContextMessage>(
   if (used > available) {
     if (options.truncateToolResults !== false) {
       let shortenedCount = 0;
+      let keptVerbatimWhole = false;
       const shortened = messages.map((message, index) => {
         if (!protectedGroupIndexes.has(index) || message.role !== "toolResult") return message;
         const parts = Array.isArray(message.content) ? message.content : undefined;
@@ -572,10 +600,6 @@ export function selectContext<T extends ContextMessage>(
             ? message.content
             : JSON.stringify(message.content);
         if (!serialized || serialized.length <= 256) return message;
-        const size = Math.max(
-          128,
-          Math.min(Math.floor(serialized.length / 2), Math.floor(available / 4)),
-        );
         const group = groups.find((group) => group.indexes.includes(index));
         const assistant = group ? messages[group.indexes[0]!] : undefined;
         const nativeCall = Array.isArray(assistant?.content)
@@ -583,6 +607,15 @@ export function selectContext<T extends ContextMessage>(
               (part) => part?.type === "toolCall" && part.id === message.toolCallId,
             )
           : undefined;
+        const call = toolCallIdentity(nativeCall, message.toolName);
+        if (isVerbatimMcpResult(call.name, call.arguments, options.verbatimMcpServers)) {
+          keptVerbatimWhole = true;
+          return message;
+        }
+        const size = Math.max(
+          128,
+          Math.min(Math.floor(serialized.length / 2), Math.floor(available / 4)),
+        );
         const text = shortenToolResultText(
           serialized,
           size,
@@ -599,6 +632,16 @@ export function selectContext<T extends ContextMessage>(
           ...retry,
           truncatedToolResults: Math.max(retry.truncatedToolResults, shortenedCount),
         };
+      }
+      if (keptVerbatimWhole) {
+        // Throws the generic error when shortening the kept results would not make it fit either.
+        selectContext(messages, { ...options, verbatimMcpServers: undefined });
+        throw new ContextBudgetError(
+          used + fixed,
+          options.budget.contextWindow - options.budget.outputReserve,
+          false,
+          VERBATIM_TOOL_RESULT_TOO_LARGE_ERROR,
+        );
       }
     }
     throw new ContextBudgetError(

@@ -168,8 +168,8 @@ export function TicketProperties({
           <Text style={[typeScale.caption, { color: tokens.mutedForeground }]}>{t("Owner")}</Text>
         )}
       </Chip>
-      {dateChip("due", ticket.dueAt, ticket.dueHasTime)}
-      {dateChip("start", ticket.startAt, ticket.startHasTime)}
+      {dateChip("due", ticket.dueAt ?? null, ticket.dueHasTime ?? false)}
+      {dateChip("start", ticket.startAt ?? null, ticket.startHasTime ?? false)}
       <Chip
         label={t("Priority")}
         disabled={disabled}
@@ -194,7 +194,11 @@ export function TicketProperties({
       </Chip>
       {picking ? (
         <DatePickerSheet
-          value={pickerStart(picking === "start" ? ticket.startAt : ticket.dueAt, timeZone, now)}
+          value={pickerStart(
+            picking === "start" ? (ticket.startAt ?? null) : (ticket.dueAt ?? null),
+            timeZone,
+            now,
+          )}
           onPick={(date) => onChange({ [picking]: date })}
           onClose={() => setPicking(null)}
         />

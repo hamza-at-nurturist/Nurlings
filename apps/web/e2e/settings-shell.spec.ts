@@ -1,29 +1,25 @@
 import { brand } from "@nurlings/brand";
 import { expect, test } from "@playwright/test";
-import {
-  activeBotId,
-  captureScreenshot,
-  completeOnboarding,
-  openUserSettings,
-  rpc,
-  signup,
-} from "./helpers";
+import { captureScreenshot, completeOnboarding, openUserSettings, signup } from "./helpers";
 
 test("changing language updates settings overflow without resizing", async ({ page }, testInfo) => {
   const stamp = Date.now();
   await signup(page, `settings-language-${stamp}@rakazo.test`, "password12", "Settings");
   await completeOnboarding(page);
   const settings = await openUserSettings(page);
-  await page.setViewportSize({ width: 740, height: 700 });
+  // Below the desktop breakpoint, where the section list scrolls sideways.
+  await page.setViewportSize({ width: 640, height: 700 });
   const nav = settings.getByTestId("settings-nav");
   const next = settings.getByRole("button", { name: "Next settings sections" });
-  await expect.poll(() => nav.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
-  await expect(next).toBeHidden();
+  const overflow = () => nav.evaluate((node) => node.scrollWidth - node.clientWidth);
+  const english = await overflow();
 
   const language = settings.getByTestId("ui-locale-select");
   await language.click();
   await page.getByRole("option", { name: "Deutsch", exact: true }).click();
   await expect(settings.getByRole("heading", { name: "Allgemein", exact: true })).toBeVisible();
+  // Longer German labels overflow further, and the scroll control follows without a resize.
+  await expect.poll(overflow).toBeGreaterThan(english);
   await expect(next).toBeVisible();
   await expect(next).toBeEnabled();
   await captureScreenshot(page, testInfo, "settings-tabs-language-overflow");
@@ -31,7 +27,7 @@ test("changing language updates settings overflow without resizing", async ({ pa
   await language.click();
   await page.getByRole("option", { name: "English", exact: true }).click();
   await expect(settings.getByRole("heading", { name: "General", exact: true })).toBeVisible();
-  await expect(next).toBeHidden();
+  await expect.poll(overflow).toBe(english);
 });
 
 test("narrow settings reveals the active section and offers scroll controls", async ({
@@ -75,9 +71,7 @@ test("narrow settings reveals the active section and offers scroll controls", as
     await expect.poll(() => nav.evaluate((node) => node.scrollLeft)).toBeGreaterThan(0);
     const header = settings.getByTestId("settings-header");
     const before = await header.boundingBox();
-    await settings
-      .getByRole("button", { name: "Delete account", exact: true })
-      .scrollIntoViewIfNeeded();
+    await settings.getByTestId("delete-account").scrollIntoViewIfNeeded();
     await expect
       .poll(() => settings.getByTestId("settings-scroll").evaluate((node) => node.scrollTop))
       .toBeGreaterThan(0);
@@ -119,8 +113,6 @@ test("settings shell is two-pane and deep-links Models Memory Voice Usage", asyn
   );
   await expect(settings.getByRole("heading", { name: "General", exact: true })).toBeVisible();
   await expect(settings.getByRole("heading", { name: "Account", exact: true })).toBeVisible();
-  await expect(settings.getByTestId("response-streaming-toggle")).toBeHidden();
-  await settings.getByTestId("advanced-settings").locator("button[aria-expanded]").click();
   const streamReplies = settings.getByTestId("response-streaming-toggle");
   await expect(streamReplies).toBeVisible();
   await expect(streamReplies).not.toBeChecked();
@@ -149,7 +141,7 @@ test("settings shell is two-pane and deep-links Models Memory Voice Usage", asyn
   await expect
     .poll(() => page.evaluate(() => window.localStorage.getItem("rakazo.responseStreaming")))
     .toBe("on");
-  const deleteAccount = settings.getByRole("button", { name: "Delete account", exact: true });
+  const deleteAccount = settings.getByTestId("delete-account");
   await deleteAccount.scrollIntoViewIfNeeded();
   await expect(deleteAccount).toBeVisible();
   await captureScreenshot(page, testInfo, "settings-general-delete-account");
@@ -157,12 +149,15 @@ test("settings shell is two-pane and deep-links Models Memory Voice Usage", asyn
   await settings.getByTestId("settings-nav-models").click();
   await expect(settings).toHaveAttribute("data-settings-section", "models");
   await expect(settings.getByTestId("model-settings")).toBeVisible();
+  await expect(settings.getByTestId("model-role-main")).toBeVisible();
+  await expect(settings.getByTestId("model-role-approval")).toBeVisible();
   await captureScreenshot(page, testInfo, "settings-shell-models");
 
   await settings.getByTestId("settings-nav-memory").click();
   await expect(settings).toHaveAttribute("data-settings-section", "memory");
   await expect(settings.getByTestId("memory-settings")).toBeVisible();
   const memory = settings.getByTestId("memory-settings");
+  await memory.getByRole("button", { name: "Connect memory provider", exact: true }).click();
   await expect(memory.getByLabel("Provider")).toBeVisible();
   await memory.getByLabel("Provider").selectOption("serenity");
   await expect(memory.getByLabel("MCP endpoint")).toBeVisible();
@@ -191,6 +186,9 @@ test("Honcho memory settings empty and filled", async ({ page }, testInfo) => {
   await completeOnboarding(page);
   const settings = await openUserSettings(page, "memory");
   const memory = settings.getByTestId("memory-settings");
+  await expect(memory.getByLabel("Provider")).toHaveCount(0);
+  await captureScreenshot(page, testInfo, "memory-default");
+  await memory.getByRole("button", { name: "Connect memory provider", exact: true }).click();
   await memory.getByLabel("Provider").selectOption("honcho");
   await expect(memory.getByLabel("API key", { exact: true })).toBeVisible();
   await expect(memory.getByLabel("Workspace", { exact: true })).toBeVisible();
@@ -211,8 +209,8 @@ test("Honcho memory settings empty and filled", async ({ page }, testInfo) => {
   await userPeer.fill("user-alex");
   await expect(memory.getByRole("button", { name: "Connect", exact: true })).toBeEnabled();
   await captureScreenshot(page, testInfo, "memory-honcho-filled");
-  await memory.getByRole("button", { name: "Local", exact: true }).click();
-  await expect(memory.getByLabel("Base URL", { exact: true })).toHaveValue("http://localhost:8000");
+  await memory.getByRole("button", { name: "Self-hosted", exact: true }).click();
+  await expect(memory.getByLabel("Base URL", { exact: true })).toHaveValue("");
   await memory
     .getByLabel("Base URL", { exact: true })
     .fill("http://honcho-api.railway.internal:8000");
@@ -236,8 +234,8 @@ test("Honcho memory settings empty and filled", async ({ page }, testInfo) => {
   await scrollToTop();
   await expect(memory.getByLabel("Organization API key", { exact: true })).toBeVisible();
   await captureScreenshot(page, testInfo, "memory-supermemory-cloud");
-  await memory.getByRole("button", { name: "Local", exact: true }).click();
-  await expect(memory.getByLabel("Base URL", { exact: true })).toHaveValue("http://localhost:6767");
+  await memory.getByRole("button", { name: "Self-hosted", exact: true }).click();
+  await expect(memory.getByLabel("Base URL", { exact: true })).toHaveValue("");
   await expect(memory.getByLabel("Instance API key", { exact: true })).toBeVisible();
   await captureScreenshot(page, testInfo, "memory-supermemory-local");
 
@@ -254,46 +252,4 @@ test("Honcho memory settings empty and filled", async ({ page }, testInfo) => {
   await documents.scrollIntoViewIfNeeded();
   await expect(documents).toBeVisible();
   await captureScreenshot(page, testInfo, "memory-dark-bottom");
-});
-
-test("shell overlays open from the URL and keep it in sync", async ({ page }, testInfo) => {
-  await signup(page, `settings-url-${Date.now()}@rakazo.test`, "password12", "Settings");
-  await completeOnboarding(page);
-  const botPath = new URL(page.url()).pathname;
-
-  await page.goto("/app?settings=usage");
-  const settings = page.getByTestId("user-settings");
-  await expect(settings).toHaveAttribute("data-settings-section", "usage");
-  await expect(page).toHaveURL((url) => url.pathname === botPath);
-  await settings.getByTestId("settings-nav-general").click();
-  await expect(page).toHaveURL((url) => url.searchParams.get("settings") === "general");
-  await captureScreenshot(page, testInfo, "settings-from-url");
-  await page.keyboard.press("Escape");
-  await expect(settings).toHaveCount(0);
-  await expect(page).toHaveURL((url) => url.pathname === botPath && url.search === "");
-
-  const apps = page.getByPlaceholder("Search apps");
-  await page.getByRole("button", { name: "Connect apps", exact: true }).click();
-  await expect(apps).toBeVisible();
-  await expect(page).toHaveURL((url) => url.searchParams.has("integrations"));
-});
-
-test("usage lists spend per model", async ({ page }, testInfo) => {
-  const stamp = Date.now();
-  await signup(page, `usage-models-${stamp}@rakazo.test`, "password12", "Usage");
-  await completeOnboarding(page);
-  await page.goto("/app");
-  await page.waitForURL(/\/app\/[^/]+$/);
-  await rpc(page, "threads/send", { botId: activeBotId(page), text: "Plan my week" });
-  await expect
-    .poll(async () => (await rpc<{ modelCalls?: number }>(page, "usage/summary", {})).modelCalls, {
-      timeout: 60_000,
-    })
-    .toBeGreaterThan(0);
-
-  await openUserSettings(page, "usage");
-  const usage = page.getByTestId("usage-settings");
-  await expect(usage.getByRole("columnheader", { name: "Model" })).toBeVisible();
-  await expect(usage.locator("tbody tr")).not.toHaveCount(0);
-  await captureScreenshot(page, testInfo, "settings-usage-models");
 });

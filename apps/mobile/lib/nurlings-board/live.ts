@@ -40,7 +40,7 @@ export function useBoardBots(revision: number): Bot[] {
   const [bots, setBots] = useState<Bot[]>([]);
   useEffect(() => {
     let active = true;
-    void rpc<Bot[]>("bots/list")
+    void rpc("bots/list")
       .then((rows) => {
         if (active) setBots(rows);
       })
@@ -60,7 +60,7 @@ export function useBoardMe(): { timeZone: string; viewer: Viewer } {
   });
   useEffect(() => {
     let active = true;
-    void rpc<{ userId: string; name: string; timezone?: string | null }>("me")
+    void rpc("me")
       .then((row) => {
         if (active)
           setMe({

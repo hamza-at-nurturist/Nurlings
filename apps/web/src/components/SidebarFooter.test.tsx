@@ -54,6 +54,7 @@ async function render(
           open
           onOpenChange={() => {}}
           onIntegrations={onIntegrations}
+          onSkills={vi.fn()}
           onBoard={onBoard}
           onArtifacts={() => {}}
           onSettings={() => {}}
@@ -141,12 +142,13 @@ it("opens integrations and keeps the existing account actions and links", async 
   expect(onIntegrations).toHaveBeenCalledOnce();
   const menu = document.querySelector('[data-slot="popover-content"]')!;
   expect([...menu.querySelectorAll("button, a")].map((row) => row.textContent)).toEqual([
+    "Settings",
+    "Skills",
+    "Artifacts",
+    "Board",
     "Usage",
     // "Get the mobile app" is absent: no store listing is configured for this brand.
     "Docs",
-    "Board",
-    "Artifacts",
-    "Settings",
     "Log out",
   ]);
   expect(host.querySelector('[data-testid="user-menu-trigger"]')?.getAttribute("aria-label")).toBe(
