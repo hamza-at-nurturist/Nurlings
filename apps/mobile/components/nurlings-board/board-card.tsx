@@ -68,7 +68,11 @@ export function BoardCard({
           ) : null}
         </View>
         <Text
-          style={[typeScale.secondary, { color: tokens.foreground, fontWeight: fontWeight.medium }]}
+          style={[
+            typeScale.secondary,
+            styles.shrink,
+            { color: tokens.foreground, fontWeight: fontWeight.medium },
+          ]}
         >
           {card.title}
         </Text>
@@ -90,9 +94,9 @@ export function BoardCard({
             />
           ) : null}
           {card.hasDates ? (
-            <View style={styles.meta}>
+            <View style={[styles.meta, styles.shrink]}>
               <NativeSymbol ios="calendar" android="calendar-outline" size={12} color={dueColor} />
-              <Text style={[typeScale.footnote, { color: tokens.mutedForeground }]}>
+              <Text style={[typeScale.footnote, styles.shrink, { color: tokens.mutedForeground }]}>
                 {card.dates.start ? `${card.dates.start} – ` : ""}
                 <Text style={{ color: dueColor }}>{card.dates.due ?? ""}</Text>
               </Text>
@@ -118,7 +122,14 @@ export function BoardCard({
 }
 
 const styles = StyleSheet.create({
-  card: { borderWidth: StyleSheet.hairlineWidth, borderRadius: 14, padding: 12, gap: 8 },
+  shrink: { flexShrink: 1, minWidth: 0 },
+  card: {
+    alignSelf: "stretch",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 14,
+    padding: 12,
+    gap: 8,
+  },
   top: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   footer: {
     flexDirection: "row",
