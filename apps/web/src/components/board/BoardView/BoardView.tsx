@@ -2,7 +2,7 @@ import { Trans, useLingui } from "@lingui/react/macro";
 import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import { isRetryableError, retryDelayMs, WORKING_RUN_STATUSES } from "@rakazo/core";
 import type { QuickAddTicket } from "@rakazo/core/nurlings-board";
-import { boardColumns } from "@rakazo/core/nurlings-board";
+import { boardColumns, isMoveTarget } from "@rakazo/core/nurlings-board";
 import { buttonVariants } from "@rakazo/ui-web";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -125,7 +125,7 @@ export function BoardView() {
   }
 
   function move(ticket: TicketListItem, status: TicketStatus) {
-    if (ticket.status === status) return;
+    if (!isMoveTarget(ticket.status, status)) return;
     // Show the move now; the reload after it puts the card back if the server refused.
     setTickets((rows) => rows.map((row) => (row.id === ticket.id ? { ...row, status } : row)));
     void act(() => rpc.tickets.move({ id: ticket.id, status })).catch(() => undefined);

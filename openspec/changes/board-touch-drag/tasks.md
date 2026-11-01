@@ -2,10 +2,9 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the proposal and `design.md`, including the haptic choice (Android
-  `Vibration` only, or add `expo-haptics`). Verify: explicit approval in the session. No code
+- [x] 1.1 Maintainer approves the proposal and `design.md`, including adding `expo-haptics`. Verify: explicit approval in the session. No code
   before this.
-- [ ] 1.2 Confirm the `mobile-board` change is archived first (the modified requirements resolve
+- [x] 1.2 Confirm the `mobile-board` change is archived first (the modified requirements resolve
   against it). Verify: `openspec/specs/mobile-board/spec.md` exists on `main`, or the maintainer
   chooses the reworded delta.
 
@@ -38,9 +37,9 @@
   passes; on a device the card lifts after the hold and a quick tap still opens the ticket.
 - [ ] 5.2 Render the floating copy overlay in `BoardPages`; leave the origin slot dimmed. Verify:
   on a device the copy follows the finger and the list does not re-render while moving.
-- [ ] 5.3 Haptic per the approved choice; confirm whether Android declares `VIBRATE`, and if it
-  does not, drop the vibration instead of editing the manifest. Verify: on an Android device
-  there is a short buzz on lift, or the PR says why there is none.
+- [ ] 5.3 Add `expo-haptics` (`expo install`) and call a light impact on lift and on a valid drop.
+  Verify: `pnpm --filter @rakazo/mobile check` passes (`expo install --check`); the package's own
+  manifest declares `VIBRATE`; on a device both platforms give a tap on lift.
 - [ ] 5.4 Disable pager and column list scrolling while a card is lifted. Verify: on a device
   neither scrolls from touch during a drag.
 

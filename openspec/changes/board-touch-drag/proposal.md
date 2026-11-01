@@ -29,20 +29,16 @@ keeps the native menu one tap away on the card.
   ticket.
 - **No fighting scroll.** While a card is lifted the pager and the column list do not scroll from
   touch; only the edge auto-scroll moves them.
-- **No new dependencies.** Built on `react-native-gesture-handler` and `react-native-reanimated`,
-  which are already installed.
+- **One new dependency.** `expo-haptics` (above). The drag itself uses `react-native-gesture-handler`
+  and `react-native-reanimated`, which are already installed.
 
-### Haptic: open question for approval
+### Haptic
 
-`expo-haptics` is not installed and the brief rules out new dependencies. Options:
-
-1. **Recommended.** Lift feedback is the scale and shadow everywhere, plus a short
-   `Vibration.vibrate` on Android (react-native core, no dependency). On iOS the core API only
-   gives a long buzz, so iOS gets no haptic from this change.
-2. Add `expo-haptics` (part of the Expo SDK already in use) so iOS gets a real light impact. This
-   is a dependency add and needs your explicit yes.
-
-I will implement option 1 unless you pick option 2.
+`expo-haptics` (Expo first-party, same SDK as the app) is added, approved by the maintainer. It
+gives a light impact on lift and a lighter one on drop, on iOS and Android. The package declares
+its own `VIBRATE` permission, which autolinking merges into the Android manifest, so there is no
+manifest edit. It is a native module, so the change reaches phones with the next native build,
+not an over-the-air update.
 
 ### Proposed copy
 
@@ -80,13 +76,13 @@ to call the shared validity function. Overlap with an upstream mobile board is c
   card" requirements change; one requirement is added.
 - `board-tickets` is unchanged: its "Move cards between columns" requirement already says drag and
   Move to, and the web behaviour does not change.
-- Mobile app: `nurlings-board` components, one prop in `board.tsx`, one string in five locale files.
+- Mobile app: `nurlings-board` components, one line in `board.tsx`, one string in five locale files,
+  and the `expo-haptics` dependency.
 - `@rakazo/core`: one small pure function next to `boardColumns`.
 - No API, contract, schema or migration change. Contacts no Rakazo-owned infrastructure.
 
-## Ordering note
+## Ordering
 
-The `mobile-board` change (PR merged) is not archived yet, so `mobile-board` is not in
-`openspec/specs/` and the modified requirements below only resolve once it is archived. Archive
-`mobile-board` before applying or archiving this change; if you would rather not wait, this delta
-can be reworded as ADDED requirements with the old ones removed in the same step.
+`mobile-board` is archived first (its own pull request), so the modified requirements above
+resolve against `openspec/specs/mobile-board`. The `fix-mobile-board-layout` bug fix lands before
+this change touches the same card and filter components.

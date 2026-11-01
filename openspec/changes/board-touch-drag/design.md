@@ -83,9 +83,10 @@ background with the muted token when `hoverIndex === index`. Invalid targets nev
 
 ### 8. Haptic
 
-See the proposal's open question. Default plan: scale and shadow everywhere, `Vibration.vibrate`
-on Android. Whether the Android build already declares `VIBRATE` is checked in task 5.3; if it
-does not, the haptic is dropped rather than adding a manifest permission.
+`expo-haptics`: `impactAsync(Light)` when the card lifts and when a valid drop lands, called from
+the JS side of the gesture callbacks. The module declares `VIBRATE` in its own Android manifest,
+so no app manifest or config-plugin edit is needed. A failed haptic call is ignored. Adding a
+native module means the next preview APK must be a native build, not an update.
 
 ## Upstream overlap
 

@@ -1,6 +1,7 @@
 import type { TicketListItem } from "@rakazo/contracts";
+import { TICKET_STATUSES } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
-import { boardColumns } from "./columns.js";
+import { boardColumns, isMoveTarget } from "./columns.js";
 
 const NOW = new Date("2026-10-25T12:00:00.000Z");
 const ticket = (id: string, overrides: Partial<TicketListItem> = {}) =>
@@ -59,5 +60,13 @@ describe("boardColumns", () => {
     ];
     expect(boardColumns(rows, "bot-2", NOW)[0]!.tickets.map((row) => row.id)).toEqual(["theirs"]);
     expect(boardColumns(rows, null, NOW)[0]!.tickets).toHaveLength(3);
+  });
+});
+
+describe("isMoveTarget", () => {
+  it("allows every other column and never the card's own", () => {
+    for (const from of TICKET_STATUSES) {
+      for (const to of TICKET_STATUSES) expect(isMoveTarget(from, to)).toBe(from !== to);
+    }
   });
 });
