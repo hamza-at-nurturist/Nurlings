@@ -1,3 +1,8 @@
+## RENAMED Requirements
+
+- FROM: `### Requirement: Long-press a card for its actions`
+- TO: `### Requirement: Card actions and opening a card`
+
 ## MODIFIED Requirements
 
 ### Requirement: Board cards match the web card
@@ -9,8 +14,16 @@ A finished ticket SHALL be dimmed. The card SHALL have a small ⋯ button that o
 menu, and no inline Approve.
 
 #### Scenario: Working
-- **WHEN** a Nurling has an active run for a ticket
-- **THEN** the card shows "{name} is working…" in place of the latest comment
+- **WHEN** the owner's run for the ticket is running
+- **THEN** the card shows "{owner} is working…" and the owner's avatar shows working
+
+#### Scenario: Overdue
+- **WHEN** a To do ticket's due has passed
+- **THEN** its due shows in the destructive colour
+
+#### Scenario: Not overdue once done
+- **WHEN** a Done ticket's due has passed
+- **THEN** its due is not shown as overdue
 
 #### Scenario: Menu button
 - **WHEN** a card is shown
@@ -22,7 +35,7 @@ context menu with Move to (the six statuses, the current one checked), Approve (
 ticket is In review) and Open. A move SHALL show at once and SHALL revert with an error if the
 server refuses it. Approve SHALL move the ticket to Done and record that the user approved it.
 
-#### Scenario: Move from the menu
+#### Scenario: Move
 - **WHEN** the user opens a To do card's ⋯ menu and picks Move to, Blocked
 - **THEN** the card is in Blocked
 
