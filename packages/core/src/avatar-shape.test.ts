@@ -55,4 +55,12 @@ describe("organic avatar looks", () => {
       expect(organicAvatarSampleIdentity(family)).toBe(identity);
     }
   });
+
+  it("keeps every existing bot on the same organic family", () => {
+    // Ids hash to a family with `seed % 10`; the original bodies are appended after it, never
+    // reached by the hash, so these stay put.
+    expect(ORGANIC_AVATAR_FAMILY_COUNT).toBe(10);
+    const families = ["chief", "maya", "bot-1", "cabc123", "github"].map(organicAvatarFamily);
+    expect(families).toEqual([1, 4, 9, 7, 3]);
+  });
 });

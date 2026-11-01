@@ -1,7 +1,9 @@
 import { BOT_AVATAR_SHAPE_COUNT } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
 import {
+  BRAND_BLOB_SHAPE_INDEX,
   organicBotAvatarFrame,
+  PICKABLE_ORGANIC_SHAPE_INDEXES,
   SHIPPED_BOT_AVATAR_CENTER,
   SHIPPED_BOT_AVATAR_SHAPE_KEYS,
   SHIPPED_BOT_AVATAR_SHAPES,
@@ -44,8 +46,8 @@ function pathBounds(d: string) {
 }
 
 describe("shipped bot avatar shapes", () => {
-  it("keeps the same shapes the parser encodes", () => {
-    expect(SHIPPED_BOT_AVATAR_SHAPE_KEYS).toHaveLength(BOT_AVATAR_SHAPE_COUNT);
+  it("keeps the retired static shapes the parser still accepts", () => {
+    expect(SHIPPED_BOT_AVATAR_SHAPE_KEYS).toHaveLength(BRAND_BLOB_SHAPE_INDEX + 1);
     expect(shippedBotAvatarShapePath(3)).toBe(SHIPPED_BOT_AVATAR_SHAPES.tablet);
     expect(shippedBotAvatarShapePath(3)).not.toBe(shippedBotAvatarShapePath(0));
     expect(shippedBotAvatarShapePath(12)).toBe(shippedBotAvatarShapePath(3));
@@ -60,7 +62,7 @@ describe("shipped bot avatar shapes", () => {
   });
 
   it("draws the brand blob as the last shape, centred in the shape box like the others", () => {
-    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const index = BRAND_BLOB_SHAPE_INDEX;
     expect(index).toBe(SHIPPED_BOT_AVATAR_SHAPE_KEYS.length - 1);
     const bounds = pathBounds(shippedBotAvatarShapePath(index));
     expect((bounds.minX + bounds.maxX) / 2).toBeCloseTo(SHIPPED_BOT_AVATAR_CENTER, 0);
@@ -75,7 +77,7 @@ describe("shipped bot avatar shapes", () => {
 
   it("keeps ellipse eyes on the old shapes and slanted pills on the brand blob", () => {
     expect(shippedBotAvatarEyes(0)).toMatchObject({ kind: "ellipse", rx: 10, ry: 7, tiltDeg: 0 });
-    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    const index = BRAND_BLOB_SHAPE_INDEX;
     const eyes = shippedBotAvatarEyes(index);
     expect(eyes).toMatchObject({ kind: "pill", tiltDeg: 13.5 });
     expect(eyes.ry).toBeGreaterThan(eyes.rx * 2);
@@ -87,9 +89,11 @@ describe("shipped bot avatar shapes", () => {
     }
   });
 
-  it("gives only the brand blob an organic frame, centred in the organic box with its eyes inside", () => {
+  it("gives the brand blob an organic frame, centred in the organic box with its eyes inside", () => {
     expect(organicBotAvatarFrame(0)).toBeUndefined();
-    const index = SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling");
+    expect(organicBotAvatarFrame(7)).toBeUndefined();
+    expect(organicBotAvatarFrame(12)).toBeUndefined();
+    const index = BRAND_BLOB_SHAPE_INDEX;
     const frame = organicBotAvatarFrame(index);
     if (!frame) throw new Error("the brand blob has an organic frame");
     const bounds = pathBounds(frame.path);
@@ -103,5 +107,49 @@ describe("shipped bot avatar shapes", () => {
       expect(eye.cx).toBeGreaterThan(bounds.minX);
       expect(eye.cx).toBeLessThan(bounds.maxX);
     }
+  });
+
+  it("keeps the brand blob and the original bodies inside the shape count", () => {
+    expect(PICKABLE_ORGANIC_SHAPE_INDEXES).toEqual([8, 9, 10, 11]);
+    expect(Math.max(...PICKABLE_ORGANIC_SHAPE_INDEXES)).toBe(BOT_AVATAR_SHAPE_COUNT - 1);
+    for (const index of PICKABLE_ORGANIC_SHAPE_INDEXES)
+      expect(organicBotAvatarFrame(index)).toBeDefined();
+  });
+
+  it.each([9, 10, 11])(
+    "draws shape_%i as an original body with room for its eyes and gloss",
+    (index) => {
+      const frame = organicBotAvatarFrame(index);
+      if (!frame) throw new Error("the original body has a frame");
+      const bounds = pathBounds(frame.path);
+      expect(frame.path).toMatch(/^M[^<>]*Z$/);
+      expect(bounds.minX).toBeGreaterThanOrEqual(-60);
+      expect(bounds.maxX).toBeLessThanOrEqual(60);
+      expect(bounds.minY).toBeGreaterThanOrEqual(-60);
+      expect(bounds.maxY).toBeLessThanOrEqual(60);
+      // Upright pills inside the body, like the hashed organic bodies' eyes.
+      expect(frame.eyes).toMatchObject({ kind: "pill", rx: 3.5, ry: 12, tiltDeg: 0 });
+      for (const eye of [frame.eyes.left, frame.eyes.right]) {
+        expect(eye.cx - 3.5).toBeGreaterThan(bounds.minX);
+        expect(eye.cx + 3.5).toBeLessThan(bounds.maxX);
+        expect(eye.cy - 12).toBeGreaterThan(bounds.minY);
+        expect(eye.cy + 12).toBeLessThan(bounds.maxY);
+      }
+      // The gloss arc keeps well clear of both eyes.
+      const gloss = (frame.gloss?.match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number);
+      expect(gloss.length).toBeGreaterThanOrEqual(8);
+      for (let i = 0; i < gloss.length; i += 2) {
+        for (const eye of [frame.eyes.left, frame.eyes.right]) {
+          const gapY = Math.max(0, Math.abs((gloss[i + 1] ?? 0) - eye.cy) - 12);
+          expect(Math.hypot((gloss[i] ?? 0) - eye.cx, gapY)).toBeGreaterThan(8);
+        }
+      }
+    },
+  );
+
+  it("gives the three original bodies different outlines", () => {
+    const paths = [9, 10, 11].map((index) => organicBotAvatarFrame(index)?.path);
+    expect(new Set(paths).size).toBe(3);
+    expect(paths).not.toContain(organicBotAvatarFrame(BRAND_BLOB_SHAPE_INDEX)?.path);
   });
 });

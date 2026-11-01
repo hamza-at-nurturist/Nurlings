@@ -20,38 +20,40 @@ test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo
   await expect(studio.getByRole("tab", { name: "Upload", exact: true })).toBeVisible();
   await expect(studio.getByTestId("avatar-studio-bot-tab")).toBeVisible();
 
-  // The Rakazo icon set draws upstream's logo, so a Nurlings build offers only the original shapes
+  // The Rakazo icon set draws upstream's logo, so a Nurlings build offers only the original bodies
   // and no set switcher.
   await expect(studio.getByRole("tablist", { name: "Icon set" })).toHaveCount(0);
   const defaultLook = studio.getByTestId("avatar-studio-default");
-  const wedge = studio.getByRole("button", { name: "wedge", exact: true });
-  // Sign-up gives Chief the brand blob shape, so the studio opens on it rather than on Default.
-  const nurling = studio.getByRole("button", { name: "nurling", exact: true });
-  await expect(nurling).toHaveAttribute("aria-pressed", "true");
+  // The picker lists organic bodies only: the brand blob, then the three original bodies.
+  await expect(studio.getByRole("button", { name: /^Shape \d+$/ })).toHaveCount(4);
+  for (const retired of ["hex", "wedge", "squircle", "tablet", "pebble", "cloud", "teardrop"]) {
+    await expect(studio.getByRole("button", { name: retired, exact: true })).toHaveCount(0);
+  }
+  const blob = studio.getByRole("button", { name: "Shape 1", exact: true });
+  const drift = studio.getByRole("button", { name: "Shape 3", exact: true });
+  // Sign-up gives Chief the brand blob, so the studio opens on it rather than on Default.
+  await expect(blob).toHaveAttribute("aria-pressed", "true");
   await expect(defaultLook).toHaveAttribute("aria-pressed", "false");
-  await expect(wedge).toHaveAttribute("aria-pressed", "false");
+  await expect(drift).toHaveAttribute("aria-pressed", "false");
 
-  await wedge.click();
-  await expect(wedge).toHaveAttribute("aria-pressed", "true");
-  await expect(nurling).toHaveAttribute("aria-pressed", "false");
+  await drift.click();
+  await expect(drift).toHaveAttribute("aria-pressed", "true");
+  await expect(blob).toHaveAttribute("aria-pressed", "false");
   await expect(defaultLook).toHaveAttribute("aria-pressed", "false");
-  await expect(studio.locator(".rakazo-organic-avatar")).toHaveCount(0);
 
   await defaultLook.click();
   await expect(defaultLook).toHaveAttribute("aria-pressed", "true");
-  await expect(wedge).toHaveAttribute("aria-pressed", "false");
-  await expect(studio.locator(".rakazo-organic-avatar")).toHaveCount(1);
+  await expect(drift).toHaveAttribute("aria-pressed", "false");
   await expect(studio.locator(".rakazo-organic-avatar-eyes").first()).toBeVisible();
 
   await studio.getByRole("button", { name: "Color #EAB308" }).click();
   await expect(defaultLook).toHaveAttribute("aria-pressed", "true");
-  await expect(wedge).toHaveAttribute("aria-pressed", "false");
+  await expect(drift).toHaveAttribute("aria-pressed", "false");
 
-  await wedge.click();
+  await drift.click();
   await studio.getByRole("button", { name: "Reset", exact: true }).click();
   await expect(defaultLook).toHaveAttribute("aria-pressed", "true");
-  await expect(wedge).toHaveAttribute("aria-pressed", "false");
-  await expect(studio.locator(".rakazo-organic-avatar")).toHaveCount(1);
+  await expect(drift).toHaveAttribute("aria-pressed", "false");
 
   await captureScreenshot(page, testInfo, "avatar-studio-bot-tab");
   await studio.getByRole("button", { name: "Done", exact: true }).click();

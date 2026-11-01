@@ -20,6 +20,7 @@ import {
   parseModelMaxTokens,
 } from "@rakazo/contracts";
 import {
+  BRAND_BLOB_SHAPE_INDEX,
   COMPATIBLE_THINKING_LEVELS,
   clampCatalogThinkingLevel,
   createModelProbe,
@@ -27,7 +28,6 @@ import {
   initialModelProbeState,
   pickCatalogModelId,
   popularModelProvidersFirst,
-  SHIPPED_BOT_AVATAR_SHAPE_KEYS,
 } from "@rakazo/core";
 import {
   Button,
@@ -87,7 +87,7 @@ function providerOptionValue(provider: string, auth?: ProviderAuth): string {
 const FIRST_BOT_NAME = "Chief";
 const FIRST_BOT_SPAWN_KEY = "onboarding:first";
 /** Chief wears the brand blob in the default avatar colour. */
-const FIRST_BOT_AVATAR = `${DEFAULT_BOT_AVATAR_COLOR}::shape_${SHIPPED_BOT_AVATAR_SHAPE_KEYS.indexOf("nurling")}`;
+const FIRST_BOT_AVATAR = `${DEFAULT_BOT_AVATAR_COLOR}::shape_${BRAND_BLOB_SHAPE_INDEX}`;
 const FIRST_BOT_LOCK = "rakazo:onboarding-first-bot";
 
 /** Survives StrictMode remounts; concurrent first-bot creates share one in-flight attempt. */

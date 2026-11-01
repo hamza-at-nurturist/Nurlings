@@ -29,8 +29,16 @@ sets to a new body are affected; Chief and all existing bots are not.
 Frames reuse `OrganicBotAvatarFrame` (path in the 120-unit organic box plus eyes), so the new
 bodies get organic motion, glow and eye behaviour for free on web and mobile. The three new
 bodies are drawn from our own point lists through the same smoothing as the existing families,
-default ellipse-pill eyes. Candidate names: lobe, bean, bloom (final silhouettes judged on the
-contact sheet).
+upright pill eyes placed per body. The maintainer picked three of six candidates on a contact
+sheet: Bean (`shape_9`), Drift (`shape_10`), Sprout (`shape_11`). Each frame also stores a gloss arc
+path along its upper edge, clear of the eyes. Nothing draws it: the glint ships later in
+`avatar-working-states`, and the bodies draw flat like the hashed ones until then.
+
+## Retired shapes
+
+The static shape renderers on web and mobile are removed, so `shape_0`..`shape_7` draw the bot's
+own organic body. Their path table in `@rakazo/core` stays untouched to keep upstream merges small;
+it is no longer drawn by the apps.
 
 ## Picker
 

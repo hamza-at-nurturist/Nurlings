@@ -2,7 +2,7 @@ import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import type { BotAvatarSet } from "@rakazo/contracts";
 import { resolveBotAvatarSet, SELECTABLE_BOT_AVATAR_SETS } from "@rakazo/contracts";
-import { SHIPPED_BOT_AVATAR_SHAPE_KEYS } from "@rakazo/core";
+import { PICKABLE_ORGANIC_SHAPE_INDEXES } from "@rakazo/core";
 import {
   BOT_AVATAR_COLORS,
   BotAvatar,
@@ -48,7 +48,11 @@ export function BotLookPicker({
 }) {
   const parsed = parseBotAvatar(value);
   const currentColor = parsed.color || DEFAULT_BOT_AVATAR_COLOR;
-  const isDefaultLook = !parsed.isImage && parsed.shapeIndex === undefined;
+  // A retired static shape (0 to 7) draws the bot's own body, so it counts as the default look.
+  const isDefaultLook =
+    !parsed.isImage &&
+    (parsed.shapeIndex === undefined ||
+      !PICKABLE_ORGANIC_SHAPE_INDEXES.includes(parsed.shapeIndex));
 
   function selectColor(color: string) {
     onChange(parsed.shapeIndex === undefined ? color : `${color}::shape_${parsed.shapeIndex}`);
@@ -113,11 +117,11 @@ export function BotLookPicker({
                 onClick={() => onChange(currentColor, organicIdentity)}
               />
             ))}
-            {SHIPPED_BOT_AVATAR_SHAPE_KEYS.map((key, shapeIndex) => (
+            {PICKABLE_ORGANIC_SHAPE_INDEXES.map((shapeIndex, position) => (
               <BotShapePreview
-                key={key}
-                shapeIndex={shapeIndex}
-                color={currentColor}
+                key={shapeIndex}
+                label={t`Shape ${(organicIdentities?.length ?? 0) + position + 1}`}
+                color={`${currentColor}::shape_${shapeIndex}`}
                 selected={!parsed.isImage && parsed.shapeIndex === shapeIndex}
                 onClick={() => onChange(`${currentColor}::shape_${shapeIndex}`)}
               />

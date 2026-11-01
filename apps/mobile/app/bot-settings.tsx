@@ -1,6 +1,5 @@
 import type { Bot, BotAvatarSet, ComputerMode, ThinkingLevel } from "@rakazo/contracts";
 import {
-  BOT_AVATAR_SHAPE_COUNT,
   BOT_COLORS,
   BOT_DESCRIPTION_MAX_LENGTH,
   BOT_INSTRUCTIONS_MAX_LENGTH,
@@ -12,6 +11,7 @@ import {
   credentialForModel,
   MODEL_SEARCH_THRESHOLD,
   modelOptionKey,
+  PICKABLE_ORGANIC_SHAPE_INDEXES,
   parseModelOptionKey,
   resolveSelectableModelId,
 } from "@rakazo/core";
@@ -47,6 +47,7 @@ import { rpc } from "../lib/api";
 import {
   avatarColor,
   avatarShape,
+  hasOwnBody,
   isAvatarPhoto,
   withAvatarColor,
   withAvatarShape,
@@ -897,7 +898,7 @@ export default function BotSettingsScreen() {
                     accessibilityRole="radio"
                     accessibilityLabel={t("Default")}
                     accessibilityState={{
-                      checked: avatarSet === "organic" && avatarShape(color) === null,
+                      checked: avatarSet === "organic" && !hasOwnBody(color),
                     }}
                     onPress={() => {
                       setAvatarSet("organic");
@@ -908,18 +909,18 @@ export default function BotSettingsScreen() {
                       borderRadius: 14,
                       borderWidth: 2,
                       borderColor:
-                        avatarSet === "organic" && avatarShape(color) === null
+                        avatarSet === "organic" && !hasOwnBody(color)
                           ? tokens.foreground
                           : "transparent",
                     }}
                   >
                     <BotAvatar color={avatarColor(color)} identity={bot.id} size={36} />
                   </Pressable>
-                  {Array.from({ length: BOT_AVATAR_SHAPE_COUNT }, (_, shape) => (
+                  {PICKABLE_ORGANIC_SHAPE_INDEXES.map((shape, position) => (
                     <Pressable
                       key={shape}
                       accessibilityRole="radio"
-                      accessibilityLabel={t("Shape {number}", { number: shape + 1 })}
+                      accessibilityLabel={t("Shape {number}", { number: position + 1 })}
                       accessibilityState={{ checked: avatarShape(color) === shape }}
                       onPress={() => {
                         setAvatarSet("organic");

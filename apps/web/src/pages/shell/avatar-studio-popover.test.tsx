@@ -94,7 +94,29 @@ describe("selectable bot icon sets", () => {
     await click("Original");
     expect(changed).toHaveBeenLastCalledWith("#10B981", "organic");
     expect(document.querySelector(".rakazo-organic-avatar")).not.toBeNull();
-    expect(button("wedge")).toBeDefined();
+  });
+
+  it("offers organic bodies only, and stores the one picked", async () => {
+    await render("#8B5CF6");
+    await click("Customize bot avatar");
+    const labels = [...document.querySelectorAll("button[aria-pressed]")].map((node) =>
+      node.getAttribute("aria-label"),
+    );
+    expect(labels).toEqual(expect.arrayContaining(["Shape 1", "Shape 2", "Shape 3", "Shape 4"]));
+    for (const classic of ["hex", "wedge", "squircle", "tablet", "pebble", "cloud", "teardrop"]) {
+      expect(labels).not.toContain(classic);
+    }
+    expect(labels.filter((label) => label?.startsWith("Shape "))).toHaveLength(4);
+    await click("Shape 3");
+    expect(changed).toHaveBeenLastCalledWith("#8B5CF6::shape_10", undefined);
+  });
+
+  it("shows a retired static shape as the default look", async () => {
+    await render("#8B5CF6::shape_3");
+    await click("Customize bot avatar");
+    expect(
+      document.querySelector('[data-testid="avatar-studio-default"]')?.getAttribute("aria-pressed"),
+    ).toBe("true");
   });
 
   it("leaves a photo intact until the user explicitly selects another set", async () => {

@@ -16,17 +16,17 @@ test("Chief wears the brand blob as an organic avatar, idle and working, in both
       const regular = scope
         .locator('[data-avatar="regular"]')
         .first()
-        .locator(".rakazo-bot-avatar");
+        .locator(".rakazo-organic-avatar");
       await expect(chief).toBeVisible();
       await expect(regular).toBeVisible();
       await expect(chief).toHaveAttribute("data-working", String(row === "working"));
       await expect(regular).toHaveAttribute("data-working", String(row === "working"));
       // An organic avatar with the blob as its body: two pills in each of the idle and working eye
-      // groups, and no working ring. The classic shapes keep their ring and ellipse eyes.
+      // groups, and no working ring. Retired static shapes draw the bot's own organic body the same way.
       await expect(chief.locator("rect")).toHaveCount(4);
       await expect(chief.locator(".rakazo-bot-avatar-ring")).toHaveCount(0);
-      await expect(regular.locator(".bot-character-eyes ellipse")).toHaveCount(2);
-      await expect(regular.locator(".rakazo-bot-avatar-ring")).toHaveCount(1);
+      await expect(regular.locator("rect")).toHaveCount(4);
+      await expect(regular.locator(".rakazo-bot-avatar-ring")).toHaveCount(0);
     }
   }
   await captureScreenshot(page, testInfo, "chief-avatar-idle-working-light-dark");
@@ -42,13 +42,11 @@ test("Chief's eyes use the organic idle and working animations, and stop for red
   const light = page.locator('.panel[data-theme="light"]');
   const idle = light.locator('[data-row="idle"]');
   const working = light.locator('[data-row="working"]');
-  const eyesOf = (row: typeof idle, which: "chief" | "classic" | "organic", group: string) => {
+  const eyesOf = (row: typeof idle, which: "chief" | "organic", group: string) => {
     const item =
       which === "chief"
         ? row.locator('[data-avatar="chief"]').last()
-        : which === "classic"
-          ? row.locator('[data-avatar="regular"]').first()
-          : row.locator('[data-avatar="regular"]').last();
+        : row.locator('[data-avatar="regular"]').last();
     return item.locator(`.rakazo-organic-avatar-eyes-${group}`).first();
   };
 
@@ -57,11 +55,6 @@ test("Chief's eyes use the organic idle and working animations, and stop for red
     "animation-name",
     /^rakazo-organic-eyes-loop-[0-3]$/,
   );
-  // The classic shapes have no animated eyes.
-  await expect(
-    idle.locator('[data-avatar="regular"]').first().locator(".rakazo-organic-avatar-eyes"),
-  ).toHaveCount(0);
-
   // The working group shows while working, the idle one while idle.
   await expect(eyesOf(working, "chief", "working")).toHaveCSS("opacity", "1");
   await expect(eyesOf(working, "chief", "idle")).toHaveCSS("opacity", "0");

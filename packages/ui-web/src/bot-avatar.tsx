@@ -1,5 +1,6 @@
 import { brand } from "@nurlings/brand";
 import type { BotAvatarSet } from "@rakazo/contracts";
+import { BOT_AVATAR_SHAPE_COUNT } from "@rakazo/contracts";
 import type { BotColorDef, LogoAvatarActivity } from "@rakazo/core";
 import {
   ACTIVE_RUN_STATUSES,
@@ -13,13 +14,11 @@ import {
   resolvePersonaColorDef,
   SHIPPED_BOT_AVATAR_SHAPE_KEYS,
   SHIPPED_BOT_AVATAR_SHAPES,
-  SHIPPED_BOT_AVATAR_VIEWBOX,
-  shippedBotAvatarEyes,
-  shippedBotAvatarShapePath,
+  type shippedBotAvatarEyes,
 } from "@rakazo/core";
 import { tokens } from "@rakazo/ui-tokens";
 import type { ComponentProps, CSSProperties } from "react";
-import { memo, useEffect, useId, useMemo, useSyncExternalStore } from "react";
+import { memo, useEffect, useMemo, useSyncExternalStore } from "react";
 import { useBotAvatarActivity } from "./bot-avatar-activity.js";
 import { BrandMark } from "./brand-mark.js";
 import { useAvatarMotionVisibility } from "./hooks/use-avatar-motion-visibility.js";
@@ -32,7 +31,6 @@ export { BOT_AVATAR_COLORS, BOT_COLOR_LIST, DEFAULT_BOT_AVATAR_COLOR, resolvePer
 
 export const BOT_SHAPES = SHIPPED_BOT_AVATAR_SHAPES;
 export const SHIPPED_SHAPE_KEYS = SHIPPED_BOT_AVATAR_SHAPE_KEYS;
-const VIEWBOX = SHIPPED_BOT_AVATAR_VIEWBOX;
 
 export const BOT_MASCOT_SHAPES = SHIPPED_SHAPE_KEYS.map(
   (k) => BOT_SHAPES[k] ?? FALLBACK_SHAPE_PATH,
@@ -62,7 +60,7 @@ export function parseBotAvatar(
     const shapeIdx = Number.isSafeInteger(parsedShapeIdx) ? parsedShapeIdx : 0;
     return {
       color: parts[0] || "#F97316",
-      shapeIndex: shapeIdx % SHIPPED_SHAPE_KEYS.length,
+      shapeIndex: shapeIdx % BOT_AVATAR_SHAPE_COUNT,
       isImage: false,
     };
   }
@@ -96,7 +94,6 @@ export const BotAvatar = memo(function BotAvatar({
   identity = "",
   className,
 }: BotAvatarProps) {
-  const id = useId().replace(/[^a-zA-Z0-9-_]/g, "");
   const isWorking = ACTIVE_RUN_STATUSES.some((s) => s === status);
 
   const parsed = useMemo(() => parseBotAvatar(color, identity), [color, identity]);
@@ -157,98 +154,19 @@ export const BotAvatar = memo(function BotAvatar({
       />
     );
   }
-  // The brand blob is an organic avatar with its own body and eyes.
+  // Shapes 9 to 11 and the brand blob (8) draw their own body and eyes; any other shape draws the
+  // organic body the bot's id picks, in the stored colour.
   const frame =
     parsed.shapeIndex === undefined ? undefined : organicBotAvatarFrame(parsed.shapeIndex);
-  if (parsed.shapeIndex === undefined || frame) {
-    return (
-      <OrganicAvatar
-        color={colorDef.hex}
-        identity={effectiveId}
-        size={size}
-        isWorking={isWorking}
-        frame={frame}
-        className={className}
-      />
-    );
-  }
-
   return (
-    <div
-      className={cn(
-        "rakazo-bot-avatar bot-avatar-container relative inline-flex items-center justify-center shrink-0 select-none",
-        className,
-      )}
-      style={{
-        width: size,
-        height: size,
-      }}
-      data-working={isWorking}
-    >
-      <svg
-        className="rakazo-bot-avatar-ring absolute pointer-events-none"
-        style={{
-          inset: -4,
-          width: size + 8,
-          height: size + 8,
-          filter: `drop-shadow(0 0 6px ${colorDef.light}) drop-shadow(0 0 10px #ffffff)`,
-        }}
-        viewBox="0 0 48 48"
-        fill="none"
-        aria-hidden="true"
-      >
-        <circle
-          cx="24"
-          cy="24"
-          r="22"
-          stroke={`url(#${id}-ring)`}
-          strokeWidth="3.2"
-          strokeLinecap="round"
-          strokeDasharray="45 80"
-        />
-        <circle cx="43" cy="24" r="2.8" fill="#ffffff" />
-        <defs>
-          <linearGradient id={`${id}-ring`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffffff" stopOpacity="1" />
-            <stop offset="60%" stopColor={colorDef.light} stopOpacity="0.9" />
-            <stop offset="100%" stopColor={colorDef.light} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <svg
-        viewBox={VIEWBOX}
-        aria-hidden="true"
-        className={cn(
-          "overflow-visible transition-transform duration-300",
-          isWorking
-            ? "animate-pulse scale-[1.04] motion-reduce:animate-none"
-            : "hover:scale-[1.03] motion-reduce:hover:scale-100",
-        )}
-        // Inline size so a parent's icon sizing (Button sizes bare SVGs) cannot shrink it.
-        style={{
-          width: size,
-          height: size,
-          filter: isWorking
-            ? `drop-shadow(0 0 8px ${colorDef.light}) drop-shadow(0 0 2px #ffffff)`
-            : "drop-shadow(0 2px 4px rgba(0,0,0,0.45))",
-        }}
-      >
-        <defs>
-          <linearGradient id={`bot-ink-${id}`} x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={colorDef.light} />
-            <stop offset="100%" stopColor={colorDef.dark} />
-          </linearGradient>
-        </defs>
-        <g>
-          <path d={shippedBotAvatarShapePath(parsed.shapeIndex)} fill={`url(#bot-ink-${id})`} />
-          <ShapeEyes
-            eyes={shippedBotAvatarEyes(parsed.shapeIndex)}
-            fill={colorDef.eyeColor}
-            className="bot-character-eyes"
-          />
-        </g>
-      </svg>
-    </div>
+    <OrganicAvatar
+      color={colorDef.hex}
+      identity={effectiveId}
+      size={size}
+      isWorking={isWorking}
+      frame={frame}
+      className={className}
+    />
   );
 });
 
@@ -404,32 +322,24 @@ function subscribeToReducedMotion(onChange: () => void): () => void {
 }
 
 export function BotShapePreview({
-  shapeIndex,
   identity,
   label,
   color,
   selected,
   onClick,
 }: {
-  /** An Avatar Studio shape; omit it to draw the organic body `identity` gets. */
-  shapeIndex?: number;
+  /** The organic body this identity draws; with a `::shape_N` color, that shape's own body. */
   identity?: string;
-  label?: string;
+  label: string;
   color: string;
   selected?: boolean;
   onClick?: () => void;
 }) {
-  const key =
-    shapeIndex === undefined
-      ? undefined
-      : (SHIPPED_SHAPE_KEYS[shapeIndex % SHIPPED_SHAPE_KEYS.length] ?? "hex");
-  const colorDef = resolvePersonaColorDef("preview", color);
-
   return (
     <button
       type="button"
       onClick={onClick}
-      aria-label={label ?? key}
+      aria-label={label}
       aria-pressed={selected ?? false}
       className={cn(
         "relative flex size-11 items-center justify-center rounded-xl transition-transform hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-popover",
@@ -438,14 +348,7 @@ export function BotShapePreview({
           : "hover:bg-white/5",
       )}
     >
-      {shapeIndex === undefined ? (
-        <BotAvatar color={color} identity={identity} size={32} />
-      ) : (
-        <svg viewBox={VIEWBOX} className="size-8 overflow-visible" aria-hidden="true">
-          <path d={shippedBotAvatarShapePath(shapeIndex)} fill={colorDef.light} />
-          <ShapeEyes eyes={shippedBotAvatarEyes(shapeIndex)} fill={colorDef.eyeColor} />
-        </svg>
-      )}
+      <BotAvatar color={color} identity={identity} size={32} />
     </button>
   );
 }

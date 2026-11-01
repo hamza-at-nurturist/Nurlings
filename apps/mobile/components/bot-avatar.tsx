@@ -19,8 +19,6 @@ import {
   type OrganicBotAvatarFrame,
   organicAvatarPath,
   organicBotAvatarFrame,
-  SHIPPED_BOT_AVATAR_VIEWBOX,
-  shippedBotAvatarEyes,
   usesLogoAvatar,
 } from "@rakazo/core";
 import { botEyeColor } from "@rakazo/ui-tokens";
@@ -31,7 +29,7 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
 } from "react-native-reanimated";
-import Svg, { Ellipse, G, Path, Rect } from "react-native-svg";
+import Svg, { G, Path, Rect } from "react-native-svg";
 import type { AvatarLife } from "../lib/avatar-life";
 import { useAvatarOnScreen, useLife, usePoke, useSettling } from "../lib/avatar-life";
 import { mobileBotAvatarPresentation } from "../lib/bot-avatar";
@@ -42,7 +40,6 @@ import { LogoAvatar } from "./logo-avatar";
 import { NativeSymbol } from "./native-symbol";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
-const AnimatedEllipse = Animated.createAnimatedComponent(Ellipse);
 
 /** How far (0–1) the face has turned into the typing dots, for a morph of 0–1. */
 function morphGrow(morph: number): number {
@@ -52,8 +49,6 @@ function morphGrow(morph: number): number {
 }
 /** The face shrinks until it is the size of the middle typing dot. */
 const MORPH_SHRINK = 1 - (2 * AVATAR_TYPING_DOTS.radius) / AVATAR_MOTION_UNITS;
-/** The shipped shapes' view box is this many units wide. */
-const SHAPE_UNITS = Number(SHIPPED_BOT_AVATAR_VIEWBOX.split(" ")[2]);
 
 /** The avatar's flat frame right now, a tap poke included; a worklet. */
 function liveFrame(life: AvatarLife) {
@@ -289,7 +284,8 @@ function LegacyBotAvatar({
   const life = useLife(state, clock, size, motion);
   const poke = usePoke(life, pokeable && clock === "running");
   const bodyStyle = useBodyStyle(life, size);
-  // The brand blob is an organic avatar with its own body and eyes.
+  // The brand blob and the original bodies (shapes 8 to 11) draw their own body and eyes; every
+  // other shape draws the organic body the bot's id picks.
   const blobFrame = parsed.kind === "shape" ? organicBotAvatarFrame(parsed.shapeIndex) : undefined;
   const fillColor = parsed.kind === "shape" || parsed.kind === "color" ? parsed.color : color;
   const picture =
@@ -306,16 +302,6 @@ function LegacyBotAvatar({
       >
         <Image source={{ uri: parsed.imageUrl }} style={{ width: size, height: size }} />
       </View>
-    ) : parsed.kind === "shape" && !blobFrame ? (
-      <ShippedShapeAvatar
-        color={parsed.color}
-        eyeColor={parsed.eyeColor}
-        shapeIndex={parsed.shapeIndex}
-        shapePath={parsed.shapePath}
-        size={size}
-        life={life}
-        bodyStyle={bodyStyle}
-      />
     ) : (
       <OrganicAvatar
         color={fillColor}
@@ -386,36 +372,6 @@ function Dot({
 
 type BodyStyle = ReturnType<typeof useAnimatedStyle>;
 
-function ShippedShapeAvatar({
-  color,
-  eyeColor,
-  shapeIndex,
-  shapePath,
-  size,
-  life,
-  bodyStyle,
-}: {
-  color: string;
-  eyeColor: string;
-  shapeIndex: number;
-  shapePath: string;
-  size: number;
-  life: AvatarLife;
-  bodyStyle: BodyStyle;
-}) {
-  const eyes = shippedBotAvatarEyes(shapeIndex);
-  return (
-    <Animated.View style={[{ width: size, height: size }, bodyStyle]}>
-      <Svg width={size} height={size} viewBox={SHIPPED_BOT_AVATAR_VIEWBOX}>
-        <Path d={shapePath} fill={color} />
-        <G fill={eyeColor}>
-          <EllipseEyes eyes={eyes} life={life} />
-        </G>
-      </Svg>
-    </Animated.View>
-  );
-}
-
 /** An organic avatar's upright eyes in its 120-unit box. */
 const ORGANIC_EYES: ShapeEyes = {
   kind: "pill",
@@ -426,29 +382,7 @@ const ORGANIC_EYES: ShapeEyes = {
   tiltDeg: 0,
 };
 
-type ShapeEyes = ReturnType<typeof shippedBotAvatarEyes>;
-
-function EllipseEyes({ eyes, life }: { eyes: ShapeEyes; life: AvatarLife }) {
-  // Offsets are in motion units, scaled to the shape's view box.
-  const eyeProps = (cx: number, cy: number) => () => {
-    "worklet";
-    const state = eyeState(life);
-    const scale = SHAPE_UNITS / AVATAR_MOTION_UNITS;
-    return {
-      cx: cx + state.x * scale,
-      cy: cy + state.y * scale,
-      ry: state.hidden ? 0 : eyes.ry * state.lid,
-    };
-  };
-  const leftEye = useAnimatedProps(eyeProps(eyes.left.cx, eyes.left.cy));
-  const rightEye = useAnimatedProps(eyeProps(eyes.right.cx, eyes.right.cy));
-  return (
-    <>
-      <AnimatedEllipse animatedProps={leftEye} rx={eyes.rx} />
-      <AnimatedEllipse animatedProps={rightEye} rx={eyes.rx} />
-    </>
-  );
-}
+type ShapeEyes = OrganicBotAvatarFrame["eyes"];
 
 /** Pill eyes are tilted about their own centre; blinking closes them along their length. */
 function PillEyes({
