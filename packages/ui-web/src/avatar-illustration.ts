@@ -7,6 +7,8 @@
  */
 export const AVATAR_ILLUSTRATION = {
   white: "#ffffff",
+  /** The glint on a white or very light body, where a white one would vanish. */
+  glintOnLight: "#475569",
   pencilBody: "#F5C242",
   pencilShade: "#D9A21B",
   pencilLight: "#FFE08A",

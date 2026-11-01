@@ -12,13 +12,9 @@ import {
 } from "@rakazo/core";
 import { tokens } from "@rakazo/ui-tokens";
 import type { CSSProperties } from "react";
-import { useEffect, useMemo, useRef, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AVATAR_ILLUSTRATION as ink } from "./avatar-illustration.js";
-import {
-  avatarDizzySnapshot,
-  registerAvatarPointer,
-  subscribeAvatarDizzy,
-} from "./avatar-pointer.js";
+import { registerAvatarPointer } from "./avatar-pointer.js";
 import { useAvatarMotionVisibility } from "./hooks/use-avatar-motion-visibility.js";
 import { cn } from "./lib/utils.js";
 import {
@@ -83,6 +79,15 @@ function eyeSpecs(frame: OrganicBotAvatarFrame | undefined): EyeSpec[] {
   }));
 }
 
+/** True for a body so light that a white glint would vanish on it. */
+function isLightColor(color: string): boolean {
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim())?.[1];
+  if (!hex) return false;
+  const full = hex.length === 3 ? [...hex].map((c) => c + c).join("") : hex;
+  const [r, g, b] = [0, 2, 4].map((i) => Number.parseInt(full.slice(i, i + 2), 16));
+  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b! > 200;
+}
+
 const reducedMotionMedia = "(prefers-reduced-motion: reduce)";
 const reducedMotionSnapshot = () => window.matchMedia(reducedMotionMedia).matches;
 function subscribeToReducedMotion(onChange: () => void): () => void {
@@ -115,8 +120,8 @@ export function OrganicAvatar({
   const { state, working } = useAvatarState(source);
   const propTool: AvatarTool = state === "working" ? working.tool : "none";
   const swap = useToolSwap(propTool, !still);
-  const sharedDizzy = useSyncExternalStore(subscribeAvatarDizzy, avatarDizzySnapshot, () => false);
-  const dizzy = sharedDizzy && !still && state !== "asleep" && state !== "thinking";
+  const [shaken, setShaken] = useState(false);
+  const dizzy = shaken && !still && state !== "asleep" && state !== "thinking";
 
   const seed = avatarIdentitySeed(identity || color);
   const body = frame?.path ?? organicAvatarPath(seed);
@@ -143,7 +148,12 @@ export function OrganicAvatar({
     if (still) return;
     const element = ref.current;
     if (!element) return;
-    return registerAvatarPointer({ element, strength: () => followRef.current, reach });
+    return registerAvatarPointer({
+      element,
+      strength: () => followRef.current,
+      reach,
+      onDizzy: setShaken,
+    });
   }, [ref, still, reach]);
   useEffect(() => {
     // jsdom has no SMIL clock, so these are optional.
@@ -174,7 +184,7 @@ export function OrganicAvatar({
       data-dizzy={dizzy}
       data-swapping={swapping}
       data-glint="true"
-      data-glint-tone={frame?.glint}
+      data-glint-tone={frame?.glint ?? (isLightColor(color) ? "light" : undefined)}
       data-paused={!visible}
       data-shape-family={seed % 10}
       data-eye-pattern={seed % 4}
@@ -185,6 +195,7 @@ export function OrganicAvatar({
           "--c0": color,
           "--rakazo-av-eye": tokens.background,
           "--rakazo-av-ink": tokens.foreground,
+          "--rakazo-av-glint-dark": ink.glintOnLight,
           "--rakazo-av-white": ink.white,
           "--rakazo-av-dull": ink.dull,
           "--rakazo-av-shadow": ink.shadow,

@@ -67,7 +67,7 @@ test("every body in the picker is drawn with its gloss", async ({ page }, testIn
   await captureScreenshot(page, testInfo, "avatar-bodies");
 });
 
-test("shaking the pointer makes avatars dizzy, but not sleeping or thinking ones", async ({
+test("shaking the pointer makes nearby avatars dizzy, but not far, sleeping or thinking ones", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -78,12 +78,17 @@ test("shaking the pointer makes avatars dizzy, but not sleeping or thinking ones
   const thinking = page.locator('[data-row$="-96"] svg[aria-label^="Thinking,"]').first();
   await expect(idle).toHaveAttribute("data-dizzy", "false");
 
+  const box = (await idle.boundingBox())!;
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height + 20;
+  const far = page.locator('[data-row="bodies"] svg').last();
   for (let i = 0; i < 14; i += 1) {
-    await page.mouse.move(i % 2 ? 300 : 420, 300);
+    await page.mouse.move(i % 2 ? cx - 60 : cx + 60, cy);
     await page.waitForTimeout(40);
   }
   await expect(idle).toHaveAttribute("data-dizzy", "true");
   await expect(idle.locator(".rakazo-av-spiral").first()).toHaveCSS("opacity", "1");
+  await expect(far).toHaveAttribute("data-dizzy", "false");
   await expect(asleep).toHaveAttribute("data-dizzy", "false");
   await expect(thinking).toHaveAttribute("data-dizzy", "false");
   await expect(idle).toHaveAttribute("data-dizzy", "false", { timeout: 4000 });

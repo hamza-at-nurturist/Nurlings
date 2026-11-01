@@ -106,15 +106,23 @@ describe("shared avatar pointer", () => {
     expect(Number(svg.style.getPropertyValue("--gy"))).toBeCloseTo(0);
   });
 
-  it("makes avatars dizzy after a shake, but not asleep or thinking ones, then calms them", async () => {
+  it("makes only the avatars near a shake dizzy, but not asleep ones, then calms them", async () => {
     vi.useFakeTimers();
     const container = await mount(
       <>
         <BotAvatar color="#14B8A6" identity="a" size={48} />
         <BotAvatar color="#14B8A6" identity="b" size={48} asleep />
+        <BotAvatar color="#14B8A6" identity="c" size={48} />
       </>,
     );
-    const [idle, asleep] = [...container.querySelectorAll("svg")];
+    const [idle, asleep, far] = [...container.querySelectorAll("svg")];
+    const place = (el: Element | undefined, left: number) => {
+      el!.getBoundingClientRect = () =>
+        ({ left, top: 80, width: 48, height: 48, right: left + 48, bottom: 128 }) as DOMRect;
+    };
+    place(idle, 100);
+    place(asleep, 110);
+    place(far, 3000);
     await act(async () => {
       for (let i = 0; i < 12; i += 1) {
         vi.advanceTimersByTime(60);
@@ -123,9 +131,24 @@ describe("shared avatar pointer", () => {
     });
     expect(idle?.getAttribute("data-dizzy")).toBe("true");
     expect(asleep?.getAttribute("data-dizzy")).toBe("false");
+    expect(far?.getAttribute("data-dizzy")).toBe("false");
     await act(async () => {
       vi.advanceTimersByTime(2500);
     });
     expect(idle?.getAttribute("data-dizzy")).toBe("false");
+  });
+});
+
+describe("glint on light bodies", () => {
+  it("gives a white body a darker glint tone", async () => {
+    const container = await mount(
+      <>
+        <BotAvatar color="#FFFFFF" identity="w" size={48} />
+        <BotAvatar color="#14B8A6" identity="t" size={48} />
+      </>,
+    );
+    const [white, teal] = [...container.querySelectorAll("svg")];
+    expect(white?.getAttribute("data-glint-tone")).toBe("light");
+    expect(teal?.getAttribute("data-glint-tone")).toBeNull();
   });
 });
