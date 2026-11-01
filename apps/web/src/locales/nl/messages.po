@@ -936,6 +936,10 @@ msgstr "Artefacten"
 msgid "Ask"
 msgstr "Vragen"
 
+#: src/components/AvatarStateNames.tsx
+msgid "asleep"
+msgstr ""
+
 #: src/pages/shell/computer-panel.tsx
 msgid "Asleep"
 msgstr "Slaapt"
@@ -1070,6 +1074,10 @@ msgstr "Facturatie"
 #: src/components/ApprovalRulesSettings.tsx
 msgid "Block"
 msgstr "Blokkeren"
+
+#: src/components/AvatarStateNames.tsx
+msgid "blocked"
+msgstr ""
 
 #: src/lib/ticket-status.ts
 msgid "Blocked"
@@ -2722,6 +2730,10 @@ msgstr "Het document is gewijzigd. Open het opnieuw om de nieuwste versie te bew
 msgid "Don’t have an account?"
 msgstr "Heb je geen account?"
 
+#: src/components/AvatarStateNames.tsx
+msgid "done"
+msgstr ""
+
 #: src/components/AccountDataSettings.tsx
 #: src/components/ToolActivityDisclosure.tsx
 #: src/lib/ticket-status.ts
@@ -3296,6 +3308,10 @@ msgstr "Ik ben klaar"
 msgid "Icon set"
 msgstr ""
 
+#: src/components/AvatarStateNames.tsx
+msgid "idle"
+msgstr ""
+
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "Als je dat hoorde, is de stem klaar."
@@ -3333,6 +3349,10 @@ msgstr "Gegevens importeren"
 #: src/lib/ticket-status.ts
 msgid "In progress"
 msgstr "Bezig"
+
+#: src/components/AvatarStateNames.tsx
+msgid "in review"
+msgstr ""
 
 #: src/lib/ticket-status.ts
 msgid "In review"
@@ -4042,6 +4062,10 @@ msgstr "Heeft invoer nodig"
 #: src/pages/ActivityList.tsx
 msgid "Needs takeover"
 msgstr "Heeft overname nodig"
+
+#: src/components/AvatarStateNames.tsx
+msgid "needs you"
+msgstr ""
 
 #: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
@@ -5987,6 +6011,10 @@ msgstr "Deze bestanden of keuzes kloppen niet meer. Kies de bestanden opnieuw."
 msgid "These saved settings can't be read. Remove it and add it again."
 msgstr "Deze opgeslagen instellingen kunnen niet worden gelezen. Verwijder ze en voeg ze opnieuw toe."
 
+#: src/components/AvatarStateNames.tsx
+msgid "thinking"
+msgstr ""
+
 #: src/components/call/CallCard.tsx
 #: src/pages/ModelRoleSettings.tsx
 #: src/pages/RoutineEditor.tsx
@@ -6645,6 +6673,10 @@ msgstr "Wordt niet gedaan"
 
 #: src/components/SignupSurvey.tsx
 msgid "Work"
+msgstr ""
+
+#: src/components/AvatarStateNames.tsx
+msgid "working"
 msgstr ""
 
 #: src/pages/shell/agent-import.tsx

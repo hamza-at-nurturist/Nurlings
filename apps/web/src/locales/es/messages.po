@@ -936,6 +936,10 @@ msgstr "Artefactos"
 msgid "Ask"
 msgstr "Preguntar"
 
+#: src/components/AvatarStateNames.tsx
+msgid "asleep"
+msgstr ""
+
 #: src/pages/shell/computer-panel.tsx
 msgid "Asleep"
 msgstr "En reposo"
@@ -1070,6 +1074,10 @@ msgstr "Facturación"
 #: src/components/ApprovalRulesSettings.tsx
 msgid "Block"
 msgstr "Bloquear"
+
+#: src/components/AvatarStateNames.tsx
+msgid "blocked"
+msgstr ""
 
 #: src/lib/ticket-status.ts
 msgid "Blocked"
@@ -2722,6 +2730,10 @@ msgstr "El documento ha cambiado. Vuelve a abrirlo para editar la última versi�
 msgid "Don’t have an account?"
 msgstr "¿No tienes una cuenta?"
 
+#: src/components/AvatarStateNames.tsx
+msgid "done"
+msgstr ""
+
 #: src/components/AccountDataSettings.tsx
 #: src/components/ToolActivityDisclosure.tsx
 #: src/lib/ticket-status.ts
@@ -3296,6 +3308,10 @@ msgstr "Listo"
 msgid "Icon set"
 msgstr "Conjunto de íconos"
 
+#: src/components/AvatarStateNames.tsx
+msgid "idle"
+msgstr ""
+
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "Si escuchaste eso, la voz está lista."
@@ -3333,6 +3349,10 @@ msgstr "Importar datos"
 #: src/lib/ticket-status.ts
 msgid "In progress"
 msgstr "En curso"
+
+#: src/components/AvatarStateNames.tsx
+msgid "in review"
+msgstr ""
 
 #: src/lib/ticket-status.ts
 msgid "In review"
@@ -4042,6 +4062,10 @@ msgstr "Necesita entrada"
 #: src/pages/ActivityList.tsx
 msgid "Needs takeover"
 msgstr "Necesita toma de control"
+
+#: src/components/AvatarStateNames.tsx
+msgid "needs you"
+msgstr ""
 
 #: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
@@ -5987,6 +6011,10 @@ msgstr "Estos archivos o la selección ya no coinciden. Vuelve a elegir los arch
 msgid "These saved settings can't be read. Remove it and add it again."
 msgstr "No se puede leer esta configuración guardada. Quítala y vuelve a agregarla."
 
+#: src/components/AvatarStateNames.tsx
+msgid "thinking"
+msgstr ""
+
 #: src/components/call/CallCard.tsx
 #: src/pages/ModelRoleSettings.tsx
 #: src/pages/RoutineEditor.tsx
@@ -6646,6 +6674,10 @@ msgstr "No se hará"
 #: src/components/SignupSurvey.tsx
 msgid "Work"
 msgstr "Trabajo"
+
+#: src/components/AvatarStateNames.tsx
+msgid "working"
+msgstr ""
 
 #: src/pages/shell/agent-import.tsx
 msgid "Working instructions"

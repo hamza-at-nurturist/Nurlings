@@ -1,4 +1,5 @@
 import type { Run } from "@rakazo/contracts";
+import type { AvatarTool } from "./avatar-tool.js";
 import type {
   LogoAvatarActivity,
   LogoAvatarEvent,
@@ -7,6 +8,7 @@ import type {
 import {
   initialLogoAvatarSignals,
   logoAvatarActivity,
+  logoAvatarWorkTool,
   reduceLogoAvatarSignals,
 } from "./logo-avatar-activity.js";
 import { isBackgroundRunTrigger, isRunWaitingOnUser, isRunWorking } from "./run-state.js";
@@ -25,6 +27,19 @@ export function logoAvatarStatusActivity(status?: string): LogoAvatarActivity {
   if (status === "failed") return "error";
   if (status && isRunWaitingOnUser(status)) return "waiting";
   return status && isRunWorking(status) ? "working" : "idle";
+}
+
+/** What an organic avatar needs beyond the activity: its tool prop and whether it is writing its reply. */
+export interface AvatarLive {
+  tool: AvatarTool;
+  composing: boolean;
+}
+const NO_LIVE: AvatarLive = { tool: "none", composing: false };
+function sameDetails(a: Map<string, AvatarLive>, b: Map<string, AvatarLive>): boolean {
+  return (
+    a.size === b.size &&
+    [...b].every(([id, v]) => a.get(id)?.tool === v.tool && a.get(id)?.composing === v.composing)
+  );
 }
 
 const PRIORITY: Record<LogoAvatarActivity, number> = {
@@ -56,12 +71,14 @@ export function createLogoAvatarActivityStore() {
   const sources = new Map<string, Set<string>>();
   const listeners = new Set<() => void>();
   let activities = new Map<string, LogoAvatarActivity>();
+  let details = new Map<string, AvatarLive>();
   let backgroundOnly = new Set<string>();
   let stamp = 0;
 
   const publish = () => {
     const grouped = new Map<string, { signals: LogoAvatarSignals; stamp: number }[]>();
     const next = new Map<string, LogoAvatarActivity>();
+    const nextDetails = new Map<string, AvatarLive>();
     const nextBackgroundOnly = new Set<string>();
     for (const thread of threads.values()) {
       for (const botId of thread.idleBots) next.set(botId, "idle");
@@ -79,11 +96,19 @@ export function createLogoAvatarActivityStore() {
       );
       if (active.length) {
         let selected: LogoAvatarActivity = "idle";
+        let chosen = active[0]!;
         for (const run of active) {
           const activity = logoAvatarActivity(run.signals);
-          if (PRIORITY[activity] > PRIORITY[selected]) selected = activity;
+          if (PRIORITY[activity] > PRIORITY[selected]) {
+            selected = activity;
+            chosen = run;
+          }
         }
         next.set(botId, selected);
+        nextDetails.set(botId, {
+          tool: logoAvatarWorkTool(chosen.signals),
+          composing: chosen.signals.composing,
+        });
       } else {
         const latest = foreground.reduce<(typeof foreground)[number] | undefined>(
           (previous, run) => (!previous || run.stamp > previous.stamp ? run : previous),
@@ -95,11 +120,13 @@ export function createLogoAvatarActivityStore() {
     if (
       next.size === activities.size &&
       [...next].every(([botId, value]) => activities.get(botId) === value) &&
+      sameDetails(details, nextDetails) &&
       nextBackgroundOnly.size === backgroundOnly.size &&
       [...nextBackgroundOnly].every((botId) => backgroundOnly.has(botId))
     )
       return;
     activities = next;
+    details = nextDetails;
     backgroundOnly = nextBackgroundOnly;
     for (const listener of listeners) listener();
   };
@@ -151,6 +178,10 @@ export function createLogoAvatarActivityStore() {
       // Background-only observations retain their existing privacy suppression.
       if (known && (known !== "idle" || backgroundOnly.has(botId))) return known;
       return logoAvatarStatusActivity(status);
+    },
+    /** The prop and reply-writing flag of the bot's busiest foreground run; none and false when unknown. */
+    getLive(botId: string): AvatarLive {
+      return details.get(botId) ?? NO_LIVE;
     },
     hydrate(source: string, snapshot: LogoAvatarActivitySnapshot) {
       const thread = own(source, snapshot.threadId);

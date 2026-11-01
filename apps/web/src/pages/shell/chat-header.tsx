@@ -56,6 +56,7 @@ export function ChatHeader({
             avatarSet={active.avatarSet}
             color={active.color}
             identity={active.id}
+            name={active.name}
             size={26}
             status={active.status}
           />

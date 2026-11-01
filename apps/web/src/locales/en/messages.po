@@ -936,6 +936,10 @@ msgstr "Artifacts"
 msgid "Ask"
 msgstr "Ask"
 
+#: src/components/AvatarStateNames.tsx
+msgid "asleep"
+msgstr "asleep"
+
 #: src/pages/shell/computer-panel.tsx
 msgid "Asleep"
 msgstr "Asleep"
@@ -1070,6 +1074,10 @@ msgstr "Billing"
 #: src/components/ApprovalRulesSettings.tsx
 msgid "Block"
 msgstr "Block"
+
+#: src/components/AvatarStateNames.tsx
+msgid "blocked"
+msgstr "blocked"
 
 #: src/lib/ticket-status.ts
 msgid "Blocked"
@@ -2722,6 +2730,10 @@ msgstr "Document changed. Reopen to edit the latest version."
 msgid "Don’t have an account?"
 msgstr "Don’t have an account?"
 
+#: src/components/AvatarStateNames.tsx
+msgid "done"
+msgstr "done"
+
 #: src/components/AccountDataSettings.tsx
 #: src/components/ToolActivityDisclosure.tsx
 #: src/lib/ticket-status.ts
@@ -3296,6 +3308,10 @@ msgstr "I’m done"
 msgid "Icon set"
 msgstr "Icon set"
 
+#: src/components/AvatarStateNames.tsx
+msgid "idle"
+msgstr "idle"
+
 #: src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "If you heard that, voice is ready."
@@ -3333,6 +3349,10 @@ msgstr "Import data"
 #: src/lib/ticket-status.ts
 msgid "In progress"
 msgstr "In progress"
+
+#: src/components/AvatarStateNames.tsx
+msgid "in review"
+msgstr "in review"
 
 #: src/lib/ticket-status.ts
 msgid "In review"
@@ -4042,6 +4062,10 @@ msgstr "Needs input"
 #: src/pages/ActivityList.tsx
 msgid "Needs takeover"
 msgstr "Needs takeover"
+
+#: src/components/AvatarStateNames.tsx
+msgid "needs you"
+msgstr "needs you"
 
 #: src/components/board/TicketModal/NeedsYou.tsx
 #: src/lib/roster-status.ts
@@ -5987,6 +6011,10 @@ msgstr "These files or choices no longer match. Choose the files again."
 msgid "These saved settings can't be read. Remove it and add it again."
 msgstr "These saved settings can't be read. Remove it and add it again."
 
+#: src/components/AvatarStateNames.tsx
+msgid "thinking"
+msgstr "thinking"
+
 #: src/components/call/CallCard.tsx
 #: src/pages/ModelRoleSettings.tsx
 #: src/pages/RoutineEditor.tsx
@@ -6646,6 +6674,10 @@ msgstr "Won't do"
 #: src/components/SignupSurvey.tsx
 msgid "Work"
 msgstr "Work"
+
+#: src/components/AvatarStateNames.tsx
+msgid "working"
+msgstr "working"
 
 #: src/pages/shell/agent-import.tsx
 msgid "Working instructions"

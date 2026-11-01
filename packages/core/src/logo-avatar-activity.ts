@@ -1,4 +1,5 @@
 import { hasThinkingActivityMarker, parseBotAvatarValue } from "@rakazo/contracts";
+import { type AvatarTool, avatarToolFromPayload } from "./avatar-tool.js";
 import { isBackgroundRunTrigger, isRunWaitingOnUser, isRunWorking } from "./run-state.js";
 
 /** Minimal public stream fields used by web and native activity projections. */
@@ -47,7 +48,7 @@ export interface LogoAvatarSignals {
   status: string;
   composing: boolean;
   thinking: boolean;
-  tools: readonly { executionId: string; name: string }[];
+  tools: readonly { executionId: string; name: string; tool: AvatarTool }[];
   cursor: number;
   background: boolean;
 }
@@ -80,6 +81,11 @@ const COMPUTER_TOOLS = new Set([
   "open_path",
   "launch_app",
 ]);
+
+/** The prop the latest running tool asks for, as the worker categorised it; none when it sent no category. */
+export function logoAvatarWorkTool(signals: Pick<LogoAvatarSignals, "tools">): AvatarTool {
+  return signals.tools.at(-1)?.tool ?? "none";
+}
 
 export function logoAvatarActivity(signals: LogoAvatarSignals): LogoAvatarActivity {
   if (signals.background) return "idle";
@@ -150,7 +156,7 @@ export function reduceLogoAvatarSignals(
       thinking: false,
       tools: [
         ...previous.tools.filter((tool) => tool.executionId !== executionId),
-        { name, executionId },
+        { name, executionId, tool: avatarToolFromPayload(event.payload) },
       ],
     };
   }
