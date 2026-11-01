@@ -32,9 +32,9 @@
 
 ## 5. Pull request
 
-- [ ] 5.1 Open the PR on `feature/avatar-organic-only`; stay with it until CI is green. Verify:
+- [x] 5.1 Open the PR on `feature/avatar-organic-only`; stay with it until CI is green. Verify:
   checks green on the head commit.
 
 ## 6. After merge
 
-- [ ] 6.1 Archive the change. Verify: `openspec validate --strict`.
+- [x] 6.1 Archive the change. Verify: `openspec validate --strict`.
