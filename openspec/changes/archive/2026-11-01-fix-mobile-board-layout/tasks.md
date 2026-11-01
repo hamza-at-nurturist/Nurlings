@@ -14,9 +14,9 @@
 
 ## 3. Pull request
 
-- [ ] 3.1 Open the PR on `fix/mobile-board-layout`, state that native layout cannot be captured by
+- [x] 3.1 Open the PR on `fix/mobile-board-layout`, state that native layout cannot be captured by
   CI, and stay with it until CI is done. Verify: checks green on the head commit.
 
 ## 4. After merge
 
-- [ ] 4.1 Archive with `--skip-specs`. Verify: `openspec validate --strict`.
+- [x] 4.1 Archive with `--skip-specs`. Verify: `openspec validate --strict`.
