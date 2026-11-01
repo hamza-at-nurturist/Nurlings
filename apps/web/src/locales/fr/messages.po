@@ -6409,6 +6409,10 @@ msgstr ""
 msgid "Upload"
 msgstr "Télécharger"
 
+#: src/pages/Artifacts.tsx
+msgid "Uploads"
+msgstr ""
+
 #: src/lib/ticket-priority.ts
 msgid "Urgent"
 msgstr ""

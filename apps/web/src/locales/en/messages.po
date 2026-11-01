@@ -5343,10 +5343,6 @@ msgid "Search apps"
 msgstr "Search apps"
 
 #: src/pages/Artifacts.tsx
-msgid "Uploads"
-msgstr "Uploads"
-
-#: src/pages/Artifacts.tsx
 msgid "Search artifacts…"
 msgstr "Search artifacts…"
 
@@ -6412,6 +6408,10 @@ msgstr "Upgrade now"
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Upload"
 msgstr "Upload"
+
+#: src/pages/Artifacts.tsx
+msgid "Uploads"
+msgstr "Uploads"
 
 #: src/lib/ticket-priority.ts
 msgid "Urgent"
