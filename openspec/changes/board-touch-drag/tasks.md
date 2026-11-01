@@ -10,27 +10,28 @@
 
 ## 2. Shared rule
 
-- [ ] 2.1 Add `isMoveTarget(from, to)` to `packages/core/src/nurlings-board/columns.ts`, use it in
+- [x] 2.1 Add `isMoveTarget(from, to)` to `packages/core/src/nurlings-board/columns.ts`, use it in
   the web `move()` and in mobile `board.tsx` `onAction`. Verify: new cases in `columns.test.ts`
   for all status pairs; web `BoardView.test.tsx` passes untouched; `pnpm --filter @rakazo/web
   check` and `pnpm --filter @rakazo/mobile check` pass.
 
 ## 3. Geometry
 
-- [ ] 3.1 Add `apps/mobile/lib/nurlings-board/drag.ts` with `columnAt`, `edgeScrollSpeed` and
+- [x] 3.1 Add `apps/mobile/lib/nurlings-board/drag.ts` with `columnAt`, `edgeScrollSpeed` and
   `snapOffset`. Verify: `drag.test.ts` covering inside, gaps, padding, past ends, scrolled
   offsets, zero outside the zone, monotonic ramp, cap, sign, clamp.
 
 ## 4. Card
 
-- [ ] 4.1 Split `BoardCardBody` out of `BoardCard`; wrap only a ⋯ button in `MenuView` (tap opens,
+- [x] 4.1 Split `BoardCardBody` out of `BoardCard`; wrap only a ⋯ button in `MenuView` (tap opens,
   no long-press), accessible name `More` through `t()`; keep tap-to-open on the card. Verify:
   `board-column.test.tsx` updated for the button and its name, menu actions and tap-to-open
-  unchanged.
-- [ ] 4.2 Add `More` to the five `lib/locales/nurlings-board/*.ts` files. Verify: the mobile
-  i18n test passes.
+  unchanged. `More` already exists in every mobile catalog, so there is no locale change.
 
 ## 5. Drag layer
+
+Tasks 5.1 to 6.3 are implemented and type-checked. Their "on a device" checks need the
+maintainer's preview build, so they stay unticked until then.
 
 - [ ] 5.1 Add the drag store (shared values: dragged ticket, finger x/y, grab offset, hovered
   index) and the long-press pan on each card, lifting with scale and shadow. Verify: `tsc`

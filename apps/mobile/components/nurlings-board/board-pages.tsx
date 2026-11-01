@@ -1,10 +1,12 @@
-import type { Bot, TicketListItem } from "@rakazo/contracts";
+import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import type { BoardColumn as BoardColumnData } from "@rakazo/core/nurlings-board";
+import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
-import type { FlatList as FlatListType } from "react-native";
+import type { FlatList as FlatListType, View as ViewType } from "react-native";
 import { FlatList, StyleSheet, useWindowDimensions, View } from "react-native";
 import type { CardMenuAction } from "../../lib/nurlings-board/card-menu";
 import { BoardColumn } from "./board-column";
+import { BoardDragProvider, useBoardDrag } from "./board-drag";
 
 const GAP = 10;
 const EDGE = 16;
@@ -22,7 +24,8 @@ export function firstFilledColumn(columns: readonly BoardColumnData[]): number {
   return Math.max(0, index);
 }
 
-/** The columns as horizontally paged lists, one per page, snapping page to page. */
+/** The columns as horizontally paged lists, one per page, snapping page to page. A card can be
+ * long-pressed and dragged between them. */
 export function BoardPages({
   columns,
   bots,
@@ -43,6 +46,74 @@ export function BoardPages({
   const { width: windowWidth } = useWindowDimensions();
   const width = pageWidth(windowWidth);
   const list = useRef<FlatListType<BoardColumnData>>(null);
+  const container = useRef<ViewType>(null);
+  const offset = useRef(0);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const layout = { pageWidth: width, gap: GAP, edge: EDGE, count: columns.length };
+  // A drop is the card menu's Move to: the same call, optimistic update and rollback.
+  const drop = (ticketId: string, status: TicketStatus) => {
+    for (const column of columns) {
+      const ticket = [...column.tickets, ...column.older].find((row) => row.id === ticketId);
+      if (ticket) return onAction(ticket, { type: "move", status });
+    }
+  };
+  return (
+    <View
+      ref={container}
+      collapsable={false}
+      style={styles.board}
+      onLayout={(event) => setSize(event.nativeEvent.layout)}
+    >
+      <BoardDragProvider
+        columns={columns}
+        layout={layout}
+        size={size}
+        container={container}
+        pager={list}
+        pagerOffset={offset}
+        onDrop={drop}
+      >
+        <Pager
+          columns={columns}
+          bots={bots}
+          timeZone={timeZone}
+          width={width}
+          bottomInset={bottomInset}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          onAction={onAction}
+          list={list}
+          offset={offset}
+        />
+      </BoardDragProvider>
+    </View>
+  );
+}
+
+function Pager({
+  columns,
+  bots,
+  timeZone,
+  width,
+  bottomInset,
+  refreshing,
+  onRefresh,
+  onAction,
+  list,
+  offset,
+}: {
+  columns: BoardColumnData[];
+  bots: Bot[];
+  timeZone: string;
+  width: number;
+  bottomInset: number;
+  refreshing: boolean;
+  onRefresh: () => void;
+  onAction: (ticket: TicketListItem, action: CardMenuAction) => void;
+  list: RefObject<FlatListType<BoardColumnData> | null>;
+  offset: RefObject<number>;
+}) {
+  const drag = useBoardDrag();
   const [showOlder, setShowOlder] = useState(false);
   const [height, setHeight] = useState(0);
   const opened = useRef(false);
@@ -55,11 +126,17 @@ export function BoardPages({
     opened.current = true;
     if (target > 0)
       list.current?.scrollToOffset({ offset: target * (width + GAP), animated: false });
-  }, [hasCards, target, width]);
+  }, [hasCards, target, width, list]);
   return (
     <FlatList
       ref={list}
       onLayout={(event) => setHeight(event.nativeEvent.layout.height)}
+      // While a card is held only the edge auto-scroll moves the pager.
+      scrollEnabled={!drag?.locked}
+      onScroll={(event) => {
+        if (!drag?.locked) offset.current = event.nativeEvent.contentOffset.x;
+      }}
+      scrollEventThrottle={16}
       horizontal
       data={columns}
       keyExtractor={(column) => column.status}
@@ -71,9 +148,10 @@ export function BoardPages({
       contentContainerStyle={styles.content}
       ItemSeparatorComponent={Gap}
       getItemLayout={(_, index) => ({ length: width + GAP, offset: (width + GAP) * index, index })}
-      renderItem={({ item }) => (
+      renderItem={({ item, index }) => (
         <BoardColumn
           status={item.status}
+          index={index}
           tickets={item.tickets}
           older={item.older}
           showOlder={showOlder}
@@ -97,6 +175,7 @@ function Gap() {
 }
 
 const styles = StyleSheet.create({
+  board: { flex: 1 },
   content: { paddingHorizontal: EDGE },
   gap: { width: GAP },
 });

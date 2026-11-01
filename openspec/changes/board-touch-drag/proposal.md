@@ -46,11 +46,10 @@ One string, an accessible name only; nothing visible is added besides the ⋯ gl
 
 | Copy | Where | Why it is needed / why not removable |
 |---|---|---|
-| `More` | Accessible name of the ⋯ button on a card | A glyph-only control needs a name for screen readers. Short on purpose. Not visible, so nothing to reveal later. |
+| `More` (reused) | Accessible name of the ⋯ button on a card | A glyph-only control needs a name for screen readers. Short on purpose. Not visible, so nothing to reveal later. |
 
-The drag has no visible text: no hint, no "drop here", no empty-column prose. `More` is new to the
-mobile catalog, so it is added to the five locale files under `lib/locales/nurlings-board/` (the
-mobile i18n test requires every `t()` string in every catalog).
+The drag has no visible text: no hint, no "drop here", no empty-column prose. `More` already
+exists in all five mobile catalogs, so no locale file changes.
 
 ### Native-only, and what CI covers
 
@@ -76,8 +75,7 @@ to call the shared validity function. Overlap with an upstream mobile board is c
   card" requirements change; one requirement is added.
 - `board-tickets` is unchanged: its "Move cards between columns" requirement already says drag and
   Move to, and the web behaviour does not change.
-- Mobile app: `nurlings-board` components, one line in `board.tsx`, one string in five locale files,
-  and the `expo-haptics` dependency.
+- Mobile app: `nurlings-board` components, one line in `board.tsx`, and the `expo-haptics` dependency.
 - `@rakazo/core`: one small pure function next to `boardColumns`.
 - No API, contract, schema or migration change. Contacts no Rakazo-owned infrastructure.
 
