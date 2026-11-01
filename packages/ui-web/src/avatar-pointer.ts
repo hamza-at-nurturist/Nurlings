@@ -17,6 +17,8 @@ export interface AvatarPointerTarget {
   strength: () => number;
   /** Scales the reach for bodies whose eyes sit near the edge. */
   reach: number;
+  /** The Nurling this avatar shows; every avatar of the same Nurling shares its dizziness. */
+  nurling?: string;
   /** Called when a shake near this avatar starts or ends its dizziness. */
   onDizzy: (on: boolean) => void;
 }
@@ -62,15 +64,27 @@ function clearDizzy() {
   queue();
 }
 
-/** A shake makes the avatars near the pointer dizzy, not every avatar on the page. */
+/**
+ * A shake makes dizzy the Nurling the pointer is near, on every screen spot that shows it (the
+ * sidebar, the header and the profile are one Nurling), and no other Nurling.
+ */
 function startDizzy(at: { x: number; y: number }) {
-  for (const target of targets) {
+  const near = (target: AvatarPointerTarget) => {
     const rect = target.element.getBoundingClientRect();
     const distance = Math.hypot(
       at.x - (rect.left + rect.width / 2),
       at.y - (rect.top + rect.height / 2),
     );
-    if (distance > avatarFollowRadius(rect.width) || dizzy.has(target)) continue;
+    return distance <= avatarFollowRadius(rect.width);
+  };
+  const shaken = new Set<string>();
+  for (const target of targets) {
+    if (target.nurling && near(target)) shaken.add(target.nurling);
+  }
+  for (const target of targets) {
+    if (dizzy.has(target)) continue;
+    if (!(target.nurling && shaken.has(target.nurling)) && !(!target.nurling && near(target)))
+      continue;
     dizzy.add(target);
     target.onDizzy(true);
   }

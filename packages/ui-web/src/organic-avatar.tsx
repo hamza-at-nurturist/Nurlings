@@ -152,9 +152,10 @@ export function OrganicAvatar({
       element,
       strength: () => followRef.current,
       reach,
+      nurling: identity,
       onDizzy: setShaken,
     });
-  }, [ref, still, reach]);
+  }, [ref, still, reach, identity]);
   useEffect(() => {
     // jsdom has no SMIL clock, so these are optional.
     if (visible) ref.current?.unpauseAnimations?.();

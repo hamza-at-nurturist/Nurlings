@@ -152,3 +152,33 @@ describe("glint on light bodies", () => {
     expect(teal?.getAttribute("data-glint-tone")).toBeNull();
   });
 });
+
+describe("one Nurling, several avatars", () => {
+  it("makes every avatar of the shaken Nurling dizzy, wherever it is, and no other Nurling", async () => {
+    vi.useFakeTimers();
+    const container = await mount(
+      <>
+        <BotAvatar color="#14B8A6" identity="chief" size={48} />
+        <BotAvatar color="#14B8A6" identity="chief" size={72} />
+        <BotAvatar color="#14B8A6" identity="other" size={48} />
+      </>,
+    );
+    const [near, away, other] = [...container.querySelectorAll("svg")];
+    const place = (el: Element | undefined, left: number) => {
+      el!.getBoundingClientRect = () =>
+        ({ left, top: 80, width: 48, height: 48, right: left + 48, bottom: 128 }) as DOMRect;
+    };
+    place(near, 100);
+    place(away, 3000);
+    place(other, 5000);
+    await act(async () => {
+      for (let i = 0; i < 12; i += 1) {
+        vi.advanceTimersByTime(60);
+        move(i % 2 ? 100 : 160, 100);
+      }
+    });
+    expect(near?.getAttribute("data-dizzy")).toBe("true");
+    expect(away?.getAttribute("data-dizzy")).toBe("true");
+    expect(other?.getAttribute("data-dizzy")).toBe("false");
+  });
+});
