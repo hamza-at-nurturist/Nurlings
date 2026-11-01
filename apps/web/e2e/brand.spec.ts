@@ -58,7 +58,7 @@ test("the signed-in app and its settings carry the brand and no upstream name", 
 
   await createNamedBot(page, "Scout");
   await openNewBot(page);
-  await expect(page.getByTestId("create-bot-dialog")).toContainText(ui("Create new Bot"));
+  await expect(page.getByTestId("create-bot-dialog")).toContainText(ui("New Bot"));
   await expectNoUpstreamName(page, "new bot dialog");
   await captureScreenshot(page, testInfo, "brand-new-bot");
 

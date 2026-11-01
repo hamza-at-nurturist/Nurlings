@@ -1,6 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { brand } from "@nurlings/brand";
 import { EmailEmulator, FakeSandboxProvider } from "@rakazo/adapters";
 import { runAsSystem } from "@rakazo/db";
 import { expect, it, vi } from "vitest";
@@ -36,7 +37,8 @@ it.skipIf(!databaseUrl)(
         headers: { "content-type": "application/json", origin: webOrigin },
         body: JSON.stringify(body),
       });
-    const welcomes = () => email.sent.filter((message) => message.subject === "Welcome to Rakazo");
+    const welcomes = () =>
+      email.sent.filter((message) => message.subject === `Welcome to ${brand.name}`);
     try {
       expect((await post("/api/auth/sign-up/email", { ...credentials, name: "New" })).status).toBe(
         200,

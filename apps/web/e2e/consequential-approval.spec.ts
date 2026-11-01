@@ -74,7 +74,8 @@ test("A change asks without an approval model, and approvals settings shape what
   await settings.getByTestId("settings-nav-confirmations").click();
   await expect(settings.getByRole("heading", { name: "Approvals", exact: true })).toBeVisible();
   const mode = settings.getByTestId("approval-mode");
-  await expect(mode.getByRole("button", { name: "Auto", exact: true })).toHaveAttribute(
+  // Nurlings asks first until a member turns Auto on (and Auto needs an approval model).
+  await expect(mode.getByRole("button", { name: "Ask", exact: true })).toHaveAttribute(
     "aria-pressed",
     "true",
   );

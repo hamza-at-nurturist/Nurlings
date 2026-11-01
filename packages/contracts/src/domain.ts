@@ -868,7 +868,8 @@ export const PluginMarketplaceCatalogSchema = z.object({
 export type PluginMarketplaceCatalog = z.infer<typeof PluginMarketplaceCatalogSchema>;
 
 export const PLUGIN_SUBMISSIONS_PATH = "/api/v1/plugin-submissions";
-export const SUBMIT_PLUGIN_URL = "https://rakazo.com/plugins/submit/";
+// Upstream's submission page is not ours; there is no link until the product has one.
+export const SUBMIT_PLUGIN_URL: string | null = null;
 
 const HttpsUrlSchema = z
   .string()

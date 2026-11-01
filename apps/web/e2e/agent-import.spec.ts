@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { brand } from "@nurlings/brand";
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import type { Bot, MemoryDocument } from "@rakazo/contracts";
@@ -260,8 +261,8 @@ test("imports an OpenClaw folder and another assistant's document as new bots", 
   }
   await preview.getByRole("button", { name: "Not imported", exact: true }).click();
   await expect(preview.getByTestId("agent-import-skipped").getByRole("listitem")).toHaveText([
-    /IDENTITY\.md: Emoji\s*Not used by Rakazo/,
-    /TOOLS\.md\s*Not used by Rakazo/,
+    new RegExp(`IDENTITY\\.md: Emoji\\s*Not used by ${brand.name}`),
+    new RegExp(`TOOLS\\.md\\s*Not used by ${brand.name}`),
   ]);
   // IDENTITY.md names and describes the bot; it is not part of its instructions.
   await expect(preview.getByRole("textbox", { name: "Name" })).toHaveValue("Pebble");

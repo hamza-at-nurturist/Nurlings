@@ -52,19 +52,12 @@ test("Chief's eyes use the organic idle and working animations, and stop for red
     return item.locator(`.rakazo-organic-avatar-eyes-${group}`).first();
   };
 
-  await expect(eyesOf(idle, "chief", "idle")).toHaveCSS(
-    "animation-name",
-    /^rakazo-eyes-idle-[0-3]$/,
-  );
+  // Upstream dropped the idle eye animation, so idle eyes are still; only working eyes loop.
   await expect(eyesOf(working, "chief", "working")).toHaveCSS(
     "animation-name",
     /^rakazo-organic-eyes-loop-[0-3]$/,
   );
-  // Same keyframes as an organic avatar's eyes; the classic shapes still have none.
-  await expect(eyesOf(idle, "organic", "idle")).toHaveCSS(
-    "animation-name",
-    /^rakazo-eyes-idle-[0-3]$/,
-  );
+  // The classic shapes have no animated eyes.
   await expect(
     idle.locator('[data-avatar="regular"]').first().locator(".rakazo-organic-avatar-eyes"),
   ).toHaveCount(0);
