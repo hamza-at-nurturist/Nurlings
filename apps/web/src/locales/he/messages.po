@@ -482,6 +482,10 @@ msgstr "נפתחה לשונית התחברות בכתובת <0>{0}</0>. יש ל�
 msgid "A subscription credential is stored securely."
 msgstr "פרטי גישה של המנוי נשמרים בצורה מאובטחת."
 
+#: src/pages/KnowledgeSection.tsx
+msgid "About {kb} KB of memory no longer reaches the bot."
+msgstr ""
+
 #: src/components/InfoTooltip.tsx
 msgid "About {label}"
 msgstr "על {label}"
@@ -490,6 +494,7 @@ msgstr "על {label}"
 msgid "Access token (optional)"
 msgstr "טוקן גישה (אופציונלי)"
 
+#: src/components/AccountMenu.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Account"
 msgstr "חשבון"
@@ -893,6 +898,10 @@ msgstr "אישורים"
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "אישור"
+
+#: src/lib/call-session.ts
+msgid "Approve or deny it on screen."
+msgstr "יש לאשר או לדחות על המסך."
 
 #: src/pages/shell/message-cards.tsx
 msgid "Approve this server to let your agent use its tools."
@@ -2561,6 +2570,7 @@ msgid "Delete {0}?"
 msgstr "למחוק את {0}?"
 
 #: src/components/AccountAccess.tsx
+#: src/components/AccountMenu.tsx
 msgid "Delete account"
 msgstr "מחיקת החשבון"
 
@@ -2838,13 +2848,17 @@ msgstr "נדרש אימות אימייל"
 msgid "Enable {0}"
 msgstr "הפעלת {0}"
 
-#: src/pages/BillingSettingsPanel.tsx
+#: src/lib/billing.ts
 msgid "Ends {day}"
 msgstr "מסתיים ב-{day}"
 
 #: src/pages/ExternalConversationSettings.tsx
 msgid "Engage when... Ignore..."
 msgstr "להגיב כאשר... להתעלם מ..."
+
+#: src/components/GitHubStarPrompt.tsx
+msgid "Enjoying Rakazo?"
+msgstr ""
 
 #: src/lib/user-error.ts
 msgid "Enter a password"
@@ -3650,9 +3664,8 @@ msgstr "גישה מקומית מאפשרת לבוטים להריץ פקודות 
 msgid "Local computer access requires the latest desktop app."
 msgstr ""
 
-#: src/components/ModelCredits.tsx
+#: src/components/AccountMenu.tsx
 #: src/components/SidebarFooter.tsx
-#: src/pages/Paywall.tsx
 msgid "Log out"
 msgstr "התנתקות"
 
@@ -3701,8 +3714,8 @@ msgid "Manage MCP servers"
 msgstr "ניהול שרתי MCP"
 
 #: src/pages/shell/bot-panel.tsx
-msgid "Manage the bots it creates"
-msgstr "ניהול הבוטים שהוא יוצר"
+msgid "Manage other bots"
+msgstr "ניהול בוטים אחרים"
 
 #: src/pages/PluginsOverlay.tsx
 msgid "Manual"
@@ -4296,6 +4309,7 @@ msgstr "לא בקטלוג של Rakazo"
 msgid "Not in the plugin catalog"
 msgstr "לא נמצא בקטלוג התוספים"
 
+#: src/components/GitHubStarPrompt.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Not now"
 msgstr "לא עכשיו"
@@ -5010,7 +5024,7 @@ msgstr "שינוי שם"
 msgid "Rename section"
 msgstr "שינוי שם המקטע"
 
-#: src/pages/BillingSettingsPanel.tsx
+#: src/lib/billing.ts
 msgid "Renews {day}"
 msgstr "מתחדש ב-{day}"
 
@@ -5758,6 +5772,10 @@ msgstr ""
 msgid "SSO is temporarily unavailable. Try again."
 msgstr "SSO אינו זמין כרגע. אפשר לנסות שוב."
 
+#: src/components/GitHubStarPrompt.tsx
+msgid "Star on GitHub"
+msgstr ""
+
 #: src/components/board/TicketModal/Properties.tsx
 #: src/pages/shell/computer-overlay.tsx
 msgid "Start"
@@ -6287,7 +6305,7 @@ msgstr "טוקן Treg"
 msgid "Trial"
 msgstr "תקופת ניסיון"
 
-#: src/pages/BillingSettingsPanel.tsx
+#: src/lib/billing.ts
 msgid "Trial ends {day}"
 msgstr "תקופת הניסיון מסתיימת {day}"
 

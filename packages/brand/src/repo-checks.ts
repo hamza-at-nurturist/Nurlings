@@ -149,17 +149,21 @@ const SERVER_TEXT_FILES = [
 ];
 /**
  * Lines that name the upstream on purpose: internal errors and the legacy automated-message label
- * and compaction prefix, which the matchers still accept.
+ * and compaction prefix, which the matchers still accept. Email copy goes through `say(...)`, which
+ * rebrands the template; `email.test.ts` checks that no rendered email says Rakazo.
  */
 const SERVER_TEXT_EXEMPT =
-  /throw new Error|OFFICIAL_REPO_URL|Automated message from Rakazo|Rakazo-owned compacted context/;
+  /throw new Error|OFFICIAL_REPO_URL|Automated message from Rakazo|Rakazo-owned compacted context|\bsay\(/;
 
 export function upstreamNameInServerText(source: string): number[] {
   const lines: number[] = [];
-  source.split("\n").forEach((line, index) => {
+  const sourceLines = source.split("\n");
+  sourceLines.forEach((line, index) => {
     const trimmed = line.trim();
     if (/^(\/\/|\*|\/\*)/.test(trimmed)) return;
     if (SERVER_TEXT_EXEMPT.test(line)) return;
+    // The argument of a `say(` call that the formatter moved to its own line.
+    if (/\bsay\($/.test(sourceLines[index - 1]?.trim() ?? "")) return;
     if (/\bRakazo\b/.test(line)) lines.push(index + 1);
   });
   return lines;

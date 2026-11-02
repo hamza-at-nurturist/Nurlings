@@ -100,6 +100,7 @@ describe("the bot → Nurling rule on the real English catalog", () => {
       .sort();
     expect(fired).toMatchInlineSnapshot(`
       [
+        "["About ",["kb"]," KB of memory no longer reaches the bot."]",
         "["All bots"]",
         "["Allow cross-space bot communication"]",
         "["Bot is watching, not acting"]",
@@ -133,7 +134,7 @@ describe("the bot → Nurling rule on the real English catalog", () => {
         "["Let bots use this computer"]",
         "["Lets bots save and recall facts by meaning, alongside MEMORY.md."]",
         "["Local access lets bots run commands without asking. Avoid it on shared or public servers."]",
-        "["Manage the bots it creates"]",
+        "["Manage other bots"]",
         "["Minimize bots"]",
         "["Name this bot"]",
         "["Name your Bot"]",

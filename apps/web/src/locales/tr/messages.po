@@ -482,6 +482,10 @@ msgstr ""
 msgid "A subscription credential is stored securely."
 msgstr "Bir abonelik kimlik bilgisi güvenli şekilde saklanıyor."
 
+#: src/pages/KnowledgeSection.tsx
+msgid "About {kb} KB of memory no longer reaches the bot."
+msgstr ""
+
 #: src/components/InfoTooltip.tsx
 msgid "About {label}"
 msgstr "{label} hakkında"
@@ -490,6 +494,7 @@ msgstr "{label} hakkında"
 msgid "Access token (optional)"
 msgstr "Erişim token'ı (isteğe bağlı)"
 
+#: src/components/AccountMenu.tsx
 #: src/pages/AccountSettingsOverlay.tsx
 msgid "Account"
 msgstr "Hesap"
@@ -893,6 +898,10 @@ msgstr "Onaylar"
 #: src/pages/shell/message-cards.tsx
 msgid "Approve"
 msgstr "Onayla"
+
+#: src/lib/call-session.ts
+msgid "Approve or deny it on screen."
+msgstr "Ekranda onayla veya reddet."
 
 #: src/pages/shell/message-cards.tsx
 msgid "Approve this server to let your agent use its tools."
@@ -2561,6 +2570,7 @@ msgid "Delete {0}?"
 msgstr "{0} silinsin mi?"
 
 #: src/components/AccountAccess.tsx
+#: src/components/AccountMenu.tsx
 msgid "Delete account"
 msgstr "Hesabı sil"
 
@@ -2838,12 +2848,16 @@ msgstr "E-posta doğrulaması gerekiyor"
 msgid "Enable {0}"
 msgstr "{0} etkinleştir"
 
-#: src/pages/BillingSettingsPanel.tsx
+#: src/lib/billing.ts
 msgid "Ends {day}"
 msgstr ""
 
 #: src/pages/ExternalConversationSettings.tsx
 msgid "Engage when... Ignore..."
+msgstr ""
+
+#: src/components/GitHubStarPrompt.tsx
+msgid "Enjoying Rakazo?"
 msgstr ""
 
 #: src/lib/user-error.ts
@@ -3202,11 +3216,11 @@ msgstr "Aramayı sonlandır"
 
 #: src/lib/call-session.ts
 msgid "Hang up first, then enter the code on screen."
-msgstr ""
+msgstr "Önce aramayı sonlandır, sonra kodu ekrana gir."
 
 #: src/lib/call-session.ts
 msgid "Hang up, then enter the code on screen."
-msgstr ""
+msgstr "Aramayı sonlandır, sonra kodu ekrana gir."
 
 #: src/pages/RoutineEditor.tsx
 msgid "header"
@@ -3650,9 +3664,8 @@ msgstr "Yerel erişim, botların sormadan komut çalıştırmasına izin verir. 
 msgid "Local computer access requires the latest desktop app."
 msgstr ""
 
-#: src/components/ModelCredits.tsx
+#: src/components/AccountMenu.tsx
 #: src/components/SidebarFooter.tsx
-#: src/pages/Paywall.tsx
 msgid "Log out"
 msgstr "Çıkış yap"
 
@@ -3701,8 +3714,8 @@ msgid "Manage MCP servers"
 msgstr "MCP sunucularını yönet"
 
 #: src/pages/shell/bot-panel.tsx
-msgid "Manage the bots it creates"
-msgstr "Oluşturduğu botları yönet"
+msgid "Manage other bots"
+msgstr "Diğer botları yönet"
 
 #: src/pages/PluginsOverlay.tsx
 msgid "Manual"
@@ -4296,6 +4309,7 @@ msgstr "Rakazo kataloğunda yok"
 msgid "Not in the plugin catalog"
 msgstr ""
 
+#: src/components/GitHubStarPrompt.tsx
 #: src/pages/shell/message-cards.tsx
 msgid "Not now"
 msgstr "Şimdi değil"
@@ -5010,7 +5024,7 @@ msgstr "Yeniden adlandır"
 msgid "Rename section"
 msgstr "Bölümü yeniden adlandır"
 
-#: src/pages/BillingSettingsPanel.tsx
+#: src/lib/billing.ts
 msgid "Renews {day}"
 msgstr ""
 
@@ -5758,6 +5772,10 @@ msgstr ""
 msgid "SSO is temporarily unavailable. Try again."
 msgstr "SSO geçici olarak kullanılamıyor. Yeniden deneyin."
 
+#: src/components/GitHubStarPrompt.tsx
+msgid "Star on GitHub"
+msgstr ""
+
 #: src/components/board/TicketModal/Properties.tsx
 #: src/pages/shell/computer-overlay.tsx
 msgid "Start"
@@ -6287,7 +6305,7 @@ msgstr "Treg token'ı"
 msgid "Trial"
 msgstr ""
 
-#: src/pages/BillingSettingsPanel.tsx
+#: src/lib/billing.ts
 msgid "Trial ends {day}"
 msgstr ""
 
