@@ -2,15 +2,15 @@
 
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { i18n } from "@lingui/core";
-import { I18nProvider } from "@lingui/react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { leadPipelineApp, leadPipelineData } from "../lib/mini-app/lead-pipeline-example";
 import { MiniAppViewer, parseMiniApp } from "./MiniAppViewer";
 
-i18n.loadAndActivate({ locale: "en", messages: {} });
+vi.mock("@lingui/react/macro", () => ({
+  useLingui: () => ({ t: (strings: TemplateStringsArray) => strings.join("") }),
+}));
 
 afterEach(() => {
   vi.useRealTimers();
@@ -23,11 +23,7 @@ async function render(props: Parameters<typeof MiniAppViewer>[0]) {
   document.body.append(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(
-      <I18nProvider i18n={i18n}>
-        <MiniAppViewer {...props} />
-      </I18nProvider>,
-    );
+    root.render(<MiniAppViewer {...props} />);
   });
   return container;
 }
