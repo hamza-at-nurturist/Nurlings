@@ -6,6 +6,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -140,6 +141,29 @@ function TicketView({ ticketId }: { ticketId: string }) {
     }
   }
 
+  function confirmDelete() {
+    if (!ticket) return;
+    Alert.alert(
+      t("Delete {ref}?", { ref: ticket.ref }),
+      t("This removes the ticket, its comments and its history. It can't be undone."),
+      [
+        { text: t("Cancel"), style: "cancel" },
+        {
+          text: t("Delete"),
+          style: "destructive",
+          onPress: () => {
+            setBusy(true);
+            rpc("tickets/delete", { id: ticket.id })
+              .then(() => router.back())
+              .catch((cause) => {
+                setError(errorText(cause));
+                setBusy(false);
+              });
+          },
+        },
+      ],
+    );
+  }
   async function approve() {
     if (!ticket) return;
     setBusy(true);
@@ -254,6 +278,12 @@ function TicketView({ ticketId }: { ticketId: string }) {
             onSave={(description) => void save({ description: description || null })}
           />
           <TicketFiles files={activity.files} label={t("Files")} />
+          <NativeActionButton
+            label={t("Delete ticket")}
+            prominence="destructive"
+            disabled={busy}
+            onPress={confirmDelete}
+          />
         </ScrollView>
         {ticket.status === "review" ? (
           <View style={[styles.approve, { paddingBottom: Math.max(insets.bottom, 12) }]}>
