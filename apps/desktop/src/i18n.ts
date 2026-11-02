@@ -1,4 +1,4 @@
-import { brand, brandText } from "@nurlings/brand";
+import { brand, brandProduct, brandText } from "@nurlings/brand";
 import { matchUiLocale, translate } from "@rakazo/core";
 import type { IpcMainInvokeEvent } from "electron";
 import type { AppTarget } from "./app-frame.js";
@@ -31,9 +31,18 @@ export function desktopLocale(): DesktopLocale {
   return activeLocale;
 }
 
-/** The active translations, keyed by the English text; empty for English. */
+/**
+ * The active translations, keyed by the English text; empty for English. The setup page's own
+ * text is branded when it is copied, so its keys and the translations carry the same product name.
+ */
 export function desktopMessages(): Readonly<Record<string, string>> {
-  return CATALOGS[activeLocale] ?? {};
+  const catalog = CATALOGS[activeLocale] ?? {};
+  return Object.fromEntries(
+    Object.entries(catalog).map(([message, text]) => [
+      brandProduct(message, brand),
+      brandProduct(text, brand),
+    ]),
+  );
 }
 
 /** An error whose message stays English for error reports and shows `detail` to the person. */

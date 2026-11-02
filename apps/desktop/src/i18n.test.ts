@@ -81,7 +81,10 @@ describe("desktop language", () => {
     expect(t("Rakazo {version} is ready to install.", { version: "1.2.0" })).toBe(
       `${brand.name} 1.2.0 está listo para instalarse.`,
     );
-    expect(desktopMessages()).toBe(ES_MESSAGES);
+    const messages = desktopMessages();
+    expect(Object.keys(messages)).toHaveLength(Object.keys(ES_MESSAGES).length);
+    // The setup page is branded when copied, so it asks for the branded English text.
+    expect(messages[`Welcome to ${brand.name}`]).toBe(`Te damos la bienvenida a ${brand.name}`);
 
     expect(startDesktopLocale("es; rm -rf /", "en-US")).toBe("en");
     expect(t("Check for Updates…")).toBe("Check for Updates…");
