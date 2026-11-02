@@ -70,6 +70,10 @@ test("every body in the picker is drawn with its gloss", async ({ page }, testIn
 test("shaking the pointer makes nearby avatars dizzy, but not far, sleeping or thinking ones", async ({
   page,
 }) => {
+  // The shake detector counts direction changes inside a window of page time. Run that time on the
+  // test clock, advanced one step per move, so a slow runner cannot stretch the shake out of it.
+  await page.clock.install({ time: 0 });
+  await page.clock.pauseAt(1000);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 1120, height: 760 });
   await page.goto("/e2e/fixtures/avatar-states.html");
@@ -84,14 +88,15 @@ test("shaking the pointer makes nearby avatars dizzy, but not far, sleeping or t
   const far = page.locator('[data-row="bodies"] svg').last();
   for (let i = 0; i < 14; i += 1) {
     await page.mouse.move(i % 2 ? cx - 60 : cx + 60, cy);
-    await page.waitForTimeout(40);
+    await page.clock.runFor(40);
   }
   await expect(idle).toHaveAttribute("data-dizzy", "true");
   await expect(idle.locator(".rakazo-av-spiral").first()).toHaveCSS("opacity", "1");
   await expect(far).toHaveAttribute("data-dizzy", "false");
   await expect(asleep).toHaveAttribute("data-dizzy", "false");
   await expect(thinking).toHaveAttribute("data-dizzy", "false");
-  await expect(idle).toHaveAttribute("data-dizzy", "false", { timeout: 4000 });
+  await page.clock.runFor(3000);
+  await expect(idle).toHaveAttribute("data-dizzy", "false");
 });
 
 test("the face follows the pointer and stays put when motion is reduced", async ({ page }) => {
