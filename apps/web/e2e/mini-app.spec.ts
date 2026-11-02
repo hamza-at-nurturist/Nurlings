@@ -70,3 +70,45 @@ test("a finance dashboard draws a chart, tones, badges and tabs", async ({ page 
 
   await captureScreenshot(page, testInfo, "mini-app-finance-breakdown");
 });
+
+for (const [theme, surface, appCard] of [
+  ["dark", "rgb(0, 0, 0)", "#1f1f1f"],
+  ["light", "rgb(255, 255, 255)", "#f2f2f2"],
+] as const) {
+  test(`a mini app is pure ${theme === "dark" ? "black" : "white"} in the ${theme} theme and the app around it keeps its own colors`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 1120, height: 900 });
+    await page.goto("/e2e/fixtures/mini-app.html?app=finance");
+    // What the theme switch does: it sets data-theme on the document.
+    await page.evaluate((value) => {
+      document.documentElement.dataset.theme = value;
+    }, theme);
+
+    const app = page.getByTestId("mini-app");
+    await expect(app.getByRole("heading", { name: "Finance overview" })).toBeVisible();
+    await expect(app).toHaveCSS("background-color", surface);
+    // Its cards sit on the same surface, with a border between them instead of a grey fill.
+    await expect(app.locator("div.rounded-lg.border").first()).toHaveCSS(
+      "background-color",
+      surface,
+    );
+
+    // The variables are scoped to the mini app: the page beside it still has the app's own card color.
+    const colors = await page.evaluate(() => {
+      const read = (element: Element | null) =>
+        element ? getComputedStyle(element).getPropertyValue("--card").trim() : "";
+      return {
+        inside: read(document.querySelector('[data-testid="mini-app"]')),
+        outside: read(document.querySelector('[data-testid="asked"]')),
+      };
+    });
+    expect(colors.outside.toLowerCase()).toBe(appCard);
+    expect(colors.inside.toLowerCase()).toBe(theme === "dark" ? "#000000" : "#ffffff");
+
+    // The chart code loads on demand; wait for it before taking the picture.
+    await expect(app.locator(".recharts-bar-rectangle").first()).toBeVisible();
+
+    await captureScreenshot(page, testInfo, `mini-app-finance-${theme}`);
+  });
+}
