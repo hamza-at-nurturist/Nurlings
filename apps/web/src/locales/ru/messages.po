@@ -2955,6 +2955,10 @@ msgstr "Развернуть"
 msgid "Expand {0}"
 msgstr "Развернуть {0}"
 
+#: src/components/InstructionsExpand.tsx
+msgid "Expand instructions"
+msgstr ""
+
 #: src/components/markdown-copy.tsx
 msgid "Expand table"
 msgstr "Развернуть таблицу"
@@ -3412,6 +3416,7 @@ msgstr "История инструкций"
 
 #: src/components/AskCard.tsx
 #: src/components/InstructionSettings.tsx
+#: src/components/InstructionsExpand.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Instructions"
 msgstr "Инструкции"

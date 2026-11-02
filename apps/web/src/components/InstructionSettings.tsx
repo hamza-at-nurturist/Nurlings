@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@rakazo/ui-web/componen
 import { History } from "lucide-react";
 import { useId, useState } from "react";
 import { rpc } from "../lib/rpc";
+import { InstructionsExpand } from "./InstructionsExpand";
 import { errorText } from "../lib/user-error";
 
 export function InstructionSettings({ bot }: { bot: Bot }) {
@@ -96,6 +97,17 @@ export function InstructionSettings({ bot }: { bot: Bot }) {
             </PopoverContent>
           </Popover>
         ) : null}
+        <InstructionsExpand
+          value={instructions}
+          disabled={pending}
+          onChange={setInstructions}
+          onClose={() => {
+            if (!conflict && instructions !== current.instructions)
+              void save(() =>
+                rpc.bots.update({ botId: bot.id, instructions, expectedInstructions: baseline }),
+              );
+          }}
+        />
       </div>
       <Textarea
         id={`${id}-instructions`}

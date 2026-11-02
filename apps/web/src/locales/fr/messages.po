@@ -2955,6 +2955,10 @@ msgstr "Développer"
 msgid "Expand {0}"
 msgstr "Développer {0}"
 
+#: src/components/InstructionsExpand.tsx
+msgid "Expand instructions"
+msgstr ""
+
 #: src/components/markdown-copy.tsx
 msgid "Expand table"
 msgstr "Agrandir le tableau"
@@ -3412,6 +3416,7 @@ msgstr "Historique des instructions"
 
 #: src/components/AskCard.tsx
 #: src/components/InstructionSettings.tsx
+#: src/components/InstructionsExpand.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Instructions"
 msgstr "Instructions"
