@@ -8,8 +8,8 @@ import {
   avatarClock,
   avatarFrame,
   avatarGlossPath,
-  avatarJellyFrame,
   avatarIdentitySeed,
+  avatarJellyFrame,
   avatarMotionState,
   avatarPokeFrame,
   avatarPropAnchors,
@@ -38,8 +38,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import Svg, {
-  ClipPath,
   Circle,
+  ClipPath,
   Defs,
   Ellipse,
   G,
