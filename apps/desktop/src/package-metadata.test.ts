@@ -13,7 +13,11 @@ const packageJson = JSON.parse(raw) as {
     appId?: string;
     publish?: unknown;
     extraMetadata?: { name?: string };
-    mac?: { icon?: string; extendInfo?: Record<string, string> };
+    mac?: {
+      icon?: string;
+      extendInfo?: Record<string, string>;
+      extraResources?: { from: string; to: string }[];
+    };
     win?: { icon?: string };
     linux?: { executableName?: string; icon?: string };
   };
@@ -58,5 +62,23 @@ describe("desktop package metadata", () => {
     expect(packageJson.build).not.toHaveProperty("publish");
     expect(raw).not.toContain("elie222");
     expect(raw).not.toMatch(/"repo":\s*"rakazo"/);
+  });
+
+  it("ships a Spanish version of every macOS permission prompt", () => {
+    const strings = readFileSync(
+      path.resolve(import.meta.dirname, "../assets/es.lproj/InfoPlist.strings"),
+      "utf8",
+    );
+    const prompts = Object.keys(packageJson.build?.mac?.extendInfo ?? {}).filter((key) =>
+      key.endsWith("UsageDescription"),
+    );
+    expect(prompts.length).toBeGreaterThan(0);
+    for (const key of prompts) expect(strings, key).toMatch(new RegExp(`^"${key}" = ".+";$`, "m"));
+    expect(strings).not.toMatch(/Rakazo|\bbots?\b/);
+    expect(strings).toContain(brand.name);
+    expect(packageJson.build?.mac?.extraResources).toContainEqual({
+      from: "assets/es.lproj",
+      to: "es.lproj",
+    });
   });
 });

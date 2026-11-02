@@ -28,6 +28,7 @@ import { getLogger } from "@rakazo/logging";
 import { activeCodingAgent } from "./coding-agent-activity.js";
 import { expireComputerControl, hasActiveComputerControl } from "./computer-control.js";
 import { screenLeaseIdForRun, toComputerRef } from "./computer-lifecycle.js";
+import { BrowserStillRunningError } from "./computer-screens.js";
 import { checkpointComputerWorkspace } from "./computer-workspace.js";
 import { HomeSaveConflictError } from "./home-object-store.js";
 import { sandboxAllowanceUsedUp } from "./sandbox-allowance.js";
@@ -424,7 +425,13 @@ export async function sleepComputerIfIdle(
   if (computer.kind === "desktop") return;
 
   if (computer.controlBotId && computer.controlLeaseId && !hasActiveComputerControl(computer)) {
-    await expireComputerControl(deps, computer.id, computer.controlLeaseId);
+    try {
+      await expireComputerControl(deps, computer.id, computer.controlLeaseId);
+    } catch (error) {
+      scheduleComputerSleep(deps.jobs, computer.id, undefined, rateLimitEnds(error));
+      if (deferSleep(error, computer)) return;
+      throw error;
+    }
     computer = await loadComputer(deps.prisma, computerId);
     if (!computer?.providerRef || !mayNeedSleep(computer)) return;
   }
@@ -895,7 +902,9 @@ export function sleepDeferReason(error: unknown): string | undefined {
             : "too_many_files"
           : error instanceof HomeSaveConflictError
             ? "saved_elsewhere"
-            : undefined;
+            : error instanceof BrowserStillRunningError
+              ? "browser_running"
+              : undefined;
 }
 
 /**

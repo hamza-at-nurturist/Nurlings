@@ -93,18 +93,22 @@ describe("desktop sources", () => {
     const literals = sources.flatMap((name) =>
       stringLiterals(readFileSync(path.join(import.meta.dirname, name), "utf8")),
     );
-    expect(literals).toContain(" is up to date.");
-    expect(literals).toContain("Sign-in callback rejected. Return to ");
+    expect(literals).toContain("Rakazo is up to date.");
+    expect(literals).toContain("Sign-in callback rejected. Return to Rakazo to retry.");
     expect(literals.length).toBeGreaterThan(300);
   });
 
-  it("never shows the upstream product name in a string literal", () => {
+  it("never shows the upstream product name outside a message that t() rebrands", () => {
     const offenders: string[] = [];
     for (const name of sources) {
       const source = readFileSync(path.join(import.meta.dirname, name), "utf8");
       for (const text of stringLiterals(source)) {
         if (EMBEDDED_RENDERER_SCRIPTS.some((marker) => text.includes(marker))) continue;
-        if (UPSTREAM_NAME.test(text)) offenders.push(`${name}: ${text}`);
+        if (!UPSTREAM_NAME.test(text)) continue;
+        const quoted = text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        // The message is a `t(...)` argument: `t` rebrands it before placeholders are filled.
+        if (new RegExp(`\\bt\\(\\s*["'\`]${quoted}["'\`]`).test(source)) continue;
+        offenders.push(`${name}: ${text}`);
       }
     }
     expect(offenders).toEqual([]);

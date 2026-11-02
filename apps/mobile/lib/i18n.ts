@@ -1,4 +1,5 @@
 import { brand, brandText } from "@nurlings/brand";
+import { translate } from "@rakazo/core";
 import { useSyncExternalStore } from "react";
 import { DE_MESSAGES, PEER_MESSAGE_FORMS as DE_PEER_FORMS } from "./locales/de";
 import { ES_MESSAGES, PEER_MESSAGE_FORMS as ES_PEER_FORMS } from "./locales/es";
@@ -48,11 +49,8 @@ export function dateLocaleForUi(locale: UiLocale = activeLocale): string {
  * bot's own name are never rewritten, and it covers untranslated (English fallback) messages too.
  */
 export function t(message: string, values?: Record<string, string | number>): string {
-  const template = brandText(catalogs[activeLocale]?.[message] ?? message, brand);
-  if (!values) return template;
-  return template.replace(/\{([A-Za-z0-9_]+)\}/g, (match, key: string) =>
-    Object.hasOwn(values, key) ? String(values[key]) : match,
-  );
+  const template = brandText(translate(catalogs[activeLocale], message), brand);
+  return translate(undefined, template, values);
 }
 
 export function useI18n(): { locale: UiLocale; t: typeof t } {

@@ -1,7 +1,7 @@
 {
   "name": "@rakazo/desktop",
   "productName": "Nurlings",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "author": {
     "name": "Nurturist AI"
   },
@@ -29,6 +29,7 @@
   "devDependencies": {
     "@playwright/test": "1.64.1",
     "@rakazo/adapters": "workspace:*",
+    "@rakazo/core": "workspace:*",
     "@rakazo/ui-tokens": "workspace:*",
     "electron": "45.0.0",
     "electron-builder": "26.15.3",
@@ -79,6 +80,10 @@
         {
           "from": "build/speech/rakazo-speech",
           "to": "speech/rakazo-speech"
+        },
+        {
+          "from": "assets/es.lproj",
+          "to": "es.lproj"
         }
       ],
       "target": [

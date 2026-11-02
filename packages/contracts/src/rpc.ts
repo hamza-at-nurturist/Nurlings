@@ -58,6 +58,7 @@ import {
   AgentSkillCatalogEntrySchema,
   AgentSkillSchema,
   AppBootstrapSchema,
+  AppLocaleSchema,
   ApprovalModeSchema,
   ArtifactSchema,
   ArtifactVersionSchema,
@@ -92,6 +93,7 @@ import {
   McpServerConfigInput,
   McpServerSchema,
   MemoryDocumentSchema,
+  MemoryPromptBudgetSchema,
   MemoryScopeSchema,
   MeSchema,
   MessagingAgentConnectionSchema,
@@ -307,10 +309,16 @@ export const appContract = {
           .object({
             avatarStyle: AvatarStyleSchema.optional(),
             timezone: TimeZoneSchema.nullable().optional(),
+            /** The language the app runs in, so emails can be written in it. */
+            locale: AppLocaleSchema.optional(),
           })
-          .refine((input) => input.avatarStyle !== undefined || input.timezone !== undefined, {
-            message: "Nothing to update",
-          }),
+          .refine(
+            (input) =>
+              input.avatarStyle !== undefined ||
+              input.timezone !== undefined ||
+              input.locale !== undefined,
+            { message: "Nothing to update" },
+          ),
       )
       .output(MeSchema),
     /** Saves a detected timezone only while none is saved, so it never replaces a choice. */
@@ -716,6 +724,7 @@ export const appContract = {
     list: oc
       .input(z.object({ botId: Id.optional(), scope: z.enum(["bot", "user"]).optional() }))
       .output(z.array(MemoryDocumentSchema)),
+    budget: oc.input(z.object({ botId: Id })).output(MemoryPromptBudgetSchema),
     update: oc
       .input(
         z.object({
