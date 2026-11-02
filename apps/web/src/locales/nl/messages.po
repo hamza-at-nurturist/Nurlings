@@ -2955,6 +2955,10 @@ msgstr "Uitklappen"
 msgid "Expand {0}"
 msgstr "{0} uitklappen"
 
+#: src/components/InstructionsExpand.tsx
+msgid "Expand instructions"
+msgstr ""
+
 #: src/components/markdown-copy.tsx
 msgid "Expand table"
 msgstr "Tabel uitvouwen"
@@ -3412,6 +3416,7 @@ msgstr "Instructiegeschiedenis"
 
 #: src/components/AskCard.tsx
 #: src/components/InstructionSettings.tsx
+#: src/components/InstructionsExpand.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Instructions"
 msgstr "Instructies"
