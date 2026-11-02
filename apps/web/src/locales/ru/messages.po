@@ -1502,6 +1502,10 @@ msgstr "Закрыть настройки пользователя"
 msgid "Close voice settings"
 msgstr "Закрыть настройки голоса"
 
+#: src/lib/ticket-status.ts
+msgid "Closed"
+msgstr ""
+
 #: src/pages/memory-providers/ConnectionModeFields.tsx
 msgid "Cloud"
 msgstr "Облако"

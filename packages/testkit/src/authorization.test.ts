@@ -460,6 +460,7 @@ describeWithDatabase("API authorization and resource isolation", () => {
       ["tickets/get"],
       ["tickets/create"],
       ["tickets/update"],
+      ["tickets/delete"],
       ["tickets/move"],
       ["tickets/comment"],
       ["tickets/comments"],

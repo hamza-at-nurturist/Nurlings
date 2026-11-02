@@ -33,5 +33,7 @@ export function ticketStatusLabel(status: TicketStatus, t: (message: string) => 
       return t("Done");
     case "closed":
       return t("Won't do");
+    case "archived":
+      return t("Closed");
   }
 }

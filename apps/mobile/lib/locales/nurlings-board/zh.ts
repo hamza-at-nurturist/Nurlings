@@ -4,6 +4,11 @@ export const NURLINGS_BOARD_ZH: Record<string, string> = {
   Blocked: "受阻",
   Board: "看板",
   "Choose date…": "选择日期…",
+  Closed: "已关闭",
+  "Delete ticket": "删除工单",
+  "Delete {ref}?": "删除 {ref}？",
+  "This removes the ticket, its comments and its history. It can't be undone.":
+    "这会删除工单及其评论和历史记录，且无法撤销。",
   Due: "截止",
   Files: "文件",
   "In progress": "进行中",

@@ -1502,6 +1502,10 @@ msgstr "סגירת הגדרות המשתמש"
 msgid "Close voice settings"
 msgstr "סגירת הגדרות הקול"
 
+#: src/lib/ticket-status.ts
+msgid "Closed"
+msgstr ""
+
 #: src/pages/memory-providers/ConnectionModeFields.tsx
 msgid "Cloud"
 msgstr "ענן"

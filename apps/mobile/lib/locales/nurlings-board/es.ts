@@ -1,6 +1,11 @@
 /** Board copy the upstream Spanish catalog lacks; spread into the es catalog (upstream's wins). */
 export const NURLINGS_BOARD_ES: Record<string, string> = {
   "Choose date…": "Elegir fecha…",
+  Closed: "Cerrado",
+  "Delete ticket": "Eliminar ticket",
+  "Delete {ref}?": "¿Eliminar {ref}?",
+  "This removes the ticket, its comments and its history. It can't be undone.":
+    "Esto elimina el ticket, sus comentarios y su historial. No se puede deshacer.",
   Description: "Descripción",
   Due: "Vence",
   Files: "Archivos",
