@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-02
+
+### Added
+
+- Upstream sync to v0.4.0: all upstream fixes and features through 2 November are included.
+- The bot settings side panel expands over the chat for more room.
+- Ticket board: a separate Closed status that hides finished tickets by default (Show closed brings them back), kept distinct from Won't do, and a human-only Delete ticket on web and mobile.
+- Nurling avatars have soft depth, a blush on Done and Asleep, and a jelly squash on taps and tool swaps, on web and mobile.
+
+### Fixed
+
+- The asleep Nurling preview in the Computer tab shows the real sleeping avatar.
+- Board ticket header buttons line up.
+
 ## [0.4.0] - 2026-11-01
 
 ### Security

@@ -2,7 +2,7 @@
 
 ## 1. Approval
 
-- [ ] 1.1 Maintainer approves the resolutions above. Verify: explicit approval in the session.
+- [x] 1.1 Maintainer approves the resolutions above. Verify: explicit approval in the session.
 
 ## 2. Merge
 
@@ -24,4 +24,4 @@
 
 ## 4. After merge
 
-- [ ] 4.1 Archive the change.
+- [x] 4.1 Archive the change.
