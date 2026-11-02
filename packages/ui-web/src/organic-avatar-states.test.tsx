@@ -69,4 +69,27 @@ describe("organic avatar states", () => {
     expect(working).not.toContain("rakazo-av-slot");
     expect(html({ size: 25, status: "running" })).toContain("rakazo-av-orbit");
   });
+  it("gives every body depth with its own clip id, and no jelly until a tap or tool swap", () => {
+    const both = renderToString(
+      <>
+        <BotAvatar color="#14B8A6" identity="maya" size={48} />
+        <BotAvatar color="#14B8A6" identity="other" size={48} />
+      </>,
+    );
+    const ids = [...both.matchAll(/clip-path="url\(#([^)]+)\)"/g)].map((m) => m[1]);
+    expect(ids).toHaveLength(2);
+    expect(ids[0]).not.toBe(ids[1]);
+    expect(both).toContain("rakazo-av-jelly");
+    expect(both).toContain('stroke-opacity="0.3"');
+    expect(both).not.toContain("data-jelly");
+  });
+
+  it("blushes on Done and Asleep only, and not at 24px or less", () => {
+    expect(html({ ticketStatus: "done" })).toContain('class="rakazo-av-blush"');
+    expect(html({ asleep: true })).toContain('class="rakazo-av-blush"');
+    expect(html()).not.toContain('class="rakazo-av-blush"');
+    expect(html({ status: "running" })).not.toContain('class="rakazo-av-blush"');
+    expect(html({ ticketStatus: "done", size: 24 })).not.toContain('class="rakazo-av-blush"');
+    expect(html({ ticketStatus: "done", size: 25 })).toContain('class="rakazo-av-blush"');
+  });
 });

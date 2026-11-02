@@ -135,7 +135,8 @@
 
 /* Idle */
 [data-state="idle"] .rakazo-av-shell {
-  animation: rakazo-av-breathe 4s ease-in-out infinite;
+  transform-origin: 50% 85%;
+  animation: rakazo-av-breathe-squash 4s ease-in-out infinite;
 }
 [data-state="idle"] .rakazo-av-pills {
   animation: rakazo-av-blink 5.2s ease-in-out infinite;
@@ -151,6 +152,68 @@
   50% {
     transform: scale(1.025);
   }
+}
+@keyframes rakazo-av-breathe-squash {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.035, 0.97);
+  }
+}
+/* Jelly squash on a tap and on a tool swap. The wrapper sits inside the shell, so it never fights the
+   state animations or the cursor follow. Two names alternate so a second tap restarts it. */
+.rakazo-av-jelly {
+  transform-origin: 50% 90%;
+}
+[data-jelly="a"] .rakazo-av-jelly {
+  animation: rakazo-av-jelly-a 0.75s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+[data-jelly="b"] .rakazo-av-jelly {
+  animation: rakazo-av-jelly-b 0.75s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+@keyframes rakazo-av-jelly-a {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  18% {
+    transform: scale(1.2, 0.8);
+  }
+  36% {
+    transform: scale(0.88, 1.14);
+  }
+  54% {
+    transform: scale(1.07, 0.94);
+  }
+  72% {
+    transform: scale(0.97, 1.03);
+  }
+}
+@keyframes rakazo-av-jelly-b {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  18% {
+    transform: scale(1.2, 0.8);
+  }
+  36% {
+    transform: scale(0.88, 1.14);
+  }
+  54% {
+    transform: scale(1.07, 0.94);
+  }
+  72% {
+    transform: scale(0.97, 1.03);
+  }
+}
+.rakazo-av-blush {
+  pointer-events: none;
+}
+.rakazo-av-blush ellipse {
+  fill: var(--rakazo-av-blush);
 }
 @keyframes rakazo-av-blink {
   0%,
