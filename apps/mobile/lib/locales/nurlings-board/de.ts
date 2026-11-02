@@ -4,6 +4,11 @@ export const NURLINGS_BOARD_DE: Record<string, string> = {
   Blocked: "Blockiert",
   Board: "Board",
   "Choose date…": "Datum wählen…",
+  Closed: "Geschlossen",
+  "Delete ticket": "Ticket löschen",
+  "Delete {ref}?": "{ref} löschen?",
+  "This removes the ticket, its comments and its history. It can't be undone.":
+    "Das entfernt das Ticket, seine Kommentare und seinen Verlauf. Das lässt sich nicht rückgängig machen.",
   Due: "Fällig",
   Files: "Dateien",
   "In progress": "In Arbeit",

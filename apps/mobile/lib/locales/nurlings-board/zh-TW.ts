@@ -1,6 +1,11 @@
 /** Board copy the upstream Traditional Chinese catalog lacks; spread into the zh-TW catalog. */
 export const NURLINGS_BOARD_ZH_TW: Record<string, string> = {
   "Choose date…": "選擇日期…",
+  Closed: "已關閉",
+  "Delete ticket": "刪除工單",
+  "Delete {ref}?": "刪除 {ref}？",
+  "This removes the ticket, its comments and its history. It can't be undone.":
+    "這會刪除工單及其留言和歷史紀錄，且無法復原。",
   Due: "截止",
   Files: "檔案",
   "Moved back to {status}": "已移回{status}",

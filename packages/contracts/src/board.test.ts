@@ -70,7 +70,8 @@ describe("ticket contracts", () => {
   it("accepts a ticket document and rejects unknown statuses", () => {
     expect(TicketSchema.parse(ticket).status).toBe("todo");
     expect(TicketSchema.parse({ ...ticket, status: "closed" }).status).toBe("closed");
-    expect(() => TicketSchema.parse({ ...ticket, status: "archived" })).toThrow();
+    expect(TicketSchema.parse({ ...ticket, status: "archived" }).status).toBe("archived");
+    expect(() => TicketSchema.parse({ ...ticket, status: "deleted" })).toThrow();
   });
 
   it("orders statuses with closed last and treats done and closed as completed", () => {
@@ -174,7 +175,8 @@ describe("ticket contracts", () => {
     );
     expect(TicketEventSchema.parse(event).status).toBe("blocked");
     expect(() => TicketEventSchema.parse({ ...event, kind: "priority" })).toThrow();
-    expect(() => TicketEventSchema.parse({ ...event, status: "archived" })).toThrow();
+    expect(TicketEventSchema.parse({ ...event, status: "archived" }).status).toBe("archived");
+    expect(() => TicketEventSchema.parse({ ...event, status: "deleted" })).toThrow();
   });
 
   it("keeps comments without mentions working and accepts typed mentions", () => {
