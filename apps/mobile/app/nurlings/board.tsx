@@ -87,9 +87,13 @@ export default function BoardScreen() {
     if (bots.length) void reload().catch(() => undefined);
   }, [working]);
 
+  const [showClosed, setShowClosed] = useState(false);
   const columns = useMemo(
-    () => boardColumns(tickets, owner, new Date()).filter((column) => column.status !== "closed"),
-    [tickets, owner],
+    () =>
+      boardColumns(tickets, owner, new Date()).filter(
+        (column) => showClosed || column.status !== "closed",
+      ),
+    [tickets, owner, showClosed],
   );
 
   async function act(change: () => Promise<unknown>) {
@@ -124,7 +128,13 @@ export default function BoardScreen() {
       keyboardVerticalOffset={iosAtLeast(26) ? 0 : headerHeight}
       style={{ flex: 1, backgroundColor: tokens.background, paddingTop: topInset }}
     >
-      <NurlingFilter bots={bots} value={owner} onChange={setOwner} />
+      <NurlingFilter
+        bots={bots}
+        value={owner}
+        onChange={setOwner}
+        showClosed={showClosed}
+        onToggleClosed={() => setShowClosed((value) => !value)}
+      />
       {error ? (
         <Text
           accessibilityRole="alert"

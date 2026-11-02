@@ -10,10 +10,14 @@ export function NurlingFilter({
   bots,
   value,
   onChange,
+  showClosed = false,
+  onToggleClosed,
 }: {
   bots: Bot[];
   value: string | null;
   onChange: (id: string | null) => void;
+  showClosed?: boolean;
+  onToggleClosed?: () => void;
 }) {
   const { t } = useI18n();
   const tokens = useMobileTokens();
@@ -64,6 +68,26 @@ export function NurlingFilter({
           />
         </Pressable>
       ))}
+      {onToggleClosed ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ selected: showClosed }}
+          onPress={onToggleClosed}
+          style={[styles.all, { backgroundColor: showClosed ? tokens.primary : "transparent" }]}
+        >
+          <Text
+            style={[
+              typeScale.caption,
+              {
+                fontWeight: fontWeight.medium,
+                color: showClosed ? tokens.primaryForeground : tokens.mutedForeground,
+              },
+            ]}
+          >
+            {t("Closed")}
+          </Text>
+        </Pressable>
+      ) : null}
     </ScrollView>
   );
 }
