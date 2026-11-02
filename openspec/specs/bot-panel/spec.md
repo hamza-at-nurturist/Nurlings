@@ -1,7 +1,7 @@
 # bot-panel Specification
 
 ## Purpose
-TBD - created by archiving change bot-panel-expand. Update Purpose after archive.
+Defines how a bot's settings panel on the web (which Electron hosts) can take the whole main area: a header button and Escape expand and collapse it, so every tab has room to work without a second editor for any one field.
 
 ## Requirements
 
