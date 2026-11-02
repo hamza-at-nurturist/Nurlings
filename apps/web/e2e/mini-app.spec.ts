@@ -112,3 +112,75 @@ for (const [theme, surface, appCard] of [
     await captureScreenshot(page, testInfo, `mini-app-finance-${theme}`);
   });
 }
+
+for (const theme of ["dark", "light"] as const) {
+  test(`a full dashboard works as one app with four screens in the ${theme} theme`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.goto("/e2e/fixtures/mini-app.html?app=outreach");
+    await page.evaluate((value) => {
+      document.documentElement.dataset.theme = value;
+    }, theme);
+
+    const app = page.getByTestId("mini-app");
+    const nav = (name: RegExp) => app.getByRole("button", { name });
+
+    // Today: tiles with trend lines, the needs-attention list, outcomes.
+    await expect(app.getByRole("heading", { name: /Today/ })).toBeVisible();
+    await expect(app.getByText("142", { exact: true })).toBeVisible();
+    await expect(app.getByText("Marcus Webb · Alder Way")).toBeVisible();
+    await expect(app.getByText("DNC / wrong number")).toBeVisible();
+    await expect(app.getByRole("heading", { name: /Leads/ })).toHaveCount(0);
+    await captureScreenshot(page, testInfo, `outreach-today-${theme}`);
+
+    // Leads: tabs keep only the leads in their bucket, and the search box narrows the rows.
+    await nav(/^Leads/).click();
+    await expect(app.getByText("Showing 1–8 of 248")).toBeVisible();
+    await expect(app.getByRole("row")).toHaveCount(9);
+    await captureScreenshot(page, testInfo, `outreach-leads-${theme}`);
+    await app.getByRole("tab", { name: /Opted out/ }).click();
+    await expect(app.getByRole("row")).toHaveCount(2);
+    await expect(app.getByText("9 Elm Court")).toBeVisible();
+    await app.getByRole("tab", { name: /^All/ }).click();
+    await app.getByPlaceholder("Name, street or city").fill("kovacs");
+    await expect(app.getByRole("row")).toHaveCount(2);
+    await expect(app.getByText("3 Pine Street")).toBeVisible();
+
+    // A lead: the conversation with its decision cards, and what the bot knows.
+    await nav(/^Today/).click();
+    await app.getByRole("button", { name: "View", exact: true }).click();
+    await expect(app.getByText("Conversation")).toBeVisible();
+    await expect(app.getByText("SENDS 2:16 · IN 4 MIN")).toBeVisible();
+    await expect(app.getByRole("progressbar", { name: "Known" })).toHaveAttribute(
+      "aria-valuenow",
+      "3",
+    );
+    await captureScreenshot(page, testInfo, `outreach-lead-${theme}`);
+
+    // Review: one chip at a time, a typed better reply, a diff of the change.
+    await nav(/^Review/).click();
+    await expect(app.getByText("Is this the right reply?")).toBeVisible();
+    await expect(app.getByRole("button", { name: "Wrong question" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await app.getByRole("button", { name: "Tone off" }).click();
+    await expect(app.getByRole("button", { name: "Tone off" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(app.getByRole("button", { name: "Wrong question" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    await expect(app.locator(".line-through")).toBeVisible();
+    await captureScreenshot(page, testInfo, `outreach-review-${theme}`);
+
+    // Runs: a table of statuses.
+    await nav(/^Runs/).click();
+    await expect(app.getByText("run_4f29")).toBeVisible();
+    await expect(app.getByText("STALLED")).toBeVisible();
+    await captureScreenshot(page, testInfo, `outreach-runs-${theme}`);
+  });
+}

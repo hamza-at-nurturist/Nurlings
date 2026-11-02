@@ -1,8 +1,7 @@
 import { defineRegistry, useBoundProp } from "@json-render/react";
 import { Alert, AlertDescription, AlertTitle } from "@rakazo/ui-web/components/ui/alert";
-import { Badge } from "@rakazo/ui-web/components/ui/badge";
-import { Button } from "@rakazo/ui-web/components/ui/button";
 import { Progress, ProgressLabel, ProgressValue } from "@rakazo/ui-web/components/ui/progress";
+import { Separator } from "@rakazo/ui-web/components/ui/separator";
 import { Skeleton } from "@rakazo/ui-web/components/ui/skeleton";
 import {
   Table,
@@ -18,48 +17,97 @@ import { lazy, Suspense } from "react";
 import { miniAppCatalog } from "./catalog";
 import { asText, formatValue, toNumber, type ValueFormat } from "./format";
 import type { ChartPoint, ChartType } from "./mini-chart";
+import {
+  ActionButton,
+  AreaField,
+  BreakdownBar,
+  ChipsField,
+  DiffView,
+  filterRows,
+  Initials,
+  isRight,
+  MessageView,
+  MeterBar,
+  MiniIcon,
+  SelectField,
+  Sparkline,
+  StatusBadge,
+  TableCell_,
+  TEXT_TONES,
+  TextField,
+  type Tone,
+  toTone,
+} from "./parts";
 
-type Tone = "neutral" | "success" | "warning" | "destructive";
-
-const GAPS = { sm: "gap-2", md: "gap-4", lg: "gap-6" } as const;
-
-const TEXT_TONES: Record<Tone, string> = {
-  neutral: "",
-  success: "text-success",
-  warning: "text-warning",
-  destructive: "text-destructive",
-};
+const GAPS = { none: "gap-0", sm: "gap-2", md: "gap-4", lg: "gap-6" } as const;
+const STACK_WIDTHS = { sm: "w-24 shrink-0", md: "w-36 shrink-0", lg: "w-56 shrink-0" } as const;
+const PADDINGS = { none: "", sm: "p-2", md: "p-4", lg: "p-6" } as const;
+const ALIGNS = {
+  start: "items-start",
+  center: "items-center",
+  end: "items-end",
+  stretch: "items-stretch",
+} as const;
+const JUSTIFIES = { start: "", between: "justify-between", end: "justify-end" } as const;
+const GRIDS = {
+  sidebar: "grid-cols-[15rem_minmax(0,1fr)]",
+  "main-side": "grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]",
+  1: "grid-cols-1",
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+  4: "grid-cols-4",
+  5: "grid-cols-5",
+  6: "grid-cols-6",
+} as const;
 
 const PROGRESS_TONES: Record<Tone, string> = {
   neutral: "",
+  info: "[&_[data-slot=progress-indicator]]:bg-link",
   success: "[&_[data-slot=progress-indicator]]:bg-success",
   warning: "[&_[data-slot=progress-indicator]]:bg-warning",
   destructive: "[&_[data-slot=progress-indicator]]:bg-destructive",
-};
-
-const BADGE_TONES: Record<Tone, string> = {
-  neutral: "",
-  success: "bg-success/15 text-success",
-  warning: "bg-warning/15 text-warning",
-  destructive: "",
+  muted: "[&_[data-slot=progress-indicator]]:bg-muted-foreground",
 };
 
 const CALLOUT_TONES: Record<Tone, string> = {
   neutral: "border-l-primary",
+  info: "border-l-link",
   success: "border-l-success",
   warning: "border-l-warning",
   destructive: "border-l-destructive",
+  muted: "border-l-muted-foreground",
 };
 
-function StatusBadge({ text, tone }: { text: string; tone: Tone }) {
-  return (
-    <Badge
-      variant={tone === "destructive" ? "destructive" : "secondary"}
-      className={BADGE_TONES[tone]}
-    >
-      {text}
-    </Badge>
-  );
+const TEXT_VARIANTS = {
+  body: "text-sm",
+  small: "text-xs",
+  label: "text-xs font-medium tracking-wide uppercase",
+  mono: "font-mono text-xs tabular-nums",
+  title: "text-lg font-semibold",
+} as const;
+
+const HEADINGS = {
+  "1": "text-xl font-semibold",
+  "2": "text-base font-semibold",
+  "3": "text-sm font-semibold",
+} as const;
+
+/** Options from a literal list or from data; anything that is not a list of value and label is none. */
+function optionList(value: unknown): { value: string; label: string }[] {
+  return (Array.isArray(value) ? value : []).flatMap((entry) => {
+    const record = (entry ?? {}) as Record<string, unknown>;
+    return typeof record.value === "string" && typeof record.label === "string"
+      ? [{ value: record.value, label: record.label }]
+      : [];
+  });
+}
+
+function toFrom(value: unknown): "contact" | "agent" | "note" {
+  return value === "agent" || value === "note" ? value : "contact";
+}
+
+function asRows(value: unknown): Record<string, unknown>[] {
+  return Array.isArray(value) ? (value as Record<string, unknown>[]) : [];
 }
 
 const CHART_MAX_POINTS = 120;
@@ -138,7 +186,15 @@ export const { registry } = defineRegistry(miniAppCatalog, {
       <div
         className={cn(
           GAPS[props.gap ?? "md"],
-          props.direction === "row" && "flex flex-wrap items-start",
+          PADDINGS[props.padding ?? "none"],
+          ALIGNS[props.align ?? (props.direction === "row" ? "center" : "stretch")],
+          JUSTIFIES[props.justify ?? "start"],
+          props.grow && "min-w-0 flex-1",
+          props.width && STACK_WIDTHS[props.width],
+          props.border === "bottom" && "border-b",
+          props.border === "top" && "border-t",
+          props.border === "end" && "border-r",
+          props.direction === "row" && cn("flex flex-row", props.wrap !== false && "flex-wrap"),
           props.direction === "columns" && "grid auto-cols-fr grid-flow-col overflow-x-auto",
           (props.direction ?? "column") === "column" && "flex flex-col",
         )}
@@ -146,42 +202,106 @@ export const { registry } = defineRegistry(miniAppCatalog, {
         {children}
       </div>
     ),
+    Grid: ({ props, children }) => (
+      <div
+        className={cn(
+          "grid",
+          GAPS[props.gap ?? "md"],
+          props.fill && "min-h-full",
+          (GRIDS as Record<string, string>)[String(props.columns)],
+        )}
+      >
+        {children}
+      </div>
+    ),
+    Separator: () => <Separator />,
     Card: ({ props, children }) => (
-      <div className="flex min-w-48 flex-col gap-2 rounded-lg border bg-card p-3 text-card-foreground">
+      <div
+        className={cn(
+          "flex min-w-48 flex-col rounded-lg border bg-card text-card-foreground",
+          props.flush ? "gap-0 overflow-hidden" : "gap-2 p-3",
+        )}
+      >
         {asText(props.title) ? (
-          <div className="text-sm font-medium">{asText(props.title)}</div>
+          <div className={cn("text-sm font-medium", props.flush && "px-4 pt-3 pb-2")}>
+            {asText(props.title)}
+          </div>
         ) : null}
         {children}
       </div>
     ),
-    Heading: ({ props }) => <h2 className="text-base font-semibold">{asText(props.text)}</h2>,
+    Heading: ({ props }) => (
+      <h2 className={cn("flex items-baseline gap-2", HEADINGS[props.level ?? "2"])}>
+        {asText(props.text)}
+        {asText(props.hint) ? (
+          <span className="text-sm font-normal text-muted-foreground">{asText(props.hint)}</span>
+        ) : null}
+      </h2>
+    ),
     Text: ({ props }) => (
-      <p className={cn("text-sm", props.tone === "muted" && "text-muted-foreground")}>
+      <p
+        className={cn(
+          TEXT_VARIANTS[props.variant ?? "body"],
+          props.tone === "default" || !props.tone ? "" : TEXT_TONES[toTone(props.tone, "neutral")],
+          props.truncate && "truncate",
+          props.align === "right" && "text-right",
+        )}
+      >
         {asText(props.text)}
       </p>
     ),
-    Badge: ({ props }) => <StatusBadge text={asText(props.text)} tone={props.tone ?? "neutral"} />,
-    Stat: ({ props }) => (
-      <div className="flex min-w-36 flex-col rounded-lg border bg-card p-4">
-        <span
-          className={cn("text-2xl font-semibold tabular-nums", TEXT_TONES[props.tone ?? "neutral"])}
-        >
-          {formatValue(props.value, props.format, props.currency)}
-        </span>
-        <span className="text-sm text-muted-foreground">{asText(props.label)}</span>
-        {asText(props.hint) ? (
-          <span className="mt-1 text-xs text-muted-foreground">{asText(props.hint)}</span>
-        ) : null}
-      </div>
+    Icon: ({ props }) => <MiniIcon name={props.name} tone={toTone(props.tone)} size={props.size} />,
+    Avatar: ({ props }) => <Initials name={asText(props.name)} size={props.size} />,
+    Badge: ({ props }) => (
+      <StatusBadge text={asText(props.text)} tone={toTone(props.tone)} shape={props.shape} />
     ),
+    Stat: ({ props }) => {
+      const spark = Array.isArray(props.spark)
+        ? props.spark.filter((n) => typeof n === "number")
+        : [];
+      return (
+        <div className="flex min-w-36 items-end justify-between gap-4 rounded-lg border bg-card p-4">
+          <div className="flex flex-col">
+            <span className="text-sm text-muted-foreground">{asText(props.label)}</span>
+            <span className="flex items-baseline gap-2">
+              <span
+                className={cn(
+                  "text-3xl font-semibold tabular-nums",
+                  TEXT_TONES[toTone(props.tone)],
+                )}
+              >
+                {formatValue(props.value, props.format, props.currency)}
+              </span>
+              {asText(props.delta) ? (
+                <span className={cn("text-xs", TEXT_TONES[toTone(props.deltaTone, "success")])}>
+                  {asText(props.delta)}
+                </span>
+              ) : null}
+            </span>
+            {asText(props.hint) ? (
+              <span className="mt-1 text-xs text-muted-foreground">{asText(props.hint)}</span>
+            ) : null}
+          </div>
+          {spark.length > 1 ? (
+            <Sparkline values={spark} tone={toTone(props.sparkTone, toTone(props.tone, "info"))} />
+          ) : null}
+        </div>
+      );
+    },
     Table: ({ props }) => {
-      const rows = Array.isArray(props.rows) ? props.rows : [];
+      const rows = filterRows(asRows(props.rows), props.where, props.search);
       return (
         <Table>
           <TableHeader>
             <TableRow>
               {props.columns.map((column) => (
-                <TableHead key={column.key} className={cn(isRight(column) && "text-right")}>
+                <TableHead
+                  key={column.key}
+                  className={cn(
+                    isRight(column) && "text-right",
+                    "text-xs font-medium tracking-wide text-muted-foreground uppercase",
+                  )}
+                >
                   {column.label}
                 </TableHead>
               ))}
@@ -190,34 +310,11 @@ export const { registry } = defineRegistry(miniAppCatalog, {
           <TableBody>
             {rows.map((row, index) => (
               <TableRow key={index}>
-                {props.columns.map((column) => {
-                  const value = (row as Record<string, unknown>)[column.key];
-                  const kind = column.format ?? "text";
-                  if (kind === "badge") {
-                    const label = asText(value);
-                    return (
-                      <TableCell key={column.key} className={cn(isRight(column) && "text-right")}>
-                        {label ? (
-                          <StatusBadge text={label} tone={column.tones?.[label] ?? "neutral"} />
-                        ) : null}
-                      </TableCell>
-                    );
-                  }
-                  const numeric = kind !== "text";
-                  const number = numeric ? toNumber(value) : null;
-                  return (
-                    <TableCell
-                      key={column.key}
-                      className={cn(
-                        isRight(column) && "text-right",
-                        numeric && "tabular-nums",
-                        number !== null && number < 0 && "text-destructive",
-                      )}
-                    >
-                      {numeric ? formatValue(value, kind, props.currency) : asText(value)}
-                    </TableCell>
-                  );
-                })}
+                {props.columns.map((column) => (
+                  <TableCell key={column.key} className={cn(isRight(column) && "text-right")}>
+                    <TableCell_ column={column} row={row} currency={props.currency} />
+                  </TableCell>
+                ))}
               </TableRow>
             ))}
           </TableBody>
@@ -236,7 +333,7 @@ export const { registry } = defineRegistry(miniAppCatalog, {
       />
     ),
     Callout: ({ props }) => (
-      <Alert role="note" className={cn("border-l-4", CALLOUT_TONES[props.tone ?? "neutral"])}>
+      <Alert role="note" className={cn("border-l-4", CALLOUT_TONES[toTone(props.tone)])}>
         {asText(props.title) ? <AlertTitle>{asText(props.title)}</AlertTitle> : null}
         <AlertDescription>{asText(props.text)}</AlertDescription>
       </Alert>
@@ -249,7 +346,7 @@ export const { registry } = defineRegistry(miniAppCatalog, {
           value={percent}
           className={cn(
             "min-w-56 flex-1 gap-2 self-center [&_[data-slot=progress-track]]:h-2",
-            PROGRESS_TONES[props.tone ?? "neutral"],
+            PROGRESS_TONES[toTone(props.tone)],
           )}
         >
           <ProgressLabel>{asText(props.label)}</ProgressLabel>
@@ -257,6 +354,53 @@ export const { registry } = defineRegistry(miniAppCatalog, {
         </Progress>
       );
     },
+    Meter: ({ props }) => (
+      <MeterBar
+        value={toNumber(props.value) ?? 0}
+        max={toNumber(props.max) ?? 7}
+        tone={toTone(props.tone, "info")}
+        label={asText(props.label)}
+        wide={props.wide}
+      />
+    ),
+    Breakdown: ({ props }) => (
+      <BreakdownBar
+        segments={(Array.isArray(props.segments) ? props.segments : []).map((segment) => ({
+          label: asText(segment.label),
+          value: toNumber(segment.value) ?? 0,
+          tone: toTone(segment.tone),
+        }))}
+        title={asText(props.title)}
+      />
+    ),
+    Message: ({ props }) => {
+      const decision =
+        props.decision && typeof props.decision === "object" && !Array.isArray(props.decision)
+          ? (props.decision as Record<string, unknown>)
+          : null;
+      return (
+        <MessageView
+          from={toFrom(props.from)}
+          text={asText(props.text)}
+          meta={asText(props.meta)}
+          skipped={props.skipped === true}
+          decision={
+            decision && ("tags" in decision || "text" in decision || "footer" in decision)
+              ? (decision as never)
+              : null
+          }
+        />
+      );
+    },
+    Diff: ({ props }) => (
+      <DiffView
+        parts={(Array.isArray(props.parts) ? props.parts : []).map((part) => ({
+          text: asText(part.text),
+          kind: part.kind,
+        }))}
+        title={asText(props.title)}
+      />
+    ),
     KeyValue: ({ props }) => (
       <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 rounded-lg border bg-card p-4 text-sm">
         {props.items.map((item) => (
@@ -269,6 +413,40 @@ export const { registry } = defineRegistry(miniAppCatalog, {
         ))}
       </dl>
     ),
+    Input: ({ props, bindings }) => (
+      <TextField
+        value={props.value}
+        bound={bindings?.value}
+        placeholder={asText(props.placeholder)}
+        icon={props.icon}
+        hint={asText(props.hint)}
+        width={props.width}
+      />
+    ),
+    Textarea: ({ props, bindings }) => (
+      <AreaField
+        value={props.value}
+        bound={bindings?.value}
+        placeholder={asText(props.placeholder)}
+        rows={props.rows}
+      />
+    ),
+    Select: ({ props, bindings }) => (
+      <SelectField
+        value={props.value}
+        bound={bindings?.value}
+        options={optionList(props.options)}
+        placeholder={asText(props.placeholder)}
+      />
+    ),
+    ToggleGroup: ({ props, bindings }) => (
+      <ChipsField
+        value={props.value}
+        bound={bindings?.value}
+        items={optionList(props.items)}
+        multiple={props.multiple}
+      />
+    ),
     Tabs: ({ props, bindings }) => {
       const [value, setValue] = useBoundProp<string>(
         typeof props.value === "string" ? props.value : undefined,
@@ -277,10 +455,15 @@ export const { registry } = defineRegistry(miniAppCatalog, {
       const current = props.tabs.some((tab) => tab.id === value) ? value : props.tabs[0]?.id;
       return (
         <TabsRoot value={current} onValueChange={(next) => setValue(String(next))}>
-          <TabsList>
+          <TabsList variant={props.variant === "line" ? "line" : "default"}>
             {props.tabs.map((tab) => (
               <TabsTrigger key={tab.id} value={tab.id}>
                 {tab.label}
+                {asText(tab.count) ? (
+                  <span className="ml-1.5 rounded-full bg-muted px-1.5 text-[11px] leading-4 text-muted-foreground tabular-nums">
+                    {asText(tab.count)}
+                  </span>
+                ) : null}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -288,20 +471,23 @@ export const { registry } = defineRegistry(miniAppCatalog, {
       );
     },
     Button: ({ props, emit }) => (
-      <Button variant="outline" size="sm" onClick={() => emit("press")}>
-        {asText(props.label)}
-      </Button>
+      <ActionButton
+        label={asText(props.label)}
+        variant={props.variant}
+        size={props.size}
+        icon={props.icon}
+        hint={asText(props.hint)}
+        count={asText(props.count)}
+        active={props.active === true}
+        full={props.full}
+        align={props.align}
+        onPress={() => emit("press")}
+      />
     ),
   },
   actions: {
-    // The real handler is supplied by the viewer, which knows the bot.
+    // The real handlers are supplied by the viewer (askBot) or built into the renderer (setState).
     askBot: async () => {},
+    setState: async () => {},
   },
 });
-
-function isRight(column: { align?: "left" | "right" | null; format?: string | null }): boolean {
-  return (
-    column.align === "right" ||
-    (!column.align && ["number", "currency", "percent"].includes(column.format ?? ""))
-  );
-}
