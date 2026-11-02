@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          include='[{"os":"macos-26","artifact":"macos"},{"os":"ubuntu-24.04","artifact":"linux"},{"os":"windows-2022","artifact":"windows"}]'
+          include='[{"os":"ubuntu-24.04","artifact":"linux"},{"os":"windows-2022","artifact":"windows"}]'
           echo "include=$include" >> "$GITHUB_OUTPUT"
           echo "windows_signed=$WINDOWS_SIGNING" >> "$GITHUB_OUTPUT"
 
@@ -339,6 +339,8 @@ jobs:
         env:
           SIGNED: ${{ needs.validate.outputs.windows_signed }}
           SIGNING_PUBLISHER: ${{ vars.DESKTOP_WIN_PUBLISHER }}
+          FEED_OWNER: ${{ github.repository_owner }}
+          FEED_REPO: ${{ github.event.repository.name }}
         run: |
           $ErrorActionPreference = "Stop"
           $executables = @(
@@ -348,7 +350,7 @@ jobs:
           if ($executables.Count -lt 2) { throw "Windows installer or application was not created." }
           $config = "apps/desktop/out/win-unpacked/resources/app-update.yml"
           $feed = Get-Content -Raw $config
-          foreach ($expected in @("provider: github", "owner: elie222", "repo: rakazo")) {
+          foreach ($expected in @("provider: github", "owner: $($env:FEED_OWNER)", "repo: $($env:FEED_REPO)")) {
             if ($feed -notmatch "(?m)^$([regex]::Escape($expected))\r?$") {
               throw "Windows update config missing '$expected'."
             }
@@ -382,6 +384,8 @@ jobs:
         shell: bash
         env:
           RELEASE_VERSION: ${{ needs.validate.outputs.version }}
+          FEED_OWNER: ${{ github.repository_owner }}
+          FEED_REPO: ${{ github.event.repository.name }}
         run: |
           set -euo pipefail
           config="apps/desktop/out/linux-unpacked/resources/app-update.yml"
@@ -391,8 +395,8 @@ jobs:
           test -n "$config"
           test -f "$config"
           grep -Fqx "provider: github" "$config"
-          grep -Fqx "owner: elie222" "$config"
-          grep -Fqx "repo: rakazo" "$config"
+          grep -Fqx "owner: $FEED_OWNER" "$config"
+          grep -Fqx "repo: $FEED_REPO" "$config"
           test -f apps/desktop/out/latest-linux.yml
           grep -Fqx "version: $RELEASE_VERSION" apps/desktop/out/latest-linux.yml
 
@@ -446,15 +450,11 @@ jobs:
             exit 1
           fi
 
-          test -f release-artifacts/latest-mac.yml
           test -f release-artifacts/latest-linux.yml
-          compgen -G 'release-artifacts/*.dmg' >/dev/null
-          compgen -G 'release-artifacts/*.zip' >/dev/null
           compgen -G 'release-artifacts/*.AppImage' >/dev/null
           test -f release-artifacts/latest.yml
           compgen -G 'release-artifacts/*.exe' >/dev/null
           feeds=(
-            release-artifacts/latest-mac.yml
             release-artifacts/latest-linux.yml
             release-artifacts/latest.yml
           )
@@ -496,7 +496,7 @@ jobs:
           ' CHANGELOG.md > "$RUNNER_TEMP/release-notes.md"
           gh release create "$RELEASE_TAG" release-artifacts/* \
             --draft --notes-file "$RUNNER_TEMP/release-notes.md" --generate-notes \
-            --title "Rakazo $RELEASE_TAG" --verify-tag
+            --title "Nurlings $RELEASE_TAG" --verify-tag
       - name: Publish the completed release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

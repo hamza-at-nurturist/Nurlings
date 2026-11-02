@@ -85,17 +85,17 @@ describe("desktop release workflow", () => {
       `include: ${expression("fromJSON(needs.validate.outputs.platforms)")}`,
     );
     expect(workflow).toContain(
-      `include='[{"os":"macos-26","artifact":"macos"},{"os":"ubuntu-24.04","artifact":"linux"},{"os":"windows-2022","artifact":"windows"}]'`,
+      `include='[{"os":"ubuntu-24.04","artifact":"linux"},{"os":"windows-2022","artifact":"windows"}]'`,
     );
     expect(workflow.split("windows-2022")).toHaveLength(2);
     expect(workflow).toContain("test -f release-artifacts/latest.yml");
     expect(workflow).toContain("compgen -G 'release-artifacts/*.exe' >/dev/null");
   });
 
-  it("pins every platform update feed to the official GitHub owner and repo", () => {
+  it("pins every platform update feed to this repository's GitHub owner and repo", () => {
     expect(workflow).toContain('grep -Fqx "provider: github"');
-    expect(workflow).toContain('grep -Fqx "owner: elie222"');
-    expect(workflow).toContain('grep -Fqx "repo: rakazo"');
+    expect(workflow).toContain('grep -Fqx "owner: $FEED_OWNER"');
+    expect(workflow).toContain('grep -Fqx "repo: $FEED_REPO"');
     expect(workflow).toContain("Verify Linux update feed is pinned to the official GitHub channel");
     expect(workflow).toContain("Windows update config missing");
     expect(workflow).toContain("RELEASE_VERSION:");
@@ -123,7 +123,6 @@ describe("desktop release workflow", () => {
     expect(workflow).toContain("must be newer than published release");
     expect(workflow).toContain("group: release-desktop-stable");
     expect(workflow).toContain("latest.yml");
-    expect(workflow).toContain("latest-mac.yml");
     expect(workflow).toContain("latest-linux.yml");
     expect(workflow).toContain(
       '--draft --notes-file "$RUNNER_TEMP/release-notes.md" --generate-notes',
