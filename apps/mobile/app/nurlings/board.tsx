@@ -91,7 +91,7 @@ export default function BoardScreen() {
   const columns = useMemo(
     () =>
       boardColumns(tickets, owner, new Date()).filter(
-        (column) => showClosed || column.status !== "closed",
+        (column) => showClosed || column.status !== "archived",
       ),
     [tickets, owner, showClosed],
   );

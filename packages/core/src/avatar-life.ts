@@ -447,7 +447,13 @@ export function avatarState(input: AvatarStateInput): AvatarState {
     input.completedAgoMs !== null &&
     input.completedAgoMs !== undefined &&
     input.completedAgoMs < AVATAR_DONE_MS;
-  if (justDone || input.ticketStatus === "done" || input.ticketStatus === "closed") return "done";
+  if (
+    justDone ||
+    input.ticketStatus === "done" ||
+    input.ticketStatus === "closed" ||
+    input.ticketStatus === "archived"
+  )
+    return "done";
   return "idle";
 }
 

@@ -171,7 +171,7 @@ export async function listBoardTickets(
       spaceId: input.spaceId,
       boardId: board.id,
       // Closed tickets are history; they only show up when asked for by status.
-      ...(status ? { status } : { status: { not: "closed" } }),
+      ...(status ? { status } : { status: { notIn: ["closed", "archived"] } }),
       ...(input.assigneeBotId ? { assigneeBotId: input.assigneeBotId } : {}),
       ...(pageCursor
         ? {
