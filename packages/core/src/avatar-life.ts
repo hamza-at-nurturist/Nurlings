@@ -345,13 +345,16 @@ export function avatarWorkingDot(size: number): { diameter: number; inset: numbe
 }
 
 /** A tap on the activity mark plays the next of these, in turn. */
-export type AvatarPoke = "spin" | "bounce" | "nod";
+export type AvatarPoke = "spin" | "bounce" | "nod" | "jelly";
+/** The reactions a tap plays in turn. `jelly` adds nothing of its own: it is the squash every poke
+ * carries, played alone when the tool in hand changes. */
 export const AVATAR_POKES: readonly AvatarPoke[] = ["spin", "bounce", "nod"];
 /** How long each tap reaction lasts, in seconds. */
 export const AVATAR_POKE_SECONDS: Record<AvatarPoke, number> = {
   spin: 0.8,
   bounce: 0.7,
   nod: 0.7,
+  jelly: 0.75,
 };
 
 /**
@@ -374,6 +377,11 @@ const POKE_KEYS: Record<AvatarPoke, readonly AvatarKey[]> = {
     [0.8, [0, -0.04, 1.03, -1], [0.45, 0, 0.55, 1]],
     [1, [0, 0, 1, 0], [0, 0, 1, 1]],
   ],
+  /** Nothing of its own; the jelly squash below is what plays. */
+  jelly: [
+    [0, [0, 0, 1, 0], [0, 0, 1, 1]],
+    [1, [0, 0, 1, 0], [0, 0, 1, 1]],
+  ],
   /** A deep nod, a smaller second one, and home. */
   nod: [
     [0, [0, 0, 1, 0], [0.3, 0, 0.3, 1]],
@@ -383,6 +391,31 @@ const POKE_KEYS: Record<AvatarPoke, readonly AvatarKey[]> = {
     [1, [0, 0, 1, 0], [0, 0, 1, 1]],
   ],
 };
+
+/** The squash and spring back every poke carries, as [scaleX, scaleY] over its length (0–1). */
+const JELLY_EASE = [0.3, 0.7, 0.4, 1] as const;
+const JELLY_KEYS: readonly AvatarKey[] = [
+  [0, [1, 1], JELLY_EASE],
+  [0.18, [1.2, 0.8], JELLY_EASE],
+  [0.36, [0.88, 1.14], JELLY_EASE],
+  [0.54, [1.07, 0.94], JELLY_EASE],
+  [0.72, [0.97, 1.03], JELLY_EASE],
+  [1, [1, 1], [0, 0, 1, 1]],
+];
+/** How far below the centre (of the size) the squash pivots, so the bottom stays on the ground. */
+const JELLY_PIVOT = 0.4;
+
+/** The jelly squash `p` (0–1) of the way through a poke, with the shift that keeps the bottom still. */
+export function avatarJellyFrame(p: number): {
+  scaleX: number;
+  scaleY: number;
+  translateY: number;
+} {
+  "worklet";
+  const value = p > 0 && p < 1 ? avatarTrackValue(JELLY_KEYS, p) : null;
+  if (!value) return { scaleX: 1, scaleY: 1, translateY: 0 };
+  return { scaleX: value[0]!, scaleY: value[1]!, translateY: (1 - value[1]!) * JELLY_PIVOT };
+}
 
 /** What a poke adds to the frame `p` (0–1) of the way through; nothing outside it. */
 export function avatarPokeFrame(

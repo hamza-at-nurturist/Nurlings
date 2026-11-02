@@ -88,6 +88,10 @@ vi.mock("react-native-svg", () => {
     G: element,
     Path: element,
     Rect: element,
+    Defs: element,
+    ClipPath: element,
+    LinearGradient: element,
+    Stop: element,
   };
 });
 vi.mock("react-native", () => ({

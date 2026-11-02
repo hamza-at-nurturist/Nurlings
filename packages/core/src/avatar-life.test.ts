@@ -25,6 +25,7 @@ import {
   avatarFrame,
   avatarLifeState,
   avatarPhotoDot,
+  avatarJellyFrame,
   avatarPokeFrame,
   avatarRestingBlink,
   avatarSchedule,
@@ -483,5 +484,19 @@ describe("authored motion", () => {
     expect(Math.min(...frames("bounce").map((frame) => frame.translateY))).toBeLessThan(-0.12);
     expect(Math.max(...frames("nod").map((frame) => frame.eyeY))).toBeGreaterThan(12);
     expect(frames("nod").every((frame) => frame.rotate === 0)).toBe(true);
+  });
+  it("squashes like jelly during a poke, with the bottom held still", () => {
+    expect(avatarJellyFrame(0)).toEqual({ scaleX: 1, scaleY: 1, translateY: 0 });
+    expect(avatarJellyFrame(1)).toEqual({ scaleX: 1, scaleY: 1, translateY: 0 });
+    const squashed = avatarJellyFrame(0.18);
+    expect(squashed.scaleX).toBeCloseTo(1.2, 5);
+    expect(squashed.scaleY).toBeCloseTo(0.8, 5);
+    // Scaling about the centre lifts the bottom by (1 - scaleY) of 0.4; the shift puts it back.
+    expect(squashed.translateY).toBeCloseTo(0.08, 5);
+    const stretched = avatarJellyFrame(0.36);
+    expect(stretched.scaleX).toBeLessThan(1);
+    expect(stretched.scaleY).toBeGreaterThan(1);
+    expect(AVATAR_POKE_SECONDS.jelly).toBe(0.75);
+    expect(AVATAR_POKES).not.toContain("jelly");
   });
 });

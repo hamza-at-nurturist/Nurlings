@@ -8,6 +8,7 @@ import {
   avatarClock,
   avatarFrame,
   avatarGlossPath,
+  avatarJellyFrame,
   avatarIdentitySeed,
   avatarMotionState,
   avatarPokeFrame,
@@ -27,8 +28,8 @@ import {
 } from "@rakazo/core";
 import { useAvatarState, useToolSwap } from "@rakazo/core/avatar-state-react";
 import { botEyeColor } from "@rakazo/ui-tokens";
-import { AVATAR_ILLUSTRATION } from "@rakazo/ui-tokens/avatar-illustration";
-import { memo, useEffect, useMemo, useSyncExternalStore } from "react";
+import { AVATAR_DEPTH, AVATAR_ILLUSTRATION } from "@rakazo/ui-tokens/avatar-illustration";
+import { memo, useEffect, useId, useMemo, useRef, useSyncExternalStore } from "react";
 import { Image, Pressable, View } from "react-native";
 import Animated, {
   useAnimatedProps,
@@ -36,9 +37,19 @@ import Animated, {
   useReducedMotion,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Circle, G, Path, Rect } from "react-native-svg";
+import Svg, {
+  ClipPath,
+  Circle,
+  Defs,
+  Ellipse,
+  G,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+} from "react-native-svg";
 import type { AvatarLife } from "../lib/avatar-life";
-import { useAvatarOnScreen, useLife, usePoke, useSettling } from "../lib/avatar-life";
+import { playPoke, useAvatarOnScreen, useLife, usePoke, useSettling } from "../lib/avatar-life";
 import { mobileBotAvatarPresentation } from "../lib/bot-avatar";
 import { useI18n } from "../lib/i18n";
 import { mobileLogoAvatarActivity } from "../lib/logo-avatar-activity";
@@ -59,6 +70,7 @@ import { NativeSymbol } from "./native-symbol";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedEllipse = Animated.createAnimatedComponent(Ellipse);
 
 /** The avatar's flat frame right now, a tap poke included; a worklet. */
 function liveFrame(life: AvatarLife) {
@@ -89,6 +101,11 @@ function liveFrame(life: AvatarLife) {
     frame.translateY += extra.translateY;
     frame.scaleY *= extra.scaleY;
     frame.eyeY += extra.eyeY;
+    // Every poke carries the jelly squash, pivoting at the bottom.
+    const jelly = avatarJellyFrame(life.pokeProgress.value);
+    frame.scaleX *= jelly.scaleX;
+    frame.scaleY *= jelly.scaleY;
+    frame.translateY += jelly.translateY;
   }
   return frame;
 }
@@ -337,6 +354,13 @@ function LegacyBotAvatar({
   });
   const life = useLife(state, clock, size, motion);
   const poke = usePoke(life, pokeable && clock === "running");
+  // A tool swap plays the jelly squash on its own, on a moving avatar only.
+  const shownTool = useRef(swap.shown);
+  useEffect(() => {
+    if (shownTool.current === swap.shown) return;
+    shownTool.current = swap.shown;
+    if (moving) playPoke(life, "jelly");
+  }, [swap.shown, moving, life]);
   const bodyStyle = useBodyStyle(life, size);
   const gaze = TOOL_GAZE[view.tool];
   const cap = lidCap(view);
@@ -389,6 +413,10 @@ function LegacyBotAvatar({
       life={life}
       bodyStyle={bodyStyle}
       frame={blobFrame}
+      blush={
+        (avatarStateValue === "done" || avatarStateValue === "asleep") &&
+        size > AVATAR_STILL_MAX_SIZE
+      }
     />
   );
   const avatar = (
@@ -514,6 +542,36 @@ function PillEyes({
   );
 }
 
+/** The two cheeks, drifting with the eyes. */
+function Blush({ life, units }: { life: AvatarLife; units: number }) {
+  const cheek = (cx: number) => () => {
+    "worklet";
+    const state = eyeState(life);
+    const scale = units / AVATAR_MOTION_UNITS;
+    return { cx: cx + state.x * scale, cy: 9 + state.y * scale };
+  };
+  const left = useAnimatedProps(cheek(-23));
+  const right = useAnimatedProps(cheek(23));
+  return (
+    <>
+      <AnimatedEllipse
+        animatedProps={left}
+        rx={5}
+        ry={3.2}
+        fill={AVATAR_ILLUSTRATION.blush}
+        opacity={AVATAR_DEPTH.blushOpacity}
+      />
+      <AnimatedEllipse
+        animatedProps={right}
+        rx={5}
+        ry={3.2}
+        fill={AVATAR_ILLUSTRATION.blush}
+        opacity={AVATAR_DEPTH.blushOpacity}
+      />
+    </>
+  );
+}
+
 function OrganicAvatar({
   color,
   glintTone,
@@ -524,6 +582,7 @@ function OrganicAvatar({
   life,
   bodyStyle,
   frame,
+  blush,
 }: {
   color: string;
   glintTone: "ink" | "light" | undefined;
@@ -535,13 +594,57 @@ function OrganicAvatar({
   bodyStyle: BodyStyle;
   /** A fixed body and eyes to draw instead of the seeded organic ones. */
   frame?: OrganicBotAvatarFrame;
+  /** A soft blush under the eyes, for a Done or Asleep face. */
+  blush: boolean;
 }) {
   const tokens = useMobileTokens();
   const glint = glintColors(glintTone, tokens);
+  // A clip and a gradient of this avatar's own, so two avatars on one screen never share them.
+  const depthId = useId().replace(/[^a-zA-Z0-9]/g, "");
   return (
     <Animated.View style={[{ width: size, height: size }, bodyStyle]}>
       <Svg width={size} height={size} viewBox="-60 -60 120 120">
+        <Defs>
+          <ClipPath id={`${depthId}clip`}>
+            <Path d={path} />
+          </ClipPath>
+          <LinearGradient
+            id={`${depthId}shade`}
+            gradientUnits="userSpaceOnUse"
+            x1="0"
+            y1={AVATAR_DEPTH.shadeFromY}
+            x2="0"
+            y2={AVATAR_DEPTH.shadeToY}
+          >
+            <Stop offset="0" stopColor={AVATAR_ILLUSTRATION.shadow} stopOpacity="0" />
+            <Stop offset="0.5" stopColor={AVATAR_ILLUSTRATION.shadow} stopOpacity="0" />
+            <Stop
+              offset="1"
+              stopColor={AVATAR_ILLUSTRATION.shadow}
+              stopOpacity={AVATAR_DEPTH.shadeOpacity}
+            />
+          </LinearGradient>
+        </Defs>
         <Path d={path} fill={color} />
+        <G clipPath={`url(#${depthId}clip)`}>
+          <Path d={path} fill={`url(#${depthId}shade)`} />
+          <Path
+            d={path}
+            transform={`translate(0 ${AVATAR_DEPTH.rimShift})`}
+            fill="none"
+            stroke={AVATAR_ILLUSTRATION.white}
+            strokeOpacity={AVATAR_DEPTH.rimOpacity}
+            strokeWidth={AVATAR_DEPTH.rimWidth}
+          />
+          <Path
+            d={path}
+            transform={`translate(0 ${-AVATAR_DEPTH.baseShift})`}
+            fill="none"
+            stroke={AVATAR_ILLUSTRATION.shadow}
+            strokeOpacity={AVATAR_DEPTH.baseOpacity}
+            strokeWidth={AVATAR_DEPTH.baseWidth}
+          />
+        </G>
         <Path
           d={gloss}
           fill="none"
@@ -557,6 +660,7 @@ function OrganicAvatar({
             units={120}
             catchlight={glint.catchlight}
           />
+          {blush ? <Blush life={life} units={120} /> : null}
         </G>
       </Svg>
     </Animated.View>

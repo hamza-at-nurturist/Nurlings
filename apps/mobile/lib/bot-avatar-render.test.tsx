@@ -230,11 +230,11 @@ describe("BotAvatar", () => {
     return container;
   }
 
+  // The filled bodies. The clip (no fill) and the gradient shade that give an organic body depth are not bodies.
   const bodies = (view: HTMLElement) =>
-    Array.from(
-      view.querySelectorAll('path:not([data-fill="none"])'),
-      (path) => (path as HTMLElement).dataset.d,
-    );
+    Array.from(view.querySelectorAll('path[data-fill]:not([data-fill="none"])'))
+      .filter((path) => !(path as HTMLElement).dataset.fill?.endsWith("shade)"))
+      .map((path) => (path as HTMLElement).dataset.d);
 
   it("preserves the shared native tap reactions on the Rakazo set", () => {
     nativeMotion.reduced = false;
@@ -391,5 +391,26 @@ describe("BotAvatar", () => {
     });
     expect(badge?.querySelector<HTMLElement>("div")?.dataset.background).toBe(tokens.secondary);
     expect(badge?.querySelector("i")?.dataset.color).toBe(tokens.foreground);
+  });
+  it("blushes a Done face, with two cheeks", () => {
+    expect(
+      render("#3EC5A8", undefined, { ticketStatus: "done" }).querySelectorAll("ellipse"),
+    ).toHaveLength(2);
+  });
+
+  it("blushes an Asleep face but not an idle one", () => {
+    expect(render("#3EC5A8", undefined, { asleep: true }).querySelectorAll("ellipse")).toHaveLength(
+      2,
+    );
+  });
+
+  it("has no blush on an idle face", () => {
+    expect(render("#3EC5A8").querySelectorAll("ellipse")).toHaveLength(0);
+  });
+
+  it("has no blush at 24 pt", () => {
+    expect(
+      render("#3EC5A8", undefined, { ticketStatus: "done", size: 24 }).querySelectorAll("ellipse"),
+    ).toHaveLength(0);
   });
 });
