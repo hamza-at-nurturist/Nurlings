@@ -1515,6 +1515,10 @@ msgstr ""
 msgid "Collapse {0}"
 msgstr ""
 
+#: src/pages/shell/bot-panel-expand.tsx
+msgid "Collapse panel"
+msgstr ""
+
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Color"
 msgstr "Renk"
@@ -2953,6 +2957,10 @@ msgstr "Genişlet"
 #. placeholder {0}: headerName(group)
 #: src/pages/shell/sidebar-roster.tsx
 msgid "Expand {0}"
+msgstr ""
+
+#: src/pages/shell/bot-panel-expand.tsx
+msgid "Expand panel"
 msgstr ""
 
 #: src/components/markdown-copy.tsx

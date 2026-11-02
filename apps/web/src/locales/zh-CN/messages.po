@@ -1515,6 +1515,10 @@ msgstr ""
 msgid "Collapse {0}"
 msgstr "折叠 {0}"
 
+#: src/pages/shell/bot-panel-expand.tsx
+msgid "Collapse panel"
+msgstr ""
+
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Color"
 msgstr "颜色"
@@ -2954,6 +2958,10 @@ msgstr "展开"
 #: src/pages/shell/sidebar-roster.tsx
 msgid "Expand {0}"
 msgstr "展开 {0}"
+
+#: src/pages/shell/bot-panel-expand.tsx
+msgid "Expand panel"
+msgstr ""
 
 #: src/components/markdown-copy.tsx
 msgid "Expand table"

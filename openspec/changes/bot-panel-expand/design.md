@@ -22,6 +22,8 @@ The width and position are decided in `ResizableSidePanel`, but the header is in
   Unlayered CSS beats Tailwind's layered utilities, so no `!important`. State and the Escape
   listener live in the same component, which unmounts with the header, so closing resets it.
   Upstream edit: one import and one JSX line in `side-panel.tsx`.
+  `e2e/bot-panel-expand.spec.ts` measures the aside before and after expanding, so renaming
+  `data-testid="side-panel"` fails CI instead of silently leaving the panel narrow.
 - Alternative: add an `expanded` prop to `ResizableSidePanel` and thread it from `Shell.tsx`
   through `ShellSidePanel`. Plain React, no `:has()`, but it edits three upstream files, one of
   them a long single-line `className` that upstream changes often.
@@ -33,6 +35,7 @@ The width and position are decided in `ResizableSidePanel`, but the header is in
 
 A `keydown` listener on `window`, active only while expanded, collapses on Escape unless the event
 is already `defaultPrevented`, is an IME composition, or came from inside an open dialog, menu or
-popover (they close themselves first). The inline name editor already handles its own Escape; the
-listener ignores events from text fields so one press cancels the edit and a second collapses.
+popover (they close themselves first). The inline name editor handles its own Escape; the listener
+ignores events from single-line fields, selects and comboboxes, so one press cancels the edit and
+a second collapses. A textarea has no Escape of its own, so Escape in Instructions collapses.
 The full-screen computer is `fixed z-30`, above the expanded panel, and keeps its own Escape.
