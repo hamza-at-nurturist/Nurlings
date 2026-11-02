@@ -80,6 +80,10 @@ vi.mock("react-native-svg", () => {
     G: element("g"),
     Path: element("path"),
     Rect: element("rect"),
+    Defs: element("defs"),
+    ClipPath: element("clipPath"),
+    LinearGradient: element("linearGradient"),
+    Stop: element("stop"),
   };
 });
 vi.mock("../components/native-symbol", () => ({ NativeSymbol: () => null }));

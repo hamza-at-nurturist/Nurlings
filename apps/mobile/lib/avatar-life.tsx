@@ -197,6 +197,18 @@ export function useLife(
 
 export type AvatarLife = ReturnType<typeof useLife>;
 
+/** Starts a reaction from its first frame. */
+export function playPoke(life: Pick<AvatarLife, "poke" | "pokeProgress">, kind: AvatarPoke) {
+  // The reaction runs on its own 0–1 clock on the UI thread. Reading the clip clock here
+  // could lag behind the frames, and the reaction would look already over.
+  life.poke.value = kind;
+  life.pokeProgress.value = 0;
+  life.pokeProgress.value = withTiming(1, {
+    duration: AVATAR_POKE_SECONDS[kind] * 1000,
+    easing: Easing.linear,
+  });
+}
+
 /** Plays the next tap reaction on a moving avatar. */
 export function usePoke(life: Pick<AvatarLife, "poke" | "pokeProgress">, enabled: boolean) {
   const next = useRef(0);
@@ -204,14 +216,7 @@ export function usePoke(life: Pick<AvatarLife, "poke" | "pokeProgress">, enabled
     if (!enabled) return;
     const kind = AVATAR_POKES[next.current % AVATAR_POKES.length]!;
     next.current += 1;
-    // The reaction runs on its own 0–1 clock on the UI thread. Reading the clip clock here
-    // could lag behind the frames, and the reaction would look already over.
-    life.poke.value = kind;
-    life.pokeProgress.value = 0;
-    life.pokeProgress.value = withTiming(1, {
-      duration: AVATAR_POKE_SECONDS[kind] * 1000,
-      easing: Easing.linear,
-    });
+    playPoke(life, kind);
   };
 }
 
