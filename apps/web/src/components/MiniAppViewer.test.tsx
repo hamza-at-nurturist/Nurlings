@@ -5,6 +5,7 @@ import path from "node:path";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
+import { financeApp, financeData } from "../lib/mini-app/finance-example";
 import { leadPipelineApp, leadPipelineData } from "../lib/mini-app/lead-pipeline-example";
 import { MiniAppViewer, parseMiniApp } from "./MiniAppViewer";
 
@@ -158,4 +159,60 @@ it("accepts the example that the Apps skill teaches bots", () => {
   const example = /\\`\\`\\`json\n([\s\S]*?)\\`\\`\\`/.exec(skill)?.[1];
   expect(example).toBeDefined();
   expect("error" in parseMiniApp(example ?? "")).toBe(false);
+});
+
+it("draws the finance dashboard: formatted stats, a chart, a callout and a progress bar", async () => {
+  const view = await render({ source: financeApp, loadData: async () => financeData });
+  expect(view.textContent).toContain("$2,189.50");
+  expect(view.textContent).toContain("$410.50");
+  expect(view.textContent).toContain("Jun 2027");
+  expect(view.textContent).toContain("At the current spend");
+  expect(view.querySelector('[role="note"]')?.textContent).toContain("Assumption");
+  const progress = view.querySelector('[role="progressbar"]');
+  expect(progress?.getAttribute("aria-valuenow")).toBe("71");
+  const chart = view.querySelector('svg[role="img"]');
+  expect(chart?.getAttribute("aria-label")).toContain("Closing cash by month");
+  expect(chart?.querySelectorAll("rect").length).toBe(financeData.months.length);
+  // Months that end below zero draw their bar in red.
+  expect(chart?.querySelectorAll("rect.fill-destructive").length).toBe(
+    financeData.months.filter((month) => month.closing < 0).length,
+  );
+  expect(view.textContent).toContain("Spend per month");
+  // An expression inside a list item resolves like any other prop.
+  const facts = [...view.querySelectorAll("dd")].map((el) => el.textContent);
+  expect(facts).toContain("$410.50");
+});
+
+it("switches tabs: the chart shows first, then the table with badge cells", async () => {
+  const view = await render({ source: financeApp, loadData: async () => financeData });
+  expect(view.querySelector("table")).toBeNull();
+  const tab = [...view.querySelectorAll('[role="tab"]')].find((el) => el.textContent === "Table");
+  await act(async () => (tab as HTMLElement | undefined)?.click());
+  expect(view.querySelector('svg[role="img"]')).toBeNull();
+  const cells = [...view.querySelectorAll("td")].map((el) => el.textContent);
+  expect(cells).toContain("OK");
+  expect(cells).toContain("Below zero");
+  expect(view.querySelector("td.text-destructive")?.textContent).toMatch(/^-\$/);
+});
+
+it("refuses new components used wrongly", () => {
+  const one = (type: string, props: unknown) =>
+    JSON.stringify({
+      data: [],
+      spec: { root: "a", elements: { a: { type, props, children: [] } } },
+    });
+  expect(parseMiniApp(one("Chart", { type: "pie", data: [], x: "a", y: "b" }))).toEqual({
+    error: "unsupported",
+  });
+  expect(parseMiniApp(one("Progress", { value: 5 }))).toEqual({ error: "unsupported" });
+  expect(parseMiniApp(one("Callout", { text: "hi", tone: "loud" }))).toEqual({
+    error: "unsupported",
+  });
+  expect(
+    parseMiniApp(one("Table", { columns: [{ key: "a", label: "A", format: "html" }], rows: [] })),
+  ).toEqual({ error: "unsupported" });
+  expect(parseMiniApp(one("Tabs", { tabs: [], value: "a" }))).toEqual({ error: "unsupported" });
+  expect(parseMiniApp(one("KeyValue", { items: [{ label: "a", value: "b" }] }))).not.toHaveProperty(
+    "error",
+  );
 });

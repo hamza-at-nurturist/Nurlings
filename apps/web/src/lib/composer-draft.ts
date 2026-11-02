@@ -98,6 +98,34 @@ export function subscribeComposerDraftAccepted(
   };
 }
 
+const requestListeners = new Map<string, Set<(text: string) => void>>();
+
+/**
+ * Puts text in a thread's composer from outside it (a mini app's button, for one). The draft is
+ * saved, so a composer that is not mounted yet shows it when it opens, and a mounted one is told
+ * to replace its text. Nothing is sent.
+ */
+export function requestComposerDraft(threadKey: string, text: string): void {
+  writeComposerDraft(threadKey, text);
+  for (const listener of requestListeners.get(threadKey) ?? []) listener(text);
+}
+
+export function subscribeComposerDraftRequest(
+  threadKey: string,
+  listener: (text: string) => void,
+): () => void {
+  let listeners = requestListeners.get(threadKey);
+  if (!listeners) {
+    listeners = new Set();
+    requestListeners.set(threadKey, listeners);
+  }
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0) requestListeners.delete(threadKey);
+  };
+}
+
 type DraftStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
 function getLocalStorage(): DraftStorage | null {
