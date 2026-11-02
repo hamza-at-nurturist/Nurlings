@@ -21,7 +21,8 @@
   --accent: #262626;
   --accent-foreground: #fafafa;
   --border: #262626;
-  --input: #262626;
+  --input: #404040;
+  --ring: #737373;
 }
 
 [data-theme="light"] .mini-app {
@@ -41,5 +42,13 @@
   --accent: #f5f5f5;
   --accent-foreground: #171717;
   --border: #e5e5e5;
-  --input: #e5e5e5;
+  --input: #d4d4d4;
+  --ring: #a3a3a3;
+}
+
+/* Base shadcn draws text fields with no fill, only a border; the app's own fields use a muted fill. */
+.mini-app [data-slot="input"],
+.mini-app [data-slot="textarea"],
+.mini-app [data-slot="select-trigger"] {
+  background-color: transparent;
 }
