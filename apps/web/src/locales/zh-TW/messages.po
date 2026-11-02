@@ -2956,10 +2956,6 @@ msgstr "展開"
 msgid "Expand {0}"
 msgstr "展開 {0}"
 
-#: src/components/InstructionsExpand.tsx
-msgid "Expand instructions"
-msgstr ""
-
 #: src/components/markdown-copy.tsx
 msgid "Expand table"
 msgstr "展開表格"
@@ -3417,7 +3413,6 @@ msgstr "指令歷史"
 
 #: src/components/AskCard.tsx
 #: src/components/InstructionSettings.tsx
-#: src/components/InstructionsExpand.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Instructions"
 msgstr "指令"

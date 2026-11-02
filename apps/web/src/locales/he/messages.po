@@ -2955,10 +2955,6 @@ msgstr "הרחבה"
 msgid "Expand {0}"
 msgstr "הרחבת {0}"
 
-#: src/components/InstructionsExpand.tsx
-msgid "Expand instructions"
-msgstr ""
-
 #: src/components/markdown-copy.tsx
 msgid "Expand table"
 msgstr "הרחבת טבלה"
@@ -3416,7 +3412,6 @@ msgstr "היסטוריית הנחיות"
 
 #: src/components/AskCard.tsx
 #: src/components/InstructionSettings.tsx
-#: src/components/InstructionsExpand.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Instructions"
 msgstr "הנחיות"

@@ -2955,10 +2955,6 @@ msgstr "विस्तृत करें"
 msgid "Expand {0}"
 msgstr ""
 
-#: src/components/InstructionsExpand.tsx
-msgid "Expand instructions"
-msgstr ""
-
 #: src/components/markdown-copy.tsx
 msgid "Expand table"
 msgstr "तालिका बड़ी करें"
@@ -3416,7 +3412,6 @@ msgstr "निर्देशों का इतिहास"
 
 #: src/components/AskCard.tsx
 #: src/components/InstructionSettings.tsx
-#: src/components/InstructionsExpand.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Instructions"
 msgstr "निर्देश"
