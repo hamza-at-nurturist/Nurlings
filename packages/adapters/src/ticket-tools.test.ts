@@ -90,7 +90,7 @@ describe("ticket tools", () => {
     expect(result).toEqual({ tickets: [expect.objectContaining({ ref: "RAK-1" })] });
   });
 
-  it("leaves closed tickets out of an unfiltered list and shortens descriptions", async () => {
+  it("leaves closed and archived tickets out of an unfiltered list and shortens descriptions", async () => {
     const findMany = vi.fn(async () => [ticket({ number: 2, description: "x".repeat(500) })]);
     const prisma = { ...boardSpace(), ticket: { findMany } };
 
@@ -100,7 +100,11 @@ describe("ticket tools", () => {
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { spaceId: "ws", boardId: "board-1", status: { not: "closed" } },
+        where: {
+          spaceId: "ws",
+          boardId: "board-1",
+          status: { notIn: ["closed", "archived"] },
+        },
         take: 51,
       }),
     );
@@ -139,7 +143,7 @@ describe("ticket tools", () => {
       where: {
         spaceId: "ws",
         boardId: "board-1",
-        status: { not: "closed" },
+        status: { notIn: ["closed", "archived"] },
         OR: [
           { createdAt: { lt: rows[49]!.createdAt } },
           { createdAt: rows[49]!.createdAt, id: { lt: "t49" } },

@@ -4,6 +4,11 @@ export const NURLINGS_BOARD_NL: Record<string, string> = {
   Blocked: "Geblokkeerd",
   Board: "Board",
   "Choose date…": "Datum kiezen…",
+  Closed: "Gesloten",
+  "Delete ticket": "Ticket verwijderen",
+  "Delete {ref}?": "{ref} verwijderen?",
+  "This removes the ticket, its comments and its history. It can't be undone.":
+    "Hiermee verdwijnen het ticket, de reacties en de geschiedenis. Dit kan niet ongedaan worden gemaakt.",
   Due: "Deadline",
   Files: "Bestanden",
   "In progress": "Bezig",

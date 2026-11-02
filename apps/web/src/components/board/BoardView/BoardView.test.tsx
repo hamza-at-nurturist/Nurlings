@@ -222,6 +222,23 @@ describe("BoardView", () => {
     expect(column("done").textContent).not.toContain("older");
   });
 
+  it("hides the Closed column until Show closed is pressed", async () => {
+    await render();
+    const toggle = () =>
+      [...container.querySelectorAll("button")].find((button) =>
+        /^(Show|Hide) closed$/.test(button.textContent ?? ""),
+      )!;
+    expect(container.querySelectorAll("[data-testid^='board-column-']")).toHaveLength(6);
+    expect(column("archived")).toBeNull();
+    expect(toggle().textContent).toBe("Show closed");
+    await click(toggle());
+    expect(container.querySelectorAll("[data-testid^='board-column-']")).toHaveLength(7);
+    expect(column("archived")).toBeTruthy();
+    expect(toggle().textContent).toBe("Hide closed");
+    await click(toggle());
+    expect(column("archived")).toBeNull();
+  });
+
   it("shows who is working, else the latest comment, with the owner and file count", async () => {
     await render();
     expect(card("2")!.querySelector("[data-testid='card-working']")!.textContent).toBe(

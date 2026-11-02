@@ -4,6 +4,11 @@ export const NURLINGS_BOARD_JA: Record<string, string> = {
   Blocked: "ブロック中",
   Board: "ボード",
   "Choose date…": "日付を選択…",
+  Closed: "クローズ済み",
+  "Delete ticket": "チケットを削除",
+  "Delete {ref}?": "{ref}を削除しますか？",
+  "This removes the ticket, its comments and its history. It can't be undone.":
+    "チケットとそのコメント、履歴が削除されます。元に戻せません。",
   Due: "期限",
   Files: "ファイル",
   "In progress": "進行中",
