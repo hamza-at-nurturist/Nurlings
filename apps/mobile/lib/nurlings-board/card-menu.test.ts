@@ -17,7 +17,7 @@ const labels = {
 };
 
 describe("cardMenu", () => {
-  it("offers Move to with all six statuses, the current one checked, and Open", () => {
+  it("offers Move to with all seven statuses, the current one checked, and Open", () => {
     const menu = cardMenu({ status: "doing", canApprove: false }, labels);
     expect(menu.map((entry) => entry.title)).toEqual(["Move to", "Open"]);
     expect(menu[0]?.subactions?.map((entry) => entry.title)).toEqual([
@@ -27,6 +27,7 @@ describe("cardMenu", () => {
       "Blocked",
       "Done",
       "Won't do",
+      "Closed",
     ]);
     expect(menu[0]?.subactions?.filter((entry) => entry.checked).map((entry) => entry.id)).toEqual([
       "move:doing",
