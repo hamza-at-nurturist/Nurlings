@@ -39,6 +39,8 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { IconTooltip } from "../components/IconTooltip";
+import { MiniAppArtifactPreview } from "../components/MiniAppArtifactPreview";
+import { isMiniAppName } from "../components/MiniAppViewer";
 import { PdfViewer } from "../components/PdfViewer";
 import { SandboxedHtmlViewer } from "../components/SandboxedHtmlViewer";
 import { artifactDataLoader } from "../lib/artifact-data-fork";
@@ -943,6 +945,10 @@ function PreviewPane({
 
 function ArtifactPreview({ artifact, bytes }: { artifact: Artifact; bytes: Uint8Array }) {
   const loadData = useMemo(() => artifactDataLoader(artifact.botId), [artifact.botId]);
+  if (artifact.mimeType === "application/json" && isMiniAppName(artifact.name)) {
+    const source = new TextDecoder("utf-8").decode(bytes);
+    return <MiniAppArtifactPreview source={source} botId={artifact.botId} loadData={loadData} />;
+  }
   if (artifact.mimeType === "text/html") {
     const html = new TextDecoder("utf-8").decode(bytes);
     return <SandboxedHtmlViewer html={html} title={artifact.name} loadData={loadData} />;

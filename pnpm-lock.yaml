@@ -338,6 +338,12 @@ importers:
       '@better-auth/passkey':
         specifier: 1.7.15
         version: 1.7.15(bsvb52x3ypldxbxgxis7ot3sgm)
+      '@json-render/core':
+        specifier: 0.21.4
+        version: 0.21.4(zod@4.6.7)
+      '@json-render/react':
+        specifier: 0.21.4
+        version: 0.21.4(react@19.2.3)(zod@4.6.7)
       '@lingui/core':
         specifier: 6.6.0
         version: 6.6.0(@babel/core@7.29.7)(@babel/types@7.29.8)
@@ -3213,6 +3219,16 @@ packages:
     engines: {node: '>= 10.16.0'}
     peerDependencies:
       jsep: ^0.4.0||^1.0.0
+
+  '@json-render/core@0.21.4':
+    resolution: {integrity: sha512-UqjpdDOmr7a9ISZisgQvgeKuBpiNQesS7PNgcstwTBlutMbgS/5fbNThvpEk4E35eMe2bpBVzwOPuaNY3xthNw==}
+    peerDependencies:
+      zod: ^4.0.0
+
+  '@json-render/react@0.21.4':
+    resolution: {integrity: sha512-pCOhhgpBQBZV8NDLx0TTMapeWqGzDGPDgaIcYg9xHm35XglqxkcG2QgzzhE/VUSz3uqkWW0s8mCYO/jGP/hZHQ==}
+    peerDependencies:
+      react: 19.2.3
 
   '@koromix/koffi-android-arm64@3.3.4':
     resolution: {integrity: sha512-F+V3PvbTVfpuFh9XKatW1XLH6FJZHQMzZRKOJL8vHQUmG59iBW4D8E9su5jCr5wghCpPoajthD/G2unzSpSedw==}
@@ -14371,6 +14387,17 @@ snapshots:
   '@jsep-plugin/regex@1.1.0(jsep@1.6.0)':
     dependencies:
       jsep: 1.6.0
+
+  '@json-render/core@0.21.4(zod@4.6.7)':
+    dependencies:
+      zod: 4.6.7
+
+  '@json-render/react@0.21.4(react@19.2.3)(zod@4.6.7)':
+    dependencies:
+      '@json-render/core': 0.21.4(zod@4.6.7)
+      react: 19.2.3
+    transitivePeerDependencies:
+      - zod
 
   '@koromix/koffi-android-arm64@3.3.4':
     optional: true

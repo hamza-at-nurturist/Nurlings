@@ -8,4 +8,10 @@ describe("built-in skills in a Nurlings build", () => {
     for (const skill of OFFERED_BUILTIN_SKILLS) expect(skill.content).not.toMatch(/rakazo\.com/i);
     expect(FETCHABLE_DOCS_URLS).toEqual([]);
   });
+
+  it("offer the Apps skill, with a description that fits the picker", () => {
+    const apps = OFFERED_BUILTIN_SKILLS.find((skill) => skill.name === "Apps");
+    expect(apps).toBeDefined();
+    expect(apps?.description.length).toBeLessThanOrEqual(72);
+  });
 });

@@ -1,4 +1,5 @@
 import { buildSkillMd } from "@rakazo/core";
+import { NURLINGS_SKILLS } from "./nurlings-skills.js";
 
 /**
  * Built-in Agent Skills (SKILL.md recipes) available to every user.
@@ -64,6 +65,7 @@ Layout: a title, a row of stat tiles (one big number plus a short label), then o
 
 Answer questions about Nurlings from this skill's own text. If the answer isn't covered here, say it isn't documented yet instead of guessing. Never present Rakazo's docs as Nurlings docs. Never invent menus, buttons, steps, links, features or pricing. Account-specific facts (credit balance, plan, usage) aren't covered here: point to the screen that shows them.`,
   },
+  ...NURLINGS_SKILLS,
 ];
 
 export const BUILTIN_AGENT_SKILLS: Array<{
