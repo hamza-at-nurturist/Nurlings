@@ -12,6 +12,7 @@ const labels = {
     blocked: "Blocked",
     done: "Done",
     closed: "Won't do",
+    archived: "Closed",
   },
 };
 
