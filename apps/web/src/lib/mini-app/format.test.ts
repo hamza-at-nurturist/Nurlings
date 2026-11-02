@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { asText, formatValue, toNumber } from "./format";
+import { asText, formatCompact, formatValue, toNumber } from "./format";
 
 it("reads numbers from numbers and numeric strings only", () => {
   expect(toNumber(5)).toBe(5);
@@ -30,4 +30,11 @@ it("falls back to USD for a bad currency code and to text for non-numbers", () =
   expect(formatValue("Jun 2027", "currency", null, "en-US")).toBe("Jun 2027");
   expect(formatValue("hello")).toBe("hello");
   expect(formatValue(7)).toBe("7");
+});
+
+it("shortens axis ticks", () => {
+  expect(formatCompact(2189.5, "currency", null, "en-US")).toBe("$2.2K");
+  expect(formatCompact(-1250000, "number", null, "en-US")).toBe("-1.3M");
+  expect(formatCompact(71.4, "percent", null, "en-US")).toBe("71%");
+  expect(formatCompact("n/a", "currency")).toBe("n/a");
 });

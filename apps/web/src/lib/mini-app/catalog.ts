@@ -75,16 +75,16 @@ const components = {
   },
   Chart: {
     props: z.object({
-      type: z.enum(["bar", "line"]),
+      type: z.enum(["bar", "line", "area", "pie"]),
       data: rows,
       x: z.string(),
-      y: z.string(),
+      y: z.union([z.string(), z.array(z.string()).min(1).max(4)]),
       title: text.nullish(),
       format: format.nullish(),
       currency: currency.nullish(),
     }),
     description:
-      "A bar or line chart. data is rows (usually a $state expression); x is the key for labels and y the key for values. Bars below zero draw in red.",
+      "A bar, line, area or pie chart. data is rows (usually a $state expression); x is the key for labels; y is the key for values, or a list of up to four keys to compare series (pie takes one). Single-series bars below zero draw in red.",
   },
   Callout: {
     props: z.object({ text, title: text.nullish(), tone: tone.nullish() }),

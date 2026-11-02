@@ -170,13 +170,14 @@ it("draws the finance dashboard: formatted stats, a chart, a callout and a progr
   expect(view.querySelector('[role="note"]')?.textContent).toContain("Assumption");
   const progress = view.querySelector('[role="progressbar"]');
   expect(progress?.getAttribute("aria-valuenow")).toBe("71");
-  const chart = view.querySelector('svg[role="img"]');
+  const chart = view.querySelector('figure[role="img"]');
   expect(chart?.getAttribute("aria-label")).toContain("Closing cash by month");
-  expect(chart?.querySelectorAll("rect").length).toBe(financeData.months.length);
-  // Months that end below zero draw their bar in red.
-  expect(chart?.querySelectorAll("rect.fill-destructive").length).toBe(
-    financeData.months.filter((month) => month.closing < 0).length,
-  );
+  expect(chart?.getAttribute("aria-label")).toContain("Nov 2026 $2,189.50 to Oct 2027 -$2,326.00");
+  // The chart library loads on demand; once it has, it draws inside the figure.
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  });
+  expect(chart?.querySelector(".recharts-wrapper")).not.toBeNull();
   expect(view.textContent).toContain("Spend per month");
   // An expression inside a list item resolves like any other prop.
   const facts = [...view.querySelectorAll("dd")].map((el) => el.textContent);
@@ -188,7 +189,7 @@ it("switches tabs: the chart shows first, then the table with badge cells", asyn
   expect(view.querySelector("table")).toBeNull();
   const tab = [...view.querySelectorAll('[role="tab"]')].find((el) => el.textContent === "Table");
   await act(async () => (tab as HTMLElement | undefined)?.click());
-  expect(view.querySelector('svg[role="img"]')).toBeNull();
+  expect(view.querySelector('figure[role="img"]')).toBeNull();
   const cells = [...view.querySelectorAll("td")].map((el) => el.textContent);
   expect(cells).toContain("OK");
   expect(cells).toContain("Below zero");
@@ -201,9 +202,21 @@ it("refuses new components used wrongly", () => {
       data: [],
       spec: { root: "a", elements: { a: { type, props, children: [] } } },
     });
-  expect(parseMiniApp(one("Chart", { type: "pie", data: [], x: "a", y: "b" }))).toEqual({
+  expect(parseMiniApp(one("Chart", { type: "donut", data: [], x: "a", y: "b" }))).toEqual({
     error: "unsupported",
   });
+  expect(parseMiniApp(one("Chart", { type: "pie", data: [], x: "a", y: "b" }))).not.toHaveProperty(
+    "error",
+  );
+  expect(
+    parseMiniApp(one("Chart", { type: "line", data: [], x: "a", y: ["b", "c"] })),
+  ).not.toHaveProperty("error");
+  expect(parseMiniApp(one("Chart", { type: "line", data: [], x: "a", y: [] }))).toEqual({
+    error: "unsupported",
+  });
+  expect(
+    parseMiniApp(one("Chart", { type: "line", data: [], x: "a", y: ["a", "b", "c", "d", "e"] })),
+  ).toEqual({ error: "unsupported" });
   expect(parseMiniApp(one("Progress", { value: 5 }))).toEqual({ error: "unsupported" });
   expect(parseMiniApp(one("Callout", { text: "hi", tone: "loud" }))).toEqual({
     error: "unsupported",

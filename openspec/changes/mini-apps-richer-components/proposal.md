@@ -10,8 +10,12 @@ Artifacts tab.
 
 ## What Changes
 
-- **More components.** Chart (bars or a line, negatives in red), Callout, Progress, KeyValue and
-  Tabs join the catalog.
+- **More components.** Chart (bar, line, area or pie, with several series and a value axis; bars
+  below zero in red), Callout, Progress, KeyValue and Tabs join the catalog.
+- **shadcn components, from the official registry.** `chart`, `progress` and `alert` are added to
+  `ui-web` with the shadcn CLI, as the repo's UI rules require. Callout is drawn with Alert and
+  Progress with Progress. The chart code is loaded on demand, so the chart library is fetched only
+  when an app has a chart.
 - **Richer existing ones.** Stat can show a number as currency, number or percent, take a tone and a
   hint. Table columns can be formatted (currency, number, percent) with negatives in red and
   numbers right-aligned, or drawn as status badges colored by a tones map. KeyValue items take a
@@ -29,6 +33,10 @@ interactive chart features beyond hover labels.
 ## Impact
 
 - Capability: `mini-apps`.
-- Adds nothing to the dependencies. Web only. No migration, API change or image.
+- Adds `recharts` 3.8.0 (MIT, the library behind shadcn's chart), exact, to `ui-web` and `web`,
+  with about a dozen small transitive packages. Web only. No migration, API change or image.
+- The shadcn CLI also tried to add an unrelated npm package named `cn` (the registry item lists
+  it); that was removed, and the vendored files use the repo's own `cn`. The chart's style rules
+  are written as text instead of raw HTML.
 - Touches `composer.tsx` and `composer-draft.ts` (one subscription effect and one helper) and
-  `ArtifactFileCard.tsx`.
+  `ArtifactFileCard.tsx`. New vendored files: `alert.tsx`, `progress.tsx`, `chart.tsx`.

@@ -40,6 +40,11 @@ test("a finance dashboard draws a chart, tones, badges and tabs", async ({ page 
     "71",
   );
   await expect(app.getByRole("img", { name: /Closing cash by month/ })).toBeVisible();
+  // One bar per month, and the months that end below zero are drawn in red.
+  const bars = app.locator(".recharts-bar-rectangle path");
+  await expect(bars).toHaveCount(12);
+  await expect(bars.last()).toHaveAttribute("fill", "var(--destructive)");
+  await expect(bars.first()).toHaveAttribute("fill", "var(--color-s0)");
   await expect(app.getByRole("table")).toHaveCount(0);
 
   await captureScreenshot(page, testInfo, "mini-app-finance-chart");
@@ -50,4 +55,18 @@ test("a finance dashboard draws a chart, tones, badges and tabs", async ({ page 
   await expect(app.getByText("Below zero").first()).toBeVisible();
 
   await captureScreenshot(page, testInfo, "mini-app-finance-table");
+
+  await app.getByRole("tab", { name: "Breakdown" }).click();
+  await expect(app.getByRole("table")).toHaveCount(0);
+  await expect(app.getByRole("img", { name: /Where the spend goes/ })).toBeVisible();
+  await expect(app.getByRole("img", { name: /Opening and closing cash/ })).toBeVisible();
+  await expect(app.locator(".recharts-pie-sector")).toHaveCount(4);
+  await expect(app.getByText("Rent", { exact: true })).toBeVisible();
+  await expect(app.getByText("Software", { exact: true })).toBeVisible();
+  // The legend follows the data's order, with each swatch the color of its slice.
+  const legend = app.locator("ul li", { hasText: /^(Rent|Software|Food|Other)$/ });
+  await expect(legend).toHaveText(["Rent", "Software", "Food", "Other"]);
+  await expect(app.locator(".recharts-area")).toHaveCount(2);
+
+  await captureScreenshot(page, testInfo, "mini-app-finance-breakdown");
 });

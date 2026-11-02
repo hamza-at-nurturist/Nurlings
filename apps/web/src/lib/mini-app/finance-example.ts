@@ -22,6 +22,12 @@ const months = MONTHS.map((name, index) => {
 export const financeData = {
   summary: { cash: 2189.5, monthly: SPEND, runout: "Jun 2027", usedPercent: 71 },
   months,
+  categories: [
+    { category: "Rent", amount: 190 },
+    { category: "Software", amount: 96.5 },
+    { category: "Food", amount: 84 },
+    { category: "Other", amount: 40 },
+  ],
 };
 
 const columns = [
@@ -46,7 +52,7 @@ export const financeApp = JSON.stringify({
       page: {
         type: "Stack",
         props: { direction: "column", gap: "lg" },
-        children: ["title", "note", "stats", "tabs", "chart-view", "table-view"],
+        children: ["title", "note", "stats", "tabs", "chart-view", "table-view", "breakdown-view"],
       },
       title: { type: "Heading", props: { text: "Finance overview" } },
       note: {
@@ -101,6 +107,7 @@ export const financeApp = JSON.stringify({
           tabs: [
             { id: "chart", label: "Chart" },
             { id: "table", label: "Table" },
+            { id: "breakdown", label: "Breakdown" },
           ],
           value: { $bindState: "/ui/tab" },
         },
@@ -140,6 +147,34 @@ export const financeApp = JSON.stringify({
         props: { direction: "column", gap: "md" },
         visible: { $state: "/ui/tab", eq: "table" },
         children: ["table"],
+      },
+      "breakdown-view": {
+        type: "Stack",
+        props: { direction: "columns", gap: "md" },
+        visible: { $state: "/ui/tab", eq: "breakdown" },
+        children: ["pie", "area"],
+      },
+      pie: {
+        type: "Chart",
+        props: {
+          type: "pie",
+          title: "Where the spend goes",
+          data: { $state: "/data/finance/categories" },
+          x: "category",
+          y: "amount",
+          format: "currency",
+        },
+      },
+      area: {
+        type: "Chart",
+        props: {
+          type: "area",
+          title: "Opening and closing cash",
+          data: { $state: "/data/finance/months" },
+          x: "month",
+          y: ["opening", "closing"],
+          format: "currency",
+        },
       },
       table: {
         type: "Table",

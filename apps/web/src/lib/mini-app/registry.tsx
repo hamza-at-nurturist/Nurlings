@@ -1,6 +1,9 @@
 import { defineRegistry, useBoundProp } from "@json-render/react";
+import { Alert, AlertDescription, AlertTitle } from "@rakazo/ui-web/components/ui/alert";
 import { Badge } from "@rakazo/ui-web/components/ui/badge";
 import { Button } from "@rakazo/ui-web/components/ui/button";
+import { Progress, ProgressLabel, ProgressValue } from "@rakazo/ui-web/components/ui/progress";
+import { Skeleton } from "@rakazo/ui-web/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -11,8 +14,10 @@ import {
 } from "@rakazo/ui-web/components/ui/table";
 import { TabsList, Tabs as TabsRoot, TabsTrigger } from "@rakazo/ui-web/components/ui/tabs";
 import { cn } from "@rakazo/ui-web/lib/utils";
+import { lazy, Suspense } from "react";
 import { miniAppCatalog } from "./catalog";
 import { asText, formatValue, toNumber, type ValueFormat } from "./format";
+import type { ChartPoint, ChartType } from "./mini-chart";
 
 type Tone = "neutral" | "success" | "warning" | "destructive";
 
@@ -25,11 +30,11 @@ const TEXT_TONES: Record<Tone, string> = {
   destructive: "text-destructive",
 };
 
-const FILL_TONES: Record<Tone, string> = {
-  neutral: "bg-primary",
-  success: "bg-success",
-  warning: "bg-warning",
-  destructive: "bg-destructive",
+const PROGRESS_TONES: Record<Tone, string> = {
+  neutral: "",
+  success: "[&_[data-slot=progress-indicator]]:bg-success",
+  warning: "[&_[data-slot=progress-indicator]]:bg-warning",
+  destructive: "[&_[data-slot=progress-indicator]]:bg-destructive",
 };
 
 const BADGE_TONES: Record<Tone, string> = {
@@ -57,12 +62,14 @@ function StatusBadge({ text, tone }: { text: string; tone: Tone }) {
   );
 }
 
-const CHART_WIDTH = 600;
-const CHART_HEIGHT = 200;
-const CHART_PADDING = 8;
 const CHART_MAX_POINTS = 120;
 
-function MiniChart({
+/** Recharts is large and most apps have no chart, so it loads only when one is drawn. */
+const MiniChartPlot = lazy(() =>
+  import("./mini-chart").then((module) => ({ default: module.MiniChartPlot })),
+);
+
+function ChartFigure({
   type,
   rows,
   x,
@@ -71,112 +78,56 @@ function MiniChart({
   format,
   currency,
 }: {
-  type: "bar" | "line";
+  type: ChartType;
   rows: unknown[];
   x: string;
-  y: string;
+  y: string | string[];
   title: string;
   format?: ValueFormat | null;
   currency?: string | null;
 }) {
-  const points = rows.slice(0, CHART_MAX_POINTS).flatMap((row) => {
+  const series = (Array.isArray(y) ? y : [y]).slice(0, 4);
+  const points: ChartPoint[] = rows.slice(0, CHART_MAX_POINTS).flatMap((row) => {
     const record = (row ?? {}) as Record<string, unknown>;
-    const value = toNumber(record[y]);
-    return value === null ? [] : [{ label: asText(record[x]), value }];
+    const values = series.map((key) => toNumber(record[key]));
+    return values.every((value) => value === null) ? [] : [{ x: asText(record[x]), values }];
   });
   const first = points[0];
   const last = points.at(-1);
   if (!first || !last) return null;
 
-  const show = (value: number) => formatValue(value, format ?? "number", currency);
-  const values = points.map((point) => point.value);
-  const min = Math.min(0, ...values);
-  const max = Math.max(0, ...values) === min ? min + 1 : Math.max(0, ...values);
-  const scale = (value: number) =>
-    CHART_PADDING + (1 - (value - min) / (max - min)) * (CHART_HEIGHT - 2 * CHART_PADDING);
-  const zero = scale(0);
-  const step = CHART_WIDTH / points.length;
-  const description = `${title ? `${title}: ` : ""}${first.label} ${show(first.value)} to ${last.label} ${show(last.value)}`;
+  const show = (value: number | null) => formatValue(value, format ?? "number", currency);
+  const latest = last.values[0] ?? null;
+  const description = `${title ? `${title}: ` : ""}${first.x} ${show(first.values[0] ?? null)} to ${last.x} ${show(latest)}`;
 
   return (
-    <figure className="flex flex-col gap-3 rounded-lg border bg-card p-4">
+    <figure
+      role="img"
+      aria-label={description}
+      className="flex flex-col gap-3 rounded-lg border bg-card p-4"
+    >
       <figcaption className="flex items-baseline justify-between gap-4">
         <span className="text-sm font-medium">{title}</span>
-        <span
-          className={cn(
-            "text-sm tabular-nums",
-            last.value < 0 ? "text-destructive" : "text-muted-foreground",
-          )}
-        >
-          {show(last.value)}
-        </span>
+        {type !== "pie" ? (
+          <span
+            className={cn(
+              "text-sm tabular-nums",
+              latest !== null && latest < 0 ? "text-destructive" : "text-muted-foreground",
+            )}
+          >
+            {show(latest)}
+          </span>
+        ) : null}
       </figcaption>
-      <svg
-        role="img"
-        aria-label={description}
-        viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-        preserveAspectRatio="none"
-        className="h-40 w-full"
-      >
-        <line
-          x1={0}
-          x2={CHART_WIDTH}
-          y1={zero}
-          y2={zero}
-          strokeDasharray="4 4"
-          vectorEffect="non-scaling-stroke"
-          className="stroke-border"
+      <Suspense fallback={<Skeleton className="h-56 w-full" />}>
+        <MiniChartPlot
+          type={type}
+          points={points}
+          series={series}
+          format={format}
+          currency={currency}
         />
-        {type === "bar" ? (
-          points.map((point, index) => {
-            const width = Math.max(2, step * 0.7);
-            const top = scale(point.value);
-            return (
-              <rect
-                key={index}
-                x={index * step + (step - width) / 2}
-                y={Math.min(top, zero)}
-                width={width}
-                height={Math.max(1, Math.abs(top - zero))}
-                rx={2}
-                className={point.value < 0 ? "fill-destructive" : "fill-primary"}
-              >
-                <title>{`${point.label}: ${show(point.value)}`}</title>
-              </rect>
-            );
-          })
-        ) : (
-          <>
-            <polyline
-              fill="none"
-              strokeWidth={2}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
-              className="stroke-primary"
-              points={points
-                .map((point, index) => `${index * step + step / 2},${scale(point.value)}`)
-                .join(" ")}
-            />
-            {points.map((point, index) => (
-              <rect
-                key={index}
-                x={index * step}
-                y={0}
-                width={step}
-                height={CHART_HEIGHT}
-                fill="transparent"
-              >
-                <title>{`${point.label}: ${show(point.value)}`}</title>
-              </rect>
-            ))}
-          </>
-        )}
-      </svg>
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>{first.label}</span>
-        <span>{last.label}</span>
-      </div>
+      </Suspense>
     </figure>
   );
 }
@@ -274,7 +225,7 @@ export const { registry } = defineRegistry(miniAppCatalog, {
       );
     },
     Chart: ({ props }) => (
-      <MiniChart
+      <ChartFigure
         type={props.type}
         rows={Array.isArray(props.data) ? props.data : []}
         x={props.x}
@@ -285,41 +236,25 @@ export const { registry } = defineRegistry(miniAppCatalog, {
       />
     ),
     Callout: ({ props }) => (
-      <div
-        role="note"
-        className={cn(
-          "flex flex-col gap-1 rounded-lg border border-l-4 bg-card p-3 text-sm",
-          CALLOUT_TONES[props.tone ?? "neutral"],
-        )}
-      >
-        {asText(props.title) ? <span className="font-medium">{asText(props.title)}</span> : null}
-        <span className="text-muted-foreground">{asText(props.text)}</span>
-      </div>
+      <Alert role="note" className={cn("border-l-4", CALLOUT_TONES[props.tone ?? "neutral"])}>
+        {asText(props.title) ? <AlertTitle>{asText(props.title)}</AlertTitle> : null}
+        <AlertDescription>{asText(props.text)}</AlertDescription>
+      </Alert>
     ),
     Progress: ({ props }) => {
       const max = toNumber(props.max) || 100;
       const percent = Math.min(100, Math.max(0, ((toNumber(props.value) ?? 0) / max) * 100));
-      const label = asText(props.label);
       return (
-        <div className="flex min-w-56 flex-1 flex-col gap-1.5 self-center">
-          <div className="flex justify-between gap-4 text-sm">
-            <span>{label}</span>
-            <span className="text-muted-foreground tabular-nums">{Math.round(percent)}%</span>
-          </div>
-          <div
-            role="progressbar"
-            aria-label={label}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(percent)}
-            className="h-2 overflow-hidden rounded-full bg-muted"
-          >
-            <div
-              className={cn("h-full rounded-full", FILL_TONES[props.tone ?? "neutral"])}
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-        </div>
+        <Progress
+          value={percent}
+          className={cn(
+            "min-w-56 flex-1 gap-2 self-center [&_[data-slot=progress-track]]:h-2",
+            PROGRESS_TONES[props.tone ?? "neutral"],
+          )}
+        >
+          <ProgressLabel>{asText(props.label)}</ProgressLabel>
+          <ProgressValue />
+        </Progress>
       );
     },
     KeyValue: ({ props }) => (

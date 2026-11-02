@@ -2,10 +2,11 @@
 
 ## Decisions
 
-- **Charts are SVG, not a chart library.** Two simple shapes cover dashboards, and a library adds a
-  dependency and its own look. Bars and a line draw from the app's tokens, with a dashed zero line
-  and the tooltips of `<title>` elements. The figure has an accessible summary of its first and
-  last points.
+- **Charts use shadcn's chart, loaded on demand.** It is the repo's official-registry route and gives
+  axes, tooltips and legends for bar, line, area and pie. The chart code is a separate chunk that
+  loads only when an app has a chart. Series are drawn under fixed ids (s0 to s3), never under a
+  name from the app file, because the chart library turns series ids into CSS variable names.
+  Colors are shades of the app's ink, with the destructive color for negative bars.
 - **Formats are a catalog concept.** `format` and `currency` are props, so a bot says what a value
   is and the app decides how to show it, in the person's locale. Percent takes percentage points.
 - **Tones are fixed.** neutral, success, warning and destructive map to the app's status colors, so

@@ -37,3 +37,22 @@ export function formatValue(
   }
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(number);
 }
+
+/** A short form for axis ticks, such as $2K or 1.5M. */
+export function formatCompact(
+  value: unknown,
+  format?: ValueFormat | null,
+  currency?: string | null,
+  locale?: string,
+): string {
+  const number = toNumber(value);
+  if (number === null) return asText(value);
+  if (format === "percent")
+    return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(number)}%`;
+  const code = currency && /^[A-Z]{3}$/.test(currency) ? currency : "USD";
+  return new Intl.NumberFormat(locale, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+    ...(format === "currency" ? { style: "currency", currency: code } : {}),
+  }).format(number);
+}

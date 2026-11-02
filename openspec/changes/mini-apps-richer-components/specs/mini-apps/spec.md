@@ -2,14 +2,20 @@
 
 ### Requirement: Mini apps can draw charts, notes, progress, facts and tabs
 
-Besides its basic components, a mini app SHALL be able to draw a bar or line chart, a highlighted
+Besides its basic components, a mini app SHALL be able to draw a bar, line, area or pie chart (several series for all but pie), a highlighted
 note, a progress bar, a list of facts and tab buttons that show and hide parts of the screen.
 
 #### Scenario: A chart of values below zero
 
 - **WHEN** a bar chart has values above and below zero
-- **THEN** bars below zero draw in the destructive color on a zero line, and the chart has an
-  accessible name that names its first and last points
+- **THEN** bars below zero draw in the destructive color on a zero line with a value axis, and the
+  chart has an accessible name that names its first and last points
+
+#### Scenario: Comparing series
+
+- **WHEN** a line or area chart lists several value keys
+- **THEN** each key draws as its own series, with a legend, and a pie chart draws one slice per row
+  with a legend in the order of the data
 
 #### Scenario: Tabs
 
