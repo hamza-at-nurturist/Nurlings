@@ -67,15 +67,9 @@ export function ComputerPanel({
             avatarSet={bot.avatarSet}
             color={bot.color}
             identity={bot.id}
-            size={44}
-            className="opacity-50 grayscale"
+            size={56}
+            asleep
           />
-          <span
-            aria-hidden
-            className="absolute -end-3 -top-2 text-[11px] font-medium leading-none text-muted-foreground/70"
-          >
-            z<sup>z</sup>
-          </span>
         </div>
         <span className="text-sm text-muted-foreground">
           <Trans>Asleep</Trans>
