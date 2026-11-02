@@ -18,8 +18,8 @@
 
 - [x] 3.1 `pnpm install --frozen-lockfile`, lint, typecheck and unit tests pass locally, except tests
   that need Docker or IPv6 loopback, which this sandbox lacks.
-- [ ] 3.2 `openspec validate upstream-sync-2026-11-02 --strict` passes.
-- [ ] 3.3 Open the PR; CI is green on the head commit (the desktop e2e runs in CI, not locally).
+- [x] 3.2 `openspec validate upstream-sync-2026-11-02 --strict` passes.
+- [x] 3.3 Open the PR; CI is green on the head commit (the desktop e2e runs in CI, not locally).
   Verify: `pr-digest --watch` reports terminal green checks.
 
 ## 4. After merge
