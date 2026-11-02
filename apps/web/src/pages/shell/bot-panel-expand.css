@@ -1,0 +1,18 @@
+/*
+ * Expanded bot panel: the aside covers the chat and stops at the bots sidebar. Unlayered, so it
+ * wins over the Tailwind utilities on the aside. The hr is the panel's resize handle.
+ * e2e/bot-panel-expand.spec.ts fails if ResizableSidePanel stops matching this selector.
+ */
+@media (min-width: 768px) {
+  [data-testid="side-panel"]:has([data-bot-panel-expanded]) {
+    position: absolute;
+    inset-inline-start: var(--sidebar-width);
+    inset-inline-end: 0;
+    width: auto;
+    max-width: none;
+  }
+
+  [data-testid="side-panel"]:has([data-bot-panel-expanded]) > hr {
+    display: none;
+  }
+}

@@ -1516,6 +1516,10 @@ msgstr ""
 msgid "Collapse {0}"
 msgstr "摺疊 {0}"
 
+#: src/pages/shell/bot-panel-expand.tsx
+msgid "Collapse panel"
+msgstr ""
+
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Color"
 msgstr "顏色"
@@ -2956,8 +2960,8 @@ msgstr "展開"
 msgid "Expand {0}"
 msgstr "展開 {0}"
 
-#: src/components/InstructionsExpand.tsx
-msgid "Expand instructions"
+#: src/pages/shell/bot-panel-expand.tsx
+msgid "Expand panel"
 msgstr ""
 
 #: src/components/markdown-copy.tsx
@@ -3417,7 +3421,6 @@ msgstr "指令歷史"
 
 #: src/components/AskCard.tsx
 #: src/components/InstructionSettings.tsx
-#: src/components/InstructionsExpand.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Instructions"
 msgstr "指令"

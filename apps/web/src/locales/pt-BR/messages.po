@@ -1515,6 +1515,10 @@ msgstr ""
 msgid "Collapse {0}"
 msgstr ""
 
+#: src/pages/shell/bot-panel-expand.tsx
+msgid "Collapse panel"
+msgstr ""
+
 #: src/pages/shell/avatar-studio-popover.tsx
 msgid "Color"
 msgstr "Cor"
@@ -2955,8 +2959,8 @@ msgstr "Expandir"
 msgid "Expand {0}"
 msgstr ""
 
-#: src/components/InstructionsExpand.tsx
-msgid "Expand instructions"
+#: src/pages/shell/bot-panel-expand.tsx
+msgid "Expand panel"
 msgstr ""
 
 #: src/components/markdown-copy.tsx
@@ -3416,7 +3420,6 @@ msgstr "Histórico de instruções"
 
 #: src/components/AskCard.tsx
 #: src/components/InstructionSettings.tsx
-#: src/components/InstructionsExpand.tsx
 #: src/pages/shell/agent-import.tsx
 msgid "Instructions"
 msgstr "Instruções"

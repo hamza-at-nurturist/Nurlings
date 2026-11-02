@@ -20,6 +20,7 @@ import type { SettingsSection } from "../shell-overlay";
 import { AgentImportForm } from "./agent-import";
 import type { BotPanelTab } from "./bot-panel";
 import { BotSettings } from "./bot-panel";
+import { BotPanelExpand } from "./bot-panel-expand";
 import { firstThreadRoute } from "./use-shell-navigation";
 
 /** The panel beside the chat: a bot's tabs, a routine, a group, or an import. */
@@ -120,6 +121,7 @@ export function ShellSidePanel({
                     }}
                   />
                 ) : null}
+                {botTab && active ? <BotPanelExpand key={active.id} /> : null}
                 <Button
                   variant="ghost"
                   size="icon-sm"
