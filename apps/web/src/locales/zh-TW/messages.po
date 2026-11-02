@@ -1205,6 +1205,7 @@ msgid "Can't read images"
 msgstr "無法讀取影像"
 
 #: src/components/AskCard.tsx
+#: src/components/board/TicketModal/DeleteTicket.tsx
 #: src/components/ComputerMaintenanceActions.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/components/markdown-link-prompt.tsx
@@ -2526,6 +2527,7 @@ msgid "Default scope"
 msgstr "預設範圍"
 
 #: src/components/AccountAccess.tsx
+#: src/components/board/TicketModal/DeleteTicket.tsx
 #: src/components/PasskeySettings.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/BotContextMenu.tsx
@@ -2561,6 +2563,10 @@ msgstr "刪除 {0}"
 msgid "Delete {0}?"
 msgstr "刪除 {0}？"
 
+#: src/components/board/TicketModal/DeleteTicket.tsx
+msgid "Delete {refLabel}?"
+msgstr ""
+
 #: src/components/AccountAccess.tsx
 msgid "Delete account"
 msgstr "刪除帳號"
@@ -2585,6 +2591,10 @@ msgstr "刪除空間"
 #: src/pages/SpaceSettingOverrides.tsx
 msgid "Delete this Space's credentials?"
 msgstr "要刪除此空間的憑證嗎？"
+
+#: src/components/board/TicketModal/DeleteTicket.tsx
+msgid "Delete ticket"
+msgstr ""
 
 #: src/pages/shell/message-view.tsx
 msgid "deleted"
@@ -3248,6 +3258,10 @@ msgstr "隱藏"
 #: src/components/VaultSettings.tsx
 msgid "Hide"
 msgstr "隱藏"
+
+#: src/components/board/BoardView/BoardView.tsx
+msgid "Hide closed"
+msgstr ""
 
 #: src/components/I18nBootstrap.tsx
 msgid "Hide password"
@@ -5543,6 +5557,10 @@ msgstr "顯示全部"
 msgid "Show bots"
 msgstr "顯示機器人"
 
+#: src/components/board/BoardView/BoardView.tsx
+msgid "Show closed"
+msgstr ""
+
 #: src/pages/Artifacts.tsx
 msgid "Show list"
 msgstr "顯示清單"
@@ -6141,6 +6159,10 @@ msgstr "此供應商尚未連線。"
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "This removes the connection from every space."
 msgstr "這將從每個空間移除該連線。"
+
+#: src/components/board/TicketModal/DeleteTicket.tsx
+msgid "This removes the ticket, its comments and its history. It can't be undone."
+msgstr ""
 
 #: src/pages/Auth.tsx
 msgid "This reset link is invalid or expired"

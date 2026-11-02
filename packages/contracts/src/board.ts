@@ -268,6 +268,10 @@ export const MoveTicketInput = z.object({
 });
 export type MoveTicketInput = z.infer<typeof MoveTicketInput>;
 
+/** Removes a ticket with its comments and history. Only people can, not Nurlings. */
+export const DeleteTicketInput = z.object({ id: Id });
+export type DeleteTicketInput = z.infer<typeof DeleteTicketInput>;
+
 /** Only a ticket that is In review can be approved; it moves to Done. */
 export const ApproveTicketInput = z.object({ id: Id });
 export type ApproveTicketInput = z.infer<typeof ApproveTicketInput>;

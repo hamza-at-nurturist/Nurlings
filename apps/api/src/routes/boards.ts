@@ -214,6 +214,17 @@ export function boardsRoutes(ctx: RouterContext) {
         if ("error" in result) throw new ORPCError("BAD_REQUEST", { message: result.error });
         return result.ticket;
       }),
+      delete: boardEnabled.tickets.delete.handler(async ({ context, input }) => {
+        const spaceId = context.actor.spaceId;
+        const ticket = await deps.prisma.ticket.findFirst({
+          where: { id: input.id, spaceId },
+          select: { id: true, boardId: true },
+        });
+        if (!ticket) throw new ORPCError("NOT_FOUND", { message: "Ticket not found." });
+        await deps.prisma.ticket.delete({ where: { id: ticket.id } });
+        await deps.boardEvents.notify(spaceId, { boardId: ticket.boardId }).catch(() => undefined);
+        return { ok: true as const };
+      }),
       approve: boardEnabled.tickets.approve.handler(async ({ context, input }) => {
         const result = await approveTicket(ticketDeps, {
           id: input.id,
