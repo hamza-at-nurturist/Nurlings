@@ -22,6 +22,7 @@ export const STATUS_DOT: Record<TicketStatus, string> = {
   blocked: "bg-destructive",
   done: "bg-success",
   closed: "bg-muted-foreground",
+  archived: "bg-muted-foreground",
 };
 
 const MENU = "w-auto min-w-40";

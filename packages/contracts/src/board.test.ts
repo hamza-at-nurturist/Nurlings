@@ -74,7 +74,15 @@ describe("ticket contracts", () => {
   });
 
   it("orders statuses with closed last and treats done and closed as completed", () => {
-    expect(TICKET_STATUSES).toEqual(["todo", "doing", "review", "blocked", "done", "closed"]);
+    expect(TICKET_STATUSES).toEqual([
+      "todo",
+      "doing",
+      "review",
+      "blocked",
+      "done",
+      "closed",
+      "archived",
+    ]);
     expect(isTicketCompletedStatus("done")).toBe(true);
     expect(isTicketCompletedStatus("closed")).toBe(true);
     expect(isTicketCompletedStatus("review")).toBe(false);

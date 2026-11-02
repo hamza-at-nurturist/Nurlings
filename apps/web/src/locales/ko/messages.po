@@ -1502,6 +1502,10 @@ msgstr "계정 설정 닫기"
 msgid "Close voice settings"
 msgstr "음성 설정 닫기"
 
+#: src/lib/ticket-status.ts
+msgid "Closed"
+msgstr ""
+
 #: src/pages/memory-providers/ConnectionModeFields.tsx
 msgid "Cloud"
 msgstr "클라우드"

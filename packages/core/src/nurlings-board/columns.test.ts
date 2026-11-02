@@ -15,7 +15,7 @@ const ticket = (id: string, overrides: Partial<TicketListItem> = {}) =>
 const daysAgo = (days: number) => new Date(NOW.getTime() - days * 86_400_000).toISOString();
 
 describe("boardColumns", () => {
-  it("returns the six statuses in order, keeping the list's order inside each", () => {
+  it("returns the seven statuses in order, keeping the list's order inside each", () => {
     const columns = boardColumns(
       [
         ticket("a"),
@@ -33,10 +33,12 @@ describe("boardColumns", () => {
       "blocked",
       "done",
       "closed",
+      "archived",
     ]);
     expect(columns[0]!.tickets.map((row) => row.id)).toEqual(["a", "c"]);
     expect(columns[2]!.tickets.map((row) => row.id)).toEqual(["b"]);
     expect(columns[5]!.tickets.map((row) => row.id)).toEqual(["d"]);
+    expect(columns[6]!.tickets).toEqual([]);
   });
   it("keeps a week of Done in view and the rest as older", () => {
     const [, , , , done] = boardColumns(

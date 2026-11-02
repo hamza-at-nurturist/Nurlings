@@ -49,7 +49,8 @@ export function ticketCard(
     dates,
     hasDates: Boolean(dates.start || dates.due),
     fileCount: ticket.fileCount,
-    finished: ticket.status === "done" || ticket.status === "closed",
+    finished:
+      ticket.status === "done" || ticket.status === "closed" || ticket.status === "archived",
     canApprove: ticket.status === "review",
   };
 }

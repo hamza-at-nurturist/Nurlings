@@ -1502,6 +1502,10 @@ msgstr "उपयोगकर्ता सेटिंग्स बंद कर
 msgid "Close voice settings"
 msgstr "आवाज़ सेटिंग्स बंद करें"
 
+#: src/lib/ticket-status.ts
+msgid "Closed"
+msgstr ""
+
 #: src/pages/memory-providers/ConnectionModeFields.tsx
 msgid "Cloud"
 msgstr "क्लाउड"

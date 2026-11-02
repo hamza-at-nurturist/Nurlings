@@ -2,13 +2,21 @@ import * as z from "zod";
 import { ATTACHMENT_MAX_COUNT } from "./attachments.js";
 import { Id, RunStatus } from "./ids.js";
 
-export const TICKET_STATUSES = ["todo", "doing", "review", "blocked", "done", "closed"] as const;
+export const TICKET_STATUSES = [
+  "todo",
+  "doing",
+  "review",
+  "blocked",
+  "done",
+  "closed",
+  "archived",
+] as const;
 export const TicketStatusSchema = z.enum(TICKET_STATUSES);
 export type TicketStatus = z.infer<typeof TicketStatusSchema>;
 
-/** `done` is finished-but-open for review; `closed` is terminal, so both stamp completion. */
+/** `done` is finished-but-open for review; `closed` (Won't do) and `archived` (Closed) are terminal, so all stamp completion. */
 export function isTicketCompletedStatus(status: TicketStatus): boolean {
-  return status === "done" || status === "closed";
+  return status === "done" || status === "closed" || status === "archived";
 }
 
 export const TICKET_PRIORITIES = ["low", "normal", "high", "urgent"] as const;

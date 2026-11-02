@@ -12,6 +12,7 @@ export function useTicketStatusLabels(): Record<TicketStatus, string> {
       blocked: t`Blocked`,
       done: t`Done`,
       closed: t`Won't do`,
+      archived: t`Closed`,
     }),
     [t],
   );
