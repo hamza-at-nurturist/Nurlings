@@ -71,7 +71,6 @@ describe("desktop release workflow", () => {
     expect(workflow).toContain(
       "if: runner.os == 'Windows' && needs.validate.outputs.windows_signed != 'true'",
     );
-    expect(workflow).toContain("Unsigned Windows update config names a publisher.");
     for (const option of [
       "endpoint",
       "codeSigningAccountName",
@@ -88,18 +87,15 @@ describe("desktop release workflow", () => {
       `include='[{"os":"ubuntu-24.04","artifact":"linux"},{"os":"windows-2022","artifact":"windows"}]'`,
     );
     expect(workflow.split("windows-2022")).toHaveLength(2);
-    expect(workflow).toContain("test -f release-artifacts/latest.yml");
     expect(workflow).toContain("compgen -G 'release-artifacts/*.exe' >/dev/null");
   });
 
-  it("pins every platform update feed to this repository's GitHub owner and repo", () => {
-    expect(workflow).toContain('grep -Fqx "provider: github"');
-    expect(workflow).toContain('grep -Fqx "owner: $FEED_OWNER"');
-    expect(workflow).toContain('grep -Fqx "repo: $FEED_REPO"');
-    expect(workflow).toContain("Verify Linux update feed is pinned to the official GitHub channel");
-    expect(workflow).toContain("Windows update config missing");
-    expect(workflow).toContain("RELEASE_VERSION:");
-    expect(workflow).toContain('grep -Fqx "version: $RELEASE_VERSION"');
+  it("refuses any packaged update feed, since the updater stays off", () => {
+    expect(workflow).toContain("Verify the Linux build has no update feed");
+    expect(workflow).toContain("The Linux build contains an update feed");
+    expect(workflow).toContain("The Windows build contains an update feed");
+    expect(workflow).toContain("The release contains an update feed");
+    expect(workflow).not.toContain("owner: $FEED_OWNER");
   });
 
   it("adds the system passkey association only when a provisioning profile is configured", () => {
@@ -118,12 +114,10 @@ describe("desktop release workflow", () => {
     expect(workflow).not.toMatch(/secrets\.APPLE_TEAM_ID/);
   });
 
-  it("publishes only a complete stable, upgrade-only feed", () => {
+  it("publishes only a complete stable, upgrade-only release", () => {
     expect(workflow).toContain("^v([0-9]+)\\.([0-9]+)\\.([0-9]+)$");
     expect(workflow).toContain("must be newer than published release");
     expect(workflow).toContain("group: release-desktop-stable");
-    expect(workflow).toContain("latest.yml");
-    expect(workflow).toContain("latest-linux.yml");
     expect(workflow).toContain(
       '--draft --notes-file "$RUNNER_TEMP/release-notes.md" --generate-notes',
     );
