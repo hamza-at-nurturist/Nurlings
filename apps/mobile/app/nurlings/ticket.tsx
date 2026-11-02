@@ -82,6 +82,7 @@ function TicketView({ ticketId }: { ticketId: string }) {
   const { t, locale } = useI18n();
   const tokens = useMobileTokens();
   const navigation = useNavigation();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const topInset = useFloatingHeaderInset();
   const headerHeight = useHeaderHeightIfAny();
