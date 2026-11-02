@@ -1204,6 +1204,7 @@ msgid "Can't read images"
 msgstr "이미지를 읽을 수 없음"
 
 #: src/components/AskCard.tsx
+#: src/components/board/TicketModal/DeleteTicket.tsx
 #: src/components/ComputerMaintenanceActions.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/components/markdown-link-prompt.tsx
@@ -2525,6 +2526,7 @@ msgid "Default scope"
 msgstr "기본 기억 범위"
 
 #: src/components/AccountAccess.tsx
+#: src/components/board/TicketModal/DeleteTicket.tsx
 #: src/components/PasskeySettings.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/BotContextMenu.tsx
@@ -2560,6 +2562,10 @@ msgstr "{0} 삭제"
 msgid "Delete {0}?"
 msgstr "{0}을 삭제할까요?"
 
+#: src/components/board/TicketModal/DeleteTicket.tsx
+msgid "Delete {refLabel}?"
+msgstr ""
+
 #: src/components/AccountAccess.tsx
 msgid "Delete account"
 msgstr "계정 삭제"
@@ -2584,6 +2590,10 @@ msgstr ""
 #: src/pages/SpaceSettingOverrides.tsx
 msgid "Delete this Space's credentials?"
 msgstr "이 스페이스의 자격 증명을 삭제할까요?"
+
+#: src/components/board/TicketModal/DeleteTicket.tsx
+msgid "Delete ticket"
+msgstr ""
 
 #: src/pages/shell/message-view.tsx
 msgid "deleted"
@@ -3247,6 +3257,10 @@ msgstr "숨김"
 #: src/components/VaultSettings.tsx
 msgid "Hide"
 msgstr "숨기기"
+
+#: src/components/board/BoardView/BoardView.tsx
+msgid "Hide closed"
+msgstr ""
 
 #: src/components/I18nBootstrap.tsx
 msgid "Hide password"
@@ -5542,6 +5556,10 @@ msgstr ""
 msgid "Show bots"
 msgstr ""
 
+#: src/components/board/BoardView/BoardView.tsx
+msgid "Show closed"
+msgstr ""
+
 #: src/pages/Artifacts.tsx
 msgid "Show list"
 msgstr ""
@@ -6139,6 +6157,10 @@ msgstr "이 서비스는 아직 연결되지 않았습니다."
 
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "This removes the connection from every space."
+msgstr ""
+
+#: src/components/board/TicketModal/DeleteTicket.tsx
+msgid "This removes the ticket, its comments and its history. It can't be undone."
 msgstr ""
 
 #: src/pages/Auth.tsx

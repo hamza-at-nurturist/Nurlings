@@ -1204,6 +1204,7 @@ msgid "Can't read images"
 msgstr "No puede leer imágenes"
 
 #: src/components/AskCard.tsx
+#: src/components/board/TicketModal/DeleteTicket.tsx
 #: src/components/ComputerMaintenanceActions.tsx
 #: src/components/integrations/plugin-marketplace.tsx
 #: src/components/markdown-link-prompt.tsx
@@ -2525,6 +2526,7 @@ msgid "Default scope"
 msgstr "Alcance predeterminado"
 
 #: src/components/AccountAccess.tsx
+#: src/components/board/TicketModal/DeleteTicket.tsx
 #: src/components/PasskeySettings.tsx
 #: src/pages/Artifacts.tsx
 #: src/pages/BotContextMenu.tsx
@@ -2560,6 +2562,10 @@ msgstr "Eliminar {0}"
 msgid "Delete {0}?"
 msgstr "¿Eliminar {0}?"
 
+#: src/components/board/TicketModal/DeleteTicket.tsx
+msgid "Delete {refLabel}?"
+msgstr ""
+
 #: src/components/AccountAccess.tsx
 msgid "Delete account"
 msgstr "Eliminar cuenta"
@@ -2584,6 +2590,10 @@ msgstr "Eliminar espacio"
 #: src/pages/SpaceSettingOverrides.tsx
 msgid "Delete this Space's credentials?"
 msgstr "¿Eliminar las credenciales de este espacio?"
+
+#: src/components/board/TicketModal/DeleteTicket.tsx
+msgid "Delete ticket"
+msgstr ""
 
 #: src/pages/shell/message-view.tsx
 msgid "deleted"
@@ -3247,6 +3257,10 @@ msgstr "Oculto"
 #: src/components/VaultSettings.tsx
 msgid "Hide"
 msgstr "Ocultar"
+
+#: src/components/board/BoardView/BoardView.tsx
+msgid "Hide closed"
+msgstr ""
 
 #: src/components/I18nBootstrap.tsx
 msgid "Hide password"
@@ -5542,6 +5556,10 @@ msgstr "Mostrar todos"
 msgid "Show bots"
 msgstr "Mostrar bots"
 
+#: src/components/board/BoardView/BoardView.tsx
+msgid "Show closed"
+msgstr ""
+
 #: src/pages/Artifacts.tsx
 msgid "Show list"
 msgstr "Mostrar lista"
@@ -6140,6 +6158,10 @@ msgstr "Este proveedor aún no está conectado."
 #: src/pages/ModelSettingsOverlay.tsx
 msgid "This removes the connection from every space."
 msgstr "Esto quita la conexión de todos los espacios."
+
+#: src/components/board/TicketModal/DeleteTicket.tsx
+msgid "This removes the ticket, its comments and its history. It can't be undone."
+msgstr ""
 
 #: src/pages/Auth.tsx
 msgid "This reset link is invalid or expired"

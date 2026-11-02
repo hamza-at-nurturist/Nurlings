@@ -3,7 +3,7 @@ import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import { isRetryableError, retryDelayMs, WORKING_RUN_STATUSES } from "@rakazo/core";
 import type { QuickAddTicket } from "@rakazo/core/nurlings-board";
 import { boardColumns, isMoveTarget } from "@rakazo/core/nurlings-board";
-import { buttonVariants } from "@rakazo/ui-web";
+import { Button, buttonVariants } from "@rakazo/ui-web";
 import { ChevronLeft } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -108,7 +108,14 @@ export function BoardView() {
     if (initialBots.length) void reload().catch(() => undefined);
   }, [working]);
 
-  const columns = useMemo(() => boardColumns(tickets, owner, new Date()), [tickets, owner]);
+  const [showClosed, setShowClosed] = useState(false);
+  const columns = useMemo(
+    () =>
+      boardColumns(tickets, owner, new Date()).filter(
+        (column) => showClosed || column.status !== "closed",
+      ),
+    [tickets, owner, showClosed],
+  );
 
   async function act(change: () => Promise<unknown>) {
     setBusy(true);
@@ -153,6 +160,14 @@ export function BoardView() {
           onChange={setOwner}
           className="@max-[640px]:order-2 @max-[640px]:w-full @min-[641px]:ml-2"
         />
+        <Button
+          variant="text"
+          size="sm"
+          aria-pressed={showClosed}
+          onClick={() => setShowClosed((value) => !value)}
+        >
+          {showClosed ? <Trans>Hide closed</Trans> : <Trans>Show closed</Trans>}
+        </Button>
         <QuickAdd
           bots={bots}
           onCreate={(ticket: QuickAddTicket) => act(() => rpc.tickets.create(ticket))}

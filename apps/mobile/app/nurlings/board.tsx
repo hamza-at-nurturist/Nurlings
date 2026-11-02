@@ -87,7 +87,10 @@ export default function BoardScreen() {
     if (bots.length) void reload().catch(() => undefined);
   }, [working]);
 
-  const columns = useMemo(() => boardColumns(tickets, owner, new Date()), [tickets, owner]);
+  const columns = useMemo(
+    () => boardColumns(tickets, owner, new Date()).filter((column) => column.status !== "closed"),
+    [tickets, owner],
+  );
 
   async function act(change: () => Promise<unknown>) {
     setError("");

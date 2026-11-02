@@ -18,6 +18,7 @@ import { NarrowTicket } from "./NarrowTicket";
 import { NeedsYou } from "./NeedsYou";
 import type { PropertiesPatch } from "./Properties";
 import { ReplyBox } from "./ReplyBox";
+import { DeleteTicket } from "./DeleteTicket";
 import { TicketPane } from "./TicketPane";
 import { useLiveBots } from "./use-live-bots";
 import { useNarrowModal } from "./use-narrow-modal";
@@ -99,26 +100,36 @@ export function TicketModal({
   const failure = error || activity.error;
   const approve = () => void save(() => rpc.tickets.approve({ id: ticket.id }));
   const pane = (
-    <TicketPane
-      ticket={ticket}
-      bots={bots}
-      timeZone={timeZone}
-      busy={busy}
-      files={activity.files}
-      failure={failure}
-      narrow={narrow}
-      latest={
-        narrow ? (
-          <LatestActivity
-            items={items}
-            bots={bots}
-            viewer={viewer}
-            onOpen={() => setTab("activity")}
-          />
-        ) : null
-      }
-      onUpdate={(patch) => void update(patch)}
-    />
+    <>
+      <TicketPane
+        ticket={ticket}
+        bots={bots}
+        timeZone={timeZone}
+        busy={busy}
+        files={activity.files}
+        failure={failure}
+        narrow={narrow}
+        latest={
+          narrow ? (
+            <LatestActivity
+              items={items}
+              bots={bots}
+              viewer={viewer}
+              onOpen={() => setTab("activity")}
+            />
+          ) : null
+        }
+        onUpdate={(patch) => void update(patch)}
+      />
+      <DeleteTicket
+        ticketId={ticket.id}
+        refLabel={ticket.ref}
+        onDeleted={() => {
+          onClose();
+          void onChanged();
+        }}
+      />
+    </>
   );
   const feed = (
     <ActivityFeed
@@ -214,7 +225,7 @@ export function TicketModal({
                 size="icon-sm"
                 data-testid="ticket-fullscreen"
                 aria-label={fullscreen ? t`Collapse` : t`Expand`}
-                className="absolute top-2 right-10"
+                className="absolute top-4.5 right-12"
                 onClick={() => {
                   writeTicketFullscreen(!fullscreen);
                   setFullscreen(!fullscreen);
