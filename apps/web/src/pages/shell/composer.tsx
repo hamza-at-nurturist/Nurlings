@@ -35,6 +35,7 @@ import {
   readComposerDraftBindings,
   settleComposerDraftSubmission,
   subscribeComposerDraftAccepted,
+  subscribeComposerDraftRequest,
   writeComposerDraft,
 } from "../../lib/composer-draft";
 import { isFileDrag, isFilePaste } from "../../lib/pending-attachments";
@@ -189,6 +190,15 @@ export const Composer = memo(function Composer({
       subscribeComposerDraftAccepted(draftKey, (text) => {
         if (compositionRef.current.text === text)
           commitComposition({ text: "", bindings: [] }, false);
+        setMentionQuery(null);
+        setSlashQuery(null);
+      }),
+    [draftKey],
+  );
+  useEffect(
+    () =>
+      subscribeComposerDraftRequest(draftKey, (text) => {
+        commitComposition({ text, bindings: [] }, false);
         setMentionQuery(null);
         setSlashQuery(null);
       }),

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ArtifactDataLoader } from "../lib/artifact-data-fork";
-import { writeComposerDraft } from "../lib/composer-draft";
+import { requestComposerDraft } from "../lib/composer-draft";
 import { MiniAppViewer } from "./MiniAppViewer";
 
 /**
@@ -21,7 +21,7 @@ export function MiniAppArtifactPreview({
   const onAskBot = useCallback(
     (message: string) => {
       if (!botId) return;
-      writeComposerDraft(`bot:${botId}`, message);
+      requestComposerDraft(`bot:${botId}`, message);
       navigate(`/app/${botId}`);
     },
     [botId, navigate],

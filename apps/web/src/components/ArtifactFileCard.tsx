@@ -5,14 +5,17 @@ import { ChatMarkdown } from "@rakazo/chat-ui/web";
 import { isAttachmentAudioMimeType } from "@rakazo/contracts";
 import { fileSizeParts } from "@rakazo/core";
 import { Button, Dialog, DialogClose, DialogContent, DialogTitle, Spinner } from "@rakazo/ui-web";
-import { Code2, Download, FileText, Play, X } from "lucide-react";
+import { Code2, Download, FileText, LayoutDashboard, Play, X } from "lucide-react";
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
+import { artifactDataLoader } from "../lib/artifact-data-fork";
 import type { ArtifactTarget } from "../lib/artifact-open";
 import { downloadArtifact, downloadArtifactBytes, fetchArtifactBytes } from "../lib/artifact-open";
+import { requestComposerDraft } from "../lib/composer-draft";
 import { errorText } from "../lib/user-error";
 import { BuiCard } from "./ai/primitives";
 import { IconTooltip } from "./IconTooltip";
+import { isMiniAppName, MiniAppViewer } from "./MiniAppViewer";
 import { PdfViewer } from "./PdfViewer";
 import { SandboxedHtmlViewer } from "./SandboxedHtmlViewer";
 
@@ -34,9 +37,15 @@ const PREVIEWABLE_MIME_TYPES = new Set([
 ]);
 const TEXT_MIME_TYPES = new Set(["text/markdown", "text/html"]);
 
+/** A mini app is a JSON file the app draws, so it previews like HTML does. */
+function isMiniApp(name: string, mimeType: string): boolean {
+  return mimeType === "application/json" && isMiniAppName(name);
+}
+
 export function ArtifactFileCard(props: ArtifactFileCardProps) {
   const { t } = useLingui();
-  const previewable = PREVIEWABLE_MIME_TYPES.has(props.mimeType);
+  const previewable =
+    PREVIEWABLE_MIME_TYPES.has(props.mimeType) || isMiniApp(props.name, props.mimeType);
   const previewButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -97,6 +106,8 @@ export function ArtifactFileCard(props: ArtifactFileCardProps) {
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] bg-muted text-foreground">
               {props.mimeType === "text/html" ? (
                 <Code2 size={21} strokeWidth={1.8} />
+              ) : isMiniApp(props.name, props.mimeType) ? (
+                <LayoutDashboard size={21} strokeWidth={1.8} />
               ) : (
                 <FileText size={21} strokeWidth={1.8} />
               )}
@@ -129,7 +140,11 @@ export function ArtifactFileCard(props: ArtifactFileCardProps) {
           finalFocus={previewButton}
           className="flex h-[min(88vh,900px)] w-[min(960px,94vw)] flex-col gap-0 overflow-hidden p-0 sm:max-w-none"
         >
-          <FilePreview {...props} closeButtonRef={closeButton} />
+          <FilePreview
+            {...props}
+            closeButtonRef={closeButton}
+            onClose={() => setPreviewOpen(false)}
+          />
         </DialogContent>
       </Dialog>
     </>
@@ -142,7 +157,11 @@ function FilePreview({
   name,
   mimeType,
   closeButtonRef,
-}: ArtifactFileCardProps & { closeButtonRef: RefObject<HTMLButtonElement | null> }) {
+  onClose,
+}: ArtifactFileCardProps & {
+  closeButtonRef: RefObject<HTMLButtonElement | null>;
+  onClose: () => void;
+}) {
   const { t } = useLingui();
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const [state, setState] = useState<
@@ -160,7 +179,7 @@ function FilePreview({
     void fetchArtifactBytes(artifactTarget, artifactId)
       .then((bytes) => {
         if (cancelled) return;
-        if (!TEXT_MIME_TYPES.has(mimeType)) {
+        if (!TEXT_MIME_TYPES.has(mimeType) && !isMiniApp(name, mimeType)) {
           setState({ status: "ready", bytes });
           return;
         }
@@ -181,7 +200,7 @@ function FilePreview({
     return () => {
       cancelled = true;
     };
-  }, [artifactId, targetBotId, targetGroupId, mimeType, t]);
+  }, [artifactId, targetBotId, targetGroupId, mimeType, name, t]);
 
   return (
     <>
@@ -236,6 +255,18 @@ function FilePreview({
           </div>
         ) : mimeType === "text/html" && state.text !== undefined ? (
           <SandboxedHtmlViewer html={state.text} title={name} />
+        ) : isMiniApp(name, mimeType) && state.text !== undefined ? (
+          <MiniAppViewer
+            source={state.text}
+            loadData={artifactDataLoader(targetBotId ?? null)}
+            onAskBot={(message) => {
+              requestComposerDraft(
+                targetBotId !== undefined ? `bot:${targetBotId}` : `group:${targetGroupId}`,
+                message,
+              );
+              onClose();
+            }}
+          />
         ) : mimeType === "video/mp4" ? (
           <VideoPreview bytes={state.bytes} name={name} />
         ) : mimeType === "application/pdf" ? (

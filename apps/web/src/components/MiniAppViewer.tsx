@@ -5,7 +5,8 @@ import { useEffect, useMemo } from "react";
 import { z } from "zod";
 import type { ArtifactDataLoader } from "../lib/artifact-data-fork";
 import { miniAppCatalog, usesOnlyTheCatalog } from "../lib/mini-app/catalog";
-import { asText, registry } from "../lib/mini-app/registry";
+import { asText } from "../lib/mini-app/format";
+import { registry } from "../lib/mini-app/registry";
 
 export const MINI_APP_SUFFIX = ".app.json";
 export const MINI_APP_MAX_BYTES = 200_000;
