@@ -23,10 +23,18 @@ test("the bot panel expands over the chat and collapses with Escape", async ({
     .poll(async () => (await panel.boundingBox())!.width)
     .toBeGreaterThan(narrow.width + 200);
   const sidebarBox = (await sidebar.boundingBox())!;
+  // The width grows before the edges settle, so wait for the final box rather than the first wider one.
+  await expect
+    .poll(async () => {
+      const box = (await panel.boundingBox())!;
+      return Math.max(
+        Math.abs(box.x - (sidebarBox.x + sidebarBox.width)),
+        Math.abs(box.x + box.width - 1400),
+      );
+    })
+    .toBeLessThan(2);
   const wide = (await panel.boundingBox())!;
   const chat = (await transcript.boundingBox())!;
-  expect(Math.abs(wide.x - (sidebarBox.x + sidebarBox.width))).toBeLessThan(2);
-  expect(Math.abs(wide.x + wide.width - 1400)).toBeLessThan(2);
   expect(wide.x).toBeLessThanOrEqual(chat.x + 1);
   expect(wide.x + wide.width).toBeGreaterThanOrEqual(chat.x + chat.width - 1);
   await expect(sidebar).toBeVisible();
