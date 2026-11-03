@@ -1,4 +1,5 @@
 import { defineRegistry, useBoundProp } from "@json-render/react";
+import { miniAppCatalog } from "@rakazo/mini-app";
 import { Alert, AlertDescription, AlertTitle } from "@rakazo/ui-web/components/ui/alert";
 import { Progress, ProgressLabel, ProgressValue } from "@rakazo/ui-web/components/ui/progress";
 import { Separator } from "@rakazo/ui-web/components/ui/separator";
@@ -14,7 +15,6 @@ import {
 import { TabsList, Tabs as TabsRoot, TabsTrigger } from "@rakazo/ui-web/components/ui/tabs";
 import { cn } from "@rakazo/ui-web/lib/utils";
 import { lazy, Suspense } from "react";
-import { miniAppCatalog } from "./catalog";
 import { asText, formatValue, toNumber, type ValueFormat } from "./format";
 import type { ChartPoint, ChartType } from "./mini-chart";
 import {

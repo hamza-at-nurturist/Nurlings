@@ -1,82 +1,29 @@
-import { formatSpecIssues, type Spec, validateSpec } from "@json-render/core";
 import { createStateStore, JSONUIProvider, Renderer } from "@json-render/react";
 import { useLingui } from "@lingui/react/macro";
+import {
+  isMiniAppName,
+  type MiniAppRefusal,
+  type ParsedMiniApp,
+  readMiniApp,
+} from "@rakazo/mini-app";
 import { cn } from "@rakazo/ui-web/lib/utils";
 import { useEffect, useMemo } from "react";
-import { z } from "zod";
 import type { ArtifactDataLoader } from "../lib/artifact-data-fork";
 import "../lib/mini-app/mini-app.css";
-import { catalogProblem, miniAppCatalog } from "../lib/mini-app/catalog";
 import { asText } from "../lib/mini-app/format";
 import { registry } from "../lib/mini-app/registry";
 
-export const MINI_APP_SUFFIX = ".app.json";
-export const MINI_APP_MAX_BYTES = 200_000;
 export const MINI_APP_REFRESH_MS = 10_000;
 const MESSAGE_LIMIT = 2000;
 
-export function isMiniAppName(name: string): boolean {
-  return name.toLowerCase().endsWith(MINI_APP_SUFFIX);
-}
+export { isMiniAppName };
 
-const appFile = z.object({
-  data: z.array(z.string().min(1).max(200)).max(8).default([]),
-  /** full draws edge to edge, for an app with its own sidebar and header. */
-  layout: z.enum(["padded", "full"]).default("padded"),
-  spec: z.unknown(),
-});
-
-export type ParsedMiniApp = { spec: Spec; data: string[]; layout: "padded" | "full" };
-export type MiniAppRefusal = "large" | "json" | "shape" | "unsupported" | "incomplete";
-
-/** Why an app file cannot be drawn, or the parsed app. Nothing is drawn from a refused file. */
+/** The app, or why it is refused. The reason in words is for bots, so people only get the code. */
 export function parseMiniApp(source: string): ParsedMiniApp | { error: MiniAppRefusal } {
-  if (new TextEncoder().encode(source).length > MINI_APP_MAX_BYTES) return { error: "large" };
-  let json: unknown;
-  try {
-    json = JSON.parse(source);
-  } catch {
-    return { error: "json" };
-  }
-  const file = appFile.safeParse(json);
-  if (!file.success) return { error: "shape" };
-  // The catalog's validate returns a copy without on, repeat and visible, so it only gates the
-  // original spec, which is what gets drawn.
-  const spec = withChildren(file.data.spec);
-  if (!spec) return { error: "shape" };
-  const checked = miniAppCatalog.validate(spec);
-  if (!checked.success) return { error: "unsupported" };
-  const problem = catalogProblem(spec);
-  if (problem) {
-    console.warn("Mini app uses something outside the catalog:", problem);
-    return { error: "unsupported" };
-  }
-  // The data a list repeats over arrives after the app opens, so it is not in the spec's own state;
-  // that is the one structural rule that does not apply here.
-  const broken = validateSpec(spec).issues.filter(
-    (issue) => issue.severity === "error" && issue.code !== "repeat_state_mismatch",
-  );
-  if (broken.length > 0) {
-    console.warn("Mini app spec rejected", formatSpecIssues(broken));
-    return { error: "incomplete" };
-  }
-  return { spec, data: file.data.data, layout: file.data.layout };
-}
-
-/** json-render wants an explicit children list on every element, leaves included. */
-function withChildren(value: unknown): Spec | null {
-  if (!value || typeof value !== "object") return null;
-  const { elements } = value as { elements?: unknown };
-  if (!elements || typeof elements !== "object") return null;
-  const filled = Object.fromEntries(
-    Object.entries(elements).map(([key, element]) => [
-      key,
-      element && typeof element === "object" && !("children" in element)
-        ? { ...element, children: [] }
-        : element,
-    ]),
-  );
-  return { ...(value as object), elements: filled } as Spec;
+  const read = readMiniApp(source);
+  if (!("error" in read)) return read;
+  console.warn("Mini app refused:", read.detail);
+  return { error: read.error };
 }
 
 /** The key a data file has in state: its name without the extension. */

@@ -1,4 +1,5 @@
 import { useBoundProp } from "@json-render/react";
+import type { IconName } from "@rakazo/mini-app";
 import { Avatar, AvatarFallback } from "@rakazo/ui-web/components/ui/avatar";
 import { Badge } from "@rakazo/ui-web/components/ui/badge";
 import { Button } from "@rakazo/ui-web/components/ui/button";
@@ -45,7 +46,6 @@ import {
   X,
 } from "lucide-react";
 import { asText, formatValue, toNumber, type ValueFormat } from "./format";
-import type { IconName } from "./icons";
 
 export type Tone = "neutral" | "info" | "success" | "warning" | "destructive" | "muted";
 

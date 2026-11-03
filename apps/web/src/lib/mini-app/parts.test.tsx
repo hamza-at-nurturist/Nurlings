@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 
+import { catalogProblem } from "@rakazo/mini-app";
 import { act, type ReactElement } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
-import { catalogProblem } from "./catalog";
 import {
   BreakdownBar,
   DiffView,
