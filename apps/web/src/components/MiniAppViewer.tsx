@@ -4,6 +4,7 @@ import { useLingui } from "@lingui/react/macro";
 import { useEffect, useMemo } from "react";
 import { z } from "zod";
 import type { ArtifactDataLoader } from "../lib/artifact-data-fork";
+import "../lib/mini-app/mini-app.css";
 import { miniAppCatalog, usesOnlyTheCatalog } from "../lib/mini-app/catalog";
 import { asText } from "../lib/mini-app/format";
 import { registry } from "../lib/mini-app/registry";
@@ -146,7 +147,10 @@ export function MiniAppViewer({
     );
   }
   return (
-    <div className="h-full overflow-auto p-6" data-testid="mini-app">
+    <div
+      className="mini-app h-full overflow-auto bg-background p-6 text-foreground"
+      data-testid="mini-app"
+    >
       <JSONUIProvider registry={registry} store={store} handlers={handlers}>
         <Renderer spec={parsed.spec} registry={registry} />
       </JSONUIProvider>
