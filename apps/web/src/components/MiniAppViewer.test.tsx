@@ -7,6 +7,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { financeApp, financeData } from "../lib/mini-app/finance-example";
 import { leadPipelineApp, leadPipelineData } from "../lib/mini-app/lead-pipeline-example";
+import { outreachApp, outreachData } from "../lib/mini-app/outreach-example";
 import { MiniAppViewer, parseMiniApp } from "./MiniAppViewer";
 
 vi.mock("@lingui/react/macro", () => ({
@@ -193,7 +194,7 @@ it("switches tabs: the chart shows first, then the table with badge cells", asyn
   const cells = [...view.querySelectorAll("td")].map((el) => el.textContent);
   expect(cells).toContain("OK");
   expect(cells).toContain("Below zero");
-  expect(view.querySelector("td.text-destructive")?.textContent).toMatch(/^-\$/);
+  expect(view.querySelector("td span.text-destructive")?.textContent).toMatch(/^-\$/);
 });
 
 it("refuses new components used wrongly", () => {
@@ -228,4 +229,47 @@ it("refuses new components used wrongly", () => {
   expect(parseMiniApp(one("KeyValue", { items: [{ label: "a", value: "b" }] }))).not.toHaveProperty(
     "error",
   );
+});
+
+it("the outreach dashboard passes the strict validator and uses the full catalog", () => {
+  const parsed = parseMiniApp(outreachApp);
+  expect(parsed).not.toHaveProperty("error");
+  if ("error" in parsed) return;
+  expect(parsed.layout).toBe("full");
+  const types = new Set(Object.values(parsed.spec.elements).map((element) => element.type));
+  for (const type of ["Grid", "Tabs", "Table", "Message", "Diff", "Breakdown", "Meter", "Select"]) {
+    expect(types.has(type)).toBe(true);
+  }
+});
+
+it("the outreach dashboard switches pages from the sidebar and filters its leads", async () => {
+  const view = await render({ source: outreachApp, loadData: async () => outreachData });
+  const text = () => view.textContent ?? "";
+  const press = async (label: string, within: ParentNode = view) => {
+    const button = [...within.querySelectorAll("button")].find((el) =>
+      el.textContent?.trim().startsWith(label),
+    );
+    await act(async () => button?.click());
+  };
+
+  // It opens on Today, with the needs-attention list.
+  expect(text()).toContain("Needs attention");
+  expect(text()).toContain("Marcus Webb · Alder Way");
+  expect(text()).not.toContain("Showing 1–8 of 248");
+
+  await press("Leads");
+  expect(text()).toContain("Showing 1–8 of 248");
+  expect(text()).toContain("12 Alder Way");
+
+  // A tab keeps only the leads in its bucket.
+  const tab = [...view.querySelectorAll('[role="tab"]')].find((el) =>
+    el.textContent?.startsWith("Opted out"),
+  );
+  await act(async () => (tab as HTMLElement | undefined)?.click());
+  expect(text()).toContain("9 Elm Court");
+  expect(text()).not.toContain("12 Alder Way");
+
+  await press("Review");
+  expect(text()).toContain("Is this the right reply?");
+  expect(view.querySelector("del, .line-through")).not.toBeNull();
 });

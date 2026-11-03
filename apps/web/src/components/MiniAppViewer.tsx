@@ -1,11 +1,12 @@
 import { formatSpecIssues, type Spec, validateSpec } from "@json-render/core";
 import { createStateStore, JSONUIProvider, Renderer } from "@json-render/react";
 import { useLingui } from "@lingui/react/macro";
+import { cn } from "@rakazo/ui-web/lib/utils";
 import { useEffect, useMemo } from "react";
 import { z } from "zod";
 import type { ArtifactDataLoader } from "../lib/artifact-data-fork";
 import "../lib/mini-app/mini-app.css";
-import { miniAppCatalog, usesOnlyTheCatalog } from "../lib/mini-app/catalog";
+import { catalogProblem, miniAppCatalog } from "../lib/mini-app/catalog";
 import { asText } from "../lib/mini-app/format";
 import { registry } from "../lib/mini-app/registry";
 
@@ -20,10 +21,12 @@ export function isMiniAppName(name: string): boolean {
 
 const appFile = z.object({
   data: z.array(z.string().min(1).max(200)).max(8).default([]),
+  /** full draws edge to edge, for an app with its own sidebar and header. */
+  layout: z.enum(["padded", "full"]).default("padded"),
   spec: z.unknown(),
 });
 
-export type ParsedMiniApp = { spec: Spec; data: string[] };
+export type ParsedMiniApp = { spec: Spec; data: string[]; layout: "padded" | "full" };
 export type MiniAppRefusal = "large" | "json" | "shape" | "unsupported" | "incomplete";
 
 /** Why an app file cannot be drawn, or the parsed app. Nothing is drawn from a refused file. */
@@ -43,13 +46,21 @@ export function parseMiniApp(source: string): ParsedMiniApp | { error: MiniAppRe
   if (!spec) return { error: "shape" };
   const checked = miniAppCatalog.validate(spec);
   if (!checked.success) return { error: "unsupported" };
-  if (!usesOnlyTheCatalog(spec)) return { error: "unsupported" };
-  const structure = validateSpec(spec);
-  if (!structure.valid) {
-    console.warn("Mini app spec rejected", formatSpecIssues(structure.issues));
+  const problem = catalogProblem(spec);
+  if (problem) {
+    console.warn("Mini app uses something outside the catalog:", problem);
+    return { error: "unsupported" };
+  }
+  // The data a list repeats over arrives after the app opens, so it is not in the spec's own state;
+  // that is the one structural rule that does not apply here.
+  const broken = validateSpec(spec).issues.filter(
+    (issue) => issue.severity === "error" && issue.code !== "repeat_state_mismatch",
+  );
+  if (broken.length > 0) {
+    console.warn("Mini app spec rejected", formatSpecIssues(broken));
     return { error: "incomplete" };
   }
-  return { spec, data: file.data.data };
+  return { spec, data: file.data.data, layout: file.data.layout };
 }
 
 /** json-render wants an explicit children list on every element, leaves included. */
@@ -148,7 +159,10 @@ export function MiniAppViewer({
   }
   return (
     <div
-      className="mini-app h-full overflow-auto bg-background p-6 text-foreground"
+      className={cn(
+        "mini-app h-full overflow-auto bg-background text-foreground",
+        parsed.layout === "padded" && "p-6",
+      )}
       data-testid="mini-app"
     >
       <JSONUIProvider registry={registry} store={store} handlers={handlers}>
