@@ -1,7 +1,7 @@
 import { defineCatalog } from "@json-render/core";
 import { schema } from "@json-render/react/schema";
 import { z } from "zod";
-import { ICON_NAMES } from "./icons";
+import { ICON_NAMES } from "./icons.js";
 
 /**
  * A prop is a literal or one of json-render's expression objects ($state, $item, $template, ...).

@@ -4,6 +4,7 @@ import { resolveBotWorkspacePath } from "./computer-support.js";
 import { desktopProtectionGuardMessage } from "./desktop-command-guard.js";
 import { protectedActivateScriptWriteRefusal } from "./desktop-guard-words.js";
 import { generateMediaFromTool } from "./media-generation-tools.js";
+import { miniAppProblem } from "./mini-app-check.js";
 import type { RunContext } from "./run-context.js";
 import { persistMessageInTransaction, publishMessage } from "./run-messages.js";
 import type { ToolCall, ToolHandlers } from "./run-tool-gate.js";
@@ -138,7 +139,10 @@ export const fileTools: ToolHandlers = {
       throw error;
     }
     await recordComputerAction(ctx, call, "write_file", filePath, { bytes: content.byteLength });
-    return call.finish({ ok: true, path: filePath });
+    const appProblem = miniAppProblem(filePath, content);
+    return call.finish(
+      appProblem ? { ok: true, path: filePath, problem: appProblem } : { ok: true, path: filePath },
+    );
   },
   generate_image: generateMedia,
   generate_video: generateMedia,
@@ -173,6 +177,9 @@ export const fileTools: ToolHandlers = {
     }
     const mimeType = inferAttachmentMimeType(filePath);
     if (!mimeType) return failAttach("unsupported attachment type");
+    const appName = typeof args.name === "string" && args.name ? args.name : filePath;
+    const appProblem = miniAppProblem(appName, bytes);
+    if (appProblem) return failAttach(appProblem);
     try {
       const attached = await attachWorkspaceFileToThread(
         {
