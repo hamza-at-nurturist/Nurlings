@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { miniAppProblem } from "./mini-app-check.js";
+import { miniAppAttachName, miniAppProblem } from "./mini-app-check.js";
 
 const bytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value));
 
@@ -19,4 +19,11 @@ test("a broken mini app says what to fix", () => {
   expect(miniAppProblem("bad.app.json", new TextEncoder().encode("{nope"))).toMatch(
     /not valid JSON/,
   );
+});
+
+test("a friendly name on a mini app keeps the app suffix", () => {
+  expect(miniAppAttachName("crm.app.json", "Demo CRM")).toBe("Demo CRM.app.json");
+  expect(miniAppAttachName("crm.app.json", "Demo CRM.app.json")).toBe("Demo CRM.app.json");
+  expect(miniAppAttachName("leads.json", "Leads")).toBe("Leads");
+  expect(miniAppAttachName("crm.app.json", undefined)).toBeUndefined();
 });
