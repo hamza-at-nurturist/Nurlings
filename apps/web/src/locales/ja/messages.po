@@ -6074,29 +6074,9 @@ msgstr "思考"
 msgid "Thinking: {0}"
 msgstr "思考: {0}"
 
-#: src/components/MiniAppViewer.tsx
-msgid "This app file is missing its data list or spec."
-msgstr ""
-
-#: src/components/MiniAppViewer.tsx
-msgid "This app file is not valid JSON."
-msgstr ""
-
-#: src/components/MiniAppViewer.tsx
-msgid "This app is incomplete and cannot be shown."
-msgstr ""
-
-#: src/components/MiniAppViewer.tsx
-msgid "This app is too large to show."
-msgstr ""
-
 #: src/lib/user-error.ts
 msgid "This app needs its own sign-in setup to connect."
 msgstr "このアプリを接続するには、専用のサインイン設定が必要です。"
-
-#: src/components/MiniAppViewer.tsx
-msgid "This app uses something that cannot be shown."
-msgstr ""
 
 #: src/pages/shell/agent-import.tsx
 msgid "This backup could not be read."

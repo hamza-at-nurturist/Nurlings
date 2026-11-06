@@ -431,7 +431,6 @@ export const builtinAgentTools: ConnectorTool[] = [
         path: { type: "string" },
         name: { type: "string" },
         description: { type: "string" },
-        quiet: { type: "boolean" },
       },
       required: ["path"],
     },

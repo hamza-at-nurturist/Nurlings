@@ -6,9 +6,7 @@ import {
   composerDraftStorageKey,
   readComposerDraft,
   readComposerDraftBindings,
-  requestComposerDraft,
   settleComposerDraftSubmission,
-  subscribeComposerDraftRequest,
   writeComposerDraft,
 } from "./composer-draft.js";
 
@@ -101,26 +99,5 @@ describe("composer drafts", () => {
     } finally {
       vi.unstubAllGlobals();
     }
-  });
-});
-
-describe("requestComposerDraft", () => {
-  it("saves the text for a composer that is not open and tells one that is", () => {
-    const storage = memoryStorage();
-    vi.stubGlobal("localStorage", storage);
-    const heard: string[] = [];
-    const other: string[] = [];
-    const stop = subscribeComposerDraftRequest("bot:1", (text) => heard.push(text));
-    const stopOther = subscribeComposerDraftRequest("bot:2", (text) => other.push(text));
-    requestComposerDraft("bot:1", "Draft a text to M. Rivera");
-    expect(readComposerDraft("bot:1", storage)).toBe("Draft a text to M. Rivera");
-    expect(heard).toEqual(["Draft a text to M. Rivera"]);
-    expect(other).toEqual([]);
-    stop();
-    stopOther();
-    requestComposerDraft("bot:1", "later");
-    expect(heard).toHaveLength(1);
-    expect(readComposerDraft("bot:1", storage)).toBe("later");
-    vi.unstubAllGlobals();
   });
 });

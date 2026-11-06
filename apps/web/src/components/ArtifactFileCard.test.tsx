@@ -25,14 +25,8 @@ vi.mock("@lingui/core/macro", () => ({
     `«${strings.reduce((text, part, index) => text + part + (values[index] ?? ""), "")}»`,
 }));
 vi.mock("./PdfViewer", () => ({ PdfViewer: () => null }));
-vi.mock("../lib/artifact-data-fork", async () => {
-  const { leadPipelineData } = await import("../lib/mini-app/lead-pipeline-example");
-  return { artifactDataLoader: () => async () => leadPipelineData, useArtifactDataRelay: () => {} };
-});
 vi.mock("@rakazo/chat-ui/web", () => ({ ChatMarkdown: () => null }));
 
-import { subscribeComposerDraftRequest } from "../lib/composer-draft";
-import { leadPipelineApp } from "../lib/mini-app/lead-pipeline-example";
 import { ArtifactFileCard } from "./ArtifactFileCard";
 
 let root: ReturnType<typeof createRoot> | undefined;
@@ -242,65 +236,4 @@ it("translates every size unit and rolls up instead of 1,024.0 KB or 1,536.0 MB"
     (el) => el.textContent,
   );
   expect(sizes).toEqual(["«512 B»", "«1 KB»", "«1 MB»", "«1.5 GB»", "«1.5 TB»"]);
-});
-
-it("previews a mini app from chat, and a plain JSON file stays a download", async () => {
-  await act(async () =>
-    root?.render(
-      <>
-        <ArtifactFileCard
-          target={{ botId: "bot-1" }}
-          artifactId="app-1"
-          name="lead-pipeline.app.json"
-          mimeType="application/json"
-          size={900}
-        />
-        <ArtifactFileCard
-          target={{ botId: "bot-1" }}
-          artifactId="data-1"
-          name="leads.json"
-          mimeType="application/json"
-          size={900}
-        />
-      </>,
-    ),
-  );
-  expect(
-    container.querySelector('button[aria-label="Preview lead-pipeline.app.json"]'),
-  ).not.toBeNull();
-  expect(container.querySelector('button[aria-label="Preview leads.json"]')).toBeNull();
-  expect(container.textContent).toContain("application/json");
-});
-
-it("opens a mini app in the chat preview and a button puts its draft in the composer", async () => {
-  mocks.fetch.mockResolvedValue(new TextEncoder().encode(leadPipelineApp));
-  const drafts: string[] = [];
-  const stop = subscribeComposerDraftRequest("bot:bot-1", (text) => drafts.push(text));
-  await act(async () =>
-    root?.render(
-      <ArtifactFileCard
-        target={{ botId: "bot-1" }}
-        artifactId="app-1"
-        name="lead-pipeline.app.json"
-        mimeType="application/json"
-        size={900}
-      />,
-    ),
-  );
-  const open = container.querySelector<HTMLButtonElement>(
-    'button[aria-label="Preview lead-pipeline.app.json"]',
-  );
-  await act(async () => open?.click());
-  await act(async () => {});
-  const app = document.body.querySelector('[data-testid="mini-app"]');
-  expect(app?.textContent).toContain("14 Cedar Lane");
-  const ask = [...(app?.querySelectorAll("button") ?? [])].find(
-    (el) => el.textContent === "Draft a text",
-  );
-  await act(async () => ask?.click());
-  expect(drafts).toHaveLength(1);
-  expect(drafts[0]).toContain("14 Cedar Lane");
-  await act(async () => {});
-  expect(document.body.querySelector('[data-testid="mini-app"]')).toBeNull();
-  stop();
 });

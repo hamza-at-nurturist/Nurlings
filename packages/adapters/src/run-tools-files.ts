@@ -4,7 +4,6 @@ import { resolveBotWorkspacePath } from "./computer-support.js";
 import { desktopProtectionGuardMessage } from "./desktop-command-guard.js";
 import { protectedActivateScriptWriteRefusal } from "./desktop-guard-words.js";
 import { generateMediaFromTool } from "./media-generation-tools.js";
-import { miniAppAttachName, miniAppProblem } from "./mini-app-check.js";
 import type { RunContext } from "./run-context.js";
 import { persistMessageInTransaction, publishMessage } from "./run-messages.js";
 import type { ToolCall, ToolHandlers } from "./run-tool-gate.js";
@@ -139,10 +138,7 @@ export const fileTools: ToolHandlers = {
       throw error;
     }
     await recordComputerAction(ctx, call, "write_file", filePath, { bytes: content.byteLength });
-    const appProblem = miniAppProblem(filePath, content);
-    return call.finish(
-      appProblem ? { ok: true, path: filePath, problem: appProblem } : { ok: true, path: filePath },
-    );
+    return call.finish({ ok: true, path: filePath });
   },
   generate_image: generateMedia,
   generate_video: generateMedia,
@@ -177,12 +173,6 @@ export const fileTools: ToolHandlers = {
     }
     const mimeType = inferAttachmentMimeType(filePath);
     if (!mimeType) return failAttach("unsupported attachment type");
-    const attachName = miniAppAttachName(
-      filePath,
-      typeof args.name === "string" ? args.name : undefined,
-    );
-    const appProblem = miniAppProblem(attachName ?? filePath, bytes);
-    if (appProblem) return failAttach(appProblem);
     try {
       const attached = await attachWorkspaceFileToThread(
         {
@@ -199,13 +189,11 @@ export const fileTools: ToolHandlers = {
           filePath,
           bytes,
           operationId: executionId,
-          name: attachName,
+          name: typeof args.name === "string" ? args.name : undefined,
           description: typeof args.description === "string" ? args.description : undefined,
         },
       );
-      // A quiet attach stores the file without a chat card, for files that only feed something
-      // else, such as a mini app's data.
-      if (args.quiet !== true) await publishMessage(deps, run, "bot", [attached.block]);
+      await publishMessage(deps, run, "bot", [attached.block]);
       await recordComputerAction(ctx, call, "attach_file", filePath);
       return call.finish({ ok: true, artifactId: attached.artifactId, path: filePath });
     } catch (error) {
