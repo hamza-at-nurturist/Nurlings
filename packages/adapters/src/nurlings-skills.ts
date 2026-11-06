@@ -8,7 +8,7 @@ export const NURLINGS_SKILLS: Array<{ name: string; description: string; body: s
     description: "Build a mini app: a live pipeline, board or table over your tools",
     body: `Build a mini app as one JSON file and attach it with attach_file as <name>.app.json (for example lead-pipeline.app.json), with a one-line description. It gives the user one screen over data from their connected tools.
 
-Get the data with the user's connected tools first. Save what the screen shows as separate JSON files with fixed names (for example leads.json), attached the same way, including any counts and ready-to-use drafts. To refresh, attach the data file again with the same name: the app reads it again every 10 seconds. Never put secrets, tokens or credentials in either file.
+Get the data with the user's connected tools first. Save what the screen shows as separate JSON files with fixed names (for example leads.json), attached with attach_file and quiet true so they do not fill the chat, including any counts and ready-to-use drafts. To refresh, attach the data file again with the same name and quiet true: the app reads it again every 10 seconds. Never paste a file's JSON into your reply. Never put secrets, tokens or credentials in either file.
 
 Shape: {"data": ["leads.json"], "spec": {"root": {element}}}. Write the screen as a tree: an element is {"type", "props", "children": [elements]}, with its children written inside it and no ids. A data file x.json is at /data/x, read with {"$state": "/data/x/summary/open"}. When you attach, the file is checked and any problem comes back in the result: fix the file and attach again.
 

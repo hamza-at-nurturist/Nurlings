@@ -200,7 +200,9 @@ export const fileTools: ToolHandlers = {
           description: typeof args.description === "string" ? args.description : undefined,
         },
       );
-      await publishMessage(deps, run, "bot", [attached.block]);
+      // A quiet attach stores the file without a chat card, for files that only feed something
+      // else, such as a mini app's data.
+      if (args.quiet !== true) await publishMessage(deps, run, "bot", [attached.block]);
       await recordComputerAction(ctx, call, "attach_file", filePath);
       return call.finish({ ok: true, artifactId: attached.artifactId, path: filePath });
     } catch (error) {
