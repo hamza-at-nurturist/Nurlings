@@ -273,7 +273,7 @@ export function SidebarFooter({
                 {logOutError}
               </p>
             ) : null}
-            <p className="px-2.5 pt-2 pb-1.5 text-xs text-muted-foreground">{brand.tagline}</p>
+            <p className="px-2.5 pt-2 pb-1.5 text-label text-muted-foreground">{brand.tagline}</p>
           </PopoverContent>
         ) : null}
       </Popover>

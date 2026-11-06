@@ -49,7 +49,7 @@ export function TicketImage({ file }: { file: { id: string; botId: string; name:
         {src ? (
           <img src={src} alt="" className="size-full object-cover" />
         ) : (
-          <span className="truncate p-1.5 text-xs text-muted-foreground">{file.name}</span>
+          <span className="truncate p-1.5 text-label text-muted-foreground">{file.name}</span>
         )}
       </button>
       {src ? (

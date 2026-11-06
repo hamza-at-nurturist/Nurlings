@@ -204,7 +204,7 @@ export function TicketModal({
           />
         ) : (
           <>
-            <header className="relative flex items-center gap-2 border-b px-5 py-3 pr-20 text-sm text-muted-foreground">
+            <header className="relative flex items-center gap-2 border-b px-5 py-3 pr-20 text-body text-muted-foreground">
               <Trans>Board</Trans>
               <span aria-hidden="true">/</span>
               <span className="font-medium text-foreground">{ticket.ref}</span>

@@ -2,9 +2,8 @@ import type { AvatarSwapPhase, AvatarTool } from "@rakazo/core";
 import { AVATAR_SWAP_IN_MS, AVATAR_SWAP_OUT_MS } from "@rakazo/core";
 import { AVATAR_ILLUSTRATION as ink } from "@rakazo/ui-tokens/avatar-illustration";
 import { useEffect } from "react";
-import Animated from "react-native-reanimated";
 import type { SharedValue } from "react-native-reanimated";
-import {
+import Animated, {
   Easing,
   ReduceMotion,
   useAnimatedProps,

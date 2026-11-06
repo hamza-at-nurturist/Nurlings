@@ -30,7 +30,7 @@ export function TicketFiles({
   const others = shown.filter((file) => !THUMBNAIL_MIME_TYPES.has(file.mimeType));
   return (
     <section data-testid="ticket-files" className="space-y-2">
-      <h3 className="text-sm font-medium text-muted-foreground">
+      <h3 className="text-body font-medium text-muted-foreground">
         <Trans>Files</Trans>
       </h3>
       {images.length ? (

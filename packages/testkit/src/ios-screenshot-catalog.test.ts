@@ -14,6 +14,9 @@ const catalogDir = path.join(mobileDir, "e2e", "ios-screenshots");
 const UNCOVERED: Record<string, string> = {
   "integration-setup": "redirects to Integrations",
   share: "Android only: iOS has no share extension yet",
+  // The fork ships Android builds only, so its own screens have no iOS catalog run.
+  "nurlings/board": "fork screen; this fork builds no iOS app",
+  "nurlings/ticket": "fork screen; this fork builds no iOS app",
 };
 
 /** Route names under app/, without route groups, layouts, or Expo Router hooks. */

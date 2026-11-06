@@ -95,13 +95,15 @@ export function ReplyBox({
           ))}
         </div>
       ) : null}
-      {files.notice ? <p className="mb-1.5 text-xs text-muted-foreground">{files.notice}</p> : null}
+      {files.notice ? (
+        <p className="mb-1.5 text-label text-muted-foreground">{files.notice}</p>
+      ) : null}
       {files.staged.length ? (
         <div data-testid="reply-files" className="mb-1.5 flex flex-wrap gap-1.5">
           {files.staged.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-[13px] text-foreground/75"
+              className="flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-body-sm text-foreground/75"
             >
               {item.previewUrl ? (
                 <img
@@ -166,7 +168,8 @@ export function ReplyBox({
           rows={1}
           className={
             touch
-              ? `max-h-40 min-h-14 resize-none rounded-3xl py-4 pr-14 text-base md:text-base ${ownerBotId ? "pl-14" : ""}`
+              ? // off-scale: 16px keeps iOS Safari from zooming into the field on focus
+                `max-h-40 min-h-14 resize-none rounded-3xl py-4 pr-14 text-[16px] md:text-[16px] ${ownerBotId ? "pl-14" : ""}`
               : `max-h-40 min-h-11 resize-none rounded-2xl py-2.5 pr-12 ${ownerBotId ? "pl-12" : ""}`
           }
           onChange={input.onChange}

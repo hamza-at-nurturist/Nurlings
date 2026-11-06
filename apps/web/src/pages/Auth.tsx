@@ -599,7 +599,7 @@ export function AuthFrame({
             {title}
           </h1>
           {children}
-          <p className="mt-10 text-sm text-muted-foreground">{brand.tagline}</p>
+          <p className="mt-10 text-body text-muted-foreground">{brand.tagline}</p>
         </form>
       </div>
     </div>

@@ -262,7 +262,7 @@ describe("narrow ticket sheet", () => {
   it("uses 16px text and 44px controls in the reply box", async () => {
     await open();
     const reply = body().querySelector("textarea[aria-label='Reply']");
-    expect(reply?.className).toContain("text-base");
+    expect(reply?.className).toContain("text-[16px]");
     expect(body().querySelector("[aria-label='Send']")?.className).toContain("size-11");
   });
 

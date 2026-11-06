@@ -108,9 +108,10 @@ describe("selectable bot icon sets", () => {
     }
     expect(labels.filter((label) => label?.startsWith("Shape "))).toHaveLength(14);
     await click("Shape 3");
-    expect(changed).toHaveBeenLastCalledWith("#8B5CF6::shape_10", undefined);
+    // A color saved with its earlier, deeper value moves to the current one when the look is edited.
+    expect(changed).toHaveBeenLastCalledWith("#A97EFE::shape_10", undefined);
     await click("Shape 14");
-    expect(changed).toHaveBeenLastCalledWith("#8B5CF6::shape_21", undefined);
+    expect(changed).toHaveBeenLastCalledWith("#A97EFE::shape_21", undefined);
   });
 
   it("shows a retired static shape as the default look", async () => {

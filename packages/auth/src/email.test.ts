@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { brand } from "@nurlings/brand";
+import { brand, brandText } from "@nurlings/brand";
 import { INVITED_TRIAL_WEEKS } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
 import {
@@ -162,7 +162,10 @@ describe("email languages", () => {
     for (const message of messages) {
       expect(message.html).toContain('lang="pl"');
       expect(message.html).toContain('dir="ltr"');
-      expect(Object.values(CATALOGS.pl!)).toContain(message.subject);
+      // Subjects come from the Polish catalog, rebranded like every account email.
+      expect(Object.values(CATALOGS.pl!).map((text) => brandText(text, brand))).toContain(
+        message.subject,
+      );
       expect(message.text).not.toMatch(/\{\w+\}/);
     }
     for (const index of [0, 2]) {

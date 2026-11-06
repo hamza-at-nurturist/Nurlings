@@ -40,7 +40,8 @@ export function ClampedDescription({ value, fieldClassName, onSave }: Props) {
         defaultValue={value}
         autoFocus={editing}
         maxLength={TICKET_DESCRIPTION_MAX_LENGTH}
-        className={`${fieldClassName} min-h-20 py-1.5 text-base`}
+        // off-scale: 16px keeps iOS Safari from zooming into the field on focus
+        className={`${fieldClassName} min-h-20 py-1.5 text-[16px]`}
         onBlur={(event) => {
           setEditing(false);
           if (event.currentTarget.value !== value) onSave(event.currentTarget.value);
@@ -53,7 +54,7 @@ export function ClampedDescription({ value, fieldClassName, onSave }: Props) {
         ref={text}
         type="button"
         data-testid="ticket-description-text"
-        className={`block w-full text-left text-[15px] leading-relaxed break-words whitespace-pre-wrap outline-none focus-visible:ring-2 focus-visible:ring-ring ${expanded ? "" : "line-clamp-3"}`}
+        className={`block w-full text-left text-body-lg leading-relaxed break-words whitespace-pre-wrap outline-none focus-visible:ring-2 focus-visible:ring-ring ${expanded ? "" : "line-clamp-3"}`}
         onClick={() => setEditing(true)}
       >
         {value}
@@ -61,7 +62,7 @@ export function ClampedDescription({ value, fieldClassName, onSave }: Props) {
       {overflows && !expanded ? (
         <button
           type="button"
-          className="min-h-11 text-sm font-medium text-muted-foreground hover:text-foreground"
+          className="min-h-11 text-body font-medium text-muted-foreground hover:text-foreground"
           onClick={() => setExpanded(true)}
         >
           <Trans>Show more</Trans>

@@ -1,4 +1,8 @@
+import { NURLINGS_BOARD_PL } from "./nurlings-board/pl";
+
 export const PL_MESSAGES: Record<string, string> = {
+  // Ours first, so upstream's own translation wins where both exist.
+  ...NURLINGS_BOARD_PL,
   "No matches": "Brak wyników",
   "Always ask": "Zawsze pytaj",
   "Search tools": "Szukaj narzędzi",

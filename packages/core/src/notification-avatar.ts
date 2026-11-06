@@ -1,20 +1,9 @@
 import { BotAvatarValueSchema, parseBotAvatarValue } from "@rakazo/contracts";
 import { lightTokens } from "@rakazo/ui-tokens";
-import type { AvatarEyes } from "./avatar-shape.js";
-import {
-  avatarEyeRects,
-  avatarIdentitySeed,
-  ORGANIC_AVATAR_EYES,
-  ORGANIC_AVATAR_VIEWBOX,
-  organicAvatarEyeTilt,
-  organicAvatarPath,
-} from "./avatar-shape.js";
+import { avatarIdentitySeed, ORGANIC_AVATAR_VIEWBOX, organicAvatarPath } from "./avatar-shape.js";
 import { botEyeInk, resolvePersonaColorDef } from "./bot-avatar-colors.js";
-import {
-  SHIPPED_BOT_AVATAR_EYES,
-  SHIPPED_BOT_AVATAR_VIEWBOX,
-  shippedBotAvatarShapePath,
-} from "./bot-avatar-shapes.js";
+import type { OrganicBotAvatarFrame } from "./bot-avatar-shapes.js";
+import { organicBotAvatarFrame } from "./bot-avatar-shapes.js";
 import {
   LOGO_AVATAR_BODY_Y,
   LOGO_AVATAR_EYES,
@@ -41,10 +30,7 @@ export function notificationAvatarSource(bot: {
   // The push is flattened onto white, so the eyes are inked for a light page.
   let viewBox: string;
   let body: string;
-  if (parsed?.kind === "shape") {
-    viewBox = SHIPPED_BOT_AVATAR_VIEWBOX;
-    body = `<path d="${shippedBotAvatarShapePath(parsed.shapeIndex)}" fill="${color}"/>${barEyes(SHIPPED_BOT_AVATAR_EYES, botEyeInk(color, lightTokens))}`;
-  } else if (bot.avatarSet === "rakazo") {
+  if (bot.avatarSet === "rakazo" && parsed?.kind !== "shape") {
     const fill = logoAvatarTraits(bot.id, color).color;
     const { width, height, leftCx, rightCx, cy } = LOGO_AVATAR_EYES;
     const eyes = [leftCx, rightCx]
@@ -53,19 +39,33 @@ export function notificationAvatarSource(bot: {
     viewBox = LOGO_AVATAR_VIEWBOX;
     body = `<g transform="translate(0 ${LOGO_AVATAR_BODY_Y})"><path d="${LOGO_BODY_PATH}" fill="${fill}"/><g fill="${logoAvatarEyeInk(fill, lightTokens)}">${eyes}</g></g>`;
   } else {
+    // The fork's organic avatar, as chat draws it: a shape with its own body (the brand blob and
+    // the original bodies) keeps that body and eyes; every other bot draws the body its id picks.
+    const frame = parsed?.kind === "shape" ? organicBotAvatarFrame(parsed.shapeIndex) : undefined;
     const seed = avatarIdentitySeed(bot.id);
     viewBox = ORGANIC_AVATAR_VIEWBOX;
-    body = `<path d="${organicAvatarPath(seed)}" fill="${color}"/><g transform="rotate(${organicAvatarEyeTilt(seed)})">${barEyes(ORGANIC_AVATAR_EYES, botEyeInk(color, lightTokens))}</g>`;
+    const tilt = frame ? "" : ` transform="rotate(${(seed % 9) - 4})"`;
+    body = `<g transform="scale(0.857)"><path d="${frame?.path ?? organicAvatarPath(seed)}" fill="${color}"/><g${tilt}>${pillEyes(frame, botEyeInk(color, lightTokens))}</g></g>`;
   }
   return `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="${viewBox}">${body}</svg>`)}`;
 }
 
-function barEyes(eyes: AvatarEyes, fill: string): string {
-  const rects = avatarEyeRects(eyes)
+/** The chat avatar's pill eyes: the frame's own, or the standard pair. */
+function pillEyes(frame: OrganicBotAvatarFrame | undefined, fill: string): string {
+  const eyes = frame
+    ? [frame.eyes.left, frame.eyes.right].map(({ cx, cy }) => ({
+        cx,
+        cy,
+        rx: frame.eyes.rx,
+        ry: frame.eyes.ry,
+        tilt: frame.eyes.kind === "pill" ? frame.eyes.tiltDeg : 0,
+      }))
+    : [-10.5, 10.5].map((cx) => ({ cx, cy: 0, rx: 3.5, ry: 12, tilt: 0 }));
+  const pills = eyes
     .map(
-      ({ x, y, width, height, rx }) =>
-        `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${rx}"/>`,
+      ({ cx, cy, rx, ry, tilt }) =>
+        `<g transform="translate(${cx} ${cy}) rotate(${tilt})"><rect x="${-rx}" y="${-ry}" width="${rx * 2}" height="${ry * 2}" rx="${rx}"/></g>`,
     )
     .join("");
-  return `<g fill="${fill}">${rects}</g>`;
+  return `<g fill="${fill}">${pills}</g>`;
 }

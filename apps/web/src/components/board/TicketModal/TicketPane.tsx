@@ -47,7 +47,7 @@ export function TicketPane({
         rows={1}
         defaultValue={ticket.title}
         maxLength={TICKET_TITLE_MAX_LENGTH}
-        className={`${FIELD} py-1 text-2xl leading-tight font-semibold md:text-2xl`}
+        className={`${FIELD} py-1 text-heading1 leading-tight font-semibold md:text-heading1`}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             event.preventDefault();
@@ -70,7 +70,7 @@ export function TicketPane({
       />
       {latest}
       <section className="space-y-2">
-        <h3 className="text-sm font-medium text-muted-foreground">
+        <h3 className="text-body font-medium text-muted-foreground">
           <Trans>Description</Trans>
         </h3>
         {narrow ? (
@@ -97,7 +97,7 @@ export function TicketPane({
       </section>
       <TicketFiles files={files} bots={bots} narrow={narrow} />
       {failure ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-body text-destructive">
           {failure}
         </p>
       ) : null}

@@ -28,7 +28,7 @@ type Props = {
 };
 
 const TRIGGER =
-  "inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-sm outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
+  "inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-body outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
 const PICK = "h-8 justify-start px-2 font-normal";
 
 export function useRelativeDayLabels(): RelativeDayLabels {

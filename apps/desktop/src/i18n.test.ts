@@ -99,10 +99,11 @@ describe("desktop language", () => {
 
   it("uses the Polish catalog at startup and interpolates native messages", () => {
     expect(startDesktopLocale("pl-PL", "en-US")).toBe("pl");
-    expect(desktopMessages()).toBe(PL_MESSAGES);
+    // The catalog is branded when read, so it has the same messages under branded keys.
+    expect(Object.keys(desktopMessages())).toHaveLength(Object.keys(PL_MESSAGES).length);
     expect(t("Check for Updates…")).toBe("Sprawdź aktualizacje…");
     expect(t("Rakazo {version} is ready to install.", { version: "1.2.0" })).toBe(
-      "Rakazo 1.2.0 jest gotowe do zainstalowania.",
+      `${brand.name} 1.2.0 jest gotowe do zainstalowania.`,
     );
   });
 
