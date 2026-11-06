@@ -44,10 +44,54 @@ vi.mock("@rakazo/ui-web", () => {
     BotAvatar: () => <span />,
     Spinner: (props: ComponentProps<"svg">) => <svg role="status" {...props} />,
     Button: (props: ComponentProps<"button">) => <button {...props} />,
+    buttonVariants: () => "",
+    Empty: Container,
+    EmptyDescription: Container,
+    EmptyHeader: Container,
+    EmptyMedia: Container,
+    EmptyTitle: Container,
+    ListSearchInput: ({
+      query,
+      setQuery,
+      label,
+    }: {
+      query: string;
+      setQuery: (query: string) => void;
+      label: string;
+    }) => (
+      <input aria-label={label} value={query} onChange={(event) => setQuery(event.target.value)} />
+    ),
     NativeSelect: (props: ComponentProps<"select">) => <select {...props} />,
     NativeSelectOption: (props: ComponentProps<"option">) => <option {...props} />,
-    parseBotAvatar: () => ({ color: undefined }),
-    resolvePersonaColorDef: () => ({ hex: "#000000" }),
+    OptionSelect: ({
+      options,
+      value,
+      onValueChange,
+      "aria-label": label,
+    }: {
+      options: Array<{ value: string; label: string }>;
+      value: string;
+      onValueChange: (value: string) => void;
+      "aria-label": string;
+    }) => (
+      <select
+        aria-label={label}
+        value={value}
+        onChange={(event) => onValueChange(event.target.value)}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    ),
+    Select: Container,
+    SelectContent: Container,
+    SelectGroup: Container,
+    SelectItem: Container,
+    SelectTrigger: Container,
+    SelectValue: () => null,
     ToggleGroup: Container,
     ToggleGroupItem: Container,
     Tooltip: Container,
@@ -80,7 +124,7 @@ function artifact(
 }
 
 function typeSearch(container: HTMLElement, value: string) {
-  const input = container.querySelector("input[type='search']");
+  const input = container.querySelector("input[aria-label='Search artifacts']");
   if (!(input instanceof HTMLInputElement)) throw new Error("missing search input");
   const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
   setter?.call(input, value);
@@ -126,7 +170,7 @@ it("opens the Artifacts screen and lists what listSpace returns", async () => {
   try {
     expect(page.container.textContent).toContain("Artifacts");
     expect(page.container.textContent).toContain("Q3 Content Calendar");
-    expect(page.container.querySelector("a[href='/app']")?.textContent).toContain("Bots");
+    expect(page.container.querySelector("a[href='/app']")?.getAttribute("aria-label")).toBe("Back");
     expect(page.container.querySelector("[data-testid='app-rail']")).toBeNull();
   } finally {
     await page.cleanup();
@@ -145,12 +189,10 @@ it("keeps loading later pages when search hides the current snapshot", async () 
   const page = await renderArtifacts();
   try {
     expect(page.container.textContent).toContain("Alpha notes");
-    const filters = [...page.container.querySelectorAll("button")].find((button) =>
-      button.textContent?.includes("Filters"),
-    );
-    expect(filters).toBeTruthy();
+    const search = page.container.querySelector<HTMLButtonElement>('button[aria-label="Search"]');
+    expect(search).toBeTruthy();
     await act(async () => {
-      filters?.click();
+      search?.click();
     });
     await act(async () => {
       typeSearch(page.container, "Beta");
@@ -189,11 +231,8 @@ it("still offers Load more when filters match nothing on the loaded page", async
   });
   const page = await renderArtifacts();
   try {
-    const filters = [...page.container.querySelectorAll("button")].find((button) =>
-      button.textContent?.includes("Filters"),
-    );
     await act(async () => {
-      filters?.click();
+      page.container.querySelector<HTMLButtonElement>('button[aria-label="Search"]')?.click();
     });
     await act(async () => {
       typeSearch(page.container, "Beta");
@@ -250,28 +289,36 @@ it("reopens with cached artifacts and refreshes them in the background", async (
   }
 });
 
-it("hides uploaded files until Uploads is turned on", async () => {
+it("hides uploaded files until All files is picked", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   const now = new Date().toISOString();
-  api.listSpace.mockResolvedValue({
-    items: [
-      artifact("Bot report", "artifact-1", now, "run-1"),
-      artifact("Uploaded notes", "artifact-2", now, null),
-    ],
+  const items = [
+    artifact("Bot report", "artifact-1", now, "run-1"),
+    artifact("Uploaded notes", "artifact-2", now, null),
+  ];
+  // The server's "made by bots" filter keeps only files a run made.
+  api.listSpace.mockImplementation(async (input: { madeByBots?: boolean }) => ({
+    items: input.madeByBots ? items.filter((item) => item.runId !== null) : items,
     nextCursor: null,
-  });
+  }));
   const page = await renderArtifacts();
-  const press = async (label: string) => {
-    const button = [...page.container.querySelectorAll("button")].find(
-      (candidate) => candidate.textContent === label,
-    );
-    await act(async () => button?.click());
-  };
   try {
+    expect(api.listSpace).toHaveBeenCalledWith(
+      expect.objectContaining({ madeByBots: true }),
+      expect.anything(),
+    );
     expect(page.container.textContent).toContain("Bot report");
     expect(page.container.textContent).not.toContain("Uploaded notes");
-    await press("Filters");
-    await press("Uploads");
+    const picker = page.container.querySelector("select[aria-label='Filter by who made it']");
+    if (!(picker instanceof HTMLSelectElement)) throw new Error("missing who-made-it picker");
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value")?.set?.call(
+        picker,
+        "all",
+      );
+      picker.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
     expect(page.container.textContent).toContain("Uploaded notes");
   } finally {
     await page.cleanup();

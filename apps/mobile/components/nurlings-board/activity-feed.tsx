@@ -143,7 +143,7 @@ export function ActivityFeed({
                     key={`${index}-${segment.text}`}
                     style={{
                       color: resolvePersonaColorDef(segment.target.id, botHexColor(color) ?? color)
-                        .light,
+                        .hex,
                       fontWeight: fontWeight.semibold,
                     }}
                   >

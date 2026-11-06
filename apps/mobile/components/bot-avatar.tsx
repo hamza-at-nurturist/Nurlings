@@ -1,5 +1,10 @@
 import type { BotAvatarSet } from "@rakazo/contracts";
-import type { AvatarMotionMode, AvatarState, LogoAvatarActivity } from "@rakazo/core";
+import type {
+  AvatarMotionMode,
+  AvatarState,
+  LogoAvatarActivity,
+  OrganicBotAvatarFrame,
+} from "@rakazo/core";
 import {
   AVATAR_LID_CLOSE,
   AVATAR_MOTION_UNITS,
@@ -20,7 +25,6 @@ import {
   isLightAvatarColor,
   isRunWaitingOnUser,
   isRunWorking,
-  type OrganicBotAvatarFrame,
   organicAvatarPath,
   organicBotAvatarFrame,
   svgPathBounds,

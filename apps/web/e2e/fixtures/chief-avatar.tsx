@@ -60,7 +60,7 @@ void bootstrapI18n("en").then(() => {
             <Compare label="compare-working" status="running" />
           </div>
           <div className="picker" data-picker={theme}>
-            <BotLookPicker value={chief} identity="chief" onChange={() => undefined} />
+            <BotLookPicker value={chief} onChange={() => undefined} />
           </div>
         </div>
       ))}

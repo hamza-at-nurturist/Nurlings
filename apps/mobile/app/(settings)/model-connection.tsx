@@ -5,17 +5,15 @@ import type {
   ThinkingLevel,
 } from "@rakazo/contracts";
 import {
-  CLOUDFLARE_AI_GATEWAY_PROVIDER_ID,
-  cloudflareModelRouting,
-  compatibleConnectionName,
+  compatibleEndpointPresets,
   connectionDisplayName,
   DEFAULT_MODEL_CONTEXT_WINDOW,
   DEFAULT_MODEL_MAX_TOKENS,
-  isCloudflareModelProvider,
-  isOllamaCloudBaseUrl,
   MAX_MODEL_CONTEXT_WINDOW,
   MAX_MODEL_MAX_TOKENS,
+  matchCompatibleEndpointPreset,
   modelHeadersInput,
+  modelRoutingForm,
   OPENAI_COMPATIBLE_BASE_URL_HINT,
   OPENAI_COMPATIBLE_PROVIDER_ID,
   savedCompatibleEndpointMatches,
@@ -52,6 +50,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HeaderRowsEditor } from "../../components/header-rows-editor";
+import { ListSearchInput } from "../../components/list-search-input";
 import { MenuPickerMenu } from "../../components/menu-picker";
 import { NativeActionButton } from "../../components/native-action-button";
 import { NativeSwitch } from "../../components/native-switch";
@@ -65,10 +64,14 @@ import {
   finishModelOAuthAttempt,
   waitForModelOAuth,
 } from "../../lib/model-auth";
-import { modelConnectionRequest } from "../../lib/model-connection-request";
+import {
+  MODEL_CONNECT_TIMEOUT_MS,
+  modelConnectionRequest,
+} from "../../lib/model-connection-request";
 import { native, useThemedStyles } from "../../lib/native";
 import { ACCOUNT_SETTINGS, settingsRpc } from "../../lib/settings-target";
 import { thinkingLevelLabel } from "../../lib/thinking-level";
+import { useListSearch } from "../../lib/use-list-search";
 import { errorText } from "../../lib/user-error";
 
 type ModelSelection = {
@@ -254,22 +257,36 @@ export default function ModelConnection() {
   const selected = modelsForProvider.find((entry) => entry.id === modelId) ?? modelsForProvider[0];
   const credential = credentials.find((entry) => entry.id === credentialId);
   const providerName = selected?.providerName ?? selected?.provider ?? "";
+  const endpointPreset =
+    provider === OPENAI_COMPATIBLE_PROVIDER_ID
+      ? matchCompatibleEndpointPreset(compatibleEndpointPresets(catalog), baseUrl)
+      : undefined;
   const selectedProviderLabel = credential
     ? connectionDisplayName(credential, providerName)
-    : compatibleConnectionName(baseUrl, providerName);
+    : (endpointPreset?.name ?? providerName);
   useLayoutEffect(() => {
     if (selectedProviderLabel) navigation.setOptions({ title: selectedProviderLabel });
   }, [navigation, selectedProviderLabel]);
   const isOpenAiCompatible = provider === OPENAI_COMPATIBLE_PROVIDER_ID;
-  const isCloudflareGateway = provider === CLOUDFLARE_AI_GATEWAY_PROVIDER_ID;
-  const isCloudflare = isCloudflareModelProvider(provider);
-  const cloudflareRoutingReady =
-    !isCloudflare || cloudflareModelRouting({ provider, accountId, gatewayId }) !== undefined;
+  const { needsRouting, needsGateway, routingReady } = modelRoutingForm(selected?.routingFields, {
+    accountId,
+    gatewayId,
+  });
   const compatibleRows = compatibleModelRows(
     savedCompatibleModelIds(credential, baseUrl),
     enabledModelIds,
     probeModels,
   );
+  const {
+    query,
+    setQuery,
+    showSearch,
+    visible: visibleModels,
+  } = useListSearch(compatibleRows, {
+    text: (id) => id,
+    id: (id) => id,
+    selectedIds: [modelId, ...enabledModelIds],
+  });
   const acceptsKey = selected?.auth !== "oauth";
   const subscriptionSignIn = selected?.signIn !== undefined;
   const reasoningEffortValue = thinkingLevel ? thinkingLevelLabel(thinkingLevel, t) : t("Default");
@@ -281,12 +298,13 @@ export default function ModelConnection() {
     modelId,
     headerRows,
     credential,
+    keyRequired: Boolean(endpointPreset),
   });
   const limitsDirty = maxTokens !== connectionMaxTokensField(provider, credential?.maxTokens);
   const gatewayDirty =
     accountId.trim() !== (credential?.accountId ?? "") ||
     gatewayId.trim() !== (credential?.gatewayId ?? "");
-  const gatewayOnlySave = isCloudflare && Boolean(credential) && !apiKey.trim();
+  const gatewayOnlySave = needsRouting && Boolean(credential) && !apiKey.trim();
   const protocolChoices: { key: ModelApiProtocol; label: string }[] = [
     { key: "chat-completions", label: t("Chat Completions") },
     { key: "responses", label: t("Responses") },
@@ -334,12 +352,16 @@ export default function ModelConnection() {
       baseUrl,
       apiKey,
       request: (input) =>
-        rpc("models/probeOpenAiCompatible", {
-          ...input,
-          apiProtocol,
-          headers: modelHeadersInput(headerRows),
-          credentialId: credential?.id,
-        }),
+        rpc(
+          "models/probeOpenAiCompatible",
+          {
+            ...input,
+            apiProtocol,
+            headers: modelHeadersInput(headerRows),
+            credentialId: credential?.id,
+          },
+          { timeoutMs: MODEL_CONNECT_TIMEOUT_MS },
+        ),
       onSuccess: (models) => {
         const next = modelId.trim() || models[0] || "";
         if (next !== modelId) stageCompatibleModelId(next);
@@ -439,7 +461,9 @@ export default function ModelConnection() {
     const { savingLimitOnly, activeModelId } = connect;
     setPending("connect");
     try {
-      const saved = await rpc("models/connect", connect.input);
+      const saved = await rpc("models/connect", connect.input, {
+        timeoutMs: MODEL_CONNECT_TIMEOUT_MS,
+      });
       credentialIdRef.current = saved.id;
       setCredentialId(saved.id);
       if (!limitsOnly) setApiKey("");
@@ -652,7 +676,7 @@ export default function ModelConnection() {
         prominence="secondary"
         style={{ marginTop: 12 }}
       />
-      {!isOllamaCloudBaseUrl(baseUrl) ? (
+      {!endpointPreset ? (
         <>
           {disclosureRow(t("Setup help"), showEndpointHelp, () =>
             setShowEndpointHelp((visible) => !visible),
@@ -687,9 +711,10 @@ export default function ModelConnection() {
       {feedbackAnchor === "probe" ? feedback : null}
       <Text style={[styles.sectionTitle, { marginTop: 12 }]}>{t("Model")}</Text>
       {/* The switches stay visible while the default is "Other model…" or a typed id. */}
+      {showSearch ? <ListSearchInput query={query} setQuery={setQuery} /> : null}
       {compatibleRows.length ? (
         <View style={styles.card}>
-          {compatibleRows.map((entry) => (
+          {visibleModels.map((entry) => (
             // The switch sits beside the radio, not inside it: an accessible
             // Pressable would merge it into the row and hide it from VoiceOver.
             <View key={entry} style={styles.modelRow}>
@@ -860,12 +885,12 @@ export default function ModelConnection() {
   const compatKeySection =
     isOpenAiCompatible && acceptsKey ? (
       <View style={styles.keySection}>
-        {isOllamaCloudBaseUrl(baseUrl) ? (
+        {endpointPreset ? (
           <Text style={styles.sectionTitle}>{t("API key")}</Text>
         ) : (
           disclosureRow(t("API key"), showApiKey, () => setShowApiKey((visible) => !visible))
         )}
-        {showApiKey || isOllamaCloudBaseUrl(baseUrl) ? (
+        {showApiKey || endpointPreset ? (
           <TextInput
             accessibilityLabel={t("API key")}
             autoCapitalize="none"
@@ -875,10 +900,10 @@ export default function ModelConnection() {
             importantForAutofill="no"
             onChangeText={updateApiKey}
             placeholder={
-              isOllamaCloudBaseUrl(baseUrl)
-                ? t("Ollama API key")
-                : credential?.hasKey
-                  ? t("Paste a replacement key")
+              credential?.hasKey
+                ? t("Paste a replacement key")
+                : endpointPreset
+                  ? undefined
                   : t("Optional")
             }
             placeholderTextColor={native.tertiaryLabel}
@@ -927,7 +952,7 @@ export default function ModelConnection() {
             )}
             {credential && limitsDirty ? (
               <NativeActionButton
-                disabled={busy || !cloudflareRoutingReady}
+                disabled={busy || !routingReady}
                 label={
                   pending === "connect" && feedbackAnchor === "limits" ? t("Saving…") : t("Save")
                 }
@@ -1025,9 +1050,9 @@ export default function ModelConnection() {
             />
           )
         ) : null}
-        {acceptsKey || isCloudflare ? (
+        {acceptsKey || needsRouting ? (
           <View style={styles.keySection}>
-            {isCloudflare ? (
+            {needsRouting ? (
               <>
                 <Text style={styles.sectionTitle}>{t("Account ID")}</Text>
                 <TextInput
@@ -1043,7 +1068,7 @@ export default function ModelConnection() {
                   style={styles.keyInput}
                   value={accountId}
                 />
-                {isCloudflareGateway ? (
+                {needsGateway ? (
                   <>
                     <Text style={styles.sectionTitle}>{t("Gateway ID")}</Text>
                     <TextInput
@@ -1089,7 +1114,7 @@ export default function ModelConnection() {
             <NativeActionButton
               disabled={
                 busy ||
-                !cloudflareRoutingReady ||
+                !routingReady ||
                 (gatewayOnlySave ? !gatewayDirty : apiKey.trim().length < 8)
               }
               label={

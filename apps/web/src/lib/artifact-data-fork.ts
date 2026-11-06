@@ -1,4 +1,5 @@
-import { type RefObject, useEffect } from "react";
+import type { RefObject } from "react";
+import { useEffect } from "react";
 import { decodeArtifactBase64 } from "./artifact-open";
 import { rpc } from "./rpc";
 

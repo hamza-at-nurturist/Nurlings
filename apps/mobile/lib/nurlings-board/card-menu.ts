@@ -1,4 +1,5 @@
-import { TICKET_STATUSES, type TicketStatus } from "@rakazo/contracts";
+import type { TicketStatus } from "@rakazo/contracts";
+import { TICKET_STATUSES } from "@rakazo/contracts";
 
 export type CardMenuEntry = {
   id: string;

@@ -32,7 +32,7 @@ function BotBadge({ target }: { target: MentionTarget }) {
       <span
         dir="auto"
         className="font-medium"
-        style={{ color: resolvePersonaColorDef(target.id, botHexColor(color) ?? color).light }}
+        style={{ color: resolvePersonaColorDef(target.id, botHexColor(color) ?? color).hex }}
       >
         {target.name}
       </span>

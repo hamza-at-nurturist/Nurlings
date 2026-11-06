@@ -1,5 +1,6 @@
 import { hasThinkingActivityMarker, parseBotAvatarValue } from "@rakazo/contracts";
-import { type AvatarTool, avatarToolFromPayload } from "./avatar-tool.js";
+import type { AvatarTool } from "./avatar-tool.js";
+import { avatarToolFromPayload } from "./avatar-tool.js";
 import { isBackgroundRunTrigger, isRunWaitingOnUser, isRunWorking } from "./run-state.js";
 
 /** Minimal public stream fields used by web and native activity projections. */

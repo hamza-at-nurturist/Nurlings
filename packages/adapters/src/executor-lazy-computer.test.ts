@@ -125,6 +125,8 @@ async function runRoutine(
     // A mutating tool's effect is written under the run's lease, in a transaction.
     $transaction: vi.fn(async (write: (tx: unknown) => unknown) => write(prisma)),
     $queryRaw: vi.fn(async () => []),
+    space: { findUnique: vi.fn(async () => null) },
+    spaceMember: { findUnique: vi.fn(async () => ({ id: "member-1" })) },
     run: {
       findUnique: vi.fn(async () => run),
       findUniqueOrThrow: vi.fn(async () => run),
@@ -207,6 +209,7 @@ async function runRoutine(
                 runId: run.id,
                 seq: 1,
                 blocks: [attachment],
+                steeringMessages: [],
               },
             ]
           : [],

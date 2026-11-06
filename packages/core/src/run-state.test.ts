@@ -10,9 +10,11 @@ import {
   isRunWaitingOnUser,
   isRunWorking,
   messageBypassesTakeoverWait,
+  messageSteersRun,
   QUEUE_HOLDING_RUN_STATUSES,
   WAITING_ON_USER_RUN_STATUSES,
   WORKING_RUN_STATUSES,
+  workingRoutineName,
 } from "./run-state.js";
 
 describe("run state machine", () => {
@@ -30,6 +32,18 @@ describe("run state machine", () => {
     expect(bypasses({ status: "running", trigger: "routine" })).toBe(false);
   });
 
+  it("isolates messaging steering by chat while preserving other triggers", () => {
+    expect(messageSteersRun("messaging", "messaging")).toBe(true);
+    expect(messageSteersRun("messaging", "messaging", "group-1", "group-1")).toBe(true);
+    expect(messageSteersRun("messaging", "messaging", "group-1")).toBe(false);
+    expect(messageSteersRun("messaging", "messaging", undefined, "group-1")).toBe(false);
+    expect(messageSteersRun("messaging", "messaging", "group-1", "group-2")).toBe(false);
+    expect(messageSteersRun("messaging", "user")).toBe(false);
+    expect(messageSteersRun("user", "messaging", undefined, "group-1")).toBe(true);
+    expect(messageSteersRun("webhook", "messaging")).toBe(false);
+    expect(messageSteersRun("user", "routine")).toBe(false);
+  });
+
   it("splits active runs into working and waiting on the user", () => {
     expect(WORKING_RUN_STATUSES.filter((status) => isRunWaitingOnUser(status))).toEqual([]);
     expect([...WORKING_RUN_STATUSES, ...WAITING_ON_USER_RUN_STATUSES].sort()).toEqual(
@@ -42,6 +56,39 @@ describe("run state machine", () => {
     expect(isRunWorking("running")).toBe(true);
     expect(isRunWorking("idle")).toBe(false);
     expect(isRunWorking(undefined)).toBe(false);
+  });
+
+  it("names the routine only when it is the one run in progress for one bot", () => {
+    const routine = {
+      status: "running",
+      botId: "bot-1",
+      trigger: "routine",
+      routineName: "Weekly sample report",
+    };
+    const waiting = { ...routine, status: "queued", routineName: "Hourly sample sync" };
+    const waitingReply = { status: "queued", botId: "bot-1", trigger: "user" };
+    expect(workingRoutineName([routine])).toBe("Weekly sample report");
+    expect(workingRoutineName([waiting, routine, waitingReply])).toBe("Weekly sample report");
+    expect(workingRoutineName([{ ...waitingReply, status: "waiting_input" }, routine])).toBe(
+      "Weekly sample report",
+    );
+    expect(workingRoutineName([routine, { ...waitingReply, botId: "bot-2" }])).toBeUndefined();
+    expect(
+      workingRoutineName([routine, { ...waitingReply, botId: "bot-2", status: "leased" }]),
+    ).toBeUndefined();
+    expect(
+      workingRoutineName([routine, { ...waitingReply, botId: "bot-2", status: "waiting_input" }]),
+    ).toBe("Weekly sample report");
+    expect(workingRoutineName([waiting])).toBeUndefined();
+    expect(workingRoutineName([{ ...waiting, status: "leased" }])).toBeUndefined();
+    expect(workingRoutineName([routine, { ...waiting, status: "running" }])).toBeUndefined();
+    expect(
+      workingRoutineName([{ status: "running", botId: "bot-1", trigger: "user" }, routine]),
+    ).toBeUndefined();
+    expect(workingRoutineName([{ ...routine, status: "completed" }])).toBeUndefined();
+    expect(workingRoutineName([{ ...routine, routineName: null }])).toBeUndefined();
+    expect(workingRoutineName([{ ...routine, routineName: "  " }])).toBeUndefined();
+    expect(workingRoutineName([])).toBeUndefined();
   });
 
   it("allows takeover resume onto a lease", () => {

@@ -11,7 +11,7 @@ import {
   seededLogoAvatarColor,
 } from "@rakazo/core";
 import type { ColorTokens } from "@rakazo/ui-tokens";
-import { botEyeColor, tokensForAppearance } from "@rakazo/ui-tokens";
+import { tokensForAppearance } from "@rakazo/ui-tokens";
 import type { ReactNode } from "react";
 import { act, createElement, useRef } from "react";
 import type { Root } from "react-dom/client";
@@ -296,10 +296,10 @@ describe("BotAvatar", () => {
   it("draws a plain-colour bot with the organic body for its identity", () => {
     const view = render("#3EC5A8");
     expect(bodies(view)).toEqual([organicAvatarPath(avatarIdentitySeed("bot-1"))]);
-    // Its eyes take the shared eye ink, the same as a group title's still faces.
+    // A pale body keeps dark eyes on a light page, the same as a group title's still faces.
     expect(Array.from(view.querySelectorAll("rect"), (eye) => eye.dataset.fill)).toEqual([
-      botEyeColor,
-      botEyeColor,
+      "#141414",
+      "#141414",
     ]);
     expect(view.querySelector("img")).toBeNull();
     expect(view.querySelector("ellipse")).toBeNull();

@@ -43,7 +43,7 @@ test("live page helper preserves identity, masks passwords, and reports partial 
     });
     let port = "";
     await expect(async () => {
-      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0];
+      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0]!;
       expect(port).toMatch(/^\d+$/);
     }).toPass({ timeout: 5_000 });
     async function command(name: string, args: Record<string, unknown> = {}) {
@@ -211,7 +211,7 @@ test("live page helper waits for a site's sign-in check, or says the page is sti
     });
     let port = "";
     await expect(async () => {
-      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0];
+      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0]!;
       expect(port).toMatch(/^\d+$/);
     }).toPass({ timeout: 5_000 });
     const snapshot = async () => {
@@ -223,10 +223,8 @@ test("live page helper waits for a site's sign-in check, or says the page is sti
     };
     const page = context.pages()[0]!;
 
-    // The session sees a page's requests and frames only from when it attaches, so start it
-    // before the page loads, as a bot's browser_navigate does.
-    await snapshot();
-    // The check answers within the wait: the snapshot shows the signed-in page.
+    // The check answers within the wait: the snapshot shows the signed-in page. The helper first
+    // reads it after it began loading, as when the person opened it.
     await page.goto(`http://127.0.0.1:${address.port}/?check=500`);
     const settled = await snapshot();
     expect(settled).toMatchObject({ ok: true, title: "Example" });
@@ -239,6 +237,144 @@ test("live page helper waits for a site's sign-in check, or says the page is sti
     const loading = await snapshot();
     expect(loading).toMatchObject({ ok: true, title: "Example", loading: true });
     expect(loading.tree).toContain('link "Sign in"');
+  } finally {
+    await context?.close();
+    await rm(profile, { recursive: true, force: true });
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+});
+
+test("live page helper reads a checkout's order lines for the pay approval", async () => {
+  const profile = await mkdtemp(path.join(os.tmpdir(), "page-browser-order-"));
+  const server = http.createServer((_req, res) => {
+    res.setHeader("content-type", "text/html");
+    res.end(`<!doctype html><meta charset="utf-8"><title>Checkout</title>
+      <style>.row { display: flex; justify-content: space-between } aside { width: 320px }</style>
+      <header><a href="/cart">Cart · Socks $9.00</a></header>
+      <main>
+        <h1>Checkout</h1>
+        <label><input type="radio" name="ship" checked> Standard delivery $6.00</label>
+        <aside>
+          <h2>Order summary</h2>
+          <div class="row"><span>Bananas × 6</span><span>$3.00</span></div>
+          <div class="row"><span>Oat milk 1L <small>× 2</small></span><span>$8.40</span></div>
+          <div class="row" style="display: none"><span>Hidden gift</span><span>$1.00</span></div>
+          <div style="opacity: 0"><div class="row"><span>Faded gift</span><span>$2.00</span></div></div>
+          <div class="row" style="color: transparent"><span>Ink-free gift</span><span>$4.00</span></div>
+          <div class="row"><span>Subtotal</span><span>$11.40</span></div>
+          <div class="row"><span>Delivery</span><span>$6.00</span></div>
+          <div class="row"><strong>Total</strong><strong>$17.40</strong></div>
+        </aside>
+        <button>Place order</button>
+        <p>Recommended: Grapes 500g $4.00</p>
+      </main>`);
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  if (!address || typeof address === "string") throw new Error("No fixture server");
+  let context: Awaited<ReturnType<typeof chromium.launchPersistentContext>> | undefined;
+  try {
+    context = await chromium.launchPersistentContext(profile, {
+      ...BROWSER,
+      args: ["--remote-debugging-port=0"],
+    });
+    let port = "";
+    await expect(async () => {
+      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0]!;
+      expect(port).toMatch(/^\d+$/);
+    }).toPass({ timeout: 5_000 });
+    const page = context.pages()[0]!;
+    await page.goto(`http://127.0.0.1:${address.port}/checkout`);
+    // Enter on the screen asks the page what it shows: its final step, total and order lines.
+    const { stdout } = await execute(
+      "python3",
+      [helper, "purchase_check", JSON.stringify({ desktop: true, enter: true })],
+      { env: { ...process.env, RAKAZO_CDP_PORT: port }, timeout: 30_000 },
+    );
+    expect(JSON.parse(stdout)).toMatchObject({
+      ok: true,
+      purchase: {
+        label: "Place order",
+        amount: "$17.40",
+        items: [
+          { name: "Bananas × 6", amount: "$3.00" },
+          { name: "Oat milk 1L × 2", amount: "$8.40" },
+          { name: "Delivery", amount: "$6.00" },
+        ],
+      },
+    });
+  } finally {
+    await context?.close();
+    await rm(profile, { recursive: true, force: true });
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+});
+
+test("live page helper reaches a form past the control limit by query or by scrolling to it", async () => {
+  const profile = await mkdtemp(path.join(os.tmpdir(), "page-browser-long-"));
+  const stories = Array.from(
+    { length: 200 },
+    (_, n) =>
+      `<article><h2>Story ${n}</h2><p>Story ${n} text.</p><a href="#s${n}">Read story ${n}</a></article>`,
+  ).join("");
+  const server = http.createServer((_req, res) => {
+    res.setHeader("content-type", "text/html");
+    res.end(`<!doctype html><title>Archive</title>${stories}
+      <form onsubmit="event.preventDefault(); window.subscribed = this.email.value">
+        <label>Newsletter email <input name="email"></label><button>Subscribe</button></form>`);
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  if (!address || typeof address === "string") throw new Error("No fixture server");
+  let context: Awaited<ReturnType<typeof chromium.launchPersistentContext>> | undefined;
+  try {
+    context = await chromium.launchPersistentContext(profile, {
+      ...BROWSER,
+      args: ["--remote-debugging-port=0"],
+    });
+    let port = "";
+    await expect(async () => {
+      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0]!;
+      expect(port).toMatch(/^\d+$/);
+    }).toPass({ timeout: 5_000 });
+    async function command(name: string, args: Record<string, unknown> = {}) {
+      const { stdout } = await execute("python3", [helper, name, JSON.stringify(args)], {
+        env: { ...process.env, RAKAZO_CDP_PORT: port },
+        timeout: 30_000,
+      });
+      return JSON.parse(stdout);
+    }
+    type Snapshot = { tree: string; elements: { name: string; ref: string }[] };
+    const names = (snapshot: Snapshot) => snapshot.elements.map((element) => element.name);
+    const page = context.pages()[0]!;
+    await page.goto(`http://127.0.0.1:${address.port}`);
+
+    const top: Snapshot = await command("snapshot");
+    expect(top.tree).toMatch(/^\[controls: showing \d+ of \d+\. Snapshot with a query/);
+    expect(names(top)).not.toContain("Newsletter email");
+
+    const found: Snapshot = await command("snapshot", { query: "newsletter" });
+    expect(found.tree.startsWith('[controls matching "newsletter"]')).toBe(true);
+    expect(names(found)).toEqual(["Newsletter email", "Subscribe"]);
+    const ref = (name: string) => found.elements.find((element) => element.name === name)!.ref;
+    expect(
+      await command("act", {
+        actions: [
+          { kind: "fill", ref: ref("Newsletter email"), text: "reader@example.test" },
+          { kind: "click", ref: ref("Subscribe") },
+        ],
+      }),
+    ).toMatchObject({ ok: true, completed: 2 });
+    expect(await page.evaluate(() => (window as { subscribed?: string }).subscribed)).toBe(
+      "reader@example.test",
+    );
+
+    await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+    const bottom: Snapshot = await command("snapshot");
+    expect(names(bottom)).toContain("Subscribe");
+    expect(names(bottom)).not.toContain("Read story 0");
   } finally {
     await context?.close();
     await rm(profile, { recursive: true, force: true });
@@ -387,6 +523,50 @@ const TWO_CODES = `<!doctype html><title>Two codes</title><style>input { width: 
     for (const box of boxes.slice(0, 6)) box.value = "1";
   </script>`;
 
+// Code pages that name only the first box, with the prompt, and leave the other boxes unnamed; some
+// set no length limit and size their boxes narrow instead. Focus moves on by itself after each digit.
+// "stray" moves focus to an unrelated field instead, "long" has more unnamed boxes than any code.
+const FIRST_LABEL_ONLY = `<!doctype html><title>First label</title><style>input { width: 36px }</style>
+  <section id="text"><label for="text-1">Code from Larkspur by text</label></section>
+  <section id="app"></section><section id="call"></section><section id="stray"></section>
+  <section id="long"></section>
+  <section id="card">${["Card 1", "Card 2", "Card 3", "Card 4", "Expiry", "CVC"]
+    .map(
+      (hint) => `<input type="tel" inputmode="numeric" placeholder="${hint}" style="width:60px">`,
+    )
+    .join("")}</section>
+  <section id="grid">${Array.from(
+    { length: 8 },
+    (_, i) =>
+      `<input type="number" min="0" max="9" value="7" placeholder="Cell ${i + 1}" style="width:40px">`,
+  ).join("")}</section>
+  <script>
+    const add = (id, attributes, label, count, next) => {
+      const section = document.getElementById(id);
+      const boxes = Array.from({ length: count }, (_, i) => {
+        const box = document.createElement("input");
+        for (const [name, value] of Object.entries(attributes)) box.setAttribute(name, value);
+        if (i === 0 && label) box.setAttribute(label[0], label[1]);
+        if (i === 0 && id === "text") box.id = "text-1";
+        box.addEventListener("input", () => {
+          box.value = box.value.replace(/[^0-9]/g, "").slice(-1);
+          if (box.value) next(boxes, i)?.focus();
+        });
+        section.append(box);
+        return box;
+      });
+    };
+    const following = (boxes, i) => boxes[i + 1];
+    add("text", { maxlength: "1" }, null, 6, following);
+    add("app", { type: "tel", inputmode: "numeric", autocomplete: "one-time-code" },
+      ["aria-label", "Code from Larkspur by app"], 6, following);
+    add("call", { type: "number", min: "0", max: "9" }, ["aria-label", "Code from Larkspur by call"], 6, following);
+    add("stray", { maxlength: "1" }, ["aria-label", "Stray code"], 4, (boxes, i) =>
+      boxes[i + 1] ?? document.getElementById("phone"));
+    document.getElementById("stray").insertAdjacentHTML("beforeend", '<input id="phone" aria-label="Phone" style="width:200px">');
+    add("long", { maxlength: "1" }, ["aria-label", "Long code"], 10, following);
+  </script>`;
+
 test("live page helper types codes as real key presses into one-box-per-digit fields", async () => {
   test.setTimeout(240_000);
   const profile = await mkdtemp(path.join(os.tmpdir(), "page-browser-test-"));
@@ -398,7 +578,7 @@ test("live page helper types codes as real key presses into one-box-per-digit fi
     });
     let port = "";
     await expect(async () => {
-      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0];
+      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0]!;
       expect(port).toMatch(/^\d+$/);
     }).toPass({ timeout: 5_000 });
     async function command(name: string, args: Record<string, unknown> = {}) {
@@ -421,18 +601,22 @@ test("live page helper types codes as real key presses into one-box-per-digit fi
       return result;
     }
     const page = context.pages()[0]!;
-    await page.route("https://code.example.test/**", (route) =>
-      route.fulfill({
+    await page.route("https://code.example.test/**", async (route) => {
+      // A slow next page keeps the one that is leaving on screen while the keys are typed.
+      if (route.request().url().endsWith("/next")) await new Promise((r) => setTimeout(r, 500));
+      await route.fulfill({
         contentType: "text/html",
         body: route.request().url().endsWith("/done")
           ? "<title>Signed in</title>"
           : route.request().url().endsWith("/two")
             ? TWO_CODES
-            : route.request().url().endsWith("/next")
-              ? '<title>Next</title><input aria-label="Next" autofocus>'
-              : CODE_FIELDS,
-      }),
-    );
+            : route.request().url().endsWith("/first")
+              ? FIRST_LABEL_ONLY
+              : route.request().url().endsWith("/next")
+                ? '<title>Next</title><input aria-label="Next" autofocus>'
+                : CODE_FIELDS,
+      });
+    });
     const open = async () => {
       await page.goto("https://code.example.test/");
       await refresh();
@@ -623,6 +807,40 @@ test("live page helper types codes as real key presses into one-box-per-digit fi
       .evaluateAll((boxes) => boxes.map((box) => (box as HTMLInputElement).value).join(""));
     expect(digits).toBe("111111482913");
 
+    // Pages that name only the first box still get the whole code, with or without a length limit.
+    await page.goto("https://code.example.test/first");
+    await refresh();
+    for (const [section, name] of [
+      ["text", "Code from Larkspur by text"],
+      ["app", "Code from Larkspur by app"],
+      ["call", "Code from Larkspur by call"],
+    ] as const) {
+      expect(await type(name, "482913"), section).toMatchObject({ ok: true, completed: 1 });
+      expect(await code(section), section).toBe("482913");
+    }
+    // Keys never go to an unrelated field: focus moving on to a phone field after the last box
+    // stops the typing there, and a run of unnamed boxes longer than a code is not one code.
+    for (const [section, name, typed] of [
+      ["stray", "Stray code", "4829"],
+      ["long", "Long code", "4"],
+    ] as const) {
+      await page.goto("https://code.example.test/first");
+      await refresh();
+      const stopped = await type(name, "482913");
+      expect(stopped, section).toMatchObject({ ok: false, completed: 0 });
+      expect(stopped.error, section).toContain(`after ${typed.length} of 6 characters`);
+      expect(await code(section), section).toBe(typed);
+    }
+    await expect(page.getByLabel("Phone")).toHaveValue("");
+    // Narrow number or card fields that no named box leads are not a code: the text stays in the
+    // field it was typed into and the others keep what they had.
+    await page.goto("https://code.example.test/first");
+    await refresh();
+    expect(await type("CVC", "123")).toMatchObject({ ok: true });
+    expect(await code("card")).toBe("123");
+    expect(await type("Cell 4", "12")).toMatchObject({ ok: true });
+    expect(await code("grid")).toBe("777127777");
+
     // A widget that submits on its last digit: the step is done and the result is the next page.
     await open();
     expect(await type("submit 1", "482913")).toMatchObject({
@@ -670,7 +888,7 @@ test("live page helper types a purchase's card into a payment provider's frame o
     });
     let port = "";
     await expect(async () => {
-      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0];
+      port = (await readFile(path.join(profile, "DevToolsActivePort"), "utf8")).split("\n")[0]!;
       expect(port).toMatch(/^\d+$/);
     }).toPass({ timeout: 5_000 });
     async function command(name: string, args: Record<string, unknown> = {}) {
@@ -699,9 +917,7 @@ test("live page helper types a purchase's card into a payment provider's frame o
         actions: [{ kind: "fill", text, origin: merchant, field: "card", cardField }],
       });
     const page = context.pages()[0]!;
-    // The session sees a page's frames only from when it attaches, so start it before the page
-    // loads, as a bot's browser_navigate does.
-    await command("snapshot");
+    // The helper first reads the checkout after its card frame loaded, as when the person opened it.
     await page.goto(`${merchant}/checkout`);
     const card = page.frameLocator("iframe").locator("body");
     await expect(card.locator("#number")).toBeVisible();

@@ -1,6 +1,6 @@
 import type { Bot, TicketListItem } from "@rakazo/contracts";
-import type { CardDatesInfo } from "./dates.js";
-import { cardDates, type RelativeDayLabels } from "./dates.js";
+import type { CardDatesInfo, RelativeDayLabels } from "./dates.js";
+import { cardDates } from "./dates.js";
 
 export type TicketCard = {
   id: string;

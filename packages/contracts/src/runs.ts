@@ -4,8 +4,17 @@ import { Id, IsoDate, RunStatus } from "./ids.js";
 /** The computer provider refused a request at its own rate limit; the run tells the user to wait. */
 export const COMPUTER_RATE_LIMIT_ERROR = "Too many computer requests. Try again later.";
 
-/** The organization spent this month's computer allowance; computers start again next month. */
-export const COMPUTER_ALLOWANCE_USED_ERROR = "This month's computer allowance is used up.";
+/** The organization spent this period's computer allowance; computers start again at renewal. */
+export const COMPUTER_ALLOWANCE_USED_ERROR = "No computer hours left.";
+
+/** The deployment's computer provider account cannot start computers, such as when it is unpaid. */
+export const COMPUTER_PROVIDER_UNAVAILABLE_ERROR =
+  "Computers are unavailable right now. Try again later.";
+
+/** Whether an error says the computer hours are spent, which only a plan change can fix. */
+export function isComputerAllowanceUsed(message: string | null | undefined): boolean {
+  return message?.startsWith(COMPUTER_ALLOWANCE_USED_ERROR) ?? false;
+}
 
 export const RUN_TRIGGERS = [
   "user",
@@ -21,6 +30,7 @@ export const RUN_TRIGGERS = [
   "messaging",
   "cloud_agent",
   "purchase",
+  "media",
   "created",
   "tickets",
 ] as const;
@@ -71,6 +81,8 @@ export const RoutineRunSchema = z.object({
   error: z.string().nullable(),
   createdAt: IsoDate,
   startedAt: IsoDate.nullable(),
+  /** When a scheduled run that started well after its time was due; null otherwise. */
+  lateSince: IsoDate.nullable(),
   completedAt: IsoDate.nullable(),
   messageId: Id.nullable(),
 });

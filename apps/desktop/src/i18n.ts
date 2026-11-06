@@ -1,16 +1,43 @@
 import { brand, brandProduct, brandText } from "@nurlings/brand";
-import { matchUiLocale, translate } from "@rakazo/core";
+import type { TextDirection } from "@rakazo/core";
+import { matchUiLocale, textDirectionForLocale, translate } from "@rakazo/core";
 import type { IpcMainInvokeEvent } from "electron";
 import type { AppTarget } from "./app-frame.js";
 import { fromAppFrame } from "./app-frame.js";
+import { DE_MESSAGES } from "./locales/de.js";
 import { ES_MESSAGES } from "./locales/es.js";
+import { FR_MESSAGES } from "./locales/fr.js";
+import { HE_MESSAGES } from "./locales/he.js";
+import { HI_MESSAGES } from "./locales/hi.js";
+import { JA_MESSAGES } from "./locales/ja.js";
+import { KO_MESSAGES } from "./locales/ko.js";
+import { NL_MESSAGES } from "./locales/nl.js";
+import { PL_MESSAGES } from "./locales/pl.js";
+import { PT_BR_MESSAGES } from "./locales/pt-BR.js";
+import { RU_MESSAGES } from "./locales/ru.js";
+import { TR_MESSAGES } from "./locales/tr.js";
+import { ZH_CN_MESSAGES } from "./locales/zh-CN.js";
+import { ZH_TW_MESSAGES } from "./locales/zh-TW.js";
 
-/** The languages the desktop shell ships; any other language the app offers shows English. */
-const DESKTOP_LOCALES = ["en", "es"] as const;
-export type DesktopLocale = (typeof DESKTOP_LOCALES)[number];
-const CATALOGS: Partial<Record<DesktopLocale, Readonly<Record<string, string>>>> = {
+/** Every language the app offers; English is the source text and needs no catalog. */
+export const CATALOGS = {
+  de: DE_MESSAGES,
   es: ES_MESSAGES,
-};
+  fr: FR_MESSAGES,
+  he: HE_MESSAGES,
+  hi: HI_MESSAGES,
+  ja: JA_MESSAGES,
+  ko: KO_MESSAGES,
+  nl: NL_MESSAGES,
+  pl: PL_MESSAGES,
+  "pt-BR": PT_BR_MESSAGES,
+  ru: RU_MESSAGES,
+  tr: TR_MESSAGES,
+  "zh-CN": ZH_CN_MESSAGES,
+  "zh-TW": ZH_TW_MESSAGES,
+} as const satisfies Record<string, Readonly<Record<string, string>>>;
+export type DesktopLocale = "en" | keyof typeof CATALOGS;
+const DESKTOP_LOCALES = ["en", ...Object.keys(CATALOGS)] as DesktopLocale[];
 const LANGUAGE_TAG = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,3}$/;
 
 let activeLocale: DesktopLocale = "en";
@@ -24,7 +51,12 @@ let saving: Promise<void> = Promise.resolve();
  * placeholders are filled, so values such as a bot's own name are never rewritten.
  */
 export function t(message: string, values?: Record<string, string | number>): string {
-  return translate(undefined, brandText(translate(CATALOGS[activeLocale], message), brand), values);
+  return translate(undefined, brandText(translate(activeCatalog(), message), brand), values);
+}
+
+/** Upstream's catalog for the active language, unbranded; empty for English. */
+function activeCatalog(): Readonly<Record<string, string>> {
+  return activeLocale === "en" ? {} : CATALOGS[activeLocale];
 }
 
 export function desktopLocale(): DesktopLocale {
@@ -36,13 +68,16 @@ export function desktopLocale(): DesktopLocale {
  * text is branded when it is copied, so its keys and the translations carry the same product name.
  */
 export function desktopMessages(): Readonly<Record<string, string>> {
-  const catalog = CATALOGS[activeLocale] ?? {};
   return Object.fromEntries(
-    Object.entries(catalog).map(([message, text]) => [
+    Object.entries(activeCatalog()).map(([message, text]) => [
       brandProduct(message, brand),
       brandProduct(text, brand),
     ]),
   );
+}
+
+export function desktopDirection(): TextDirection {
+  return textDirectionForLocale(activeLocale);
 }
 
 /** An error whose message stays English for error reports and shows `detail` to the person. */

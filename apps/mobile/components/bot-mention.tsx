@@ -31,7 +31,7 @@ export function BotMention({
       onPress={live ? () => onOpenBot(block.botId, block.name) : undefined}
       style={{
         color: live
-          ? resolvePersonaColorDef(block.botId, botHexColor(color) ?? color).light
+          ? resolvePersonaColorDef(block.botId, botHexColor(color) ?? color).hex
           : tokens.foreground,
         fontWeight: "500",
       }}
