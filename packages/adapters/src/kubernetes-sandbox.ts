@@ -10,6 +10,7 @@ import type {
   V1PodSpec,
   V1Status,
 } from "@kubernetes/client-node";
+import { brand } from "@nurlings/brand";
 import type {
   AdapterContext,
   CommandRequest,
@@ -35,7 +36,8 @@ const DISPLAY_START = 20;
 const DEFAULT_NAMESPACE = "rakazo-sandboxes";
 // Same default as the Compose stack. Pin a digest with KUBERNETES_SANDBOX_COMPUTER_IMAGE in
 // production so every pod runs the image the API was tested against.
-const DEFAULT_COMPUTER_IMAGE = "ghcr.io/elie222/rakazo/computer:edge";
+// The computer image this product publishes, not the upstream project's.
+const DEFAULT_COMPUTER_IMAGE = `${brand.registry}/computer:edge`;
 const DEFAULT_READY_TIMEOUT_MS = 120_000;
 const REQUEST_TIMEOUT_MS = 10_000;
 const CONTAINER_NAME = "computer";

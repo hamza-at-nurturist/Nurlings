@@ -59,7 +59,7 @@
         {
           "ios": {
             "enabled": true,
-            "appGroupId": "group.com.rakazo.app",
+            "appGroupId": "group.com.nurturistai.nurlings",
             "activationRule": {
               "supportsText": true,
               "supportsWebUrlWithMaxCount": 1,
@@ -149,18 +149,18 @@
               "appExtensions": [
                 {
                   "targetName": "RakazoWidgets",
-                  "bundleIdentifier": "com.rakazo.app.widgets"
+                  "bundleIdentifier": "com.nurturistai.nurlings.widgets"
                 },
                 {
                   "targetName": "expo-sharing-extension",
-                  "bundleIdentifier": "com.rakazo.app.expo-sharing-extension",
+                  "bundleIdentifier": "com.nurturistai.nurlings.expo-sharing-extension",
                   "entitlements": {
-                    "com.apple.security.application-groups": ["group.com.rakazo.app"]
+                    "com.apple.security.application-groups": ["group.com.nurturistai.nurlings"]
                   }
                 },
                 {
                   "targetName": "AgentNotifications",
-                  "bundleIdentifier": "com.rakazo.app.notifications",
+                  "bundleIdentifier": "com.nurturistai.nurlings.notifications",
                   "entitlements": {
                     "com.apple.developer.usernotifications.communication": true
                   }

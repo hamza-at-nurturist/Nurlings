@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({
@@ -53,7 +54,7 @@ vi.mock("expo-file-system", () => {
         const container = state.container;
         if (!container) return {};
         return {
-          "group.com.rakazo.app": {
+          [`group.${brand.native.bundleId}`]: {
             uri: container.uri,
             list: () => container.files.map((name) => new File(`${container.uri}${name}`)),
           },

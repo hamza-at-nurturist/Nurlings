@@ -159,7 +159,7 @@ describe("app.json and the Maestro flows", () => {
     visit(join(mobileRoot, ".maestro"));
     visit(join(mobileRoot, "e2e"));
     const withAppId = flows.filter((file) => /^appId:/m.test(readFileSync(file, "utf8")));
-    expect(withAppId.length).toBe(18);
+    expect(withAppId.length).toBe(34);
     for (const file of withAppId) {
       expect(readFileSync(file, "utf8"), file).toMatch(
         new RegExp(`^appId: ${brand.native.bundleId.replaceAll(".", "\\.")}$`, "m"),

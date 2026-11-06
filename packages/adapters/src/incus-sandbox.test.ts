@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { PeerCertificate } from "node:tls";
 import { rootCertificates } from "node:tls";
+import { brand } from "@nurlings/brand";
 import type { AdapterContext, ComputerRef, ProcessEvent } from "@rakazo/adapter-kit";
 import { describe, expect, it, vi } from "vitest";
 import { encodeTarEntry } from "./exec-computer.js";
@@ -431,7 +432,10 @@ describe("IncusSandboxProvider", () => {
     const fake = new FakeIncus();
     await providerFor(fake).provision({ botId: "bot-a", homePath: "/unused" }, context);
     expect(fake.requests.find((entry) => entry.method === "POST")?.body).toMatchObject({
-      source: { server: "https://ghcr.io", alias: "elie222/rakazo/computer:edge" },
+      source: {
+        server: "https://ghcr.io",
+        alias: `${brand.registry.replace(/^ghcr\.io\//, "")}/computer:edge`,
+      },
       config: { "limits.cpu": "2", "limits.memory": "2GiB", "limits.processes": "2048" },
     });
   });

@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type { Directory } from "expo-file-system";
 import { File, Paths } from "expo-file-system";
 import type { SharePayload } from "expo-sharing";
@@ -19,7 +20,8 @@ let expiry: ReturnType<typeof setTimeout> | undefined;
 const listeners = new Set<() => void>();
 
 /** The app group in app.json where the iOS share extension copies shared files. */
-export const IOS_SHARE_APP_GROUP = "group.com.rakazo.app";
+// The app group app.json gives the share extension, named after this app's bundle id.
+export const IOS_SHARE_APP_GROUP = `group.${brand.native.bundleId}`;
 
 /** Only iOS builds that include the share extension have its container. */
 function iosShareContainer(): Directory | null {

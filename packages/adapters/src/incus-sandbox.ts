@@ -3,6 +3,7 @@ import { Agent as HttpsAgent } from "node:https";
 import type { Readable } from "node:stream";
 import { setTimeout as sleep } from "node:timers/promises";
 import type { ConnectionOptions } from "node:tls";
+import { brand } from "@nurlings/brand";
 import type {
   AdapterContext,
   CommandRequest,
@@ -37,7 +38,8 @@ const DESKTOP_PORT_START = 6100;
 const READY_PORT = 6080;
 const DEFAULT_PROJECT = "default";
 // Pin a release tag or digest with INCUS_SANDBOX_COMPUTER_IMAGE in production.
-const DEFAULT_COMPUTER_IMAGE = "ghcr.io/elie222/rakazo/computer:edge";
+// The computer image this product publishes, not the upstream project's.
+const DEFAULT_COMPUTER_IMAGE = `${brand.registry}/computer:edge`;
 // The Docker computer's default ceilings, in Incus units.
 const DEFAULT_CPU_LIMIT = "2";
 const DEFAULT_MEMORY_LIMIT = "2GiB";
