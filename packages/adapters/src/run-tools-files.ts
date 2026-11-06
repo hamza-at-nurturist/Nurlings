@@ -4,7 +4,7 @@ import { resolveBotWorkspacePath } from "./computer-support.js";
 import { desktopProtectionGuardMessage } from "./desktop-command-guard.js";
 import { protectedActivateScriptWriteRefusal } from "./desktop-guard-words.js";
 import { generateMediaFromTool } from "./media-generation-tools.js";
-import { miniAppProblem } from "./mini-app-check.js";
+import { miniAppAttachName, miniAppProblem } from "./mini-app-check.js";
 import type { RunContext } from "./run-context.js";
 import { persistMessageInTransaction, publishMessage } from "./run-messages.js";
 import type { ToolCall, ToolHandlers } from "./run-tool-gate.js";
@@ -177,8 +177,11 @@ export const fileTools: ToolHandlers = {
     }
     const mimeType = inferAttachmentMimeType(filePath);
     if (!mimeType) return failAttach("unsupported attachment type");
-    const appName = typeof args.name === "string" && args.name ? args.name : filePath;
-    const appProblem = miniAppProblem(appName, bytes);
+    const attachName = miniAppAttachName(
+      filePath,
+      typeof args.name === "string" ? args.name : undefined,
+    );
+    const appProblem = miniAppProblem(attachName ?? filePath, bytes);
     if (appProblem) return failAttach(appProblem);
     try {
       const attached = await attachWorkspaceFileToThread(
@@ -196,7 +199,7 @@ export const fileTools: ToolHandlers = {
           filePath,
           bytes,
           operationId: executionId,
-          name: typeof args.name === "string" ? args.name : undefined,
+          name: attachName,
           description: typeof args.description === "string" ? args.description : undefined,
         },
       );
