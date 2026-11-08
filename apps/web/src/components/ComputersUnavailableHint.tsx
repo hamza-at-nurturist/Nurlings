@@ -1,7 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import { Button, buttonVariants, Spinner } from "@rakazo/ui-web";
 import { useEffect, useRef, useState } from "react";
-import { DOCS_URL } from "../lib/brand-links";
 import type { SandboxAvailabilityPhase } from "../lib/computer-sandbox";
 import {
   computersAreUnavailable,
@@ -127,7 +126,7 @@ export function ComputersUnavailableHint({
           ) : null}
           <a
             className={buttonVariants({ variant: "ghost", size: "sm" })}
-            href={DOCS_URL}
+            href="https://github.com/hamza-at-nurturist/Nurlings/blob/main/docs/self-host-sandbox-providers.md"
             target="_blank"
             rel="noreferrer"
           >

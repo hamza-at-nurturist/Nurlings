@@ -72,7 +72,7 @@ Upstream's own checks reached code the merge did not conflict on:
   "Rakazos eigenen".
 - **Identity.** The iOS share app group and extension ids follow the app's bundle id; upstream's new
   Maestro and iOS screenshot flows target it; the Incus and Kubernetes computer images default to
-  the fork's published image; "Setup help" opens the product docs.
+  the fork's published image; "Setup help" opens this repository's sandbox guide.
 - **Links.** `integrationPageUrl` is `null` like `SUBMIT_PLUGIN_URL`: the panel shows no page link and
   the claim confirmation answers in place instead of redirecting to upstream's site.
   The MCP OAuth redirect help link opens this repository's copy of the troubleshooting guide.
