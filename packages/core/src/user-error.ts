@@ -1,9 +1,12 @@
 import { MCP_OAUTH_REDIRECT_MISMATCH } from "@rakazo/contracts";
 
-/** Only reviewed, public documentation links belong here; never use URLs from an error body. */
+/**
+ * Only reviewed, public documentation links belong here; never use URLs from an error body. The
+ * guides are this product's copies in its own repository, not the upstream project's site.
+ */
 const ERROR_GUIDES: Readonly<Record<string, string>> = {
   [MCP_OAUTH_REDIRECT_MISMATCH]:
-    "https://rakazo.com/docs/troubleshooting/#mcp-oauth-redirect-mismatch",
+    "https://github.com/hamza-at-nurturist/Nurlings/blob/main/docs/troubleshooting.md#mcp-oauth-redirect-mismatch",
 };
 
 /** A stable error code opts into troubleshooting without depending on message wording. */

@@ -60,6 +60,29 @@ helpers, the thread event reducer, `ConfirmDialog`, the Artifacts tab redesign, 
 
 Every resolution beyond imports is recorded again in the merge commit and the PR.
 
+### Fixes beyond the conflicts
+
+Upstream's own checks reached code the merge did not conflict on:
+
+- **Type scale.** Upstream cleared Tailwind's default text sizes, so the board's `text-xs`/`text-sm`
+  classes sized nothing. Board and ticket UI now use the scale; the two board text fields keep
+  16px (with an `off-scale:` reason) so iOS Safari does not zoom on focus.
+- **Polish.** Upstream added Polish; the fork's board and avatar-state strings get Polish on web and
+  mobile, the Polish macOS prompts name the brand, and the brand rule rebrands the German genitive
+  "Rakazos eigenen".
+- **Identity.** The iOS share app group and extension ids follow the app's bundle id; upstream's new
+  Maestro and iOS screenshot flows target it; the Incus and Kubernetes computer images default to
+  the fork's published image; "Setup help" opens the product docs.
+- **Links.** `integrationPageUrl` is `null` like `SUBMIT_PLUGIN_URL`: the panel shows no page link and
+  the claim confirmation answers in place instead of redirecting to upstream's site.
+  The MCP OAuth redirect help link opens this repository's copy of the troubleshooting guide.
+- **Notification portraits** draw the fork's avatar body, shape frames and pill eyes, matching chat.
+- **Coolify compose** passes upstream's new settings; email settings are shared by the API and the
+  worker, as upstream now does.
+- **Workflows.** `release-desktop` keeps the fork's unsigned Windows and no-update-feed build (only the
+  `pnpm/action-setup` bump is taken). Upstream's Fly previews, issue triage and Google Play jobs only
+  run in upstream's repository.
+
 ## Risks
 
 1. **Migrations (34 new, all upstream, dated after ours).** All add tables, columns or indexes, or
