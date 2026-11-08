@@ -1,6 +1,6 @@
 import { brand } from "@nurlings/brand";
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, openUserSettings, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, openUserSettings, signup, ui } from "./helpers";
 
 test("changing language updates settings overflow without resizing", async ({ page }, testInfo) => {
   const stamp = Date.now();
@@ -209,11 +209,11 @@ test("Honcho memory settings empty and filled", async ({ page }, testInfo) => {
   await captureScreenshot(page, testInfo, "memory-honcho-user-peer-reserved");
   await userPeer.fill("user-alex");
   await expect(
-    memory.getByText("Recall from this peer; save to Rakazo’s own peers."),
+    memory.getByText(ui("Recall from this peer; save to Rakazo’s own peers.")),
   ).toBeVisible();
   await expect(memory.getByRole("button", { name: "Connect", exact: true })).toBeEnabled();
   await memory
-    .getByText("Recall from this peer; save to Rakazo’s own peers.")
+    .getByText(ui("Recall from this peer; save to Rakazo’s own peers."))
     .evaluate((element) => element.scrollIntoView({ block: "center" }));
   await captureScreenshot(page, testInfo, "memory-honcho-filled");
   await memory.getByRole("button", { name: "Self-hosted", exact: true }).click();

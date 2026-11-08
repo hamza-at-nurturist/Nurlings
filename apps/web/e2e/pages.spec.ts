@@ -8,6 +8,7 @@ import {
   openBotPanelTab,
   rpc,
   signup,
+  ui,
 } from "./helpers";
 
 function dashboard(churn: string) {
@@ -313,7 +314,7 @@ test("a bot's page shows in its reply, opens full screen, is shared by link and 
   );
   await expect(outside.getByRole("heading", { name: "Signups dashboard", level: 1 })).toBeVisible();
   await expect(outside.getByRole("button", { name: "Download PDF" })).toBeVisible();
-  await expect(outside.getByRole("link", { name: "Open Rakazo" })).toBeVisible();
+  await expect(outside.getByRole("link", { name: ui("Open Rakazo") })).toBeVisible();
   await expect(pageFrame(outside, "Signups dashboard").getByText("$12,400")).toBeVisible();
   // There is no chat beside a shared page, so its reply buttons do nothing.
   await expect(
@@ -421,7 +422,7 @@ test("a bot's page shows in its reply, opens full screen, is shared by link and 
   await expect(share.getByRole("link", { name: "Open link" })).toBeHidden();
   await outside.reload();
   await expect(outside.getByRole("heading", { name: "This page isn't available" })).toBeVisible();
-  await expect(outside.getByRole("link", { name: "Open Rakazo" })).toBeVisible();
+  await expect(outside.getByRole("link", { name: ui("Open Rakazo") })).toBeVisible();
   await captureScreenshot(outside, testInfo, "page-public-unavailable");
   // Busy or unreachable is not gone: the visitor is asked to try again.
   await outside.route("**/api/v1/pages/shared/**", (route) => route.fulfill({ status: 503 }));
@@ -450,7 +451,7 @@ test("a bot's page shows in its reply, opens full screen, is shared by link and 
   const confirm = page.getByRole("alertdialog", { name: "Delete Signups dashboard?" });
   await captureScreenshot(page, testInfo, "page-delete-confirm");
   await confirm.getByRole("button", { name: "Delete" }).click();
-  await expect(page.getByText("Pages this bot builds for you appear here.")).toBeVisible();
+  await expect(page.getByText(ui("Pages this bot builds for you appear here."))).toBeVisible();
   await captureScreenshot(page, testInfo, "page-library-empty");
 
   // The header pill reopens the bot panel on the Pages tab it closed on.
@@ -800,7 +801,7 @@ test("a page's failures, a deleted page's card, and the Library's Share, search 
   await openBotPanelTab(page, "Pages");
   const unread = page.getByTestId("bot-settings").getByRole("alert");
   await expect(unread).toContainText("Couldn't load pages.");
-  await expect(page.getByText("Pages this bot builds for you appear here.")).toBeHidden();
+  await expect(page.getByText(ui("Pages this bot builds for you appear here."))).toBeHidden();
   await captureScreenshot(page, testInfo, "page-library-error");
   await page.unroute("**/rpc/pages/list");
   await unread.getByRole("button", { name: "Try again" }).click();

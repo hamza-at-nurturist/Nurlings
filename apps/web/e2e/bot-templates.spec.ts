@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Routine } from "@rakazo/contracts";
-import { captureScreenshot, completeOnboarding, rpc, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, rpc, signup, ui } from "./helpers";
 
 test("a bot template previews what it adds, then creates a bot with a paused routine", async ({
   page,
@@ -14,7 +14,7 @@ test("a bot template previews what it adds, then creates a bot with a paused rou
     .getByRole("dialog", { name: "Integrations", exact: true })
     .getByTestId("open-bot-templates")
     .click();
-  const dialog = page.getByRole("dialog", { name: "Bot templates", exact: true });
+  const dialog = page.getByRole("dialog", { name: ui("Bot templates"), exact: true });
   const cards = dialog.getByTestId("bot-template-card");
   await expect(cards).toHaveCount(4);
   const briefing = cards.filter({ hasText: "Morning briefing" });
@@ -28,7 +28,7 @@ test("a bot template previews what it adds, then creates a bot with a paused rou
   await expect(detail.getByText(/paused until you turn it on$/)).toBeVisible();
   await captureScreenshot(page, testInfo, "bot-template-detail");
 
-  await detail.getByRole("button", { name: "Create bot", exact: true }).click();
+  await detail.getByRole("button", { name: ui("Create bot"), exact: true }).click();
   await expect(dialog).toHaveCount(0);
   await expect(page).toHaveURL(/\/app\/[^/?]+/);
   const botId = new URL(page.url()).pathname.split("/").pop()!;
