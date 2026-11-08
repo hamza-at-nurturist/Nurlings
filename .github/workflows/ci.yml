@@ -190,9 +190,9 @@ jobs:
           DATABASE_URL: postgres://rakazo:rakazo@127.0.0.1:5433/rakazo
       - name: Install age for the encrypted backup round trip
         run: |
-          # Release downloads sometimes answer 502/503/504 for minutes; retry transient answers
+          # Release downloads sometimes answer 502/503/504 or drop the connection for minutes; retry every failure
           # 15 s apart (about two minutes in all). The checksum below still pins the file.
-          curl -fsSL --retry 8 --retry-delay 15 -o "$RUNNER_TEMP/age.tar.gz" \
+          curl -fsSL --retry 8 --retry-delay 15 --retry-all-errors -o "$RUNNER_TEMP/age.tar.gz" \
             "https://github.com/FiloSottile/age/releases/download/v1.3.2/age-v1.3.2-linux-amd64.tar.gz"
           echo "cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10  $RUNNER_TEMP/age.tar.gz" | sha256sum -c -
           tar -xzf "$RUNNER_TEMP/age.tar.gz" -C "$RUNNER_TEMP" age/age age/age-keygen
