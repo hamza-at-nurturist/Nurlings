@@ -283,6 +283,10 @@ else:
         PLAYWRIGHT_TEST_RESULTS_DIR: path.join(artifacts, "apps/web/test-results"),
         FAKE_STORAGE: storage,
         ATTACK_MARKER: path.join(root, "executed-untrusted-code"),
+        // The checkout borrows the repository's node_modules through symlinks, so pnpm must not
+        // install before `pnpm exec`: that would relink the real packages into this temp checkout,
+        // which is deleted afterwards, and break every later suite that loads them.
+        pnpm_config_verify_deps_before_run: "false",
       };
       execFileSync("bash", ["scripts/publish-playwright-report.sh"], {
         cwd: checkout,
