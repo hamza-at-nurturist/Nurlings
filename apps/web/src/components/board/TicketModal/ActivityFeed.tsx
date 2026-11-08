@@ -33,7 +33,7 @@ type Props = {
 
 function Time({ at }: { at: string }) {
   return (
-    <time dateTime={at} className="shrink-0 text-xs text-muted-foreground">
+    <time dateTime={at} className="shrink-0 text-label text-muted-foreground">
       {formatRelativeTime(at)}
     </time>
   );
@@ -44,6 +44,7 @@ function UserMark({ name, image }: { name: string; image?: string | null }) {
   return (
     <span
       aria-hidden="true"
+      // off-scale: initials sized to the 20px avatar circle
       className="grid size-5 shrink-0 place-items-center overflow-hidden rounded-full bg-muted text-[10px] font-medium text-foreground"
     >
       {image ? (
@@ -155,7 +156,7 @@ export function ActivityFeed({
             <Fragment key={item.id}>
               {separator}
               <li
-                className={`flex items-baseline justify-between gap-3 px-1 text-xs text-muted-foreground ${spacing}`}
+                className={`flex items-baseline justify-between gap-3 px-1 text-label text-muted-foreground ${spacing}`}
               >
                 <span className="min-w-0">{line}</span>
                 <Time at={item.at} />
@@ -166,7 +167,7 @@ export function ActivityFeed({
         return (
           <Fragment key={item.id}>
             {separator}
-            <li className={`rounded-xl border border-border bg-card p-3 text-sm ${spacing}`}>
+            <li className={`rounded-xl border border-border bg-card p-3 text-body ${spacing}`}>
               <div className="mb-1.5 flex items-center gap-2">
                 {mark}
                 <span className="min-w-0 flex-1 truncate font-medium">{name}</span>
@@ -212,7 +213,7 @@ export function ActivityFeed({
             key={`working-${run.botId}`}
             role="status"
             data-testid="ticket-working"
-            className="mt-2 px-1 text-xs"
+            className="mt-2 px-1 text-label"
           >
             <Shimmer>{t`${name} is working…`}</Shimmer>
           </li>

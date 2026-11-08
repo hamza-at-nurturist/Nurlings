@@ -29,7 +29,7 @@ const MENU = "w-auto min-w-40";
 /** Menu rows sized for a finger on the narrow sheet. */
 const ITEM = "min-h-11";
 const TRIGGER =
-  "inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-sm outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
+  "inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-body outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
 
 export type PropertiesPatch = Partial<{
   status: TicketStatus;
@@ -191,7 +191,7 @@ export function Properties({ ticket, bots, timeZone, disabled, layout = "grid", 
       </div>
     );
   return (
-    <dl className="grid grid-cols-[auto_1fr_auto_1fr] items-center gap-x-4 gap-y-2 text-sm">
+    <dl className="grid grid-cols-[auto_1fr_auto_1fr] items-center gap-x-4 gap-y-2 text-body">
       <dt className="text-muted-foreground">
         <Trans>Status</Trans>
       </dt>

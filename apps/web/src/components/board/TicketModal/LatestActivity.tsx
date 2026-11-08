@@ -30,12 +30,12 @@ export function LatestActivity({ items, bots, viewer, onOpen }: Props) {
       type="button"
       data-testid="ticket-latest-activity"
       onClick={onOpen}
-      className="flex min-h-11 w-full items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-3 text-left text-sm outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex min-h-11 w-full items-center gap-2.5 rounded-xl border border-border bg-card px-3.5 py-3 text-left text-body outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span className="min-w-0 flex-1 truncate">
         <span className="font-semibold">{name}:</span> {comment.body.replace(/\s+/g, " ")}
       </span>
-      <time dateTime={latest.at} className="shrink-0 text-xs text-muted-foreground">
+      <time dateTime={latest.at} className="shrink-0 text-label text-muted-foreground">
         {formatRelativeTime(latest.at)}
       </time>
       <ChevronRight aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />

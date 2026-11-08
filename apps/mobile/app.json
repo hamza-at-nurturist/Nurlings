@@ -53,9 +53,20 @@
           "microphonePermission": "Rakazo uses the microphone for voice calls with your bots."
         }
       ],
+      "./plugins/with-share-extension",
       [
         "expo-sharing",
         {
+          "ios": {
+            "enabled": true,
+            "appGroupId": "group.com.nurturistai.nurlings",
+            "activationRule": {
+              "supportsText": true,
+              "supportsWebUrlWithMaxCount": 1,
+              "supportsImageWithMaxCount": 10,
+              "supportsFileWithMaxCount": 10
+            }
+          },
           "android": {
             "enabled": true,
             "singleShareMimeTypes": [
@@ -81,10 +92,14 @@
       "./plugins/with-worklets-headers",
       "./plugins/with-scene-lifecycle",
       "./plugins/with-lan-cleartext",
+      "./plugins/with-android-no-gwp-asan",
+      "./plugins/with-agent-notifications",
+      "./plugins/with-android-r8",
       "./plugins/with-app-intents"
     ],
     "locales": {
-      "es": "./locales/es.json"
+      "es": "./locales/es.json",
+      "pl": "./locales/pl.json"
     },
     "ios": {
       "bundleIdentifier": "com.nurturistai.nurlings",
@@ -100,7 +115,13 @@
         "NSLocalNetworkUsageDescription": "Rakazo connects to a self-hosted Rakazo server on your local network.",
         "NSAppTransportSecurity": {
           "NSAllowsLocalNetworking": true
-        }
+        },
+        "UIBackgroundModes": ["voip", "audio", "remote-notification"],
+        "NSUserActivityTypes": ["INSendMessageIntent"]
+      },
+      "entitlements": {
+        "com.apple.developer.usernotifications.time-sensitive": true,
+        "com.apple.developer.usernotifications.communication": true
       }
     },
     "android": {
@@ -121,7 +142,33 @@
       "router": {},
       "supportsRTL": true,
       "eas": {
-        "projectId": "aa1a8375-7dea-4dc7-a6ba-d42968e9f40f"
+        "projectId": "aa1a8375-7dea-4dc7-a6ba-d42968e9f40f",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "RakazoWidgets",
+                  "bundleIdentifier": "com.nurturistai.nurlings.widgets"
+                },
+                {
+                  "targetName": "expo-sharing-extension",
+                  "bundleIdentifier": "com.nurturistai.nurlings.expo-sharing-extension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": ["group.com.nurturistai.nurlings"]
+                  }
+                },
+                {
+                  "targetName": "AgentNotifications",
+                  "bundleIdentifier": "com.nurturistai.nurlings.notifications",
+                  "entitlements": {
+                    "com.apple.developer.usernotifications.communication": true
+                  }
+                }
+              ]
+            }
+          }
+        }
       }
     },
     "runtimeVersion": {

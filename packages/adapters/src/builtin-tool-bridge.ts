@@ -48,6 +48,8 @@ export const CORE_BUILTIN_TOOL_NAMES: ReadonlySet<string> = new Set([
   "schedule_list",
   "search_history",
   "read_history",
+  "read_email",
+  "send_email",
   "end_call",
   // Ticket work is unattended and reports only through these, so they are never a find_tool away.
   "board_tickets",
@@ -70,9 +72,13 @@ const AREAS: Array<[area: string, matches: (name: string) => boolean]> = [
   ["skills", (name) => name.startsWith("skill_")],
   ["schedules", (name) => name.startsWith("schedule_")],
   ["memory", (name) => name.includes("memory")],
-  ["media", (name) => name.startsWith("generate_") || name === "render_plot"],
+  [
+    "media",
+    (name) => name.startsWith("generate_") || name === "render_plot" || name === "save_page",
+  ],
   ["cloud agents", (name) => name.startsWith("cloud_agent_")],
   ["purchases", (name) => name.includes("purchase") || name === "paid_request"],
+  ["email", (name) => name.includes("email")],
 ];
 
 export function isDeferredTool(name: string): boolean {

@@ -5,18 +5,21 @@ import type { Brand } from "./schema.js";
  * stay identical to upstream and strings added by later merges are rebranded automatically.
  *
  * - `Rakazo` (the capitalised word only; `rakazo-shared`, `RAKAZO_*` are identifiers) becomes the
- *   product name; a possessive keeps grammatical sense ("Nurlings’").
+ *   product name; a possessive keeps grammatical sense ("Nurlings’"), as does the German
+ *   genitive without an apostrophe ("Rakazos eigenen" becomes "Nurlings' eigenen"); a bare
+ *   "Rakazos" is a look-alike and stays.
  * - The English words `bot`/`bots` become the brand's agent nouns, capitalised as a name. Ids
  *   (`bot-123`), paths (`/bots`), `botId`, `robot` and `chatbot` are not words and stay.
  * - ICU placeholder names (`{bot}`) are never touched.
  */
-const PRODUCT = /(?<![\w{])Rakazo(?:(['’])s)?(?!\w)/g;
+const PRODUCT = /(?<![\w{])Rakazo(?:(['’])s|(s)(?= \p{Ll}))?(?!\w)/gu;
 const AGENT = /(?<![\w{\-./:@#])([Bb]ot)(s?)(?![\w\-/:@#]|\.\w)/g;
 
 /** The product-name rule alone, for text that is not prose (page sources, script strings). */
 export function brandProduct(input: string, brand: Pick<Brand, "name">): string {
   if (!input.includes("Rakazo")) return input;
-  return input.replace(PRODUCT, (_match, apostrophe: string | undefined) => {
+  return input.replace(PRODUCT, (_match, apostrophe: string | undefined, genitive?: string) => {
+    if (genitive) return brand.name.endsWith("s") ? `${brand.name}'` : `${brand.name}s`;
     if (!apostrophe) return brand.name;
     return brand.name.endsWith("s") ? `${brand.name}${apostrophe}` : `${brand.name}${apostrophe}s`;
   });

@@ -259,6 +259,7 @@ export function Wordmark({ className }: { className?: string }) {
         <BrandMark className="h-5" />
       </div>
       <span
+        // off-scale: wordmark sized to the 44px logo mark
         className="text-[28px] text-foreground"
         style={{
           fontFamily: `${brand.wordmarkFont.family}, ${brand.wordmarkFont.fallback}`,

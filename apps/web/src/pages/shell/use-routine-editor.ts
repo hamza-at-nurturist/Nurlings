@@ -11,8 +11,8 @@ import { sharedInflight } from "../../lib/shared-inflight";
 import { errorText } from "../../lib/user-error";
 import type { RoutineDraftState, RoutineEditor } from "../RoutineEditor";
 import {
-  draftFromRoutine,
-  emptyRoutineDraft,
+  draftStateFromRoutine,
+  emptyRoutineDraftState,
   routineNeedsOneShotArm,
   watchFromDraft,
 } from "../RoutineEditor";
@@ -37,8 +37,9 @@ export function useRoutineEditor({
   setPanel: (panel: Panel) => void;
 }) {
   const { t } = useLingui();
-  const [routineDraft, setRoutineDraft] = useState<RoutineDraftState>(emptyRoutineDraft());
-  const [routineWebhookSecret, setRoutineWebhookSecret] = useState<string | null>(null);
+  const [routineDraft, setRoutineDraft] = useState<RoutineDraftState>(emptyRoutineDraftState());
+  const [revealedWebhookSecrets, setRevealedWebhookSecrets] = useState<Record<string, string>>({});
+  const routineWebhookSecret = (active && revealedWebhookSecrets[active.id]) || null;
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
   const [deleteRoutineTarget, setDeleteRoutineTarget] = useState<Routine | null>(null);
   const [savingRoutine, setSavingRoutine] = useState(false);
@@ -49,7 +50,7 @@ export function useRoutineEditor({
   const ensureWebhookSecret = (botId: string) =>
     sharedInflight(webhookSecretProvisionRef.current, botId, async () => {
       const result = await rpc.bots.rotateWebhookSecret({ botId });
-      setRoutineWebhookSecret(result.secret);
+      setRevealedWebhookSecrets((current) => ({ ...current, [botId]: result.secret }));
       setBots((current) =>
         current.map((bot) => (bot.id === botId ? { ...bot, webhookConfigured: true } : bot)),
       );
@@ -58,25 +59,25 @@ export function useRoutineEditor({
   const routineSaveRequest = useRef(0);
   const routineRunPending = useRef(false);
   const addSkillRoutine = useCallback((name: string, prompt: string) => {
-    setRoutineDraft({ ...emptyRoutineDraft(), name, prompt });
-    setRoutineWebhookSecret(null);
+    setRoutineDraft({ ...emptyRoutineDraftState(), name, prompt });
+    setRevealedWebhookSecrets({});
     setEditingRoutine(null);
     setPanel("routine");
   }, []);
 
   function restoreRoutine(routine: Routine | null) {
     setEditingRoutine(routine);
-    setRoutineDraft(routine ? draftFromRoutine(routine) : emptyRoutineDraft());
-    setRoutineWebhookSecret(null);
+    setRoutineDraft(routine ? draftStateFromRoutine(routine) : emptyRoutineDraftState());
+    setRevealedWebhookSecrets({});
   }
   function editRoutine(routine: Routine) {
-    setRoutineDraft(draftFromRoutine(routine));
-    setRoutineWebhookSecret(null);
+    setRoutineDraft(draftStateFromRoutine(routine));
+    setRevealedWebhookSecrets({});
     setEditingRoutine(routine);
   }
   function startRoutine(routine?: Routine) {
-    setRoutineDraft(routine ? draftFromRoutine(routine) : emptyRoutineDraft());
-    setRoutineWebhookSecret(null);
+    setRoutineDraft(routine ? draftStateFromRoutine(routine) : emptyRoutineDraftState());
+    setRevealedWebhookSecrets({});
     setEditingRoutine(routine ?? null);
     setRoutineError(null);
     setPanel("routine");
@@ -91,6 +92,7 @@ export function useRoutineEditor({
   }
   const editorProps = active
     ? ({
+        bot: { id: active.id, name: active.name },
         draft: routineDraft,
         onChange: setRoutineDraft,
         editing: editingRoutine,
@@ -126,6 +128,7 @@ export function useRoutineEditor({
             !routineDraft.webhookEnabled &&
             !routineDraft.githubEnabled &&
             !routineDraft.messageProvider &&
+            !routineDraft.emailSenders &&
             !routineDraft.watch
           ) {
             setRoutineError(t`Add a trigger to run this routine.`);
@@ -187,6 +190,7 @@ export function useRoutineEditor({
                 webhookEnabled: routineDraft.webhookEnabled,
                 githubEnabled: routineDraft.githubEnabled,
                 messageProvider: routineDraft.messageProvider,
+                emailSenders: routineDraft.emailSenders,
                 watch,
                 ...(routineModel.modelProvider !== targetRoutine.modelProvider ||
                 routineModel.modelId !== targetRoutine.modelId ||
@@ -207,6 +211,7 @@ export function useRoutineEditor({
                 webhookEnabled: routineDraft.webhookEnabled,
                 githubEnabled: routineDraft.githubEnabled,
                 messageProvider: routineDraft.messageProvider,
+                emailSenders: routineDraft.emailSenders,
                 watch,
                 ...routineModel,
               });
@@ -214,7 +219,7 @@ export function useRoutineEditor({
             if (routineSaveRequest.current === saveRequest && activeBotId.current === targetBotId) {
               setEditingRoutine(saved);
               // Fields edited while the save was in flight keep the newer value.
-              const fresh = draftFromRoutine(saved);
+              const fresh = draftStateFromRoutine(saved);
               setRoutineDraft(
                 (current) =>
                   Object.fromEntries(

@@ -50,10 +50,10 @@ export function BoardColumn({ status, count, hidden, onShowOlder, onDropTicket, 
     >
       <header className="flex items-center gap-2 px-1 pt-1">
         <span aria-hidden="true" className={`size-2 rounded-full ${STATUS_DOT[status]}`} />
-        <h2 id={`board-column-${status}`} className="text-sm font-semibold">
+        <h2 id={`board-column-${status}`} className="text-body font-semibold">
           {statuses[status]}
         </h2>
-        <span data-testid="column-count" className="text-xs text-muted-foreground">
+        <span data-testid="column-count" className="text-label text-muted-foreground">
           {count}
         </span>
         {yours ? (
@@ -66,7 +66,7 @@ export function BoardColumn({ status, count, hidden, onShowOlder, onDropTicket, 
       {hidden > 0 ? (
         <button
           type="button"
-          className="self-start rounded-md px-1.5 py-1 text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="self-start rounded-md px-1.5 py-1 text-label text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           onClick={onShowOlder}
         >
           <Trans>Show {hidden} older</Trans>

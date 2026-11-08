@@ -76,6 +76,23 @@ export function isRunWorking(status: string | null | undefined): boolean {
   return WORKING_RUN_STATUSES.some((working) => working === status);
 }
 
+export function workingRoutineName(
+  runs: readonly {
+    status: string;
+    botId?: string;
+    trigger?: string;
+    routineName?: string | null;
+  }[],
+): string | undefined {
+  const running = runs.filter((candidate) => candidate.status === "running");
+  const [run] = running;
+  if (running.length !== 1 || run?.trigger !== "routine") return undefined;
+  const otherBotWorking = runs.some(
+    (candidate) => isRunWorking(candidate.status) && candidate.botId !== run.botId,
+  );
+  return (!otherBotWorking && run.routineName?.trim()) || undefined;
+}
+
 export function isRunWaitingOnUser(status: string | null | undefined): boolean {
   return WAITING_ON_USER_RUN_STATUSES.some((waiting) => waiting === status);
 }
@@ -98,10 +115,28 @@ export function isConversationalRun(trigger: string | null | undefined): boolean
 }
 
 /**
+ * Whether a message joins a busy run as steering. A webhook delivery never does, nothing steers a
+ * non-conversational run, and a connected chat's message steers only a run started from a connected
+ * chat in the same channel (or both in the bot's direct chat); otherwise it waits for its own run.
+ */
+export function messageSteersRun(
+  messageTrigger: string,
+  runTrigger: string | null | undefined,
+  messageChannelId?: string,
+  runChannelId?: string,
+): boolean {
+  if (messageTrigger === "webhook" || !isConversationalRun(runTrigger)) return false;
+  return (
+    messageTrigger !== "messaging" ||
+    (runTrigger === "messaging" && messageChannelId === runChannelId)
+  );
+}
+
+/**
  * A takeover wait holds only a conversational message it can take as steering. Any other
  * message passes it and gets its own run; the dispatcher then ends a wait the user has not
- * acted on so that run can start. `steerable` is false for messages that never steer a run,
- * such as webhook deliveries.
+ * acted on so that run can start. `steerable` is false for messages that would not steer this run
+ * (see `messageSteersRun`).
  */
 export function messageBypassesTakeoverWait(
   run: { status?: string; trigger?: string | null },

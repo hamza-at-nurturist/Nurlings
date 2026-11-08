@@ -37,6 +37,12 @@ describe("brandText: the product name", () => {
     expect(brandText("Rakazo's inbox", acme)).toBe("Acme's inbox");
   });
 
+  it("rebrands a German genitive written without an apostrophe", () => {
+    expect(t("in Rakazos eigenen Peers")).toBe("in Nurlings' eigenen Peers");
+    const acme = { name: "Acme", bot: { singular: "Helper", plural: "Helpers" } };
+    expect(brandText("in Rakazos eigenen Peers", acme)).toBe("in Acmes eigenen Peers");
+  });
+
   it("leaves identifiers and look-alikes alone", () => {
     expect(t("rakazo-shared and IDs")).toBe("rakazo-shared and IDs");
     expect(t("RAKAZO_IMAGE_TAG")).toBe("RAKAZO_IMAGE_TAG");

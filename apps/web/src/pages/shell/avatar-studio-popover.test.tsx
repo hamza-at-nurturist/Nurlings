@@ -108,9 +108,10 @@ describe("selectable bot icon sets", () => {
     }
     expect(labels.filter((label) => label?.startsWith("Shape "))).toHaveLength(14);
     await click("Shape 3");
-    expect(changed).toHaveBeenLastCalledWith("#8B5CF6::shape_10", undefined);
+    // A color saved with its earlier, deeper value moves to the current one when the look is edited.
+    expect(changed).toHaveBeenLastCalledWith("#A97EFE::shape_10", undefined);
     await click("Shape 14");
-    expect(changed).toHaveBeenLastCalledWith("#8B5CF6::shape_21", undefined);
+    expect(changed).toHaveBeenLastCalledWith("#A97EFE::shape_21", undefined);
   });
 
   it("shows a retired static shape as the default look", async () => {
@@ -137,10 +138,10 @@ describe("selectable bot icon sets", () => {
     await render("#8B5CF6::shape_2", "organic");
     await click("Customize bot avatar");
     expect(changed).not.toHaveBeenCalled();
-    await click("Color #10B981");
-    expect(changed).toHaveBeenLastCalledWith("#10B981::shape_2", undefined);
+    await click("Color #00C972");
+    expect(changed).toHaveBeenLastCalledWith("#00C972::shape_2", undefined);
     expect(button("Original").getAttribute("aria-selected")).toBe("true");
     await click("Rakazo");
-    expect(changed).toHaveBeenLastCalledWith("#10B981", "rakazo");
+    expect(changed).toHaveBeenLastCalledWith("#00C972", "rakazo");
   });
 });

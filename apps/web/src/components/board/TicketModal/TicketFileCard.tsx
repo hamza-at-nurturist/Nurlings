@@ -53,7 +53,7 @@ export function TicketFileCard({
             () => setError(t`Could not download ${file.name}. Try again.`),
           );
         }}
-        className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-left text-[14px] text-foreground hover:bg-accent"
+        className="w-full rounded-2xl border border-border bg-card px-4 py-3 text-left text-body text-foreground hover:bg-accent"
       >
         <div className="font-medium">{file.name}</div>
         <div className="mt-1 text-muted-foreground">
@@ -61,7 +61,7 @@ export function TicketFileCard({
         </div>
       </button>
       {error ? (
-        <div role="alert" className="mt-2 text-left text-[13px] text-destructive">
+        <div role="alert" className="mt-2 text-left text-body-sm text-destructive">
           {error}
         </div>
       ) : null}

@@ -21,7 +21,7 @@ export function CardDates({ ticket, timeZone }: { ticket: Ticket; timeZone: stri
     .filter(Boolean)
     .join(", ");
   return (
-    <span data-testid="card-dates" className="text-xs text-muted-foreground">
+    <span data-testid="card-dates" className="text-label text-muted-foreground">
       <span className="sr-only">{name}</span>
       <span
         aria-hidden="true"

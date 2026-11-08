@@ -62,7 +62,7 @@ describe("BotAvatar", () => {
   });
 
   it("resolves explicit colors and shapes", () => {
-    expect(resolvePersonaColorDef("bot", "#10B981").hex.toLowerCase()).toBe("#10b981");
+    expect(resolvePersonaColorDef("bot", "#10B981").hex).toBe("#00C972");
     expect(resolvePersonaColorDef("bot", "#fff").hex).toBe("#fff");
     expect(BOT_AVATAR_COLORS.length).toBeGreaterThan(0);
   });

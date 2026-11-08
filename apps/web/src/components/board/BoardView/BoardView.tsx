@@ -151,7 +151,7 @@ export function BoardView() {
         >
           <ChevronLeft />
         </Link>
-        <h1 className="text-lg font-semibold">
+        <h1 className="text-heading3 font-semibold">
           <Trans>Board</Trans>
         </h1>
         <NurlingFilter
@@ -175,7 +175,7 @@ export function BoardView() {
         />
       </header>
       {error ? (
-        <p role="alert" className="px-4 py-2 text-sm text-destructive">
+        <p role="alert" className="px-4 py-2 text-body text-destructive">
           {error}
         </p>
       ) : null}

@@ -17,7 +17,7 @@ export function MentionChip({ name, color, onRemove }: Props) {
     <span
       data-testid="mention-chip"
       data-mention-color={hex ?? ""}
-      className={`inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 align-baseline text-[13px] leading-5 ${hex ? "" : "bg-accent text-foreground"}`}
+      className={`inline-flex max-w-full items-center gap-1 rounded-full px-2 py-0.5 align-baseline text-body-sm leading-5 ${hex ? "" : "bg-accent text-foreground"}`}
       style={
         hex
           ? { color: hex, backgroundColor: `color-mix(in srgb, ${hex} 16%, transparent)` }

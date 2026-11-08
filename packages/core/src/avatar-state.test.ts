@@ -1,10 +1,10 @@
 import { BUILTIN_TOOL_NAMES } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
+import type { AvatarState } from "./avatar-life.js";
 import {
   AVATAR_DONE_MS,
   AVATAR_LONG_RUN_MS,
   AVATAR_STATES,
-  type AvatarState,
   avatarBusySince,
   avatarFollowPull,
   avatarFollowRadius,

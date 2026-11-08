@@ -64,9 +64,9 @@ describe("desktop package metadata", () => {
     expect(raw).not.toMatch(/"repo":\s*"rakazo"/);
   });
 
-  it("ships a Spanish version of every macOS permission prompt", () => {
+  it.each(["es", "pl"])("ships a %s version of every macOS permission prompt", (locale) => {
     const strings = readFileSync(
-      path.resolve(import.meta.dirname, "../assets/es.lproj/InfoPlist.strings"),
+      path.resolve(import.meta.dirname, `../assets/${locale}.lproj/InfoPlist.strings`),
       "utf8",
     );
     const prompts = Object.keys(packageJson.build?.mac?.extendInfo ?? {}).filter((key) =>
@@ -77,8 +77,8 @@ describe("desktop package metadata", () => {
     expect(strings).not.toMatch(/Rakazo|\bbots?\b/);
     expect(strings).toContain(brand.name);
     expect(packageJson.build?.mac?.extraResources).toContainEqual({
-      from: "assets/es.lproj",
-      to: "es.lproj",
+      from: `assets/${locale}.lproj`,
+      to: `${locale}.lproj`,
     });
   });
 });

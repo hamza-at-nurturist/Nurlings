@@ -24,7 +24,7 @@ type Props = {
 };
 
 const SAFE_BOTTOM = "pb-[max(env(safe-area-inset-bottom),0.75rem)]";
-const TAB = "h-11 text-[15px] group-data-horizontal/tabs:after:bottom-0";
+const TAB = "h-11 text-body-lg group-data-horizontal/tabs:after:bottom-0";
 
 /**
  * The ticket on a narrow window: a full-screen sheet with a Ticket tab and an Activity tab. Both
@@ -66,7 +66,7 @@ export function NarrowTicket({
           <ChevronLeft className="size-5" />
         </Button>
         {tab === "ticket" ? (
-          <span className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
+          <span className="flex min-w-0 items-center gap-1.5 text-body text-muted-foreground">
             <Trans>Board</Trans>
             <span aria-hidden="true">/</span>
             <span className="font-medium text-foreground">{ticket.ref}</span>
@@ -75,7 +75,7 @@ export function NarrowTicket({
         ) : (
           <span
             data-testid="ticket-sheet-title"
-            className="min-w-0 truncate text-[15px] font-medium"
+            className="min-w-0 truncate text-body-lg font-medium"
           >
             {ticket.title}
           </span>
@@ -98,7 +98,7 @@ export function NarrowTicket({
             {unseen > 0 ? (
               <span
                 data-testid="activity-unseen"
-                className="rounded-full bg-primary px-1.5 text-[11px] leading-4 font-semibold text-primary-foreground"
+                className="rounded-full bg-primary px-1.5 text-caption leading-4 font-semibold text-primary-foreground"
               >
                 {unseen > 9 ? "9+" : unseen}
               </span>
@@ -117,7 +117,7 @@ export function NarrowTicket({
               <footer className={`border-t px-4 pt-3 ${SAFE_BOTTOM}`}>
                 <Button
                   data-testid="ticket-approve"
-                  className="h-12 w-full rounded-full text-[15px]"
+                  className="h-12 w-full rounded-full text-body-lg"
                   disabled={busy}
                   onClick={onApprove}
                 >

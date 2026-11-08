@@ -58,7 +58,7 @@ export function BoardCard({ ticket, bots, timeZone, busy, onOpen, onMove, onAppr
         finished && "opacity-70",
       )}
     >
-      <div className="flex min-h-5 items-center gap-2 text-xs text-muted-foreground">
+      <div className="flex min-h-5 items-center gap-2 text-label text-muted-foreground">
         <span>{ticket.ref}</span>
         {ticket.needsUser ? <NeedsYou /> : null}
         <DropdownMenu>
@@ -87,7 +87,7 @@ export function BoardCard({ ticket, bots, timeZone, busy, onOpen, onMove, onAppr
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <h3 className="text-sm leading-snug font-medium">
+      <h3 className="text-body leading-snug font-medium">
         <button
           type="button"
           data-testid="card-open"
@@ -98,7 +98,7 @@ export function BoardCard({ ticket, bots, timeZone, busy, onOpen, onMove, onAppr
         </button>
       </h3>
       {workerName ? (
-        <p data-testid="card-working" className="truncate text-xs">
+        <p data-testid="card-working" className="truncate text-label">
           <Shimmer>
             <Trans>{workerName} is working…</Trans>
           </Shimmer>
@@ -107,12 +107,12 @@ export function BoardCard({ ticket, bots, timeZone, busy, onOpen, onMove, onAppr
         <p
           data-testid="card-last"
           dir="auto"
-          className="line-clamp-2 text-xs leading-relaxed break-words text-muted-foreground"
+          className="line-clamp-2 text-label leading-relaxed break-words text-muted-foreground"
         >
           {ticket.lastComment}
         </p>
       ) : null}
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-label text-muted-foreground">
         {owner ? (
           <span data-testid="card-owner" className="inline-flex min-w-0 items-center gap-1.5">
             <BotAvatar

@@ -16,6 +16,7 @@ import {
   DialogTitle,
   defaultBotAvatarValue,
   parseBotAvatar,
+  resolvePersonaColorDef,
   Tabs,
   TabsContent,
   TabsList,
@@ -42,7 +43,11 @@ export function BotLookPicker({
   onChange: (value: string) => void;
 }) {
   const parsed = parseBotAvatar(value);
-  const currentColor = parsed.color || DEFAULT_BOT_AVATAR_COLOR;
+  // A bot saved with a color's earlier, deeper value still selects and keeps that color.
+  const currentColor = resolvePersonaColorDef(
+    "preview",
+    parsed.color || DEFAULT_BOT_AVATAR_COLOR,
+  ).hex;
   // A retired static shape (0 to 7) draws the bot's own body, so it counts as the default look.
   const isDefaultLook =
     !parsed.isImage &&
@@ -55,11 +60,12 @@ export function BotLookPicker({
 
   return (
     <div className="space-y-4">
-      {SELECTABLE_BOT_AVATAR_SETS.length > 1 ? (
+      {/* Only one bot's own editor overrides the account's set; a new bot takes the default. */}
+      {SELECTABLE_BOT_AVATAR_SETS.length > 1 && onAvatarSetChange ? (
         <Tabs
           value={avatarSet}
           onValueChange={(next) =>
-            onAvatarSetChange?.(resolveBotAvatarSet(next), defaultBotAvatarValue(value))
+            onAvatarSetChange(resolveBotAvatarSet(next), defaultBotAvatarValue(value))
           }
         >
           <TabsList className="w-full" aria-label={t`Icon set`}>
@@ -75,7 +81,7 @@ export function BotLookPicker({
       {avatarSet === "organic" ? (
         <div>
           <div className="mb-2 flex items-center justify-between">
-            <div className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+            <div className="text-caption font-medium tracking-wider text-muted-foreground uppercase">
               <Trans>Shape</Trans>
             </div>
             <Button
@@ -88,7 +94,7 @@ export function BotLookPicker({
                 const next = defaultBotAvatarValue(value);
                 if (next !== value) onChange(next);
               }}
-              className={`px-3 py-1 text-xs font-medium transition-colors ${
+              className={`px-3 py-1 text-label font-medium transition-colors ${
                 isDefaultLook
                   ? "bg-secondary text-foreground"
                   : "text-muted-foreground hover:text-foreground"
@@ -115,7 +121,7 @@ export function BotLookPicker({
       ) : null}
 
       <div className="border-t border-border pt-2">
-        <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+        <div className="mb-2 text-caption font-medium tracking-wider text-muted-foreground uppercase">
           <Trans>Color</Trans>
         </div>
         <div className="grid grid-cols-6 place-items-center gap-2">
@@ -242,7 +248,7 @@ export function AvatarStudioPopover({
           status={status}
           avatarSet={avatarSet}
         />
-        <div className="absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full border-2 border-background bg-secondary text-foreground shadow-md transition-transform group-hover:scale-110">
+        <div className="absolute -right-1 -bottom-1 flex size-6 items-center justify-center rounded-full border-2 border-background bg-secondary text-foreground shadow-md opacity-0 transition group-hover:scale-110 group-hover:opacity-100 group-focus-visible:opacity-100 [@media(hover:none)]:opacity-100">
           <Pencil size={12} strokeWidth={2.2} />
         </div>
       </button>
@@ -254,7 +260,7 @@ export function AvatarStudioPopover({
           data-testid="avatar-studio"
         >
           <DialogHeader className="flex-row items-center justify-between space-y-0">
-            <DialogTitle className="text-[14px] font-semibold tracking-tight">
+            <DialogTitle className="text-body font-semibold tracking-tight">
               <Trans>Avatar Studio</Trans>
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -289,10 +295,10 @@ export function AvatarStudioPopover({
           >
             <div className="flex items-center justify-between border-b border-border pb-1">
               <TabsList className="rounded-full">
-                <TabsTrigger value="bot" className="rounded-full px-3 text-xs">
+                <TabsTrigger value="bot" className="rounded-full px-3 text-label">
                   <Trans>Bot</Trans>
                 </TabsTrigger>
-                <TabsTrigger value="upload" className="rounded-full px-3 text-xs">
+                <TabsTrigger value="upload" className="rounded-full px-3 text-label">
                   <Trans>Upload</Trans>
                 </TabsTrigger>
               </TabsList>
@@ -302,7 +308,7 @@ export function AvatarStudioPopover({
                 size="sm"
                 type="button"
                 onClick={restoreDefaultAvatar}
-                className="text-xs text-muted-foreground"
+                className="text-label text-muted-foreground"
               >
                 <Trans>Reset</Trans>
               </Button>
@@ -347,10 +353,10 @@ export function AvatarStudioPopover({
                 <div className="mb-2 grid size-10 place-items-center rounded-full bg-secondary text-muted-foreground">
                   <Upload size={18} strokeWidth={1.8} />
                 </div>
-                <p className="text-[12.5px] font-medium text-muted-foreground">
+                <p className="text-body-sm font-medium text-muted-foreground">
                   <Trans>Drag, drop, or paste an image</Trans>
                 </p>
-                <span className="mt-3 rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-foreground">
+                <span className="mt-3 rounded-lg bg-secondary px-3 py-1.5 text-label font-medium text-foreground">
                   <Trans>Choose file</Trans>
                 </span>
               </button>

@@ -1,4 +1,5 @@
 import { useNavigation, useRouter } from "expo-router";
+import type { ReactNode } from "react";
 import { useLayoutEffect } from "react";
 import type { CreateAction } from "./create-chooser";
 import { createMenuItems } from "./create-chooser";
@@ -15,6 +16,7 @@ export function useHomeHeader({
   activityMode,
   toggleActivityMode,
   runCreateAction,
+  headerTitle,
 }: {
   nativeHeader: boolean;
   ready: boolean;
@@ -23,6 +25,7 @@ export function useHomeHeader({
   activityMode: boolean;
   toggleActivityMode: () => void;
   runCreateAction: (action: CreateAction) => void;
+  headerTitle?: () => ReactNode;
 }) {
   const navigation = useNavigation();
   const router = useRouter();
@@ -36,6 +39,7 @@ export function useHomeHeader({
       headerTransparent: true,
       headerStyle: { backgroundColor: "transparent" },
       title: "",
+      headerTitle,
       unstable_headerLeftItems: () => [
         {
           type: "button" as const,
@@ -100,6 +104,7 @@ export function useHomeHeader({
     boardEnabled,
     toggleActivityMode,
     runCreateAction,
+    headerTitle,
     router,
     t,
     locale,
