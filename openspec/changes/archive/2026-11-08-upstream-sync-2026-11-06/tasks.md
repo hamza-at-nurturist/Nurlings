@@ -26,8 +26,8 @@
 - [x] 3.4 `pnpm brand:check` and, after a web build, `pnpm brand:check --built` pass; no
   user-facing "Rakazo" or upstream-only URL in the tree or built output.
 - [x] 3.5 `openspec validate upstream-sync-2026-11-06 --strict` passes.
-- [ ] 3.6 Open the PR; CI is green on the head commit (desktop e2e runs in CI only).
+- [x] 3.6 Open the PR; CI is green on the head commit (desktop e2e runs in CI only).
 
 ## 4. After merge
 
-- [ ] 4.1 Archive the change in a separate `chore/` PR.
+- [x] 4.1 Archive the change in a separate `chore/` PR.
