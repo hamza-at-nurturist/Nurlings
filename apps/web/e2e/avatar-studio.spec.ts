@@ -20,12 +20,13 @@ test("bot settings open Avatar Studio on the Bot tab", async ({ page }, testInfo
   await expect(studio.getByRole("tab", { name: "Upload", exact: true })).toBeVisible();
   await expect(studio.getByTestId("avatar-studio-bot-tab")).toBeVisible();
 
-  // The Rakazo icon set draws upstream's logo, so a Nurlings build offers only the original bodies
+  // The Rakazo icon set draws upstream's logo, so a Nurlings build offers only organic bodies
   // and no set switcher.
   await expect(studio.getByRole("tablist", { name: "Icon set" })).toHaveCount(0);
   const defaultLook = studio.getByTestId("avatar-studio-default");
-  // The picker lists organic bodies only: the brand blob, then the three original bodies.
-  await expect(studio.getByRole("button", { name: /^Shape \d+$/ })).toHaveCount(4);
+  // The picker lists organic bodies only: the brand blob, the three original bodies, then the
+  // ten body families.
+  await expect(studio.getByRole("button", { name: /^Shape \d+$/ })).toHaveCount(14);
   for (const retired of ["hex", "wedge", "squircle", "tablet", "pebble", "cloud", "teardrop"]) {
     await expect(studio.getByRole("button", { name: retired, exact: true })).toHaveCount(0);
   }
