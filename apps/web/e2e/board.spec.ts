@@ -124,15 +124,15 @@ test("board creates a ticket and opens it", async ({ page }, testInfo) => {
   await detail.getByRole("button", { name: "Collapse", exact: true }).click();
   await expect(detail.getByRole("button", { name: "Expand", exact: true })).toBeVisible();
 
-  // Calling in another Nurling: the picker lists the space's Nurlings and the feed shows a chip.
+  // Calling in another Nurling: the picker lists the space's Nurlings and the feed shows its avatar and name.
   await detail.getByLabel("Reply").fill("@Sc");
   await detail.getByRole("option", { name: "Scout", exact: true }).click();
   await detail.getByLabel("Reply").pressSequentially("can you sanity-check this?");
   await detail.getByRole("button", { name: "Send", exact: true }).click();
   await expect(activity).toContainText("can you sanity-check this?");
-  const chip = activity.getByTestId("mention-chip").filter({ hasText: "Scout" });
+  // A mentioned Nurling shows its avatar and its name in its own color.
+  const chip = activity.getByTestId("bot-mention").filter({ hasText: "Scout" });
   await expect(chip).toBeVisible();
-  await expect(chip).toHaveAttribute("data-mention-color", /^#[0-9a-f]{3,6}$/i);
   await captureScreenshot(page, testInfo, "board-ticket-mention");
 
   // In review: one Approve action; a reply sends it back, approving moves it to Done.

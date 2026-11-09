@@ -42,10 +42,8 @@ test("photo working avatars show a visible ring while idle avatars stay plain", 
   await expect(idle).toHaveAttribute("data-working", "false");
   await expect(idle.locator(".rakazo-bot-avatar-ring")).toHaveCount(0);
   await expect(idle.locator(".rakazo-bot-avatar-picture")).toHaveCSS("animation-name", "none");
-  await expect(page.locator(".avatar-shape-idle .rakazo-bot-avatar-ring")).toHaveCSS(
-    "animation-play-state",
-    "paused",
-  );
+  // Shape avatars draw their state in the body, so an idle one has no ring to pause.
+  await expect(page.locator(".avatar-shape-idle .rakazo-bot-avatar-ring")).toHaveCount(0);
   await captureScreenshot(page, testInfo, "avatar-photo-working-and-idle");
 });
 
