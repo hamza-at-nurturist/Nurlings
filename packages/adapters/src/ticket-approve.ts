@@ -12,12 +12,10 @@ export const APPROVE_NOT_IN_REVIEW_ERROR = "Only a ticket in review can be appro
 export async function approveTicket(
   deps: {
     prisma: PrismaClient;
-    ticketBoardEnabled?: boolean;
     onTicketChange?: TicketChangeNotifier;
   },
   input: { spaceId: string; userId: string; id: string },
 ) {
-  if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
   const board = await ensureBoard(deps.prisma, input.spaceId);
   const result = await deps.prisma.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM tickets WHERE id = ${input.id} AND "spaceId" = ${input.spaceId} FOR UPDATE`;

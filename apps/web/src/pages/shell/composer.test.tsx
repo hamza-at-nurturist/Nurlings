@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { i18n } from "@lingui/core";
-import type { AgentSkillCatalogEntry, ThreadMessage } from "@rakazo/contracts";
+import type { AgentSkillCatalogEntry, BillingStatus, ThreadMessage } from "@rakazo/contracts";
 import type { ComposerMention } from "@rakazo/core";
 import { MODEL_REQUIRED_SEND_ERROR, resolveComposerSendPlan } from "@rakazo/core";
 import type { ComponentProps, ReactNode } from "react";
@@ -16,10 +16,15 @@ vi.mock("@lingui/react/macro", () => {
   return { useLingui: () => ({ t }), Trans: ({ children }: { children: ReactNode }) => children };
 });
 
+const billing = vi.hoisted(() => ({ status: null as BillingStatus | null }));
+vi.mock("../../components/SubscriptionGate", () => ({
+  useBilling: () => ({ status: billing.status, showPlans: () => {} }),
+}));
+
 import { replaceComposerDraft } from "../../lib/composer-draft";
 import { dictation } from "../../lib/dictation";
 import { createPageSession, PagesProvider } from "../../lib/pages";
-import { Composer } from "./composer";
+import { Composer, LARGE_PASTE_THRESHOLD } from "./composer";
 
 let root: Root | null = null;
 let container: HTMLDivElement | null = null;
@@ -36,6 +41,7 @@ afterEach(() => {
   root = null;
   container = null;
   localStorage.clear();
+  billing.status = null;
 });
 
 const bob: ComposerMention = { kind: "bot", id: "bot-2", name: "Bob" };
@@ -76,6 +82,7 @@ function renderComposer(
     sendError: null,
     onOpenModels: () => {},
     onOpenConnections: () => {},
+    onOpenBilling: () => {},
     runError: null,
     runErrorId: null,
     onRunErrorPresented: () => {},
@@ -168,6 +175,40 @@ it.each([
 
   rerenderComposer({ sendError: "Could not send the message." });
   expect(container?.querySelector('[data-testid="composer-error-action"]')).toBeNull();
+});
+
+it.each([
+  ["active", false, "This month's computer hours are used up.", "Upgrade"],
+  ["trialing", false, "Your trial's computer hours are used up.", "Start plan now"],
+  ["trialing", true, "Cancelled trials have no computer hours.", "Renew plan"],
+] as const)(
+  "says why computer hours ran out on a %s plan (cancelling: %s) and opens billing",
+  (state, cancelAtPeriodEnd, summary, label) => {
+    billing.status = { state, cancelAtPeriodEnd, canManage: true } as BillingStatus;
+    const onOpenBilling = vi.fn();
+    renderComposer(async () => true, {
+      runError: "No computer hours left.",
+      runErrorId: "failed-run",
+      onOpenBilling,
+    });
+    const error = container?.querySelector('[data-testid="composer-error"]');
+    expect(error?.textContent).toContain(summary);
+    const action = error?.querySelector<HTMLButtonElement>('[data-testid="composer-error-action"]');
+    expect(action?.textContent).toBe(label);
+    act(() => action?.click());
+    expect(onOpenBilling).toHaveBeenCalledOnce();
+  },
+);
+
+it("offers no billing action to a member who cannot manage the plan", () => {
+  billing.status = { state: "active", cancelAtPeriodEnd: false, canManage: false } as BillingStatus;
+  renderComposer(async () => true, {
+    runError: "No computer hours left.",
+    runErrorId: "failed-run",
+  });
+  const error = container?.querySelector('[data-testid="composer-error"]');
+  expect(error?.textContent).toContain("This month's computer hours are used up.");
+  expect(error?.querySelector('[data-testid="composer-error-action"]')).toBeNull();
 });
 
 it.each([MODEL_REQUIRED_SEND_ERROR, `  ${MODEL_REQUIRED_SEND_ERROR}  `])(
@@ -2410,3 +2451,103 @@ it.each([
     expect(onSend.mock.calls[0]?.[0]).toBe("please book the flight and a hotel");
   },
 );
+
+function pasteText(textarea: HTMLTextAreaElement, text: string, files: File[] = []) {
+  const event = new Event("paste", { bubbles: true, cancelable: true });
+  Object.defineProperty(event, "clipboardData", {
+    value: { getData: () => text, files },
+  });
+  act(() => textarea.dispatchEvent(event));
+  return event;
+}
+
+function pasteAction(label: string) {
+  const button = Array.from(container!.querySelectorAll("button")).find(
+    (button) => button.textContent === label,
+  );
+  if (!button) throw new Error(`Missing paste action: ${label}`);
+  act(() => button.click());
+}
+
+it.each(["small paste", "x".repeat(LARGE_PASTE_THRESHOLD)])(
+  "leaves native inline paste alone up to the threshold (%#. case)",
+  (text) => {
+    const onAttachmentPick = vi.fn(() => true);
+    const textarea = renderComposer(async () => true, { onAttachmentPick });
+    expect(pasteText(textarea, text).defaultPrevented).toBe(false);
+    expect(container!.querySelector('[aria-label="Large paste"]')).toBeNull();
+    expect(onAttachmentPick).not.toHaveBeenCalled();
+  },
+);
+
+it("keeps a large paste inline with its original whitespace and sends it", async () => {
+  const onSend = vi.fn<ComponentProps<typeof Composer>["onSend"]>(async () => true);
+  const textarea = renderComposer(onSend);
+  const text = `  ${"log line\n".repeat(500)}  `;
+  expect(pasteText(textarea, text).defaultPrevented).toBe(true);
+  expect(textarea.value).toBe(text);
+  expect(document.activeElement).toBe(textarea);
+  pasteAction("Keep inline");
+  expect(container!.querySelector('[aria-label="Large paste"]')).toBeNull();
+  expect(textarea.value).toBe(text);
+  expect(document.activeElement).toBe(textarea);
+  await act(async () => pressEnter(textarea));
+  expect(onSend.mock.calls[0]?.[0]).toBe(text.trim());
+});
+
+it("switches the pasted selection to a text attachment and restores the surrounding draft", async () => {
+  const onAttachmentPick = vi.fn<ComponentProps<typeof Composer>["onAttachmentPick"]>(() => true);
+  const textarea = renderComposer(async () => true, { onAttachmentPick });
+  type(textarea, "before replace after");
+  textarea.setSelectionRange(7, 14);
+  const text = "x".repeat(LARGE_PASTE_THRESHOLD + 1);
+  pasteText(textarea, text);
+  expect(textarea.value).toBe(`before ${text} after`);
+  pasteAction("Attach as file");
+  const file = onAttachmentPick.mock.calls[0]?.[0]?.[0] as File;
+  expect(file.name).toBe("pasted-text.txt");
+  expect(file.type).toBe("text/plain");
+  const reader = new FileReader();
+  const contents = new Promise((resolve) => {
+    reader.onload = () => resolve(reader.result);
+  });
+  reader.readAsText(file);
+  expect(await contents).toBe(text);
+  expect(textarea.value).toBe("before replace after");
+  expect(textarea.selectionStart).toBe(7);
+  expect(textarea.selectionEnd).toBe(14);
+  expect(document.activeElement).toBe(textarea);
+  expect(container!.querySelector('[aria-label="Large paste"]')).toBeNull();
+});
+
+it("keeps the text and choice when the normal attachment path rejects the file", () => {
+  const textarea = renderComposer(async () => true, { onAttachmentPick: () => false });
+  const text = "x".repeat(LARGE_PASTE_THRESHOLD + 1);
+  pasteText(textarea, text);
+  pasteAction("Attach as file");
+  expect(textarea.value).toBe(text);
+  expect(container!.querySelector('[aria-label="Large paste"]')).not.toBeNull();
+  pasteAction("Keep inline");
+  expect(textarea.value).toBe(text);
+});
+
+it("dismisses a stale paste choice on editing and replaces it on the next large paste", () => {
+  const textarea = renderComposer(async () => true);
+  pasteText(textarea, "x".repeat(LARGE_PASTE_THRESHOLD + 1));
+  type(textarea, "edited");
+  expect(container!.querySelector('[aria-label="Large paste"]')).toBeNull();
+  pasteText(textarea, "y".repeat(LARGE_PASTE_THRESHOLD + 1));
+  pasteAction("Attach as file");
+  expect(textarea.value).toBe("edited");
+});
+
+it("preserves mixed file and text paste without offering to attach the text again", () => {
+  const onAttachmentPick = vi.fn(() => true);
+  const textarea = renderComposer(async () => true, { onAttachmentPick });
+  const file = new File(["content"], "example.txt", { type: "text/plain" });
+  const text = "x".repeat(LARGE_PASTE_THRESHOLD + 1);
+  pasteText(textarea, text, [file]);
+  expect(onAttachmentPick).toHaveBeenCalledWith([file]);
+  expect(textarea.value).toBe(text);
+  expect(container!.querySelector('[aria-label="Large paste"]')).toBeNull();
+});

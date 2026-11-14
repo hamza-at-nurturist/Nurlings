@@ -64,6 +64,13 @@ describe("desktop package metadata", () => {
     expect(raw).not.toMatch(/"repo":\s*"rakazo"/);
   });
 
+  it("ships the macOS server bundle's address only when a release build wrote one", () => {
+    expect(packageJson.build?.mac?.extraResources).toContainEqual({
+      from: "build/server-bundle.json",
+      to: "server-bundle.json",
+    });
+  });
+
   it.each(["es", "pl"])("ships a %s version of every macOS permission prompt", (locale) => {
     const strings = readFileSync(
       path.resolve(import.meta.dirname, `../assets/${locale}.lproj/InfoPlist.strings`),

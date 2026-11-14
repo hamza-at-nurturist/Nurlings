@@ -18,8 +18,6 @@ import {
 import {
   COMPACTION_BATCH_SIZE,
   compactHistory,
-  formatCompactedSummary,
-  formatRecalledMemory,
   HISTORY_WINDOW_SIZE,
   historyWindowSize,
   MAX_COMPACTED_SUMMARY_CHARS,
@@ -34,6 +32,7 @@ import {
   shouldEnqueueCompaction,
   summarizeTimeoutMs,
 } from "./history-compaction.js";
+import { formatCompactedSummary, formatRecalledMemory } from "./history-compaction.prompt.js";
 
 describe("shouldEnqueueCompaction", () => {
   it("is false when nothing has aged out of the window yet", () => {
@@ -984,7 +983,7 @@ describe("compactHistory", () => {
       expect.any(Object),
     );
     expect(harness.purgeHistory).toHaveBeenCalledWith(
-      { botId: "bot-1", generations: [0] },
+      { botId: "bot-1", threadId: "thread-1", generations: [0] },
       expect.any(Object),
     );
   });

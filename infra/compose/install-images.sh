@@ -2,7 +2,16 @@
 
 set -Eeuo pipefail
 
-DOWNLOAD_BASE="${RAKAZO_DOWNLOAD_BASE:-https://raw.githubusercontent.com/hamza-at-nurturist/Nurlings/main/infra/compose}"
+# A pinned release gets its own Compose files. Like Compose, prefer the shell's tag over .env.
+image_tag="${RAKAZO_IMAGE_TAG-}"
+if [[ -z "${RAKAZO_IMAGE_TAG+x}" && -f .env ]]; then
+  image_tag=$(sed -nE "s/^[[:space:]]*(export[[:space:]]+)?RAKAZO_IMAGE_TAG[[:space:]]*=[[:space:]]*[\"']?([^\"'#[:space:]]*).*/\2/p" .env | tail -n 1)
+fi
+download_ref=main
+if [[ "$image_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  download_ref="$image_tag"
+fi
+DOWNLOAD_BASE="${RAKAZO_DOWNLOAD_BASE:-https://raw.githubusercontent.com/hamza-at-nurturist/Nurlings/${download_ref}/infra/compose}"
 while [[ "$DOWNLOAD_BASE" == */ ]]; do
   DOWNLOAD_BASE="${DOWNLOAD_BASE%/}"
 done
@@ -408,6 +417,21 @@ registry_login() {
   echo "Logged in to ghcr.io as ${user}."
 }
 
+remove_replaced_images() {
+  local ref repo id tag repos=" "
+  while IFS= read -r ref; do
+    repo="${ref%@*}"
+    [[ "${repo##*/}" != *:* ]] || repo="${repo%:*}"
+    repo="${repo#docker.io/}"
+    repos+="${repo#library/} "
+  done < <(docker compose --env-file "$ENV_FILE" "${compose_files[@]}" config --images 2>/dev/null)
+  [[ "$repos" != " " ]] || return 0
+  while read -r id repo tag; do
+    [[ "$tag" == "<none>" && "$repos" == *" ${repo} "* ]] || continue
+    docker image rm "$id" >/dev/null 2>&1 || true
+  done < <(docker image ls --no-trunc --format '{{.ID}} {{.Repository}} {{.Tag}}' 2>/dev/null)
+}
+
 for filename in "${required_files[@]}"; do
   download "$filename"
 done
@@ -465,5 +489,6 @@ if grep -q -- '--wait-timeout' <<<"$compose_up_help"; then
 else
   docker compose --env-file "$ENV_FILE" "${compose_files[@]}" up -d ${up_pull_args[@]+"${up_pull_args[@]}"}
 fi
+remove_replaced_images
 
 echo "Nurlings is starting at http://127.0.0.1:5173"

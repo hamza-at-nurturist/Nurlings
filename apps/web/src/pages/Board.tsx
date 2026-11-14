@@ -8,7 +8,7 @@ import {
   TICKET_STATUSES,
   TICKET_TITLE_MAX_LENGTH,
 } from "@rakazo/contracts";
-import { isRetryableError, retryDelayMs } from "@rakazo/core";
+import { isRetryableError, reconnectDelayMs, retryDelayMs } from "@rakazo/core";
 import { fetchFresh, writeSaved } from "@rakazo/core/query";
 import {
   Button,
@@ -73,6 +73,7 @@ export function UpstreamBoardPage() {
         const controller = new AbortController();
         currentController = controller;
         let failure: unknown;
+        let opened = false;
         try {
           const stream = await rpc.boards.subscribe(undefined, {
             signal: controller.signal,
@@ -82,6 +83,7 @@ export function UpstreamBoardPage() {
           if (!active) return;
           refreshComments();
           setError("");
+          opened = true;
           for await (const event of stream) {
             if (!active) return;
             refreshComments(event.ticketId);
@@ -95,7 +97,10 @@ export function UpstreamBoardPage() {
         }
         if (!active || !isRetryableError(failure)) return;
         await new Promise<void>((resolve) => {
-          const timer = setTimeout(resolve, retryDelayMs(failure, 1_000));
+          const timer = setTimeout(
+            resolve,
+            opened ? reconnectDelayMs(failure) : retryDelayMs(failure, 1_000),
+          );
           cancelRetry = () => {
             clearTimeout(timer);
             resolve();

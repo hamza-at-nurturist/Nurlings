@@ -50,12 +50,6 @@ jobs:
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
-      - name: Set up Expo
-        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
-        with:
-          eas-version: latest
-          packager: npm
-          token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Verify mobile project
@@ -66,9 +60,11 @@ jobs:
         # A preview is another package with no Firebase file (see app.config.ts), so it has no push to set up.
         if: env.PREVIEW != 'true'
         working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           set -euo pipefail
-          vars="$(eas env:list production --format short)"
+          vars="$(pnpm exec eas env:list production --format short)"
           if ! grep -q '^GOOGLE_SERVICES_JSON=' <<< "$vars"; then
             echo "Set the GOOGLE_SERVICES_JSON file variable in the EAS production environment (see docs/mobile-release.md)." >&2
             exit 1
@@ -79,9 +75,11 @@ jobs:
       - name: Build APK on EAS
         id: build
         working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           set -euo pipefail
-          eas build --platform android --profile "$EAS_PROFILE" --non-interactive --wait --json > "$RUNNER_TEMP/build.json"
+          pnpm exec eas build --platform android --profile "$EAS_PROFILE" --non-interactive --wait --json > "$RUNNER_TEMP/build.json"
           url="$(jq -r '.[0].artifacts.applicationArchiveUrl // .[0].artifacts.buildUrl' "$RUNNER_TEMP/build.json")"
           version="$(jq -r '.[0].appVersion' "$RUNNER_TEMP/build.json")"
           version_code="$(jq -r '.[0].appBuildVersion' "$RUNNER_TEMP/build.json")"

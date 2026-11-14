@@ -11,12 +11,6 @@ import BotSettingsScreen from "../app/bot-settings";
 import { MenuPicker } from "../components/menu-picker";
 import { afterChatNotifyChange } from "./live-notifications";
 
-// A Nurlings build offers one icon set; these tests exercise the set switcher, so offer both.
-vi.mock("@rakazo/contracts", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@rakazo/contracts")>()),
-  SELECTABLE_BOT_AVATAR_SETS: ["organic", "rakazo"],
-}));
-
 const mocks = vi.hoisted(() => ({
   instructions: "",
   description: "",
@@ -71,9 +65,11 @@ vi.mock("./bot-voices", () => ({
 vi.mock("./device-voice", () => ({ loadDeviceVoiceEnabled: async () => true }));
 vi.mock("./voice", () => ({ stopVoicePlayback: mocks.stopVoicePlayback }));
 vi.mock("expo-speech", () => ({ stop: mocks.stop, speak: mocks.speak }));
+vi.mock("./api-server", () => ({}));
+vi.mock("./api-auth", () => ({}));
+vi.mock("./api-live", () => ({}));
 vi.mock("./api", () => ({
   currentApiBase: () => "https://api.example.test",
-  loadSessionToken: async () => "token",
   selectedSpaceId: () => "space-a",
   rpc: async (procedure: string, input?: unknown) => {
     if (
@@ -111,6 +107,9 @@ vi.mock("./api", () => ({
     if (procedure === "me") return {};
     return [];
   },
+}));
+vi.mock("./session", () => ({
+  loadSessionToken: async () => "token",
 }));
 vi.mock("./live-notifications", { spy: true });
 vi.mock("expo-modules-core", () => ({ requireNativeModule: vi.fn() }));
@@ -199,10 +198,12 @@ vi.mock("react-native", () => {
       value,
       onChangeText,
       scrollEnabled,
+      editable,
     }: {
       value: string;
       onChangeText?: (value: string) => void;
       scrollEnabled?: boolean;
+      editable?: boolean;
       style?: unknown;
       accessibilityLabel?: string;
       placeholder?: string;
@@ -210,6 +211,7 @@ vi.mock("react-native", () => {
     }) =>
       createElement("textarea", {
         value,
+        disabled: editable === false,
         onChange: () => undefined,
         onInput: (event: { currentTarget: HTMLTextAreaElement }) =>
           onChangeText?.(event.currentTarget.value),
@@ -267,20 +269,7 @@ vi.mock("./native", () => ({
   useResolvedAppearance: () => "light",
   useThemedStyles: (createStyles: () => unknown) => createStyles(),
 }));
-vi.mock("./i18n", () => {
-  const t = (text: string, values?: Record<string, string | number>) =>
-    text.replace(/\{(\w+)\}/g, (_, key) => String(values?.[key] ?? ""));
-  return { t, useI18n: () => ({ t }) };
-});
 vi.mock("../components/bot-avatar", () => ({ BotAvatar: () => null }));
-vi.mock("./bot-avatar-edit", () => ({
-  avatarColor: (value: string) => value,
-  avatarShape: () => null,
-  hasOwnBody: () => false,
-  isAvatarPhoto: () => false,
-  withAvatarColor: (_value: string, color: string) => color,
-  withAvatarShape: (value: string) => value,
-}));
 vi.mock("../components/native-segmented-control", () => ({
   NativeSegmentedControl: ({
     options,
@@ -521,6 +510,81 @@ describe("bot settings device voice menu", () => {
       versionId: "v1",
       expectedInstructions: "",
     });
+  });
+
+  it.each([false, true])(
+    "locks instruction edits and Save during restore (fails: %s)",
+    async (fails) => {
+      mocks.history = [
+        {
+          id: "v1",
+          instructions: "Earlier",
+          reason: "Manual edit",
+          createdAt: "2026-10-01T00:00:00Z",
+        },
+      ];
+      const restore = deferredSave<{ id: string; instructions: string }>();
+      mocks.rpc.mockReturnValue(restore.promise);
+      await render();
+      await act(async () =>
+        container.querySelector<HTMLButtonElement>('[aria-label="Read replies aloud"]')!.click(),
+      );
+      const history = container.querySelector('[data-menu="Instruction history"]')!;
+      await act(async () => history.querySelector<HTMLButtonElement>("button")!.click());
+      const confirm = mocks.alert.mock.calls.at(-1)![2][1].onPress;
+      await act(async () => {
+        confirm();
+        confirm();
+      });
+      const input = container.querySelector<HTMLTextAreaElement>(
+        'textarea[aria-label="Instructions"]',
+      )!;
+      expect(input.disabled).toBe(true);
+      const save = [...container.querySelectorAll<HTMLButtonElement>("button")].find(
+        (button) => button.textContent === "Saving…",
+      )!;
+      expect(save.disabled).toBe(true);
+      await act(async () => save.click());
+      expect(mocks.rpc).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        if (fails) restore.reject(new Error("restore failed"));
+        else restore.resolve({ id: "bot-fixture", instructions: "Earlier" });
+      });
+      expect(input.disabled).toBe(false);
+      expect(input.value).toBe(fails ? "" : "Earlier");
+      if (fails) expect(container.textContent).toContain("restore failed");
+      expect(mocks.back).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not start a restore while Save is in flight", async () => {
+    mocks.history = [
+      {
+        id: "v1",
+        instructions: "Earlier",
+        reason: "Manual edit",
+        createdAt: "2026-10-01T00:00:00Z",
+      },
+    ];
+    const save = deferredSave();
+    mocks.rpc.mockReturnValue(save.promise);
+    await render();
+    const history = container.querySelector('[data-menu="Instruction history"]')!;
+    await act(async () => history.querySelector<HTMLButtonElement>("button")!.click());
+    const confirm = mocks.alert.mock.calls.at(-1)![2][1].onPress;
+    await act(async () =>
+      container.querySelector<HTMLButtonElement>('[aria-label="Read replies aloud"]')!.click(),
+    );
+    const button = [...container.querySelectorAll<HTMLButtonElement>("button")].find(
+      (node) => node.textContent === "Save",
+    )!;
+    await act(async () => {
+      button.click();
+      confirm();
+    });
+    expect(mocks.rpc).toHaveBeenCalledTimes(1);
+    expect(mocks.rpc).toHaveBeenCalledWith("bots/update", expect.any(Object));
+    await act(async () => save.resolve());
   });
 
   it("exports through the share sheet and confirms conversation clearing", async () => {

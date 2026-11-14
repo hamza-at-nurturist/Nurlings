@@ -1,7 +1,9 @@
 import type { JobPublisher } from "@rakazo/adapter-kit";
 import { runContinueJob } from "@rakazo/adapter-kit";
-import type { TicketMention } from "@rakazo/contracts";
+import type { LabFeature, TicketMention } from "@rakazo/contracts";
 import {
+  hasLab,
+  resolveLabs,
   isTicketCompletedStatus,
   TICKET_MENTIONS_MAX,
   TicketStatusSchema,
@@ -110,7 +112,7 @@ export const MENTION_RUN_COMMENT_ERROR =
  * and (for a Nurling's mention) the loop guards decide; nothing here changes the ticket.
  */
 export async function wakeMentionedBot(
-  deps: { prisma: PrismaClient; jobs: JobPublisher; ticketBoardEnabled?: boolean },
+  deps: { prisma: PrismaClient; jobs: JobPublisher; deploymentLabs?: readonly LabFeature[] },
   input: {
     spaceId: string;
     userId: string;
@@ -120,7 +122,7 @@ export async function wakeMentionedBot(
     byBotId?: string;
   },
 ): Promise<void> {
-  if (!deps.ticketBoardEnabled || input.botId === input.byBotId) return;
+  if (input.botId === input.byBotId) return;
   const byBot = Boolean(input.byBotId);
   const run = await deps.prisma.$transaction(async (tx) => {
     // One mention at a time per ticket, so the cap and the working check cannot be raced past.
@@ -140,6 +142,8 @@ export async function wakeMentionedBot(
       select: { id: true, userId: true, thread: { select: { id: true } } },
     });
     if (!bot?.thread) return null;
+    const owner = await tx.user.findUnique({ where: { id: input.userId }, select: { labs: true } });
+    if (!hasLab(resolveLabs(owner?.labs, deps.deploymentLabs), "board")) return null;
     const queued = await tx.run.findFirst({
       where: {
         spaceId: input.spaceId,

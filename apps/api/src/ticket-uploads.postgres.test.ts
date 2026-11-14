@@ -118,7 +118,7 @@ describePostgres("ticket uploads (PostgreSQL)", () => {
       };
       const artifacts = { get: vi.fn(async () => new Uint8Array([1, 2, 3])) };
       const read = await runAsTenant({ spaceId: ticket.spaceId, userId }, () =>
-        readTicketForRun({ prisma: handles.prisma, ticketBoardEnabled: true, artifacts } as never, {
+        readTicketForRun({ prisma: handles.prisma, deploymentLabs: ["board"], artifacts } as never, {
           ref: ticket.ref,
           acceptsImages: true,
           context,

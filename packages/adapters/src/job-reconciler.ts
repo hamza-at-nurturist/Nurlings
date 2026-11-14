@@ -1,21 +1,25 @@
 import { setImmediate } from "node:timers/promises";
 import type { JobPublisher, NotificationProvider } from "@rakazo/adapter-kit";
-import { messagingDeliverJob, routineWakeupJob, runContinueJob } from "@rakazo/adapter-kit";
+import { routineWakeupJob, runContinueJob } from "@rakazo/adapter-kit";
 import type { MessageBlock } from "@rakazo/contracts";
-import { stuckWorkStatusMessages } from "@rakazo/core";
-import type { Pool, PrismaClient, ThreadEvents } from "@rakazo/db";
-import { reconcileComputerRuns } from "@rakazo/db";
+import { BACKGROUND_HELPER_TRIGGER, stuckWorkStatusMessages } from "@rakazo/core";
+import type { DatabaseOutage, Pool, PrismaClient, ThreadEvents } from "@rakazo/db";
+import { databaseOutage, reconcileComputerRuns } from "@rakazo/db";
 import { getLogger } from "@rakazo/logging";
 import type { PoolClient } from "pg";
+import { returnHelperOutcome } from "./background-helpers.js";
 import { returnBotMessageOutcome } from "./bot-messages.js";
 import { reconcileCallRequests } from "./call-request.js";
 import { scheduleComputerControlExpiry } from "./computer-control.js";
 import { findRunRecoveryBlockers } from "./run-recovery.js";
+import { messageBlocksText } from "./run-replies.prompt.js";
 import { reconcileStuckWork } from "./stuck-work.js";
 import { isLoopGuardStopText } from "./tool-loop.js";
 import { isUserProgressClientNonce } from "./user-progress.js";
 
 const DEFAULT_INTERVAL_MS = 30_000;
+/** The longest a pass waits while the database is unavailable. */
+const MAX_OUTAGE_BACKOFF_MS = 2 * 60_000;
 const DEFAULT_BATCH_SIZE = 100;
 const ROUTINE_LOOKAHEAD_MS = 60_000;
 const CONTROL_LOOKAHEAD_MS = 60_000;
@@ -126,6 +130,10 @@ export function createJobReconciler(
     reconcileTicketDates?: () => Promise<void>;
     reconcileIdleComputers?: () => Promise<void>;
     reconcileDeadJobs?: () => Promise<void>;
+    /** Gives chat messages whose backup job was lost a new one. */
+    reconcileChatDelivery?: () => Promise<void>;
+    /** The process's database outage streak; defaults to the shared one. */
+    outage?: DatabaseOutage;
   },
   options: { intervalMs?: number; batchSize?: number; maxPagesPerPass?: number } = {},
 ) {
@@ -136,6 +144,13 @@ export function createJobReconciler(
   if (!Number.isSafeInteger(maxPagesPerPass) || maxPagesPerPass < 1) {
     throw new Error("Invalid page budget");
   }
+  const outage = deps.outage ?? databaseOutage;
+  let outageFailures = 0;
+  /** One log per outage for the whole process, instead of one per failing step and tick. */
+  const report = (message: string, error: unknown) => {
+    if (outage.failed(error, "job reconciliation")) outageFailures += 1;
+    else getLogger().error(message, error);
+  };
   let stopping = false;
   let timer: ReturnType<typeof setInterval> | undefined;
   let reconciling: Promise<void> | undefined;
@@ -161,13 +176,14 @@ export function createJobReconciler(
     deps.reconcileTicketDates,
     deps.reconcileIdleComputers,
     deps.reconcileDeadJobs,
+    deps.reconcileChatDelivery,
   ].filter((reconcile) => reconcile !== undefined);
   const housekeepingRunning = new Map<() => Promise<void>, Promise<void>>();
   const startHousekeeping = () => {
     for (const reconcile of housekeeping) {
       if (housekeepingRunning.has(reconcile)) continue;
       const pass = (async () => reconcile())()
-        .catch((error) => getLogger().error("auxiliary reconciliation", error))
+        .catch((error) => report("auxiliary reconciliation", error))
         .finally(() => housekeepingRunning.delete(reconcile));
       housekeepingRunning.set(reconcile, pass);
     }
@@ -176,6 +192,7 @@ export function createJobReconciler(
   const reconcileOnce = async () => {
     if (reconciling) return reconciling;
     if (stopping) return;
+    const failuresBefore = outageFailures;
     reconciling = (async () => {
       if (deps.leadership && !(await deps.leadership.tryAcquire())) return;
 
@@ -185,8 +202,7 @@ export function createJobReconciler(
         reconcileComputerRuns(deps.prisma),
       ]);
       for (const result of auxiliary) {
-        if (result.status === "rejected")
-          getLogger().error("auxiliary reconciliation", result.reason);
+        if (result.status === "rejected") report("auxiliary reconciliation", result.reason);
       }
 
       const now = new Date();
@@ -201,7 +217,7 @@ export function createJobReconciler(
           cursor: stuckCursor,
         });
       } catch (error) {
-        getLogger().error("stuck work reconciliation", error);
+        report("stuck work reconciliation", error);
       }
       const runCursorFilter = runCursor
         ? {
@@ -211,46 +227,32 @@ export function createJobReconciler(
             ],
           }
         : undefined;
-      const [runs, dueOutbound, unmirroredMessagingRuns] = await Promise.all([
-        deps.prisma.run.findMany({
-          where: {
-            AND: [
-              {
-                OR: [
-                  { status: "queued" },
-                  {
-                    status: { in: ["leased", "running"] },
-                    leaseExpiresAt: { lte: now },
-                  },
-                ],
-              },
-              ...(runCursorFilter ? [runCursorFilter] : []),
-            ],
-          },
-          orderBy: [{ updatedAt: "asc" }, { id: "asc" }],
-          take: batchSize,
-          select: {
-            id: true,
-            status: true,
-            updatedAt: true,
-            botId: true,
-            bot: { select: { computerId: true } },
-          },
-        }),
-        deps.prisma.messagingOutbound.findFirst({
-          where: {
-            status: "pending",
-            OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: now } }],
-          },
-          select: { id: true },
-        }),
-        deps.prisma.run.findMany({
-          where: { trigger: "messaging", status: "completed", messagingMirroredAt: null },
-          orderBy: [{ updatedAt: "asc" }, { id: "asc" }],
-          take: batchSize,
-          select: { id: true },
-        }),
-      ]);
+      const runs = await deps.prisma.run.findMany({
+        where: {
+          AND: [
+            {
+              OR: [
+                { status: "queued" },
+                {
+                  status: { in: ["leased", "running"] },
+                  leaseExpiresAt: { lte: now },
+                },
+              ],
+            },
+            ...(runCursorFilter ? [runCursorFilter] : []),
+          ],
+        },
+        orderBy: [{ updatedAt: "asc" }, { id: "asc" }],
+        take: batchSize,
+        select: {
+          id: true,
+          status: true,
+          updatedAt: true,
+          botId: true,
+          trigger: true,
+          bot: { select: { computerId: true } },
+        },
+      });
 
       const events = deps.events;
       if (events) {
@@ -311,7 +313,7 @@ export function createJobReconciler(
               intent,
               { forceUnread: run.status === "failed" || stuckCancel || loopGuardStop },
             ).catch((error) => {
-              getLogger().error("bot message outcome reconciliation", error);
+              report("bot message outcome reconciliation", error);
               return false;
             });
             if (!returned) {
@@ -322,6 +324,53 @@ export function createJobReconciler(
             }
           }),
         );
+        // A background helper whose result did not go back yet: a crash after it ended, or a
+        // stop. A stopped helper only settles its card; anything else answers in the chat.
+        const helpers = await deps.prisma.run.findMany({
+          where: {
+            trigger: BACKGROUND_HELPER_TRIGGER,
+            status: { in: ["completed", "failed", "cancelled"] },
+            botOutcomeReturnedAt: null,
+          },
+          orderBy: [{ updatedAt: "asc" }, { id: "asc" }],
+          take: batchSize,
+          select: {
+            id: true,
+            spaceId: true,
+            botId: true,
+            userId: true,
+            sourceMessageId: true,
+            status: true,
+            error: true,
+          },
+        });
+        for (const run of helpers) {
+          const expired =
+            run.status === "cancelled" && stuckWorkStatusMessages().includes(run.error ?? "");
+          await (async () => {
+            const outcome =
+              run.status === "completed"
+                ? {
+                    status: "completed" as const,
+                    text: (await botRunOutcomeText(deps.prisma, run.id)).text,
+                  }
+                : run.status === "failed" || expired
+                  ? { status: "failed" as const, text: run.error ?? "unknown error" }
+                  : { status: "stopped" as const, text: "" };
+            await returnHelperOutcome(
+              { prisma: deps.prisma, jobs: deps.jobs, events },
+              run,
+              outcome,
+            );
+          })().catch(async (error) => {
+            report("background helper outcome reconciliation", error);
+            // Like a bot message outcome: retry later without holding the head of the queue.
+            await deps.prisma.run.updateMany({
+              where: { id: run.id, botOutcomeReturnedAt: null },
+              data: { updatedAt: new Date() },
+            });
+          });
+        }
       }
 
       // A queued run already has a job while it waits out failure backoff.
@@ -342,8 +391,6 @@ export function createJobReconciler(
               replaceLockedBefore: run.status === "queued" ? abandonedQueuedLockAt : now,
             }),
           ),
-        ...(dueOutbound ? [deps.jobs.enqueue(messagingDeliverJob())] : []),
-        ...unmirroredMessagingRuns.map((run) => deps.jobs.enqueue(messagingDeliverJob(run.id))),
       ]);
 
       const lastRun = runs.at(-1);
@@ -471,6 +518,7 @@ export function createJobReconciler(
     })()
       .then(() => {
         lastCompletedAt = Date.now();
+        if (outageFailures === failuresBefore) outage.succeeded();
       })
       .finally(() => {
         reconciling = undefined;
@@ -478,9 +526,9 @@ export function createJobReconciler(
     return reconciling;
   };
   const reconcileSafely = () => {
-    void reconcileOnce().catch((error) =>
-      getLogger().error("background job reconciliation", error),
-    );
+    // While the database is unavailable each pass waits as long as the outage has lasted.
+    if (!outage.ready(intervalMs, MAX_OUTAGE_BACKOFF_MS)) return;
+    void reconcileOnce().catch((error) => report("background job reconciliation", error));
   };
 
   return {
@@ -550,9 +598,5 @@ async function botRunOutcomeText(
 
 function messageText(blocks: unknown): string {
   if (!Array.isArray(blocks)) return "";
-  return (blocks as MessageBlock[])
-    .filter((block): block is Extract<MessageBlock, { kind: "text" }> => block.kind === "text")
-    .map((block) => block.text)
-    .join("")
-    .trim();
+  return messageBlocksText(blocks as MessageBlock[]).trim();
 }

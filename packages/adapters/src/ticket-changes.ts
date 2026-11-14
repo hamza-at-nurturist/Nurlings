@@ -1,4 +1,5 @@
 import type { JobPublisher, NotificationProvider } from "@rakazo/adapter-kit";
+import type { LabFeature } from "@rakazo/contracts";
 import type { BoardEvents, PrismaClient } from "@rakazo/db";
 import { getLogger } from "@rakazo/logging";
 import { wakeMentionedBot } from "./ticket-mentions.js";
@@ -29,12 +30,11 @@ export function createTicketChangeNotifier(deps: {
   boardEvents: BoardEvents;
   prisma: PrismaClient;
   jobs: JobPublisher;
-  ticketBoardEnabled?: boolean;
+  deploymentLabs?: readonly LabFeature[];
   /** Read when needed: the provider is built after this notifier in both composition roots. */
   notifications?: () => NotificationProvider | undefined;
 }): TicketChangeNotifier {
   return async (change) => {
-    if (!deps.ticketBoardEnabled) return;
     try {
       if (change.wakeAssignee && change.assigneeBotId) {
         await wakeTicketAssignee(deps, {

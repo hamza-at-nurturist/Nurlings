@@ -124,7 +124,7 @@ describePostgres("ticket mentions (PostgreSQL)", () => {
           await system(() => handles.prisma.bot.findFirstOrThrow({ where: { id: scout.id } }))
         ).userId,
       };
-      const deps = { prisma: handles.prisma, ticketBoardEnabled: true };
+      const deps = { prisma: handles.prisma, deploymentLabs: ["board"] };
       const asScout = {
         spaceId: ticket.spaceId,
         userId: tenant.userId,

@@ -13,7 +13,6 @@ import { ComputerMaintenanceActions } from "../../components/ComputerMaintenance
 import { PagesList } from "../../components/pages/PagesList";
 import type { Panel } from "../../lib/right-panel-state";
 import type { createSpaceRpc } from "../../lib/rpc";
-import { computerPanelNeedsMaintenance } from "../../lib/thread-events";
 import { CreateGroupForm, GroupSettings } from "../GroupPanel";
 import { ResizableSidePanel } from "../ResizableSidePanel";
 import { RoutineEditor } from "../RoutineEditor";
@@ -41,7 +40,6 @@ export function ShellSidePanel({
   refreshGroupThread,
   computer,
   computerOpen,
-  booting,
   computerPanel,
   routinesPanel,
   routineEditorProps,
@@ -69,7 +67,6 @@ export function ShellSidePanel({
   refreshGroupThread: (groupId: string) => Promise<ThreadSnapshot>;
   computer: ComputerStatus | null;
   computerOpen: boolean;
-  booting: boolean;
   computerPanel: ReactNode;
   routinesPanel: ReactNode;
   routineEditorProps: ComponentProps<typeof RoutineEditor> | null;
@@ -115,19 +112,6 @@ export function ShellSidePanel({
                 </span>
               ) : null}
               <div className="ml-auto flex gap-1">
-                {active &&
-                panel === "computer" &&
-                !computerOpen &&
-                computerPanelNeedsMaintenance(computer?.state, booting) ? (
-                  <ComputerMaintenanceActions
-                    botId={active.id}
-                    computer={computer}
-                    onChanged={async () => {
-                      await refreshThread(active.id);
-                    }}
-                  />
-                ) : null}
-                {botTab && active ? <BotPanelExpand key={active.id} /> : null}
                 <Button
                   variant="ghost"
                   size="icon-sm"
@@ -142,6 +126,7 @@ export function ShellSidePanel({
           {panel === "create-group" ? (
             <CreateGroupForm
               bots={bots}
+                {botTab && active ? <BotPanelExpand key={active.id} /> : null}
               onCancel={() => setPanel(null)}
               onCreate={(input) => createGroup(input)}
               onOpenBot={(botId) => {
@@ -198,6 +183,15 @@ export function ShellSidePanel({
                 if (tab === "computer") void refreshThread(active.id).catch(() => undefined);
               }}
               computer={computerPanel}
+              computerActions={
+                <ComputerMaintenanceActions
+                  botId={active.id}
+                  computer={computer}
+                  onChanged={async () => {
+                    await refreshThread(active.id);
+                  }}
+                />
+              }
               routines={routinesPanel}
               focusModel={modelFocusRequest}
               onOpenConnections={() => openSettings("models")}

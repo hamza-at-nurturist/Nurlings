@@ -20,6 +20,8 @@ function publisher() {
   const enqueue = vi.fn(async () => undefined);
   const jobs: JobPublisher = {
     enqueue,
+    enqueueIn: async () => undefined,
+    cancelIn: async () => undefined,
     cancel: async () => undefined,
     close: async () => undefined,
   };
@@ -203,6 +205,34 @@ describe("reconcileStrategicInitiatives", () => {
                   clientNonce: { startsWith: "strategic-initiative:" },
                   status: "failed",
                   createdAt: { gt: new Date("2026-10-26T12:00:00.000Z") },
+                },
+              ]),
+            },
+          },
+        }),
+      }),
+    );
+  });
+
+  it("treats a bot whose only active run is a background helper as free", async () => {
+    const { prisma } = strategicPrisma({ bots: [] });
+    await reconcileStrategicInitiatives({
+      prisma,
+      jobs: publisher().jobs,
+      now: new Date(),
+      pageSize: 10,
+    });
+    expect(prisma.bot.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          runs: {
+            none: {
+              OR: expect.arrayContaining([
+                {
+                  status: {
+                    in: ["queued", "leased", "running", "waiting_input", "waiting_takeover"],
+                  },
+                  trigger: { not: "helper" },
                 },
               ]),
             },

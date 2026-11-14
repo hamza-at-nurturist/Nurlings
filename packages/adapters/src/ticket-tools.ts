@@ -32,10 +32,10 @@ import {
   resolveMentions,
 } from "./ticket-mentions.js";
 import { ticketTriagePrompt } from "./ticket-wake.js";
+import { sliceWellFormed } from "./utf8.js";
 
 type TicketToolDeps = {
   prisma: PrismaClient;
-  ticketBoardEnabled?: boolean;
   onTicketChange?: TicketChangeNotifier;
 };
 
@@ -140,7 +140,7 @@ function decodeTicketListCursor(
 
 function truncateDescription(value: string | null | undefined) {
   if (!value || value.length <= LIST_DESCRIPTION_CHARS) return value;
-  return `${value.slice(0, LIST_DESCRIPTION_CHARS - 1)}…`;
+  return `${sliceWellFormed(value, LIST_DESCRIPTION_CHARS - 1)}…`;
 }
 
 export async function listBoardTickets(
@@ -152,7 +152,6 @@ export async function listBoardTickets(
     cursor?: string;
   },
 ) {
-  if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
   let status: TicketStatus | undefined;
   if (input.status !== undefined) {
     status = coerceInputStatus(input.status);
@@ -198,7 +197,6 @@ export async function listBoardTickets(
 }
 
 export async function getTicket(deps: TicketToolDeps, input: { spaceId: string; ref: string }) {
-  if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
   const ref = input.ref.trim();
   if (!ref) return { error: "ref is required." };
   const board = await ensureBoard(deps.prisma, input.spaceId);
@@ -228,7 +226,6 @@ export async function createTicket(
     due?: unknown;
   },
 ) {
-  if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
   const parsed = CreateTicketInput.safeParse({
     ...input,
     ...clearableDates(input),
@@ -302,7 +299,6 @@ export async function updateTicket(
     due?: unknown;
   },
 ) {
-  if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
   const parsed = UpdateTicketInput.safeParse({
     ...input,
     ...clearableDates(input),
@@ -402,7 +398,6 @@ export async function commentTicket(
     attachments?: TicketAttachment[];
   },
 ) {
-  if (!deps.ticketBoardEnabled) return { error: "Board unavailable." };
   const parsed = CommentTicketInput.safeParse({
     ticketId: input.id,
     body: input.body,

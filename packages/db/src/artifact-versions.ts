@@ -1,11 +1,15 @@
-import { MCP_APP_MIME_TYPE } from "@rakazo/contracts";
+import { MCP_APP_MIME_TYPE, STEP_SCREENSHOT_MIME_TYPES } from "@rakazo/contracts";
 import type { PrismaClient } from "./client.js";
 import { Prisma } from "./client.js";
 import { isUniqueViolation } from "./prisma-errors.js";
 
-/** Files people and bots see: an MCP app's HTML is kept as an artifact only for its chat card. */
+/**
+ * Files people and bots see. An MCP app's HTML is kept as an artifact only for its chat card, and
+ * a reply's kept screenshot only for the bot's later turns.
+ */
+export const HIDDEN_ARTIFACT_MIME_TYPES = [MCP_APP_MIME_TYPE, ...STEP_SCREENSHOT_MIME_TYPES];
 export const LISTED_ARTIFACT = {
-  mimeType: { not: MCP_APP_MIME_TYPE },
+  mimeType: { notIn: HIDDEN_ARTIFACT_MIME_TYPES },
 } satisfies Prisma.ArtifactWhereInput;
 
 export async function resolveNextArtifactVersion(
@@ -23,6 +27,7 @@ export async function resolveNextArtifactVersion(
       botId: params.botId,
       groupId: params.groupId ?? null,
       name: { equals: params.name, mode: "insensitive" },
+      standalone: false,
       // An MCP app's hidden HTML never starts or joins a file's version history.
       ...LISTED_ARTIFACT,
     },
@@ -54,6 +59,7 @@ export async function withResolvedArtifactVersion<T>(
     name: string;
   },
   attempt: (db: Prisma.TransactionClient, version: ArtifactVersionWrite) => Promise<T>,
+  options?: { timeout?: number },
 ): Promise<T> {
   let lastError: unknown;
   for (let i = 0; i < MAX_VERSION_ALLOCATION_ATTEMPTS; i++) {
@@ -64,7 +70,7 @@ export async function withResolvedArtifactVersion<T>(
         `);
         const version = await resolveNextArtifactVersion(tx, params);
         return await attempt(tx, version);
-      });
+      }, options);
     } catch (error) {
       if (!isUniqueViolation(error)) throw error;
       lastError = error;

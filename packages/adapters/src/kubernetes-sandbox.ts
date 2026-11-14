@@ -31,6 +31,7 @@ import { COMPUTER_CACHE_ENV } from "@rakazo/core/node/desktop-runtime";
 import type { RawExecEvent } from "./exec-computer.js";
 import { ExecComputer, COMPUTER_IMAGE_WORKSPACE as WORKSPACE } from "./exec-computer.js";
 import { LinuxDesktop, onBotScreen } from "./linux-desktop.js";
+import { sandboxNotFoundError } from "./sandbox-errors.js";
 
 const DISPLAY_START = 20;
 const DEFAULT_NAMESPACE = "rakazo-sandboxes";
@@ -634,15 +635,18 @@ export class KubernetesSandboxProvider implements SandboxProvider {
           ),
         );
         await Promise.race([
-          connecting.then((connected) => {
-            socket = connected;
-            if (done) {
-              connected.close();
-              return;
-            }
-            connected.onclose = () => finish(1);
-            connected.onerror = (event) => fail(event.error ?? new Error("Kubernetes exec failed"));
-          }, fail),
+          connecting.then(
+            (connected) => {
+              socket = connected;
+              if (done) {
+                connected.close();
+                return;
+              }
+              connected.onclose = () => finish(1);
+              connected.onerror = (event) => fail(execSocketError(event));
+            },
+            (event) => fail(execSocketError(event)),
+          ),
           completed,
         ]);
       }
@@ -650,7 +654,20 @@ export class KubernetesSandboxProvider implements SandboxProvider {
         if (!queue.length) await new Promise<void>((resolve) => (wake = resolve));
         while (queue.length) yield queue.shift()!;
       }
-      if (failure) throw failure;
+      if (failure) {
+        if (failure instanceof Error && /Unexpected server response: 404\b/.test(failure.message)) {
+          let pod: V1Pod | undefined;
+          try {
+            pod = await this.readPod(this.podId(computer), signal);
+          } catch {
+            throw failure;
+          }
+          if (!pod || isTerminalPod(pod) || pod.metadata?.deletionTimestamp) {
+            throw sandboxGone(this.podId(computer), failure);
+          }
+        }
+        throw failure;
+      }
     } finally {
       clearTimeout(timeout);
       signal.removeEventListener("abort", abort);
@@ -660,6 +677,12 @@ export class KubernetesSandboxProvider implements SandboxProvider {
       stderr?.destroy();
     }
   }
+}
+
+/** A socket reports failure with an event whose fields are not enumerable, so it logs as `{}`. */
+function execSocketError(event: unknown): unknown {
+  const { error, message } = event as { error?: unknown; message?: string };
+  return event instanceof Error ? event : (error ?? new Error(message || "Kubernetes exec failed"));
 }
 
 let kubernetesModule: Promise<typeof KubernetesClient> | undefined;
@@ -706,9 +729,7 @@ function podMountsHome(pod: V1Pod, homeKey: string, claimName: string | undefine
 }
 
 function sandboxGone(name: string, cause?: unknown): Error {
-  const error = new Error(`Kubernetes computer ${name} no longer exists`, { cause });
-  error.name = "SandboxNotFoundError";
-  return error;
+  return sandboxNotFoundError(`Kubernetes computer ${name} no longer exists`, { cause });
 }
 
 function isTerminalPod(pod: V1Pod): boolean {

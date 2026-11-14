@@ -122,7 +122,7 @@ describePostgres("ticket approval and replies (PostgreSQL)", () => {
           await system(() => handles.prisma.bot.findFirstOrThrow({ where: { id: owner.id } }))
         ).userId,
       };
-      const deps = { prisma: handles.prisma, ticketBoardEnabled: true };
+      const deps = { prisma: handles.prisma, deploymentLabs: ["board"] };
       await runAsTenant(tenant, () =>
         commentTicket(deps, {
           spaceId: ticket.spaceId,

@@ -1,5 +1,4 @@
 import type { AgentRunRequest, AgentRuntimeEvent, BackgroundJob } from "@rakazo/adapter-kit";
-import { messagingProgressJob } from "@rakazo/adapter-kit";
 import type { MessageBlock } from "@rakazo/contracts";
 import type { AppendEventInput, Prisma } from "@rakazo/db";
 import {
@@ -9,13 +8,18 @@ import {
   RunHistoryWriteError,
 } from "@rakazo/db";
 import { describe, expect, it, vi } from "vitest";
-import { PARTIAL_REPLY_NOTE } from "./automated-messages.js";
+import { PARTIAL_REPLY_NOTE } from "./automated-messages.prompt.js";
 import { loadBotMessageContext, returnBotMessageOutcome } from "./bot-messages.js";
 import type * as ComputerLifecycleModule from "./computer-lifecycle.js";
 import { createRunExecutor } from "./executor.js";
 import { createJobReconciler } from "./job-reconciler.js";
 import type * as ModelVisionModule from "./model-vision.js";
-import { GROUP_UNADDRESSED_REPLY_GUIDANCE, messagesModeReplyGuidance } from "./run-replies.js";
+import type * as RunNotificationsModule from "./run-notifications.js";
+import { notifyRun } from "./run-notifications.js";
+import {
+  GROUP_UNADDRESSED_REPLY_GUIDANCE,
+  messagesModeReplyGuidance,
+} from "./run-replies.prompt.js";
 import { PEER_NOTHING_NEW_REPLY } from "./silent-reply.js";
 import { MID_TURN_PROGRESS_MIN_TURN_AGE_MS, userProgressClientNonce } from "./user-progress.js";
 
@@ -29,6 +33,11 @@ const vision = vi.hoisted(() => ({ seesImages: false }));
 vi.mock("./model-vision.js", async (importOriginal) => ({
   ...(await importOriginal<typeof ModelVisionModule>()),
   modelAcceptsImageInput: () => vision.seesImages,
+}));
+
+vi.mock("./run-notifications.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof RunNotificationsModule>()),
+  notifyRun: vi.fn(async () => undefined),
 }));
 
 vi.mock("./bot-messages.js", () => ({
@@ -78,6 +87,8 @@ async function runTurn(
     priorBotMessage?: boolean;
     /** A messaging run from a 1:1 chat instead of a group channel. */
     directChat?: boolean;
+    /** The peer message answers a request this bot sent, so the user reads the reply. */
+    repliesToRequest?: boolean;
   } = {},
 ) {
   vi.mocked(loadBotMessageContext).mockResolvedValue({
@@ -87,7 +98,7 @@ async function runTurn(
     text: "Look again",
     intent,
     hop: 1,
-    repliesToRequest: false,
+    repliesToRequest: options.repliesToRequest ?? false,
   });
   const run = {
     id: "run-1",
@@ -300,6 +311,7 @@ async function runTurn(
       updateManyAndReturn: vi.fn(async () => [{ fence: 1 }]),
       updateMany: vi.fn(async () => ({ count: 1 })),
     },
+    $executeRaw: vi.fn(async () => 0),
     $queryRaw: vi.fn(async () => [{ id: "row-1", scope: "dedicated" }]),
     $transaction: vi.fn(async (fn: (tx: unknown) => Promise<unknown>): Promise<unknown> => {
       const messageCount = messages.length;
@@ -322,6 +334,9 @@ async function runTurn(
   });
   const pauseRunForInput = vi.fn(async () => ({ continuationRunId: null }));
   const jobs = { enqueue: vi.fn(async (_job: BackgroundJob) => undefined) };
+  const messagingDelivery = {
+    deliverRun: vi.fn(async (_runId: string, _options?: { progress?: boolean }) => undefined),
+  };
   vision.seesImages = options.graphical ?? false;
   const executor = createRunExecutor({
     deploymentModelKey: "fixture-model-key",
@@ -348,6 +363,7 @@ async function runTurn(
     memoryProviders: { resolve: async () => null },
     events: { append, finalizeRun, pauseRunForInput, notify: vi.fn(async () => undefined) },
     jobs,
+    messagingDelivery,
     secrets,
     ...(options.graphical
       ? {
@@ -377,7 +393,7 @@ async function runTurn(
     prisma,
     runtimeRun,
     run,
-    jobs,
+    messagingDelivery,
   };
 }
 
@@ -682,7 +698,16 @@ describe("notes that can't be posted as messages", () => {
     expect(finalText(finalizeRun)).toBe("Saved.");
     expect(finalizeRun.mock.calls[0]![0].blocks).toContainEqual({
       kind: "steps",
-      steps: [{ label: "Save event", count: 1, note: "The meeting is with Anna." }],
+      steps: [
+        {
+          label: "Save event",
+          tool: "save_event",
+          count: 1,
+          note: "The meeting is with Anna.",
+          // What the call was made with, for a later turn to replay.
+          calls: [{ arguments: "{}" }],
+        },
+      ],
     });
   });
 
@@ -855,10 +880,8 @@ describe("notes that can't be posted as messages", () => {
 });
 
 describe("interim messages in a chat app", () => {
-  const sentOn = (jobs: Awaited<ReturnType<typeof runTurn>>["jobs"]) =>
-    jobs.enqueue.mock.calls
-      .filter(([job]) => job.name === "messaging.progress")
-      .map(([job]) => job);
+  const sentOn = (delivery: Awaited<ReturnType<typeof runTurn>>["messagingDelivery"]) =>
+    delivery.deliverRun.mock.calls;
   const texts = (messages: Awaited<ReturnType<typeof runTurn>>["messages"]) =>
     messages.map((message) =>
       message.blocks.map((block) => ("text" in block ? block.text : "")).join(""),
@@ -876,19 +899,19 @@ describe("interim messages in a chat app", () => {
           yield { type: "done", text: "" };
         },
       });
-      return { messages: texts(turn.messages), jobs: sentOn(turn.jobs) };
+      return { messages: texts(turn.messages), sends: sentOn(turn.messagingDelivery) };
     };
     const chat = await run({ trigger: "messaging", directChat: true });
     expect(chat.messages).toEqual(["Checking the logs.", "Still looking."]);
-    expect(chat.jobs).toEqual(Array(2).fill(messagingProgressJob("run-1")));
+    expect(chat.sends).toEqual(Array(2).fill(["run-1", { progress: true }]));
     // A group run posts once, when it ends; an in-app run has no chat app to reach.
     const group = await run({ trigger: "messaging" });
-    expect(group).toEqual({ messages: chat.messages, jobs: [] });
-    expect((await run({ trigger: "user" })).jobs).toEqual([]);
+    expect(group).toEqual({ messages: chat.messages, sends: [] });
+    expect((await run({ trigger: "user" })).sends).toEqual([]);
   });
 
   it("sends a note posted on a long turn on at once", async () => {
-    const { messages, jobs } = await runTurn(
+    const { messages, messagingDelivery } = await runTurn(
       "All done.",
       false,
       ["Opening the report."],
@@ -897,7 +920,7 @@ describe("interim messages in a chat app", () => {
       { trigger: "messaging", directChat: true, startedAt: new Date(Date.now() - 120_000) },
     );
     expect(texts(messages)).toEqual(["Opening the report."]);
-    expect(sentOn(jobs)).toEqual([messagingProgressJob("run-1")]);
+    expect(sentOn(messagingDelivery)).toEqual([["run-1", { progress: true }]]);
   });
 });
 
@@ -2143,5 +2166,34 @@ describe("a group member the message named nobody for", () => {
     });
     expect(result.finalizeRun.mock.calls[0]![0].blocks).not.toEqual([]);
     expect(result.finalizeRun).toHaveBeenCalledWith(expect.objectContaining({ markUnread: true }));
+  });
+});
+
+describe("completion pushes", () => {
+  const completionPushes = () =>
+    vi.mocked(notifyRun).mock.calls.filter(([, , message]) => message.kind === "completion");
+
+  it("sends none for an agent-to-agent turn that leaves the chat read", async () => {
+    vi.mocked(notifyRun).mockClear();
+    const { finalizeRun } = await runTurn("Pinned.", true, "I will pin it.", [], "request", {
+      trigger: "bot_message",
+    });
+    expect(finalizeRun).toHaveBeenCalledWith(expect.objectContaining({ markUnread: false }));
+    expect(completionPushes()).toEqual([]);
+  });
+
+  it("sends one for the answer to a request the bot made for the user", async () => {
+    vi.mocked(notifyRun).mockClear();
+    await runTurn("Both bots are pinned.", true, "I will check.", [], "fyi", {
+      trigger: "bot_message",
+      repliesToRequest: true,
+    });
+    expect(completionPushes()).toHaveLength(1);
+  });
+
+  it("sends one for a reply to the user", async () => {
+    vi.mocked(notifyRun).mockClear();
+    await runTurn("Done.", false, "I will check.", [], "fyi", { trigger: "user" });
+    expect(completionPushes()).toHaveLength(1);
   });
 });

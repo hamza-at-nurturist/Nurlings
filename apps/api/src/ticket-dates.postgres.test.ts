@@ -100,7 +100,7 @@ describePostgres("ticket dates (PostgreSQL)", () => {
       const deps = {
         prisma: handles.prisma,
         jobs: { enqueue } as never,
-        ticketBoardEnabled: true,
+        deploymentLabs: ["board"],
         notifications: () => ({ describe: vi.fn(), send }) as never,
       };
       const tenant = {
