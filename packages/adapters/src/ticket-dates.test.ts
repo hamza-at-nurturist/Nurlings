@@ -159,7 +159,7 @@ describe("runTicketDates", () => {
   });
   afterEach(() => vi.useRealTimers());
 
-  function setup(overrides: Record<string, unknown>) {
+  function setup(overrides: Record<string, unknown>, labs: string[] = ["board"]) {
     let row: Record<string, unknown> = {
       id: "t1",
       spaceId: "ws",
@@ -175,6 +175,7 @@ describe("runTicketDates", () => {
     };
     const tx = {
       $queryRaw: vi.fn(async () => []),
+      user: { findUnique: vi.fn(async () => ({ labs })) },
       ticket: {
         findFirst: vi.fn(async () => row),
         update: vi.fn(async ({ data }: { data: Record<string, unknown> }) => {
@@ -187,7 +188,7 @@ describe("runTicketDates", () => {
       $transaction: vi.fn(async (fn: (client: typeof tx) => Promise<unknown>) => fn(tx)),
       user: { findUnique: vi.fn(async () => ({ timezone: "America/New_York" })) },
     };
-    const deps = { prisma, jobs: {}, ticketBoardEnabled: true } as never;
+    const deps = { prisma, jobs: {} } as never;
     return { deps, tx, row: () => row };
   }
 
@@ -260,12 +261,11 @@ describe("runTicketDates", () => {
     expect(wake).not.toHaveBeenCalled();
   });
 
-  it("does nothing while the board is off", async () => {
-    const s = setup({ startAt: now });
-    await runTicketDates({ ...(s.deps as object), ticketBoardEnabled: false } as never, {
-      ticketId: "t1",
-    });
-    expect(s.tx.ticket.findFirst).not.toHaveBeenCalled();
+  it("stays quiet for a ticket whose owner has the board off", async () => {
+    const s = setup({ startAt: now }, []);
+    await runTicketDates(s.deps, { ticketId: "t1" });
+    expect(wake).not.toHaveBeenCalled();
+    expect(notify).not.toHaveBeenCalled();
   });
 });
 

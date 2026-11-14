@@ -113,10 +113,4 @@ describe("approveTicket", () => {
     const s = setup(null);
     await expect(approveTicket(s.deps, input)).resolves.toEqual({ error: "Ticket not found." });
   });
-
-  it("does nothing while the board is off", async () => {
-    const s = setup("review", false);
-    await expect(approveTicket(s.deps, input)).resolves.toEqual({ error: "Board unavailable." });
-    expect(s.prisma.$transaction).not.toHaveBeenCalled();
-  });
 });

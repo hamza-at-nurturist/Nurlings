@@ -96,8 +96,6 @@ jobs:
           # Windows ships unsigned until Azure Artifact Signing is configured.
           WINDOWS_SIGNING: ${{ secrets.DESKTOP_WIN_AZURE_CLIENT_ID != '' }}
         shell: bash
-        env:
-          MAC_ONLY: ${{ vars.DESKTOP_RELEASE_MAC_ONLY }}
         run: |
           set -euo pipefail
           include='[{"os":"ubuntu-24.04","artifact":"linux"},{"os":"windows-2022","artifact":"windows"}]'

@@ -112,23 +112,23 @@ export function BotLookPicker({
           <div
             className={`grid place-items-center gap-2 ${organicIdentities ? "grid-cols-4 sm:grid-cols-8 sm:gap-1" : "grid-cols-4"}`}
           >
+            {offeredShapes.map((shape, position) => (
+              <BotShapePreview
+                key={shape}
+                label={t`Shape ${position + 1}`}
+                color={botLookWithShape(currentColor, shape)}
+                selected={shapeIndex === shape}
+                onClick={() => onChange(botLookWithShape(currentColor, shape))}
+              />
+            ))}
             {organicIdentities?.map((organicIdentity, index) => (
               <BotShapePreview
                 key={organicIdentity}
                 identity={organicIdentity}
-                label={t`Shape ${index + 1}`}
+                label={t`Shape ${offeredShapes.length + index + 1}`}
                 color={currentColor}
                 selected={isDefaultLook && identity === organicIdentity}
                 onClick={() => onChange(currentColor, organicIdentity)}
-              />
-            ))}
-            {offeredShapes.map((shape, position) => (
-              <BotShapePreview
-                key={shape}
-                label={t`Shape ${(organicIdentities?.length ?? 0) + position + 1}`}
-                color={botLookWithShape(currentColor, shape)}
-                selected={shapeIndex === shape}
-                onClick={() => onChange(botLookWithShape(currentColor, shape))}
               />
             ))}
           </div>

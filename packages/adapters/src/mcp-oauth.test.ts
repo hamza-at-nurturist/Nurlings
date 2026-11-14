@@ -1948,7 +1948,7 @@ describe("MCP OAuth", () => {
     expect(started.status).toBe("authorization_required");
     if (started.status !== "authorization_required") throw new Error("OAuth was not requested");
 
-    expect(registration).toMatchObject({ client_name: "Rakazo" });
+    expect(registration).toMatchObject({ client_name: brand.name });
     expect(registration).not.toHaveProperty("token_endpoint_auth_method");
     expect(new URL(started.authorizationUrl).searchParams.get("client_id")).toBe(
       "confidential-client-id",
