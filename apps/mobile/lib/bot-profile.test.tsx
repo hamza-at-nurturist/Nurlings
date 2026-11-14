@@ -17,6 +17,7 @@ import type * as NativeControls from "./native-controls";
 import { queryClient } from "./query";
 import type * as RoutineHelpers from "./routine";
 import { ROUTINES_POLL_MS, ROUTINES_RETRY_MS } from "./routine-store";
+import { branded } from "./test-brand";
 
 vi.mock("./haptics", () => ({
   hapticImpact: vi.fn(),
@@ -517,7 +518,7 @@ describe("bot profile", () => {
 });
 
 describe("bot profile notifications", () => {
-  const footer = "Get notified when this Bot finishes or needs input";
+  const footer = branded("Get notified when this Bot finishes or needs input");
   const notificationsSwitch = () =>
     container.querySelector<HTMLInputElement>('input[aria-label="Notifications"]');
 
@@ -776,7 +777,9 @@ describe("routines screen", () => {
 
     await act(async () => load([]));
     expect(container.querySelector("progress")).toBeNull();
-    expect(container.textContent).toBe("Ask this Bot in chat to set up a routine.New routine");
+    expect(container.textContent).toBe(
+      branded("Ask this Bot in chat to set up a routine.New routine"),
+    );
     rowFor("New routine")!.click();
     expect(push).toHaveBeenCalledWith({
       pathname: "/routine",
@@ -1593,7 +1596,7 @@ describe("artifacts opened for one bot", () => {
   it("lists only what bots made while Made by bots is chosen", async () => {
     await render(createElement(ArtifactsScreen));
     expect(container.textContent).toContain("No artifacts yet");
-    await act(async () => button("Made by bots").click());
+    await act(async () => button(branded("Made by bots")).click());
     expect(listSpaceArtifacts).toHaveBeenLastCalledWith({
       botId: "bot-fixture",
       madeByBots: true,
@@ -1633,7 +1636,7 @@ describe("artifacts opened for one bot", () => {
             : { items: [file("a", "first-report.md")], nextCursor: "page-2" },
     );
     await render(createElement(ArtifactsScreen));
-    await act(async () => button("Made by bots").click());
+    await act(async () => button(branded("Made by bots")).click());
     expect(container.textContent).toContain("first-report.md");
 
     await act(async () => button("End of list").click());
@@ -1687,7 +1690,7 @@ describe("artifacts opened for one bot", () => {
     );
     screen.endOnLayout = true;
     try {
-      await act(async () => button("Made by bots").click());
+      await act(async () => button(branded("Made by bots")).click());
     } finally {
       screen.endOnLayout = false;
     }

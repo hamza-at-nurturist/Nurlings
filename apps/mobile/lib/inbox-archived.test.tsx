@@ -14,6 +14,7 @@ import { InboxListFooter } from "../components/inbox-render-item";
 import { ArchivedChatsRow, CompactRowsContext } from "../components/inbox-rows";
 import type { loadAllArchivedChats } from "./archived-chats";
 import { notifyArchivedChatsChanged, onArchivedChatsChanged } from "./archived-chats";
+import { branded } from "./test-brand";
 import { useArchivedCount } from "./use-archived-count";
 
 type AlertButton = { text: string; onPress?: () => void };
@@ -222,7 +223,7 @@ describe("archived chats row", () => {
   it("sits at the very end of the inbox list and opens the existing Archived screen", () => {
     act(() => root.render(<InboxListFooter createHint archivedCount={3} />));
     expect(Array.from(container.children, (child) => child.textContent)).toEqual([
-      "Tap + to create a bot",
+      branded("Tap + to create a bot"),
       "Archived3",
     ]);
     act(() => container.querySelector("button")!.click());
@@ -312,7 +313,7 @@ describe("bot profile menu archive notifications", () => {
   function renderActions() {
     let actions: { text: string; onPress: () => void }[] = [];
     function Header() {
-      actions = useBotProfileActions("bot-b", "Bot");
+      actions = useBotProfileActions("bot-b", branded("Bot"));
       return null;
     }
     act(() => root.render(<Header />));
@@ -341,7 +342,10 @@ describe("bot profile menu archive notifications", () => {
     await flush();
     expect(listener).toHaveBeenCalledOnce();
     expect(mocks.removeFromSearchInbox).toHaveBeenCalledOnce();
-    expect(mocks.alert).toHaveBeenCalledExactlyOnceWith("Could not archive bot", "failure");
+    expect(mocks.alert).toHaveBeenCalledExactlyOnceWith(
+      branded("Could not archive bot"),
+      "failure",
+    );
     stop();
   });
 

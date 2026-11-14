@@ -16,6 +16,7 @@ import { retainInboxValue } from "./inbox-retention";
 import type { InboxItem, InboxSpace } from "./inbox-spaces";
 import { inboxItemKey, spaceInboxItems } from "./inbox-spaces";
 import type { MobileBot } from "./mobile-types";
+import { branded } from "./test-brand";
 import { useCollapsedSections } from "./use-collapsed-sections";
 import { useInboxDay } from "./use-inbox-day";
 import { usePublishSearchInbox } from "./use-publish-search-inbox";
@@ -360,7 +361,10 @@ it.each(["midnight", "focus", "foreground"])(
     const sixDaysAgo = new Date(2026, 9, 4, 12, 30).toISOString();
     // Keep the response and every row object identical throughout the date change.
     const items = [today, sixDaysAgo].flatMap((updatedAt): InboxItem[] => [
-      { type: "bot", bot: { id: updatedAt, name: "Helper", preview: "", updatedAt } as MobileBot },
+      {
+        type: "bot",
+        bot: { id: updatedAt, name: "Helper", preview: "", updatedAt } as MobileBot,
+      },
       {
         type: "group",
         group: { id: updatedAt, name: "Team", preview: "", members: [], updatedAt },
@@ -766,8 +770,8 @@ it("creates a bot in the heading's own space, and not while a space switch or re
   render(<List items={items} spaceId="space-home" options={{ createBotInSpace }} />);
   const newBot = (menu: NativeRowMenu) => menu.actions.find((entry) => entry.id === "new-bot");
   expect(ui.rowMenus.map((menu) => newBot(menu))).toEqual([
-    expect.objectContaining({ title: "New bot", disabled: false }),
-    expect.objectContaining({ title: "New bot", disabled: false }),
+    expect.objectContaining({ title: branded("New bot"), disabled: false }),
+    expect.objectContaining({ title: branded("New bot"), disabled: false }),
   ]);
   // A heading of a space that is not selected still makes the bot in that space.
   act(() => ui.rowMenus[1]!.onAction("new-bot"));
@@ -780,7 +784,7 @@ it("creates a bot in the heading's own space, and not while a space switch or re
 });
 
 it("pins a bot made for a space to that space while another is selected", async () => {
-  const bot = { id: "bot-new", name: "New Bot", spaceId: "space-work" };
+  const bot = { id: "bot-new", name: branded("New Bot"), spaceId: "space-work" };
   const spaces = () =>
     ui.rpc.mock.calls.map(([method, , options]) => [
       method,
@@ -863,14 +867,14 @@ it("does not open a created bot after its account or server changes", async () =
   });
   await vi.waitFor(() => expect(complete).toBeDefined());
   ui.sameSession = false;
-  complete({ id: "bot-new", name: "New Bot" });
+  complete({ id: "bot-new", name: branded("New Bot") });
   await creating;
   ui.sameSession = true;
   expect(openChat).not.toHaveBeenCalled();
 });
 
 it("opens a heading-created bot in its space after the selection changes during creation", async () => {
-  const bot = { id: "bot-new", name: "New Bot", spaceId: "space-work" };
+  const bot = { id: "bot-new", name: branded("New Bot"), spaceId: "space-work" };
   let complete!: (value: typeof bot) => void;
   ui.rpc.mockReset().mockImplementation(async (method: string) => {
     if (method === "bots/create") return new Promise<typeof bot>((resolve) => (complete = resolve));
@@ -927,7 +931,7 @@ it("asks for a model instead of making the first bot when the account has none",
   ui.alert.mockReset();
   ui.rpc.mockReset().mockImplementation(async (method: string) => {
     if (method === "me") return me;
-    return method === "bots/list" ? bots : { id: "bot-new", name: "New Bot" };
+    return method === "bots/list" ? bots : { id: "bot-new", name: branded("New Bot") };
   });
   const openChat = vi.fn();
   const create = () => createInboxBot({ input: { name: "Scout" }, openChat });
@@ -1028,7 +1032,7 @@ it("asks for a model instead of making the first bot when the account has none",
 });
 
 it("adds a bot made from the inbox's Create menu to the inbox roster before opening its chat", async () => {
-  const bot = { id: "bot-new", name: "New Bot", spaceId: "space-a" };
+  const bot = { id: "bot-new", name: branded("New Bot"), spaceId: "space-a" };
   const askedIn = { generation: 7, apiBase: "http://api.test" };
   const calls: string[] = [];
   ui.rpc.mockReset().mockImplementation(async (method: string) => {
@@ -1163,7 +1167,7 @@ it.each([
     expect(ui.rpc).toHaveBeenCalledWith("bots/create", expect.anything(), undefined),
   );
   ui.searchInboxSession.mockReturnValue(current);
-  finish({ id: "bot-new", name: "New Bot" });
+  finish({ id: "bot-new", name: branded("New Bot") });
   await creating;
   expect(ui.hapticSuccess).not.toHaveBeenCalled();
 });

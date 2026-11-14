@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { act, createElement, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
+import { branded } from "./test-brand";
 
 type Button = { text: string; onPress?: (value?: string) => void };
 type Summary = {
@@ -209,7 +210,7 @@ it("shows what the server has after a rename, pin or delete whose answer was los
 
   await act(async () => host.menus.get("Launch")!.press("delete"));
   await act(async () => host.alert!.find((each) => each.text === "Delete")!.onPress?.());
-  expect(rows(container)).toEqual(["Pages this bot builds for you appear here."]);
+  expect(rows(container)).toEqual([branded("Pages this bot builds for you appear here.")]);
   host.loseAnswer = false;
   await act(async () => root.unmount());
 });

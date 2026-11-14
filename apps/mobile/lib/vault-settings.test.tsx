@@ -9,6 +9,7 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import Vault from "../app/(settings)/vault";
 import { resetI18nForTests } from "./i18n";
 import { queryClient } from "./query";
+import { branded } from "./test-brand";
 
 // RFC 6238's test key, written in pieces so it never reads as a saved secret.
 const TEST_KEY = ("GEZDGNBV" + "GY3TQOJQ").repeat(2);
@@ -435,7 +436,9 @@ beforeEach(() => {
       return { ok: true };
     }
     if (proc === "vault/activity")
-      return input.name === "github" ? [{ botName: "Research bot" }, { botName: "Helper" }] : [];
+      return input.name === "github"
+        ? [{ botName: branded("Research bot") }, { botName: "Helper" }]
+        : [];
     if (proc === "vault/reveal") {
       if (input.name === "example-login") {
         return {
@@ -573,7 +576,7 @@ it("saves a new item with Block, and opens it saying an older server dropped the
   await act(async () => button("Close", dialog())!.click());
   expect(container.querySelector('dialog[aria-label^="Edit"]')).toBeNull();
   expect(detail()?.getAttribute("data-notice")).toBe(
-    "Saved, but this server can't block bots yet.",
+    branded("Saved, but this server can't block bots yet."),
   );
   // The notice belongs to that save: a later open of the item doesn't repeat it.
   await act(async () => button("Edit", dialog())!.click());
@@ -618,7 +621,7 @@ it("offers the owner's bots once the server keeps a choice, and says when it did
   await act(async () => button("Close", dialog())!.click());
   expect(
     container.querySelector('dialog[aria-label="Detail netbird-key"]')?.getAttribute("data-notice"),
-  ).toBe("Saved, but this server can't limit an item to chosen bots.");
+  ).toBe(branded("Saved, but this server can't limit an item to chosen bots."));
 });
 
 it("reads the owner's bots again for each edit", async () => {
@@ -710,7 +713,7 @@ it("says an account item's other Spaces choose their own bots, and offers none f
   await act(async () => button("Variable", menu("New item"))!.click());
   expect(dialog().getAttribute("data-bots")).toBe("Ada");
   expect(dialog().getAttribute("data-bots-note")).toBe(
-    "This limits only this Space's bots. Your other Spaces choose for their own.",
+    branded("This limits only this Space's bots. Your other Spaces choose for their own."),
   );
   act(() => root.unmount());
   root = createRoot(container);
@@ -719,7 +722,7 @@ it("says an account item's other Spaces choose their own bots, and offers none f
   await act(async () => button("Variable", menu("New item"))!.click());
   expect(dialog().getAttribute("data-bots")).toBe("none");
   expect(dialog().getAttribute("data-bots-note")).toBe(
-    "This Space keeps its own vault, so its bots can't use account items.",
+    branded("This Space keeps its own vault, so its bots can't use account items."),
   );
 });
 
@@ -811,7 +814,7 @@ it("opens an item's detail on tap, and edits it from there or from its menu", as
   await open("api.github.com");
   expect(container.querySelector('dialog[aria-label="Detail github"]')).not.toBeNull();
   expect(state.rpc).toHaveBeenCalledWith("vault/activity", { scope: "account", name: "github" });
-  expect(dialog()?.getAttribute("data-uses")).toBe("Research bot,Helper");
+  expect(dialog()?.getAttribute("data-uses")).toBe(branded("Research bot,Helper"));
   await act(async () => button("Edit", dialog())!.click());
   expect(container.querySelector('dialog[aria-label="Edit api_key github"]')).not.toBeNull();
   await act(async () => button("Save", dialog())!.click());
@@ -850,7 +853,7 @@ it("offers saved contacts for a card's billing, and names a card's billing conta
 it("never shows an item's earlier uses once reading them again fails", async () => {
   await render();
   await open("api.github.com");
-  expect(dialog()?.getAttribute("data-uses")).toBe("Research bot,Helper");
+  expect(dialog()?.getAttribute("data-uses")).toBe(branded("Research bot,Helper"));
   await act(async () => button("Done", dialog())!.click());
   state.rpc.mockRejectedValueOnce(new Error("offline"));
   await open("api.github.com");
@@ -1099,7 +1102,7 @@ it("reviews a picked CSV export, imports only new logins and reminds to delete t
   // Which rows were left out, by row and site, never by username or password.
   const left = "Row 1 · Old · Not on an HTTPS site\nRow 2 · shop.example.com · Already saved";
   // Said before the logins are added, the one moment no Bots setting is in sight.
-  const botsNote = "Bots can use each imported login until you change its Bots setting.";
+  const botsNote = branded("Bots can use each imported login until you change its Bots setting.");
   expect(state.alert.mock.lastCall?.[1]).toBe(
     `To add: 1\nAlready saved: 1\nNot on an HTTPS site: 1\n\n${left}\n\n${botsNote}`,
   );
@@ -1143,7 +1146,7 @@ it("lists left-out rows with the wording and limit both apps share", async () =>
     ].join("\n"),
   );
   // With nothing to add, nothing is said of what bots may use.
-  expect(state.alert.mock.lastCall?.[1]).not.toContain("Bots can use");
+  expect(state.alert.mock.lastCall?.[1]).not.toContain(branded("Bots can use"));
 });
 
 it("drops an import's result that arrives once another screen covers this one", async () => {

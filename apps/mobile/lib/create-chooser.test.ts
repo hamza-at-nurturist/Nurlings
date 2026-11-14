@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMenuActions, isCreateAction } from "./create-chooser";
 import { resetI18nForTests } from "./i18n";
+import { branded } from "./test-brand";
 
 vi.mock("./material-icons", () => ({
   materialIcons: { person_add: 101, group: 102, grid_view: 103 },
@@ -12,7 +13,7 @@ describe("create menu", () => {
   it("uses SF Symbols on iOS, in the app language", () => {
     resetI18nForTests("de");
     expect(createMenuActions("ios")).toEqual([
-      { id: "bot", title: "Neuer Bot", image: "person.crop.circle.badge.plus" },
+      { id: "bot", title: branded("Neuer Bot"), image: "person.crop.circle.badge.plus" },
       { id: "group", title: "Neuer Gruppenchat", image: "person.2" },
       { id: "space", title: "Neuer privater Space", image: "square.grid.2x2" },
     ]);

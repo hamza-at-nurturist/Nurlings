@@ -6,6 +6,7 @@ import {
   BOT_INSTRUCTIONS_MAX_LENGTH,
   BOT_NAME_MAX_LENGTH,
   resolveBotAvatarSet,
+  SELECTABLE_BOT_AVATAR_SETS,
 } from "@rakazo/contracts";
 import {
   botLookState,
@@ -869,19 +870,21 @@ export default function BotSettingsScreen() {
                 </Text>
               </Pressable>
             ) : null}
-            <MenuPicker
-              label={t`Icon set`}
-              choices={[
-                { key: "organic", label: t`Original` },
-                { key: "rakazo", label: t`Rakazo` },
-              ]}
-              value={avatarSet}
-              onChange={(next) => {
-                setAvatarSet(resolveBotAvatarSet(next));
-                setColor((current) => botLookState(current).color);
-              }}
-              plain
-            />
+            {SELECTABLE_BOT_AVATAR_SETS.length > 1 ? (
+              <MenuPicker
+                label={t`Icon set`}
+                choices={[
+                  { key: "organic", label: t`Original` },
+                  { key: "rakazo", label: t`Rakazo` },
+                ]}
+                value={avatarSet}
+                onChange={(next) => {
+                  setAvatarSet(resolveBotAvatarSet(next));
+                  setColor((current) => botLookState(current).color);
+                }}
+                plain
+              />
+            ) : null}
             {bot ? (
               <BotLookPicker
                 value={color}

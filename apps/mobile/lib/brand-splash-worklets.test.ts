@@ -33,7 +33,7 @@ const babelOptions = {
 
 type Worklet = ((...args: unknown[]) => unknown) & {
   __initData?: { code: string };
-  __closure?: Record<string, unknown>;
+  __closure?: unknown[] | Record<string, unknown>;
 };
 
 /** Loads compiled module code, as the app bundle would see it. */
@@ -46,13 +46,12 @@ function load(code: string): Record<string, unknown> {
 /** The worklet as the UI thread runs it: its own code plus its captured closure, nothing else. */
 function onUiThread(worklet: Worklet): (...args: unknown[]) => unknown {
   if (!worklet.__initData) throw new Error(`${worklet.name} is not a worklet`);
-  const closure: Record<string, unknown> = {};
-  for (const [name, value] of Object.entries(worklet.__closure ?? {})) {
-    closure[name] =
-      typeof value === "function" && (value as Worklet).__initData
-        ? onUiThread(value as Worklet)
-        : value;
-  }
+  // The worklets plugin captures values by position (an array) since react-native-worklets 0.13.
+  const closure = Object.values(worklet.__closure ?? {}).map((value) =>
+    typeof value === "function" && (value as Worklet).__initData
+      ? onUiThread(value as Worklet)
+      : value,
+  );
   const fn = vm.runInNewContext(`(${worklet.__initData.code})`, {}) as (
     ...args: unknown[]
   ) => unknown;
@@ -158,7 +157,9 @@ describe("splash worklets on the UI thread", () => {
         ...babelOptions,
         presets: [[babelOptions.presets[0], { isTSX: true, allExtensions: true }]],
       });
-      const worklets = [...code.matchAll(/code: "(function [^"]*?)\{/g)].map((match) => match[1]);
+      const worklets = [...code.matchAll(/code: "\(?(function [^"]*?)\{/g)].map(
+        (match) => match[1],
+      );
       expect(worklets.length, file).toBeGreaterThan(0);
       for (const head of worklets) expect(head, file).not.toContain("=");
     }

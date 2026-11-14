@@ -34,6 +34,7 @@ import type { AiRecipient } from "@rakazo/contracts";
 import { Alert } from "react-native";
 import { FOREGROUND_FALLBACK_MS, promptAiConsent } from "./ai-consent";
 import { resetI18nForTests } from "./i18n";
+import { branded } from "./test-brand";
 
 /** A catalog message in the active language, looked up as the compiled macro does. */
 function t(message: string, values?: Record<string, string>) {
@@ -104,7 +105,7 @@ describe("mobile AI consent prompt", () => {
   it("omits empty details from the consent message", async () => {
     const pending = promptAiConsent({ ...recipient, detail: "" });
     expect(native.alert.mock.calls[0]?.[1]).toBe(
-      `${MODEL_DISCLOSURE}\n\nYou can turn this off in Account → AI data sharing.`,
+      `${branded(MODEL_DISCLOSURE)}\n\nYou can turn this off in Account → AI data sharing.`,
     );
     currentAlert().buttons[0]?.onPress?.();
     await expect(pending).resolves.toBe(false);

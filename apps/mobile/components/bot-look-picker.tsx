@@ -6,7 +6,8 @@ import {
   botLookState,
   botLookWithColor,
   botLookWithShape,
-  SHIPPED_BOT_AVATAR_SHAPE_KEYS,
+  PICKABLE_ORGANIC_SHAPE_INDEXES,
+  PINNED_FAMILY_FIRST_SHAPE_INDEX,
 } from "@rakazo/core";
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -38,6 +39,11 @@ export function BotLookPicker({
   const tokens = useMobileTokens();
   const { photo, shapeIndex: shape, color, defaultLook } = botLookState(value);
   const labeled = !organicIdentities;
+  // The family bodies are the identities' own previews when those are offered, so only the brand
+  // blob and the original bodies come from the shapes.
+  const offeredShapes = organicIdentities
+    ? PICKABLE_ORGANIC_SHAPE_INDEXES.filter((index) => index < PINNED_FAMILY_FIRST_SHAPE_INDEX)
+    : PICKABLE_ORGANIC_SHAPE_INDEXES;
 
   return (
     <View style={{ gap: 20 }}>
@@ -45,12 +51,27 @@ export function BotLookPicker({
         <View>
           {labeled ? <Label>{t`Shape`}</Label> : null}
           <View accessibilityRole="radiogroup" style={grid}>
+            {offeredShapes.map((shapeIndex, position) => (
+              <Choice
+                disabled={disabled}
+                key={shapeIndex}
+                label={t`Shape ${ph({ number: position + 1 })}`}
+                selected={shape === shapeIndex}
+                onPress={() => onChange(botLookWithShape(color, shapeIndex))}
+              >
+                <BotAvatar
+                  color={botLookWithShape(color, shapeIndex)}
+                  identity={identity}
+                  size={40}
+                />
+              </Choice>
+            ))}
             {organicIdentities ? (
               organicIdentities.map((organic, index) => (
                 <Choice
                   disabled={disabled}
                   key={organic}
-                  label={t`Shape ${ph({ number: index + 1 })}`}
+                  label={t`Shape ${ph({ number: offeredShapes.length + index + 1 })}`}
                   selected={defaultLook && identity === organic}
                   onPress={() => onChange(color, organic)}
                 >
@@ -67,17 +88,6 @@ export function BotLookPicker({
                 <BotAvatar color={color} identity={identity} size={40} />
               </Choice>
             )}
-            {SHIPPED_BOT_AVATAR_SHAPE_KEYS.map((key, index) => (
-              <Choice
-                disabled={disabled}
-                key={key}
-                label={t`Shape ${ph({ number: index + 1 + (organicIdentities?.length ?? 0) })}`}
-                selected={shape === index}
-                onPress={() => onChange(botLookWithShape(color, index))}
-              >
-                <BotAvatar color={botLookWithShape(color, index)} identity={identity} size={40} />
-              </Choice>
-            ))}
           </View>
         </View>
       ) : null}

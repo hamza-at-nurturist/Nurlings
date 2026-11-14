@@ -133,6 +133,7 @@ vi.mock("../components/native-switch", () => ({
 import type { LoginFieldInput } from "@rakazo/contracts";
 import { SecretAskSheet } from "../components/secret-ask-sheet";
 import { resetI18nForTests } from "./i18n";
+import { branded } from "./test-brand";
 
 const onClose = vi.fn();
 const onSave = vi.fn<(fields: LoginFieldInput[], remember: boolean) => Promise<void>>();
@@ -410,11 +411,11 @@ it("clears both fields and shows a generic error when saving fails", async () =>
 it.each([
   [
     BLOCKED_ITEM_ANSWER,
-    "This item is blocked for bots. Allow it in the Vault, or dismiss the request.",
+    branded("This item is blocked for bots. Allow it in the Vault, or dismiss the request."),
   ],
   [
     UNCHOSEN_ITEM_ANSWER,
-    "This bot can't use this item. Change it in the Vault, or dismiss the request.",
+    branded("This bot can't use this item. Change it in the Vault, or dismiss the request."),
   ],
 ])("says why only when bots can't use the item it waited for (%s)", async (answer, shown) => {
   onSave.mockRejectedValue(new Error(answer));
