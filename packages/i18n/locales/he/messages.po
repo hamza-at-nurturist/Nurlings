@@ -1793,6 +1793,7 @@ msgstr "שואל לפני שליחה, הוצאת כסף או שינוי של מ�
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "שואל רק לפני רכישות ולפני השימוש הראשון במחשב שלך. רק כללי חסימה חלים."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "asleep"
 msgstr ""
@@ -2006,6 +2007,7 @@ msgstr "לחסום"
 msgid "Block"
 msgstr "לחסום"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "blocked"
 msgstr ""
@@ -4982,6 +4984,7 @@ msgstr "המסמך השתנה. יש לפתוח אותו מחדש כדי לערו
 msgid "Don’t have an account?"
 msgstr "אין חשבון?"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "done"
 msgstr ""
@@ -6042,6 +6045,7 @@ msgstr "ייבוא נתונים"
 msgid "In progress"
 msgstr "בתהליך"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "in review"
 msgstr ""
@@ -7122,6 +7126,7 @@ msgstr "נדרשת התחברות"
 msgid "Needs takeover"
 msgstr "נדרשת השתלטות"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "needs you"
 msgstr ""
@@ -9604,8 +9609,8 @@ msgstr "עזרה בהגדרה"
 msgid "Shape"
 msgstr "צורה"
 
-#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
-#. placeholder {0}: index + 1
+#. placeholder {0}: offeredShapes.length + index + 1
+#. placeholder {0}: position + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
 msgstr "צורה {0}"
@@ -10625,6 +10630,7 @@ msgstr "לא ניתן לקרוא את ההגדרות השמורות. יש להס
 msgid "They get {weeks} weeks free."
 msgstr "הם מקבלים {weeks} שבועות בחינם."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "thinking"
 msgstr ""

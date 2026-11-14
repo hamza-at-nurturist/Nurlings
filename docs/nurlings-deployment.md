@@ -11,17 +11,17 @@ and still start with `RAKAZO_`.
 `.github/workflows/publish-nurlings-images.yml` builds three amd64 images and pushes them to
 `ghcr.io/hamza-at-nurturist/nurlings/<image>`. Every segment of an image reference is lowercase.
 
-| Image | Contents |
-| --- | --- |
-| `ghcr.io/hamza-at-nurturist/nurlings/app` | api, worker, web and the sandbox supervisor |
+| Image                                          | Contents                                    |
+| ---------------------------------------------- | ------------------------------------------- |
+| `ghcr.io/hamza-at-nurturist/nurlings/app`      | api, worker, web and the sandbox supervisor |
 | `ghcr.io/hamza-at-nurturist/nurlings/computer` | the Linux desktop used as each bot computer |
-| `ghcr.io/hamza-at-nurturist/nurlings/updater` | the updater sidecar (not used, see below) |
+| `ghcr.io/hamza-at-nurturist/nurlings/updater`  | the updater sidecar (not used, see below)   |
 
-| Tag | Published on |
-| --- | --- |
-| `edge` | pushes to `main` |
-| `vX.Y.Z`, `vX.Y` | release tags (`v*`) |
-| `latest` | stable release tags only |
+| Tag                 | Published on                    |
+| ------------------- | ------------------------------- |
+| `edge`              | pushes to `main`                |
+| `vX.Y.Z`, `vX.Y`    | release tags (`v*`)             |
+| `latest`            | stable release tags only        |
 | `sha-<full-commit>` | every push and every manual run |
 
 The registry prefix lives in one place, `packages/brand/brand.json`. The compose files, `.env`

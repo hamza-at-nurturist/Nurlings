@@ -48,7 +48,7 @@ the conversation happens, and tells you when a Nurling is asking for you.
   - At most **10** such wakes per ticket per rolling hour. Beyond that the comment is stored and the
     mention is ignored.
   - A user's own mentions skip the working guard and the cap, because a person cannot loop.
-  A wake still coalesces with a queued one, as for owner wakes.
+    A wake still coalesces with a queued one, as for owner wakes.
 - Only Nurlings of the same user in the same space can be woken, and not archived ones, like
   assignment today.
 
@@ -80,10 +80,10 @@ server-side and need no mobile change.
 None new. The reply box keeps `Reply`; chips reuse the existing `Remove mention {name}` label. The
 notification text is new copy on the push channel, quoted here:
 
-| Copy | Where | Verdict |
-|---|---|---|
-| `{Nurling} mentioned you on {ref}` | push title | keep: it is the only thing that says why you were pinged |
-| first 140 characters of the comment | push body | keep: lets you decide without opening it |
+| Copy                                | Where      | Verdict                                                  |
+| ----------------------------------- | ---------- | -------------------------------------------------------- |
+| `{Nurling} mentioned you on {ref}`  | push title | keep: it is the only thing that says why you were pinged |
+| first 140 characters of the comment | push body  | keep: lets you decide without opening it                 |
 
 `or @ a Nurling for help` is **not** added back to the placeholder: the chat composer teaches `@` by
 doing, and the picker appears on the first `@`.
@@ -93,16 +93,16 @@ doing, and the picker appears on the first `@`.
 New files wherever possible (`TicketModal/MentionPicker.tsx`, `TicketModal/MentionText.tsx`,
 `packages/adapters/src/ticket-mentions.ts`, which also holds the comment-only check). Edits to existing files are small:
 
-| File | Edit |
-|---|---|
-| `packages/db/prisma/schema.prisma` | `TicketComment.mentions`, `Task.ticketWake` |
-| `packages/contracts/src/board.ts` | `mentions` on the comment input and output |
-| `packages/adapters/src/ticket-tools.ts` | `commentTicket` stores mentions, passes them on and refuses a second comment in a mention run; `updateTicket` refuses every update in one |
-| `packages/adapters/src/ticket-changes.ts` | hands mentions to the new module, sends the user notification |
-| `packages/adapters/src/ticket-wake.ts` | optional wake kind, mention prompt, sets `ticketWake` |
-| `packages/adapters/src/builtin-tools.ts` | two optional arguments on `ticket_comment` |
-| `packages/adapters/src/executor.ts` | two argument lines in the existing `ticket_comment` branch (`mention_bots`, `mention_user`); no enforcement logic |
-| `apps/web/src/components/board/TicketModal/{ReplyBox,ActivityFeed}.tsx` | picker and chips (files from the previous change) |
+| File                                                                    | Edit                                                                                                                                      |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/db/prisma/schema.prisma`                                      | `TicketComment.mentions`, `Task.ticketWake`                                                                                               |
+| `packages/contracts/src/board.ts`                                       | `mentions` on the comment input and output                                                                                                |
+| `packages/adapters/src/ticket-tools.ts`                                 | `commentTicket` stores mentions, passes them on and refuses a second comment in a mention run; `updateTicket` refuses every update in one |
+| `packages/adapters/src/ticket-changes.ts`                               | hands mentions to the new module, sends the user notification                                                                             |
+| `packages/adapters/src/ticket-wake.ts`                                  | optional wake kind, mention prompt, sets `ticketWake`                                                                                     |
+| `packages/adapters/src/builtin-tools.ts`                                | two optional arguments on `ticket_comment`                                                                                                |
+| `packages/adapters/src/executor.ts`                                     | two argument lines in the existing `ticket_comment` branch (`mention_bots`, `mention_user`); no enforcement logic                         |
+| `apps/web/src/components/board/TicketModal/{ReplyBox,ActivityFeed}.tsx` | picker and chips (files from the previous change)                                                                                         |
 
 `Board.tsx` is not touched.
 

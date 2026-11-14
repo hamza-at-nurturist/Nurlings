@@ -99,15 +99,12 @@ describe("wakeMentionedBot", () => {
 
   it("does nothing when the board is off, for a finished ticket, or for an invalid Nurling", async () => {
     const off = setup({ labs: [] });
-    await wakeMentionedBot(
-      off.deps,
-      {
-        spaceId: "ws",
-        userId: "user-1",
-        ticketId: "t1",
-        botId: "scout",
-      },
-    );
+    await wakeMentionedBot(off.deps, {
+      spaceId: "ws",
+      userId: "user-1",
+      ticketId: "t1",
+      botId: "scout",
+    });
     expect(off.createTask).not.toHaveBeenCalled();
     for (const status of ["done", "closed"]) {
       const s = setup({ status });

@@ -1793,6 +1793,7 @@ msgstr "Fragt nach, bevor in deinen Apps etwas gesendet, ausgegeben oder geände
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "Fragt nur vor Käufen und bei der ersten Nutzung deines Computers. Es gelten nur Blockierregeln."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "asleep"
 msgstr "schläft"
@@ -2006,6 +2007,7 @@ msgstr "Blockieren"
 msgid "Block"
 msgstr "Blockieren"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "blocked"
 msgstr "blockiert"
@@ -4982,6 +4984,7 @@ msgstr "Das Dokument wurde geändert. Öffne es erneut, um die neueste Version z
 msgid "Don’t have an account?"
 msgstr "Du hast noch kein Konto?"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "done"
 msgstr "fertig"
@@ -6042,6 +6045,7 @@ msgstr "Daten importieren"
 msgid "In progress"
 msgstr "In Bearbeitung"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "in review"
 msgstr "in Prüfung"
@@ -7122,6 +7126,7 @@ msgstr "Anmeldung erforderlich"
 msgid "Needs takeover"
 msgstr "Übernahme erforderlich"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "needs you"
 msgstr "braucht dich"
@@ -9604,8 +9609,8 @@ msgstr "Einrichtungshilfe"
 msgid "Shape"
 msgstr "Form"
 
-#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
-#. placeholder {0}: index + 1
+#. placeholder {0}: offeredShapes.length + index + 1
+#. placeholder {0}: position + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
 msgstr "Form {0}"
@@ -10625,6 +10630,7 @@ msgstr "Diese gespeicherten Einstellungen können nicht gelesen werden. Entferne
 msgid "They get {weeks} weeks free."
 msgstr "Sie bekommen {weeks} Wochen gratis."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "thinking"
 msgstr "denkt nach"

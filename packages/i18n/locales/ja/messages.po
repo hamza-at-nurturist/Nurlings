@@ -1793,6 +1793,7 @@ msgstr "アプリでの送信、支払い、変更の前に確認します。"
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "購入時とコンピューターの初回使用時のみ確認します。ブロックルールのみ適用されます。"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "asleep"
 msgstr "スリープ中"
@@ -2006,6 +2007,7 @@ msgstr "ブロック"
 msgid "Block"
 msgstr "ブロック"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "blocked"
 msgstr "ブロック中"
@@ -4982,6 +4984,7 @@ msgstr "ドキュメントが変更されました。最新版を編集するに
 msgid "Don’t have an account?"
 msgstr "アカウントをお持ちでないですか？"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "done"
 msgstr "完了"
@@ -6042,6 +6045,7 @@ msgstr "データをインポート"
 msgid "In progress"
 msgstr "進行中"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "in review"
 msgstr "レビュー中"
@@ -7122,6 +7126,7 @@ msgstr "ログインが必要"
 msgid "Needs takeover"
 msgstr "引き継ぎが必要"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "needs you"
 msgstr "対応が必要"
@@ -9604,8 +9609,8 @@ msgstr "設定ヘルプ"
 msgid "Shape"
 msgstr "形"
 
-#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
-#. placeholder {0}: index + 1
+#. placeholder {0}: offeredShapes.length + index + 1
+#. placeholder {0}: position + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
 msgstr "形 {0}"
@@ -10625,6 +10630,7 @@ msgstr "保存された設定を読み取れません。削除してから再度
 msgid "They get {weeks} weeks free."
 msgstr "友だちは{weeks}週間無料で使えます。"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "thinking"
 msgstr "考え中"

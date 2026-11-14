@@ -145,8 +145,8 @@
 - `apps/web/scripts/translations-de.json:531` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "Diese Abonnementanmeldung ist in Rakazo
 - `apps/web/scripts/translations-es.json:264` `Rakazo` — "Create your Rakazo": "Crea tu Rakazo",
 - `apps/web/scripts/translations-es.json:264` `Rakazo` — "Create your Rakazo": "Crea tu Rakazo",
-- `apps/web/scripts/translations-es.json:499` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Pega la dirección compatible con OpenAI de tu servidor. Rakazo agrega /v1 si es 
-- `apps/web/scripts/translations-es.json:499` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Pega la dirección compatible con OpenAI de tu servidor. Rakazo agrega /v1 si es 
+- `apps/web/scripts/translations-es.json:499` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Pega la dirección compatible con OpenAI de tu servidor. Rakazo agrega /v1 si es
+- `apps/web/scripts/translations-es.json:499` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "Pega la dirección compatible con OpenAI de tu servidor. Rakazo agrega /v1 si es
 - `apps/web/scripts/translations-es.json:549` `Rakazo` — "Return to Rakazo": "Volver a Rakazo",
 - `apps/web/scripts/translations-es.json:549` `Rakazo` — "Return to Rakazo": "Volver a Rakazo",
 - `apps/web/scripts/translations-es.json:599` `Rakazo` — "Sign in to Rakazo": "Inicia sesión en Rakazo",
@@ -161,8 +161,8 @@
 - `apps/web/scripts/translations-hi.json:448` `Rakazo` — "Return to Rakazo": "Rakazo पर लौटें",
 - `apps/web/scripts/translations-hi.json:485` `Rakazo` — "Sign in to Rakazo": "Rakazo में साइन इन करें",
 - `apps/web/scripts/translations-hi.json:485` `Rakazo` — "Sign in to Rakazo": "Rakazo में साइन इन करें",
-- `apps/web/scripts/translations-hi.json:532` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "यह सब्सक्रिप्शन साइन-इन अभी Rakazo में 
-- `apps/web/scripts/translations-hi.json:532` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "यह सब्सक्रिप्शन साइन-इन अभी Rakazo में 
+- `apps/web/scripts/translations-hi.json:532` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "यह सब्सक्रिप्शन साइन-इन अभी Rakazo में
+- `apps/web/scripts/translations-hi.json:532` `Rakazo` — "This subscription sign-in is not available in Rakazo yet. Use a deployment credential or choose another provider.": "यह सब्सक्रिप्शन साइन-इन अभी Rakazo में
 - `apps/web/scripts/translations-ko.json:221` `Rakazo` — "Create your Rakazo": "Rakazo 계정 만들기",
 - `apps/web/scripts/translations-ko.json:221` `Rakazo` — "Create your Rakazo": "Rakazo 계정 만들기",
 - `apps/web/scripts/translations-ko.json:413` `Rakazo` — "Paste the OpenAI-compatible address from your server. Rakazo adds /v1 if needed.": "서버의 OpenAI 호환 주소를 붙여넣으세요. 필요하면 Rakazo가 /v1을 추가합니다.",
@@ -335,4 +335,3 @@
 - `packages/contracts/src/client-build.ts:21` `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` — "https://github.com/elie222/rakazo/releases/download/android/rakazo.apk";
 - `packages/core/src/self-update.ts:2` `https://github.com/elie222/rakazo` — export const OFFICIAL_REPO_URL = "https://github.com/elie222/rakazo";
 - `packages/core/src/self-update.ts:83` `github.com/elie222/rakazo` — /** `github.com/elie222/rakazo` for every spelling of the same remote, for comparison only. */
-

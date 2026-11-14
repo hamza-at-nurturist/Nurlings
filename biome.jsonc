@@ -120,6 +120,10 @@
             "useKeyWithClickEvents": "off",
             "useSemanticElements": "off"
           },
+          // Vendored from the shadcn registry unchanged (the calendar passes inline components).
+          "correctness": {
+            "noComponentHookFactories": "off"
+          },
           "suspicious": {
             "noDoubleEquals": "off"
           }

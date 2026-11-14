@@ -19,8 +19,7 @@
 # A key shown as `KEY: ${KEY:-}` is an editable Coolify variable; a bare `KEY:` is passed through
 # only when set and is not shown in Coolify's variable list.
 
-x-app-environment: &app-environment
-  # Runtime
+x-app-environment: &app-environment # Runtime
   NODE_ENV: production
   # The app's own login, subject to row-level security (docs/self-host.md#database-roles).
   DATABASE_URL: postgres://rakazo_app:${SERVICE_PASSWORD_APPDB}@postgres:5432/${POSTGRES_DB:-nurlings}

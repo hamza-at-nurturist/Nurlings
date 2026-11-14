@@ -42,13 +42,13 @@ Web and desktop ticket modal only (Electron hosts the web UI). Mobile has no tic
 Each line is UI, quoted here and justified. All are feed lines in the same grey as existing event
 lines; none repeats the interface.
 
-| Copy | Why it is needed | Why not hidden or removed |
-|---|---|---|
-| "{name} attached {file}" / "You attached {file}" | The feed is the ticket's history; a file arriving is history. | Cards alone do not say who or when for Nurling files. |
-| "{name} is working…" | The only live signal on the ticket that a Nurling is acting. | Shown only while a run is active, then gone. |
-| "{name} couldn't finish, reply to retry" | A failed run is otherwise silent and the next step is not obvious. | Shown only after a failure, gone once a newer run exists. |
-| "Moved back to In progress" | Replaces a misleading "You moved it". | Same slot as an existing line, no extra line. |
-| "Today 11:20 AM" style separators | Time context, reused from chat. | Only where there is a real gap. |
+| Copy                                             | Why it is needed                                                   | Why not hidden or removed                                 |
+| ------------------------------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------- |
+| "{name} attached {file}" / "You attached {file}" | The feed is the ticket's history; a file arriving is history.      | Cards alone do not say who or when for Nurling files.     |
+| "{name} is working…"                             | The only live signal on the ticket that a Nurling is acting.       | Shown only while a run is active, then gone.              |
+| "{name} couldn't finish, reply to retry"         | A failed run is otherwise silent and the next step is not obvious. | Shown only after a failure, gone once a newer run exists. |
+| "Moved back to In progress"                      | Replaces a misleading "You moved it".                              | Same slot as an existing line, no extra line.             |
+| "Today 11:20 AM" style separators                | Time context, reused from chat.                                    | Only where there is a real gap.                           |
 
 Full screen button: icon only, accessible names "Expand" / "Collapse".
 

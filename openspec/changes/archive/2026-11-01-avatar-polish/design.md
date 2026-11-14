@@ -16,10 +16,12 @@ Only item 2 (the shape picker) has a real decision; the other three are numeric 
 ## Options for choosing a family explicitly
 
 ### A. Repurpose `shape_0..7`
+
 Cheapest, but those values are already stored on real bots as "my own hashed body". Reusing them
 changes those bots' looks. Rejected by the constraints.
 
 ### B. New indexes in the same format: `shape_12..21` = family 0..9 (recommended)
+
 `#hex::shape_{12+f}` pins family `f`. The body is the family's outline at a fixed phase, with the
 standard pill eyes. `BOT_AVATAR_SHAPE_COUNT` grows from 12 to 22. Nothing stored changes meaning:
 no existing value is in 12..21, and the server already accepts any digits.
@@ -33,11 +35,13 @@ no existing value is in 12..21, and the server already accepts any digits.
 - Cost: one constant, one frame branch, no migration, no contract change, no new token.
 
 ### C. A new token such as `#hex::body_F`
+
 Semantically cleaner (a family, not a shape number) but the server's `SHAPE_SUFFIX` check would
 reject it until deployed, and an old client's parser sees an unknown suffix and falls back to a
 plain color. That is a wider break than B for no user gain.
 
 ### D. Store the family in a new bot field
+
 A schema change plus a migration for something the existing string already carries. Rejected.
 
 **Recommendation: B.** It keeps every existing bot's look, needs no migration and degrades safely.

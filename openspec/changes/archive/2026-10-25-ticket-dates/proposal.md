@@ -87,37 +87,37 @@ existing push channel.
 
 ### Proposed copy
 
-| Copy | Where | Why it is needed |
-|---|---|---|
-| `Start`, `Due` | Properties labels; the date line's accessible names | Name the two fields, as `Status`, `Owner` and `Priority` do |
-| `Today`, `Tomorrow`, `This weekend`, `Next week` | Picker quick picks | The requested quick picks |
-| `Today`, `Tomorrow`, `Yesterday` | Relative date display | Short relative dates; other dates come from `Intl` with no new strings |
-| `Add time` | Picker | Shows the time field only when needed (progressive disclosure) |
-| `No date` | Picker | Clears the date |
-| `Start must be before due.` | Error when saving | Explains a refused save |
-| `{ref} is overdue` (push title; the body is the ticket title) | Overdue push | The push needs a title |
+| Copy                                                          | Where                                               | Why it is needed                                                       |
+| ------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------- |
+| `Start`, `Due`                                                | Properties labels; the date line's accessible names | Name the two fields, as `Status`, `Owner` and `Priority` do            |
+| `Today`, `Tomorrow`, `This weekend`, `Next week`              | Picker quick picks                                  | The requested quick picks                                              |
+| `Today`, `Tomorrow`, `Yesterday`                              | Relative date display                               | Short relative dates; other dates come from `Intl` with no new strings |
+| `Add time`                                                    | Picker                                              | Shows the time field only when needed (progressive disclosure)         |
+| `No date`                                                     | Picker                                              | Clears the date                                                        |
+| `Start must be before due.`                                   | Error when saving                                   | Explains a refused save                                                |
+| `{ref} is overdue` (push title; the body is the ticket title) | Overdue push                                        | The push needs a title                                                 |
 
 An empty date shows only a calendar icon (its name comes from the `Start` or `Due` label), so there is
 no "Set date" text. There are no tooltips or hints.
 
 ### Upstream merge safety
 
-| File | Edit |
-|---|---|
-| `packages/db/prisma/schema.prisma` + one migration | Ticket date columns, reminder flags, `scheduleAt` and its index |
-| `packages/contracts/src/board.ts` | Dates on `TicketSchema`, `start`/`due` on create and update input |
-| `packages/db/src/board.ts` | Dates in `toTicketDto` |
-| `packages/adapter-kit/src/{types,background-jobs}.ts` | The `ticket.dates` job name, payload schema and builder, next to `routine.wakeup` |
-| `packages/adapters/src/job-reconciler.ts` | **One optional hook**, `reconcileTicketDates`, added to the existing auxiliary list (two lines) |
-| `packages/adapters/src/background-job-handlers.ts` | The `ticket.dates` handler, run as the ticket's tenant like the others |
-| `packages/adapters/src/executor.ts` | **Four lines**: pass `args.start` and `args.due` in the existing `ticket_create` and `ticket_update` branches |
-| `packages/adapters/src/builtin-tools.ts` | `start` and `due` on `ticket_create` and `ticket_update` |
-| `packages/adapters/src/ticket-tools.ts`, `ticket-wake.ts`, `ticket-changes.ts` | Resolve and save dates, defer the assignment wake, take a prompt for the wake, generalise the push helper |
-| `packages/adapters/src/ticket-dates.ts` (new) | Date resolution, reminder times, the reconciler query and the job |
-| `apps/worker/src/index.ts`, `apps/api/src/app.ts` | Wire the hook and the handler where the reconciler and handlers are built |
-| `packages/ui-web` | `pnpm exec shadcn add calendar` from the official registry, plus its export |
-| `apps/web/src/pages/Board.tsx` | The card's date line, and the user's timezone (read once with `rpc.me`) passed to the modal |
-| `TicketModal/` (new `DatePicker.tsx`, `dates.ts`, `TicketFileCard.tsx`; edits to `Properties.tsx`, `TicketModal.tsx`, `TicketFiles.tsx`) | Picker, display, file card |
+| File                                                                                                                                     | Edit                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `packages/db/prisma/schema.prisma` + one migration                                                                                       | Ticket date columns, reminder flags, `scheduleAt` and its index                                               |
+| `packages/contracts/src/board.ts`                                                                                                        | Dates on `TicketSchema`, `start`/`due` on create and update input                                             |
+| `packages/db/src/board.ts`                                                                                                               | Dates in `toTicketDto`                                                                                        |
+| `packages/adapter-kit/src/{types,background-jobs}.ts`                                                                                    | The `ticket.dates` job name, payload schema and builder, next to `routine.wakeup`                             |
+| `packages/adapters/src/job-reconciler.ts`                                                                                                | **One optional hook**, `reconcileTicketDates`, added to the existing auxiliary list (two lines)               |
+| `packages/adapters/src/background-job-handlers.ts`                                                                                       | The `ticket.dates` handler, run as the ticket's tenant like the others                                        |
+| `packages/adapters/src/executor.ts`                                                                                                      | **Four lines**: pass `args.start` and `args.due` in the existing `ticket_create` and `ticket_update` branches |
+| `packages/adapters/src/builtin-tools.ts`                                                                                                 | `start` and `due` on `ticket_create` and `ticket_update`                                                      |
+| `packages/adapters/src/ticket-tools.ts`, `ticket-wake.ts`, `ticket-changes.ts`                                                           | Resolve and save dates, defer the assignment wake, take a prompt for the wake, generalise the push helper     |
+| `packages/adapters/src/ticket-dates.ts` (new)                                                                                            | Date resolution, reminder times, the reconciler query and the job                                             |
+| `apps/worker/src/index.ts`, `apps/api/src/app.ts`                                                                                        | Wire the hook and the handler where the reconciler and handlers are built                                     |
+| `packages/ui-web`                                                                                                                        | `pnpm exec shadcn add calendar` from the official registry, plus its export                                   |
+| `apps/web/src/pages/Board.tsx`                                                                                                           | The card's date line, and the user's timezone (read once with `rpc.me`) passed to the modal                   |
+| `TicketModal/` (new `DatePicker.tsx`, `dates.ts`, `TicketFileCard.tsx`; edits to `Properties.tsx`, `TicketModal.tsx`, `TicketFiles.tsx`) | Picker, display, file card                                                                                    |
 
 `ArtifactFileCard.tsx` and the create dialog are not touched.
 

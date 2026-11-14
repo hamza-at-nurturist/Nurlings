@@ -1793,6 +1793,7 @@ msgstr "Uygulamalarında bir şey göndermeden, harcamadan veya değiştirmeden 
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "Yalnızca satın almalardan ve bilgisayarının ilk kullanımından önce sorar. Yalnızca Engelle kuralları geçerlidir."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "asleep"
 msgstr ""
@@ -2006,6 +2007,7 @@ msgstr "Engelle"
 msgid "Block"
 msgstr "Engelle"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "blocked"
 msgstr ""
@@ -4982,6 +4984,7 @@ msgstr "Belge değişti. Son sürümü düzenlemek için yeniden açın."
 msgid "Don’t have an account?"
 msgstr "Hesabın yok mu?"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "done"
 msgstr ""
@@ -6042,6 +6045,7 @@ msgstr "Verileri içe aktar"
 msgid "In progress"
 msgstr "Devam ediyor"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "in review"
 msgstr ""
@@ -7122,6 +7126,7 @@ msgstr "Oturum açılması gerekiyor"
 msgid "Needs takeover"
 msgstr "Devralma bekliyor"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "needs you"
 msgstr ""
@@ -9604,8 +9609,8 @@ msgstr "Kurulum yardımı"
 msgid "Shape"
 msgstr "Şekil"
 
-#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
-#. placeholder {0}: index + 1
+#. placeholder {0}: offeredShapes.length + index + 1
+#. placeholder {0}: position + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
 msgstr "Şekil {0}"
@@ -10625,6 +10630,7 @@ msgstr "Bu kayıtlı ayarlar okunamıyor. Kaldırıp yeniden ekle."
 msgid "They get {weeks} weeks free."
 msgstr "Arkadaşın {weeks} hafta ücretsiz kullanır."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "thinking"
 msgstr ""

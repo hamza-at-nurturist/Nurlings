@@ -77,36 +77,36 @@ blocked behaviour, since those are server-side.
 
 Every visible word is UI. New copy, and what I propose to drop from the mockup:
 
-| Copy | Where | Verdict |
-|---|---|---|
-| `Files` | heading above produced files | keep: the only label that tells files apart from the description; section hidden when empty |
-| `Reply` | reply box accessible name and placeholder | keep: it is the only text on an otherwise blank input |
-| `{actor} created this and assigned it to {owner}` | first feed line | keep: it is the feed's start and the only record of the creator |
-| `{actor} moved it to {status}` | status-change line | keep: this is the history the change exists for |
-| `{actor} assigned it to {owner}` | owner-change line | keep: ownership is part of the story |
-| `You` | actor name for the signed-in user | keep |
-| Status, Owner, Priority, Description, Board | labels | already exist in the app, reused |
-| `Activity` heading | right pane | **drop**: the feed is self-evident next to the reply box |
-| `Created by you · Oct 24` header | top bar | **drop**: the first feed line says it |
-| `Due` / `Add date` | properties row | **drop**: tickets have no due date |
-| `…` menu | top bar | **drop**: nothing to put in it |
-| `Reply, or @ a Nurling for help` | placeholder | **drop**: the `@` part belongs to change 2 |
+| Copy                                              | Where                                     | Verdict                                                                                     |
+| ------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `Files`                                           | heading above produced files              | keep: the only label that tells files apart from the description; section hidden when empty |
+| `Reply`                                           | reply box accessible name and placeholder | keep: it is the only text on an otherwise blank input                                       |
+| `{actor} created this and assigned it to {owner}` | first feed line                           | keep: it is the feed's start and the only record of the creator                             |
+| `{actor} moved it to {status}`                    | status-change line                        | keep: this is the history the change exists for                                             |
+| `{actor} assigned it to {owner}`                  | owner-change line                         | keep: ownership is part of the story                                                        |
+| `You`                                             | actor name for the signed-in user         | keep                                                                                        |
+| Status, Owner, Priority, Description, Board       | labels                                    | already exist in the app, reused                                                            |
+| `Activity` heading                                | right pane                                | **drop**: the feed is self-evident next to the reply box                                    |
+| `Created by you · Oct 24` header                  | top bar                                   | **drop**: the first feed line says it                                                       |
+| `Due` / `Add date`                                | properties row                            | **drop**: tickets have no due date                                                          |
+| `…` menu                                          | top bar                                   | **drop**: nothing to put in it                                                              |
+| `Reply, or @ a Nurling for help`                  | placeholder                               | **drop**: the `@` part belongs to change 2                                                  |
 
 ### Upstream merge safety
 
 New components under `apps/web/src/components/board/TicketModal/`. Edits to existing upstream
 files are small:
 
-| File | Edit |
-|---|---|
-| `apps/web/src/pages/Board.tsx` | open the new modal instead of `TicketDialog` for an existing ticket (a few lines); `TicketDialog` stays for "New ticket" |
-| `apps/web/e2e/board.spec.ts` | the existing detail assertions move to the modal |
-| `packages/adapters/src/ticket-tools.ts` | `commentTicket` decides `wakeAssignee`; `createTicket`/`updateTicket` record events |
-| `packages/adapters/src/ticket-wake.ts` | wake prompt text, set `ticketId` on the task |
-| `packages/adapters/src/executor.ts` | one guidance string |
-| `packages/db/prisma/schema.prisma` | `TicketEvent` model, `Task.ticketId` |
-| `packages/contracts/src/{board,rpc}.ts` | `TicketEvent` schema, `tickets.events` and `tickets.files` |
-| `apps/api/src/router.ts` | the `tickets.events` and `tickets.files` handlers (next to `tickets.comments`) |
+| File                                    | Edit                                                                                                                     |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `apps/web/src/pages/Board.tsx`          | open the new modal instead of `TicketDialog` for an existing ticket (a few lines); `TicketDialog` stays for "New ticket" |
+| `apps/web/e2e/board.spec.ts`            | the existing detail assertions move to the modal                                                                         |
+| `packages/adapters/src/ticket-tools.ts` | `commentTicket` decides `wakeAssignee`; `createTicket`/`updateTicket` record events                                      |
+| `packages/adapters/src/ticket-wake.ts`  | wake prompt text, set `ticketId` on the task                                                                             |
+| `packages/adapters/src/executor.ts`     | one guidance string                                                                                                      |
+| `packages/db/prisma/schema.prisma`      | `TicketEvent` model, `Task.ticketId`                                                                                     |
+| `packages/contracts/src/{board,rpc}.ts` | `TicketEvent` schema, `tickets.events` and `tickets.files`                                                               |
+| `apps/api/src/router.ts`                | the `tickets.events` and `tickets.files` handlers (next to `tickets.comments`)                                           |
 
 Everything else is new files. `Board.tsx` is not rewritten. `TicketDialog` keeps its
 edit-an-existing-ticket branches although only "New ticket" reaches it now; pruning them is left for

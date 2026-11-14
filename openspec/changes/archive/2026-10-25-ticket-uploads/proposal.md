@@ -56,17 +56,17 @@ are dragged over it.
 
 ### Upstream merge safety
 
-| File | Edit |
-|---|---|
-| `packages/db/prisma/schema.prisma` + one migration | `TicketComment.attachments` |
-| `packages/contracts/src/board.ts` | `artifactIds` on the comment input, `attachments` on the comment |
-| `packages/db/src/board.ts` | parse `attachments` in the DTO; comment files in `listTicketFiles` |
-| `packages/adapters/src/ticket-tools.ts` | store attachments; `getTicket` returns files and their blocks |
-| `packages/adapters/src/builtin-tools.ts` | `ticket_get` description mentions files |
-| `packages/adapters/src/ticket-files.ts` (new) | reads the ticket for a run: tool result with files, optional image content, and the blocks to copy |
-| `packages/adapters/src/executor.ts` | **one change**: the `ticket_get` branch calls the new reader with the run's `acceptsImages`, pushes the blocks onto the existing `pendingTurnFiles` queue, and returns its result (about six lines) |
-| `apps/api/src/router.ts` | the comment handler validates `artifactIds` with `resolveSendAttachments` |
-| `TicketModal/{ReplyBox,ActivityFeed,TicketFiles,TicketModal}.tsx` | attach control, drop, file cards, labels |
+| File                                                              | Edit                                                                                                                                                                                                |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/db/prisma/schema.prisma` + one migration                | `TicketComment.attachments`                                                                                                                                                                         |
+| `packages/contracts/src/board.ts`                                 | `artifactIds` on the comment input, `attachments` on the comment                                                                                                                                    |
+| `packages/db/src/board.ts`                                        | parse `attachments` in the DTO; comment files in `listTicketFiles`                                                                                                                                  |
+| `packages/adapters/src/ticket-tools.ts`                           | store attachments; `getTicket` returns files and their blocks                                                                                                                                       |
+| `packages/adapters/src/builtin-tools.ts`                          | `ticket_get` description mentions files                                                                                                                                                             |
+| `packages/adapters/src/ticket-files.ts` (new)                     | reads the ticket for a run: tool result with files, optional image content, and the blocks to copy                                                                                                  |
+| `packages/adapters/src/executor.ts`                               | **one change**: the `ticket_get` branch calls the new reader with the run's `acceptsImages`, pushes the blocks onto the existing `pendingTurnFiles` queue, and returns its result (about six lines) |
+| `apps/api/src/router.ts`                                          | the comment handler validates `artifactIds` with `resolveSendAttachments`                                                                                                                           |
+| `TicketModal/{ReplyBox,ActivityFeed,TicketFiles,TicketModal}.tsx` | attach control, drop, file cards, labels                                                                                                                                                            |
 
 `Board.tsx` and `packages/core` are not touched.
 

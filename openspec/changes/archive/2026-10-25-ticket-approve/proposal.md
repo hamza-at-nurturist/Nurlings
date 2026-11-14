@@ -55,11 +55,11 @@ Mobile has no board screen, so nothing changes there. The server rules apply to 
 
 ### Proposed copy
 
-| Copy | Where | Verdict |
-|---|---|---|
-| `Approve` | modal header button, only while In review | keep: it is the single action the state calls for; an icon alone would not say what it does |
-| `Needs you` | badge on the card and in the modal header | keep: it is the only signal that the ticket waits on you; it shows only while true |
-| `{actor} approved it` | activity line | keep: the history must say who closed the ticket and that it was a review decision, which "moved it to Done" does not |
+| Copy                  | Where                                     | Verdict                                                                                                               |
+| --------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `Approve`             | modal header button, only while In review | keep: it is the single action the state calls for; an icon alone would not say what it does                           |
+| `Needs you`           | badge on the card and in the modal header | keep: it is the only signal that the ticket waits on you; it shows only while true                                    |
+| `{actor} approved it` | activity line                             | keep: the history must say who closed the ticket and that it was a review decision, which "moved it to Done" does not |
 
 The reply move reuses `{actor} moved it to {status}`. No explainer text, no confirmation dialog.
 
@@ -68,16 +68,16 @@ The reply move reuses `{actor} moved it to {status}`. No explainer text, no conf
 New files: `packages/adapters/src/ticket-approve.ts`, `TicketModal/NeedsYou.tsx`. Small edits to
 existing files:
 
-| File | Edit |
-|---|---|
-| `packages/db/prisma/schema.prisma` + one migration | `Ticket.needsUser` |
-| `packages/db/src/board.ts` | `needsUser` in `toTicketDto`; `approved` event kind |
-| `packages/contracts/src/board.ts`, `rpc.ts` | `needsUser`, `approved` kind, `ApproveTicketInput`, `tickets.approve` |
-| `packages/adapters/src/ticket-tools.ts` | `commentTicket` locks the ticket, applies the reply move, skips the owner for comments addressed only to others, sets `needsUser`; `updateTicket` clears it on a user's status change |
-| `packages/adapters/src/builtin-tools.ts` | `mention_user` description only |
-| `apps/api/src/router.ts` | one `approve` handler |
-| `apps/web/src/components/board/TicketModal/{TicketModal,ActivityFeed}.tsx` | button, badge, one event line |
-| `apps/web/src/pages/Board.tsx` | one badge on the card |
+| File                                                                       | Edit                                                                                                                                                                                  |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/db/prisma/schema.prisma` + one migration                         | `Ticket.needsUser`                                                                                                                                                                    |
+| `packages/db/src/board.ts`                                                 | `needsUser` in `toTicketDto`; `approved` event kind                                                                                                                                   |
+| `packages/contracts/src/board.ts`, `rpc.ts`                                | `needsUser`, `approved` kind, `ApproveTicketInput`, `tickets.approve`                                                                                                                 |
+| `packages/adapters/src/ticket-tools.ts`                                    | `commentTicket` locks the ticket, applies the reply move, skips the owner for comments addressed only to others, sets `needsUser`; `updateTicket` clears it on a user's status change |
+| `packages/adapters/src/builtin-tools.ts`                                   | `mention_user` description only                                                                                                                                                       |
+| `apps/api/src/router.ts`                                                   | one `approve` handler                                                                                                                                                                 |
+| `apps/web/src/components/board/TicketModal/{TicketModal,ActivityFeed}.tsx` | button, badge, one event line                                                                                                                                                         |
+| `apps/web/src/pages/Board.tsx`                                             | one badge on the card                                                                                                                                                                 |
 
 `executor.ts` is not touched.
 

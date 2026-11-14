@@ -1,42 +1,51 @@
 # user-facing-branding Specification
 
 ## Purpose
+
 Defines what clients see and read: the product name in the apps, in account emails and in other server-sent text, the branded tagline, and how bots are named.
 
 ## Requirements
 
 ### Requirement: Product name in the web, desktop and mobile UIs
+
 All text a person reads in the web app, the desktop app and the mobile app SHALL refer to the
 product as the configured product name and SHALL NOT contain the upstream product name. This
 covers page and window titles, sign-in and sign-up headings, the sidebar, onboarding, settings
 copy, dialogs, menus, permission prompts and error messages that originate in these apps.
 
 #### Scenario: Sign-in screens
+
 - **WHEN** a signed-out user opens the web app, the desktop app or the mobile app
 - **THEN** the sign-in and sign-up headings read "Sign in to Nurlings" and "Create your Nurlings" (or the equivalent localized heading) and the page title is "Nurlings"
 
 #### Scenario: Whole web UI walk-through
+
 - **WHEN** the web app is started and the main screens are visited (sign-in, onboarding, bot list, thread, settings, models, memory, usage)
 - **THEN** no text rendered by the apps contains the upstream product name, and any remaining server-supplied text that does is reported rather than hidden
 
 #### Scenario: Desktop first-run setup
+
 - **WHEN** the desktop app starts without a saved server
 - **THEN** the setup window title, heading and button labels name Nurlings
 
 #### Scenario: Mobile permission prompts
+
 - **WHEN** the mobile app asks for camera, photo library, microphone, speech recognition or local network access
 - **THEN** the system prompt text names Nurlings
 
 ### Requirement: Product name in account emails
+
 The account emails the server sends (email verification, sign-in code, password reset, account
 deletion) and the app and passkey names shown by the operating system SHALL use the configured
 product name.
 
 #### Scenario: Account emails
+
 - **WHEN** the system sends an email-verification, sign-in-code, password-reset or account-deletion email
 - **THEN** the subject, text and HTML bodies name Nurlings and none contains the upstream product name
 
 ### Requirement: Product name in other server text
+
 Other text a dedicated server generates for its users SHALL use the configured product name:
 chat-channel messages (group introduction, linked-conversation invitation, delegated-request
 failure), in-product update messages, model and billing descriptions in settings, and the client
@@ -44,47 +53,58 @@ name sent when registering with an external MCP server. The change SHALL be text
 identifiers, environment variables, protocol markers and internal error strings SHALL NOT change.
 
 #### Scenario: Chat-channel invitation
+
 - **WHEN** a conversation is linked to a user's agent and the user is asked to confirm
 - **THEN** the message names Nurlings and still asks the user to reply YES or NO
 
 #### Scenario: Model and billing descriptions
+
 - **WHEN** the model settings list a provider's billing description
 - **THEN** it names Nurlings, for example "Uses your OpenAI API key. Nurlings does not pay for model usage."
 
 #### Scenario: MCP registration name
+
 - **WHEN** the server registers as an OAuth client with an external MCP server
 - **THEN** the client name sent is "Nurlings"
 
 #### Scenario: Identifiers unchanged
+
 - **WHEN** the changed server strings are compared with upstream's
 - **THEN** only human-readable product-name text differs; ids, headers, env var names and the persisted automated-message label are identical
 
 ### Requirement: Branded tagline
+
 The login screen, the sidebar footer and the desktop About panel SHALL display the tagline
 "Powered by Nurturist AI", sourced from the brand configuration.
 
 #### Scenario: Login shows the tagline
+
 - **WHEN** the login screen is displayed on web
 - **THEN** the text "Powered by Nurturist AI" is visible
 
 #### Scenario: About panel
+
 - **WHEN** the user opens About in the desktop app
 - **THEN** it shows the name "Nurlings", the app version, and "Powered by Nurturist AI"
 
 ### Requirement: Bot naming
+
 Where UI copy names the product's agents in English, it SHALL use "Nurling" for one and
 "Nurlings" for several, while identifiers (ids, query parameters, storage keys, API fields) are
 unchanged.
 
 #### Scenario: Plural copy
+
 - **WHEN** a list screen with no results shows its empty state
 - **THEN** the message uses "Nurlings" rather than "bots"
 
 #### Scenario: Identifiers and similar words unchanged
+
 - **WHEN** a bot id such as `bot-123`, a route parameter `botId`, or a word such as "robot" or "chatbot" is used
 - **THEN** it keeps its upstream form
 
 ### Requirement: The brand blob is an avatar shape
+
 The brand mark's blob and its two slanted pill eyes SHALL be one of the organic avatar bodies,
 drawn through the same code, with the same colour picker, animations and sizes as every other
 organic body, on the web, desktop and mobile apps. It SHALL be offered in the create-bot picker
@@ -92,47 +112,58 @@ and the Avatar Studio, and its stored value SHALL be an ordinary `#hex::shape_8`
 reserved or special-cased avatar value.
 
 #### Scenario: Picked like any other shape
+
 - **WHEN** a person opens the create-bot picker or the Avatar Studio
 - **THEN** the brand blob is listed with the other organic bodies and, once picked, takes the chosen colour
 
 #### Scenario: Behaves like any other shape
+
 - **WHEN** a bot using the brand blob is idle or working
 - **THEN** it shows the organic working state and its eyes blink and look around with the same animation as any organic body
 
 #### Scenario: Visual weight
+
 - **WHEN** the brand blob is shown at the same size as another organic body
 - **THEN** it is drawn large enough to read at the same weight without extending past the organic box
 
 ### Requirement: The default Chief wears the brand blob
+
 The first bot created at sign-up SHALL use the brand blob shape in the default avatar colour.
 
 #### Scenario: New sign-up
+
 - **WHEN** a new account finishes onboarding and its first bot, Chief, is created
 - **THEN** Chief's avatar is the brand blob in the default avatar colour
 
 ### Requirement: The brand blob's eyes move like organic avatars' eyes
+
 On the web app, the brand blob avatar shape SHALL animate its eyes the way organic avatars do while
 keeping its slanted pill eyes: an idle pattern seeded per bot, blinks, a separate working-state eye
 animation, and no eye animation when the person prefers reduced motion. Mobile SHALL give it the
 same eye behaviour as every other shape.
 
 #### Scenario: Idle
+
 - **WHEN** a bot using the brand blob is idle and the person has not asked for reduced motion
 - **THEN** its eyes drift and blink on the idle pattern chosen from the bot's identity, as an organic avatar's eyes do
 
 #### Scenario: Working
+
 - **WHEN** a bot using the brand blob is working
 - **THEN** its eyes switch to the working-state animation used by organic avatars
 
 #### Scenario: Reduced motion
+
 - **WHEN** the person prefers reduced motion
 - **THEN** the brand blob's eyes do not animate
 
 #### Scenario: Other shapes unchanged
+
 - **WHEN** a bot uses any shape other than the brand blob
 - **THEN** its eyes behave as before
 
 ### Requirement: The brand blob avatar behaves like an organic avatar
+
 The brand blob avatar shape (shape 8) SHALL behave like an organic avatar in every state on web and
 mobile, keeping its logo silhouette and slanted pill eyes: no working ring or dot on web, the organic
 working-state animation and glow, the organic idle eye patterns and blinks, and the organic sizing,
@@ -140,43 +171,53 @@ hover and reduced-motion behaviour. Its stored value SHALL stay `#hex::shape_8`,
 shapes SHALL be unchanged.
 
 #### Scenario: Working
+
 - **WHEN** a bot using the brand blob is working
 - **THEN** it shows the organic working state (working eyes and body animation, glow) and no spinning ring or dot
 
 #### Scenario: Idle
+
 - **WHEN** a bot using the brand blob is idle
 - **THEN** its eyes follow the idle pattern and blinks chosen from the bot's identity, as an organic avatar's do
 
 #### Scenario: Reduced motion
+
 - **WHEN** the person prefers reduced motion
 - **THEN** the brand blob does not animate
 
 #### Scenario: Existing Chiefs
+
 - **WHEN** a bot already stores `#hex::shape_8`
 - **THEN** it renders the brand blob in the same colour with no data change
 
 #### Scenario: Other shapes unchanged
+
 - **WHEN** a bot uses any other shipped shape
 - **THEN** it renders as before
 
 ### Requirement: Upstream's logo icon set is not offered
+
 The web and mobile bot icon pickers SHALL offer only the original shapes, with no set switcher, and
 a stored "rakazo" icon set SHALL resolve to the original shapes, because the other set draws
 upstream's logo.
 
 #### Scenario: Avatar studio
+
 - **WHEN** the user opens a Nurling's avatar studio
 - **THEN** it shows shapes and colors and no icon-set tabs
 
 ### Requirement: A stored bot color carries only its hex
+
 A bot color stored as `#hex::shape_N` SHALL be treated as the hex before `::` wherever a color is
 looked up, including mention chips.
 
 #### Scenario: Mention chip
+
 - **WHEN** a Nurling with color `#8B5CF6::shape_3` is mentioned
 - **THEN** the chip is `#8B5CF6`
 
 ### Requirement: The avatar picker offers organic bodies only
+
 The avatar pickers on web, desktop and mobile SHALL list organic bodies only: the bot's default
 body, the brand blob, three additional original bodies stored as `#hex::shape_9` to
 `#hex::shape_11`, and each of the ten hashed organic families, stored as `#hex::shape_12` to
@@ -184,146 +225,179 @@ body, the brand blob, three additional original bodies stored as `#hex::shape_9`
 reproduce another product's avatar. The 14 bodies SHALL wrap cleanly on web and mobile.
 
 #### Scenario: Picker contents
+
 - **WHEN** a person opens the Avatar Studio, the create-bot dialog or the mobile bot settings shape list
 - **THEN** the Default chip and 14 organic bodies are listed and none of the eight static shapes appears
 
 #### Scenario: Picking a family
+
 - **WHEN** a person picks one of the ten organic families
 - **THEN** the bot stores `#hex::shape_{12 + family}` and draws that family's body whatever its id
 
 #### Scenario: New bot balance
+
 - **WHEN** a new bot is created without a chosen look
 - **THEN** it gets the least-used hashed organic look and colour among the person's bots
 
 ### Requirement: Existing avatar values keep their look
+
 Stored `#hex::shape_N` values SHALL keep parsing with no data change, and the additional bodies
 SHALL be appended after the existing indexes so no existing bot's body changes.
 
 #### Scenario: Existing static-shape bot
+
 - **WHEN** a bot already stores `#hex::shape_3`
 - **THEN** it renders as an organic avatar in that colour with its own hashed body, and keeps working
   without migration
 
 #### Scenario: Existing organic bots unchanged
+
 - **WHEN** a bot stores a plain `#hex` colour
 - **THEN** its organic body is the same family as before this change
 
 ### Requirement: An avatar shows one of eight states
+
 A Nurling's organic avatar SHALL show exactly one of: idle, thinking, working, needs you, in
 review, blocked, done, asleep. The state SHALL be derived in one shared function from the run
 status, composing, ticket status and an optional asleep flag, with no new status values. Needs you
 SHALL win over working, and a background run SHALL NOT drive a chat avatar.
 
 #### Scenario: Waiting on the user
+
 - **WHEN** the Nurling's run is waiting for input or a takeover
 - **THEN** its avatar shows needs you with the warning pip
 
 #### Scenario: A failed run
+
 - **WHEN** the Nurling's run has failed
 - **THEN** its avatar shows blocked with the destructive pip
 
 #### Scenario: A finished run settles
+
 - **WHEN** a run completes
 - **THEN** the avatar shows done with the success pip for 4 seconds, then idle
 
 #### Scenario: A background run
+
 - **WHEN** only a ticket run is active
 - **THEN** the chat avatar stays idle
 
 ### Requirement: A working avatar shows its tool
+
 A working avatar SHALL show a pencil on a notepad for write, a magnifier for search, a laptop for
 computer, and an orbiting dot when no tool is running or the tool is unknown. It SHALL show a
 progress ring only when a real progress value is known and ripples while a run is queued. After 3
 minutes of continuous work it SHALL show the long-run look.
 
 #### Scenario: Searching
+
 - **WHEN** the Nurling's current tool maps to search
 - **THEN** its avatar shows the magnifier
 
 #### Scenario: Unknown tool
+
 - **WHEN** the current tool is not in the map
 - **THEN** its avatar shows the orbiting dot
 
 #### Scenario: Long run
+
 - **WHEN** a Nurling has worked continuously for 3 minutes
 - **THEN** its avatar breathes slower, its eyes look tired and one sweat drop shows
 
 ### Requirement: Switching tools is animated
+
 When the working tool changes, the avatar SHALL drop the old prop in 240 ms, blink, and pop the new
 prop in over about 500 ms with a ring burst, and its eyes SHALL then follow the new prop. A change
 during a swap SHALL replace the pending prop.
 
 #### Scenario: From write to computer
+
 - **WHEN** the tool changes from write to computer
 - **THEN** the notepad drops, the eyes blink and the laptop pops in
 
 ### Requirement: The backend names the tool category
+
 The worker SHALL put a `tool` category (write, search or computer) on each tool-called event from
 one provider-neutral map of built-in tool names, and SHALL omit it for any other tool. Clients SHALL
 render the category they receive and SHALL NOT map tool names themselves.
 
 #### Scenario: A document tool
+
 - **WHEN** the Nurling calls `write_file`
 - **THEN** the tool-called event carries the write category
 
 #### Scenario: An integration tool
+
 - **WHEN** the Nurling calls a tool that is not in the map
 - **THEN** the event carries no category and the avatar shows the orbiting dot
 
 ### Requirement: Avatars follow only a near pointer
+
 On web, avatar eyes SHALL follow the pointer only while it is within about 2.5 times the avatar's
 size, never less than 120px. The pull SHALL be strongest at the avatar's edge and ease to zero at
 that radius; beyond it the avatar SHALL show its idle gaze. There SHALL be no following while
 thinking or asleep. Tracking SHALL use one shared listener and SHALL NOT rerender avatars.
 
 #### Scenario: Cursor far away
+
 - **WHEN** the pointer is farther from an avatar than its follow radius
 - **THEN** the avatar shows its idle gaze
 
 #### Scenario: Cursor near
+
 - **WHEN** the pointer is just outside the avatar's edge
 - **THEN** the avatar looks toward it with its full state strength, easing off as the pointer moves
   away
 
 ### Requirement: A hard shake makes avatars dizzy
+
 Ten direction changes within 1.5 seconds, each move at least 16px, SHALL make every visible
 avatar dizzy for about 2.4 seconds, except sleeping and thinking ones.
 
 #### Scenario: A quick wiggle
+
 - **WHEN** the pointer changes direction six times within 900 ms
 - **THEN** no avatar becomes dizzy
 
 #### Scenario: Shaking the pointer
+
 - **WHEN** the pointer changes direction ten times within 1.5 seconds, each move at least 16px
 - **THEN** every visible avatar except asleep and thinking shows spiral eyes and orbiting stars for
   about 2.4 seconds
 
 ### Requirement: Small avatars and reduced motion stay still
+
 An avatar 24px or smaller, or any avatar under reduced motion, SHALL show no props, no following and
 no animation; only its pip SHALL tell the state.
 
 #### Scenario: A 24px avatar needs you
+
 - **WHEN** a 24px avatar's Nurling needs the user
 - **THEN** the avatar is still and shows the warning pip
 
 ### Requirement: Avatars are named with their state
+
 An avatar SHALL have an accessible name that includes its state, such as "Chief, working", and SHALL
 add no visible text.
 
 #### Scenario: Name
+
 - **WHEN** Chief's avatar shows working
 - **THEN** its accessible name is "Chief, working"
 
 ### Requirement: Chief's face and highlight sit inside its body
+
 Chief SHALL draw its eyes at the storyboard position, lean and scale, and its gloss arc SHALL be its
 own stored arc. On an ink-colored Chief the eye glint SHALL be ink and the gloss SHALL use the page
 background at low opacity. Every body's gloss arc SHALL lie inside its outline.
 
 #### Scenario: Gloss containment
+
 - **WHEN** the gloss arc of any body is sampled
 - **THEN** every point lies inside that body's outline
 
 ### Requirement: Mobile avatars show the same eight states
+
 On mobile, a Nurling's organic avatar SHALL show the same state, working look and tool prop as on
 web, taken from the shared state functions and the tool category on the tool-called event. Mobile
 SHALL NOT map tool names or states itself. The body SHALL keep the Nurling's own color and the pips
@@ -331,50 +405,62 @@ SHALL use only the warning, destructive and success colors. The logo set and pho
 unchanged.
 
 #### Scenario: Waiting on the user
+
 - **WHEN** a Nurling's run is waiting for input on mobile
 - **THEN** its avatar shows needs you with the warning pip
 
 #### Scenario: Computer prop
+
 - **WHEN** the current tool category is computer
 - **THEN** the avatar shows a laptop whose screen faces the Nurling
 
 #### Scenario: Unknown tool
+
 - **WHEN** the event carries no tool category
 - **THEN** the avatar shows the orbiting dot
 
 ### Requirement: Mobile avatars have a calm gaze
+
 Mobile avatars SHALL NOT follow touches and SHALL NOT become dizzy. Their eyes SHALL keep the idle
 drift and blink, and settle on the prop while a tool is shown.
 
 #### Scenario: Touching near an avatar
+
 - **WHEN** the user touches the screen near an avatar
 - **THEN** the avatar's gaze does not change
 
 ### Requirement: Mobile tool swap is animated
+
 When the working tool changes, a mobile avatar SHALL drop the old prop in 240 ms, blink, and pop the
 new prop in over about 500 ms with a ring burst. A change during a swap SHALL replace the pending
 prop.
 
 #### Scenario: From search to write
+
 - **WHEN** the tool changes from search to write
 - **THEN** the magnifier drops, the eyes blink and the notepad pops in
 
 ### Requirement: Small mobile avatars and Reduce Motion stay still
+
 A mobile avatar of 24 pt or smaller, or any avatar while Reduce Motion is on, SHALL show no props and
 no animation; only its pip SHALL tell the state.
 
 #### Scenario: 20 pt avatar blocked
+
 - **WHEN** a 20 pt avatar's Nurling is blocked
 - **THEN** the avatar is still and shows the destructive pip
 
 ### Requirement: Mobile avatars are named with their state
+
 A named mobile avatar SHALL have an accessible name that includes its state, such as "Chief,
 working", except idle, where the name is the Nurling's name alone. It SHALL add no visible text.
 
 #### Scenario: Name
+
 - **WHEN** Chief's avatar shows working on mobile
 - **THEN** its accessible name is "Chief, working"
 
 #### Scenario: Idle
+
 - **WHEN** a named avatar is idle
 - **THEN** its accessible name is the Nurling's name only

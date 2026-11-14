@@ -15,6 +15,7 @@ Why: no new column, no new value format, no API or contract change, and the valu
 round-trips through validation, import and every renderer.
 
 **Rejected:**
+
 - Changing the hash to `seed % 14`: restyles existing bots, which the maintainer ruled out.
 - A new stored token (for example `::body_N`): needs contract, import and old-client handling
   for no gain over `shape_N`.

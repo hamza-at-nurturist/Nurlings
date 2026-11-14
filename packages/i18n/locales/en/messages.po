@@ -1793,6 +1793,7 @@ msgstr "Asks before sending, spending or changing anything in your apps."
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "Asks only before purchases and the first use of your computer. Only Block rules apply."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "asleep"
 msgstr "asleep"
@@ -2006,6 +2007,7 @@ msgstr "Block"
 msgid "Block"
 msgstr "Block"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "blocked"
 msgstr "blocked"
@@ -4982,6 +4984,7 @@ msgstr "Document changed. Reopen to edit the latest version."
 msgid "Don’t have an account?"
 msgstr "Don’t have an account?"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "done"
 msgstr "done"
@@ -6042,6 +6045,7 @@ msgstr "Import data"
 msgid "In progress"
 msgstr "In progress"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "in review"
 msgstr "in review"
@@ -7122,6 +7126,7 @@ msgstr "Needs sign-in"
 msgid "Needs takeover"
 msgstr "Needs takeover"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "needs you"
 msgstr "needs you"
@@ -9604,8 +9609,8 @@ msgstr "Setup help"
 msgid "Shape"
 msgstr "Shape"
 
-#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
-#. placeholder {0}: index + 1
+#. placeholder {0}: offeredShapes.length + index + 1
+#. placeholder {0}: position + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
 msgstr "Shape {0}"
@@ -10625,6 +10630,7 @@ msgstr "These saved settings can't be read. Remove it and add it again."
 msgid "They get {weeks} weeks free."
 msgstr "They get {weeks} weeks free."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "thinking"
 msgstr "thinking"

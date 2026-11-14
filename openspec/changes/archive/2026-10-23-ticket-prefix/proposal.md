@@ -29,11 +29,11 @@ product shows, not in a database default.
 
 ### Upstream merge safety
 
-| File | Edit |
-|---|---|
-| `packages/db/src/board.ts` | one import and one field in `ensureBoard` |
-| `packages/db/package.json`, `pnpm-lock.yaml` | workspace dependency on `@nurlings/brand` |
-| `packages/brand/brand.json`, `packages/brand/src/schema.ts` | our own files |
+| File                                                        | Edit                                      |
+| ----------------------------------------------------------- | ----------------------------------------- |
+| `packages/db/src/board.ts`                                  | one import and one field in `ensureBoard` |
+| `packages/db/package.json`, `pnpm-lock.yaml`                | workspace dependency on `@nurlings/brand` |
+| `packages/brand/brand.json`, `packages/brand/src/schema.ts` | our own files                             |
 
 ## Existing boards
 

@@ -69,16 +69,16 @@ Bot nouns come from the brand config, never a hardcoded product word.
 
 New files wherever possible. Edits to existing upstream files, each a few lines:
 
-| File | Edit |
-|---|---|
-| `packages/contracts/src/rpc.ts` | add `nest: { snapshot }` and its import |
-| `packages/contracts/src/index.ts` | one `export * from "./nest.js"` line |
-| `packages/core/src/index.ts` | one export line for the mood function |
-| `apps/api/src/router.ts` | one import and a `nest: { snapshot }` handler delegating to `apps/api/src/nest.ts` |
-| `apps/web/src/App.tsx` | one lazy import and one `<Route path="/app/nest">` |
-| `apps/web/src/pages/Shell.tsx` | pass `onNest` to the account menu (same shape as `onBoard`) |
-| `apps/web/src/components/SidebarFooter.tsx` | one extra menu item, `onNest` |
-| `apps/web/src/locales/*.po` | regenerated catalog entries for the new strings |
+| File                                        | Edit                                                                               |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `packages/contracts/src/rpc.ts`             | add `nest: { snapshot }` and its import                                            |
+| `packages/contracts/src/index.ts`           | one `export * from "./nest.js"` line                                               |
+| `packages/core/src/index.ts`                | one export line for the mood function                                              |
+| `apps/api/src/router.ts`                    | one import and a `nest: { snapshot }` handler delegating to `apps/api/src/nest.ts` |
+| `apps/web/src/App.tsx`                      | one lazy import and one `<Route path="/app/nest">`                                 |
+| `apps/web/src/pages/Shell.tsx`              | pass `onNest` to the account menu (same shape as `onBoard`)                        |
+| `apps/web/src/components/SidebarFooter.tsx` | one extra menu item, `onNest`                                                      |
+| `apps/web/src/locales/*.po`                 | regenerated catalog entries for the new strings                                    |
 
 Everything else is new: `packages/contracts/src/nest.ts`, `packages/core/src/nest-mood.ts`,
 `apps/api/src/nest.ts`, `apps/web/src/pages/Nest.tsx`, `apps/web/src/components/nest/*`, their

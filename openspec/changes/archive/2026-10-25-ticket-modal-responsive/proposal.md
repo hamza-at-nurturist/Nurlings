@@ -86,12 +86,12 @@ Every control on the narrow sheet is at least 44px. The sheet pads its bottom wi
 
 ### Proposed copy
 
-| Copy | Where | Why it is needed |
-|---|---|---|
-| `Ticket` | first tab | Names the tab that holds the ticket; two unlabeled tabs can't be told apart. |
-| `Activity` | second tab | Names the feed tab; same reason. |
-| `Show more` | under a clamped description, only when it overflows | The only way to see the rest without entering edit mode. Gone once expanded. |
-| `Close image` | viewer close button, accessible name only | The viewer is icon-only. |
+| Copy          | Where                                               | Why it is needed                                                             |
+| ------------- | --------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `Ticket`      | first tab                                           | Names the tab that holds the ticket; two unlabeled tabs can't be told apart. |
+| `Activity`    | second tab                                          | Names the feed tab; same reason.                                             |
+| `Show more`   | under a clamped description, only when it overflows | The only way to see the rest without entering edit mode. Gone once expanded. |
+| `Close image` | viewer close button, accessible name only           | The viewer is icon-only.                                                     |
 
 Reused unchanged: `Back`, `Board`, status, priority and date labels, `Approve`, `Reply`, `Attach
 file`, `Send`, `{name} is working…`. The count badge is a number. Removed on narrow: Expand/Collapse

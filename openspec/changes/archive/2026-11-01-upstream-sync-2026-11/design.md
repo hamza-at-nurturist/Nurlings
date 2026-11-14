@@ -20,11 +20,11 @@ explicitly.
 Ordering against ours. Prisma applies unapplied migrations in name order on a fresh database, and
 on production only applies the ones not yet in `_prisma_migrations`. Ours:
 
-| Ours | Touches |
-| --- | --- |
-| `20261024130000_ticket_events`, `20261024140000_ticket_mentions` | `tickets`, `ticket_events`, `tasks` |
+| Ours                                                                                                           | Touches                               |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `20261024130000_ticket_events`, `20261024140000_ticket_mentions`                                               | `tickets`, `ticket_events`, `tasks`   |
 | `20261025120000_ticket_needs_user`, `20261025130000_ticket_comment_attachments`, `20261025140000_ticket_dates` | `tickets`, `ticket_comments`, `tasks` |
-| `20261025150000_runs_taskid_idx_concurrent`, `20261025150001_artifacts_runid_idx_concurrent` | indexes on `runs`, `artifacts` |
+| `20261025150000_runs_taskid_idx_concurrent`, `20261025150001_artifacts_runid_idx_concurrent`                   | indexes on `runs`, `artifacts`        |
 
 Upstream's first dozen (`20261024150000_model_roles` to `20261025210003_*`) sort between and after
 ours. No upstream migration alters `tickets`, `ticket_*` or `tasks` columns; the only overlap is the
@@ -34,18 +34,18 @@ duplicate `runs_taskId_idx` below. New migrations of ours after the sync use a t
 Classification (everything else is a new table, a new nullable or defaulted column, a new index or
 a backfill):
 
-| Migration | Statement | Previous release reads it? | Plan |
-| --- | --- | --- | --- |
-| `20261025210001_runs_task_id_idx_concurrent` | `CREATE INDEX "runs_taskId_idx"` duplicates ours | n/a | Edit to `IF NOT EXISTS` (overlap) |
-| `20261025140000_drop_space_backup_models` | `DROP TABLE space_backup_models` | maybe | Ships (approved exception) |
-| `20261025180000_drop_model_preference_default` | drop `isDefault` + 2 indexes | yes (`space_model_preferences`) | Ships (approved exception) |
-| `20261025200000_account_settings` | `DROP TABLE account_source, space_setting_signatures` after moving data | yes | Ships as is (approved exception) |
-| `20261102120000_drop_unused_referral_tables` | drop `billing_card_fingerprints`, `referrals.createdAt` | no (new tables) | Safe, ships |
-| `20261103120000_drop_dead_bot_and_referral_columns` | drop `bots.title`, `bots.selfUpdateInstructions`, referral columns | yes for `bots` | Ships (approved exception) |
-| `20261108120000_drop_pending_instructions_run` | drop `bots.pendingInstructionsRunId` | yes | Ships (approved exception) |
-| `20261104120001..3_*_drop_concurrent` | drop three indexes | performance only | Ships |
-| `20261029150000_space_availability` | drop `secrets_scope_check` | relaxes a check | Ships |
-| `20261109120000_audit_events` | `REVOKE UPDATE` on the new table | no | Ships |
+| Migration                                           | Statement                                                               | Previous release reads it?      | Plan                              |
+| --------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------- | --------------------------------- |
+| `20261025210001_runs_task_id_idx_concurrent`        | `CREATE INDEX "runs_taskId_idx"` duplicates ours                        | n/a                             | Edit to `IF NOT EXISTS` (overlap) |
+| `20261025140000_drop_space_backup_models`           | `DROP TABLE space_backup_models`                                        | maybe                           | Ships (approved exception)        |
+| `20261025180000_drop_model_preference_default`      | drop `isDefault` + 2 indexes                                            | yes (`space_model_preferences`) | Ships (approved exception)        |
+| `20261025200000_account_settings`                   | `DROP TABLE account_source, space_setting_signatures` after moving data | yes                             | Ships as is (approved exception)  |
+| `20261102120000_drop_unused_referral_tables`        | drop `billing_card_fingerprints`, `referrals.createdAt`                 | no (new tables)                 | Safe, ships                       |
+| `20261103120000_drop_dead_bot_and_referral_columns` | drop `bots.title`, `bots.selfUpdateInstructions`, referral columns      | yes for `bots`                  | Ships (approved exception)        |
+| `20261108120000_drop_pending_instructions_run`      | drop `bots.pendingInstructionsRunId`                                    | yes                             | Ships (approved exception)        |
+| `20261104120001..3_*_drop_concurrent`               | drop three indexes                                                      | performance only                | Ships                             |
+| `20261029150000_space_availability`                 | drop `secrets_scope_check`                                              | relaxes a check                 | Ships                             |
+| `20261109120000_audit_events`                       | `REVOKE UPDATE` on the new table                                        | no                              | Ships                             |
 
 Maintainer decision: all migrations apply in one deploy, unchanged except the `IF NOT EXISTS` fix.
 Nothing is held back. This knowingly breaks the side-by-side rule for the rollout window (queries on
@@ -138,26 +138,26 @@ admin account's email. Existing stdio servers keep running; checking this is a p
 Files upstream changed that we also edit, with our edit kept as small as the merge allowed (written
 from the real merge).
 
-| File | Our edit | Why |
-| --- | --- | --- |
-| `packages/db/prisma/migrations/20261025210001_runs_task_id_idx_concurrent/migration.sql` | `IF NOT EXISTS` | Our earlier migration already created `runs_taskId_idx`; the only upstream migration edited |
-| `packages/db/prisma/schema.prisma` | union of models, one duplicate `runs` index removed | Both sides declared `@@index([taskId])` |
-| `apps/api/src/routes/boards.ts` | ticket cards, approve, events, runs, files, comment attachments and mentions | Upstream moved the board routes out of `router.ts`; our ticket handlers live there now |
-| `apps/api/src/{app.ts,ai-consent.ts,messaging-inbound.ts}`, `apps/worker/src/index.ts` | `ticketBoardEnabled`, `ticket.dates` reconciler, brand name, privacy link from the brand | Fork features |
-| `packages/adapters/src/{run-tools-tasks,run-context,executor,run-effects,run-replies,pi-runtime,pi-runtime-subagent,ticket-tools,builtin-tools,builtin-tool-bridge,builtin-skills,job-reconciler,background-job-handlers}.ts` | ticket tools (files, dates, mentions), brand names in prompts, ticket tools in the core toolset, the built-in "Rakazo" docs skill removed | Upstream split the executor into modules; edits re-applied there |
-| `packages/auth/src/{index,email,welcome-email,referral-email,plugin-submission-email}.ts(x)` | brand name in every email, no upstream links or founder sign-off | Emails moved to React Email templates |
-| `packages/core/src/bot-avatar-colors.ts`, `packages/contracts/src/{bot-avatar,board}.ts` | `#hex::shape_N` resolves to its hex; nine shapes and one selectable icon set; `Ticket` is the input type | Fork defaults |
-| `packages/db/src/approval-settings.ts`, `apps/api/src/routes/account.ts`, `packages/adapters/src/run-trust.ts` | one `DEFAULT_AUTO_REVIEW`, off | Upstream defaults Auto Review on |
-| `apps/mobile/{app.config.ts,app.json,eas.json}` and locales `de ja nl ru zh es zh-TW` | brand identity, preview profile, Board copy | Rebrand |
-| `apps/mobile/{components/inbox-header.tsx,lib/use-home-header.ts}` | Board button | Upstream moved the home header out of `app/index.tsx` |
-| `apps/mobile/app/{+native-intent.tsx,(settings)/account.tsx}` | rewrite of old `board` and `ticket` links; Settings > Board href | Route move |
-| `apps/mobile/components/bot-avatar.tsx`, `packages/ui-web/src/bot-avatar.tsx`, `apps/mobile/components/thread-composer.tsx` | brand blob shape and eyes; brand mark | Fork avatar |
-| `apps/web/src/pages/{Board.tsx,Auth.tsx}`, `components/{SidebarFooter,ArtifactFileCard}.tsx`, `pages/shell/{use-computer,message-view,avatar-studio-popover}.tsx` | `BoardView` route, brand intro animation, brand links, file meta, boot watch, brand loader, hex color | Fork features |
-| `.github/workflows/{ci,publish-server-image,publish-playwright-report,release-android-apk,weekly-dependencies,release-mobile}.yml` | repository guards, brand checks, preview input, gallery-storage check | Fork infra |
-| `deploy/coolify/docker-compose.yml`, `deploy/coolify/README.md` | `migrate` service, upstream's new settings passed through, `RAKAZO_ADMIN_EMAILS`, the web label and README step kept | Take upstream compose changes |
-| `infra/compose/docker-compose.{images,prod}.yml` | fork registry on the new `migrate` image | Registry default |
-| `apps/web/e2e/*` (about 40 specs) | `ui()` wrapping of brand wording | Rebrand |
-| Test files that pinned upstream behavior we changed | updated with the change | e.g. Auto Review default, ticket owner, docs fetch allow-list |
+| File                                                                                                                                                                                                                          | Our edit                                                                                                                                  | Why                                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `packages/db/prisma/migrations/20261025210001_runs_task_id_idx_concurrent/migration.sql`                                                                                                                                      | `IF NOT EXISTS`                                                                                                                           | Our earlier migration already created `runs_taskId_idx`; the only upstream migration edited |
+| `packages/db/prisma/schema.prisma`                                                                                                                                                                                            | union of models, one duplicate `runs` index removed                                                                                       | Both sides declared `@@index([taskId])`                                                     |
+| `apps/api/src/routes/boards.ts`                                                                                                                                                                                               | ticket cards, approve, events, runs, files, comment attachments and mentions                                                              | Upstream moved the board routes out of `router.ts`; our ticket handlers live there now      |
+| `apps/api/src/{app.ts,ai-consent.ts,messaging-inbound.ts}`, `apps/worker/src/index.ts`                                                                                                                                        | `ticketBoardEnabled`, `ticket.dates` reconciler, brand name, privacy link from the brand                                                  | Fork features                                                                               |
+| `packages/adapters/src/{run-tools-tasks,run-context,executor,run-effects,run-replies,pi-runtime,pi-runtime-subagent,ticket-tools,builtin-tools,builtin-tool-bridge,builtin-skills,job-reconciler,background-job-handlers}.ts` | ticket tools (files, dates, mentions), brand names in prompts, ticket tools in the core toolset, the built-in "Rakazo" docs skill removed | Upstream split the executor into modules; edits re-applied there                            |
+| `packages/auth/src/{index,email,welcome-email,referral-email,plugin-submission-email}.ts(x)`                                                                                                                                  | brand name in every email, no upstream links or founder sign-off                                                                          | Emails moved to React Email templates                                                       |
+| `packages/core/src/bot-avatar-colors.ts`, `packages/contracts/src/{bot-avatar,board}.ts`                                                                                                                                      | `#hex::shape_N` resolves to its hex; nine shapes and one selectable icon set; `Ticket` is the input type                                  | Fork defaults                                                                               |
+| `packages/db/src/approval-settings.ts`, `apps/api/src/routes/account.ts`, `packages/adapters/src/run-trust.ts`                                                                                                                | one `DEFAULT_AUTO_REVIEW`, off                                                                                                            | Upstream defaults Auto Review on                                                            |
+| `apps/mobile/{app.config.ts,app.json,eas.json}` and locales `de ja nl ru zh es zh-TW`                                                                                                                                         | brand identity, preview profile, Board copy                                                                                               | Rebrand                                                                                     |
+| `apps/mobile/{components/inbox-header.tsx,lib/use-home-header.ts}`                                                                                                                                                            | Board button                                                                                                                              | Upstream moved the home header out of `app/index.tsx`                                       |
+| `apps/mobile/app/{+native-intent.tsx,(settings)/account.tsx}`                                                                                                                                                                 | rewrite of old `board` and `ticket` links; Settings > Board href                                                                          | Route move                                                                                  |
+| `apps/mobile/components/bot-avatar.tsx`, `packages/ui-web/src/bot-avatar.tsx`, `apps/mobile/components/thread-composer.tsx`                                                                                                   | brand blob shape and eyes; brand mark                                                                                                     | Fork avatar                                                                                 |
+| `apps/web/src/pages/{Board.tsx,Auth.tsx}`, `components/{SidebarFooter,ArtifactFileCard}.tsx`, `pages/shell/{use-computer,message-view,avatar-studio-popover}.tsx`                                                             | `BoardView` route, brand intro animation, brand links, file meta, boot watch, brand loader, hex color                                     | Fork features                                                                               |
+| `.github/workflows/{ci,publish-server-image,publish-playwright-report,release-android-apk,weekly-dependencies,release-mobile}.yml`                                                                                            | repository guards, brand checks, preview input, gallery-storage check                                                                     | Fork infra                                                                                  |
+| `deploy/coolify/docker-compose.yml`, `deploy/coolify/README.md`                                                                                                                                                               | `migrate` service, upstream's new settings passed through, `RAKAZO_ADMIN_EMAILS`, the web label and README step kept                      | Take upstream compose changes                                                               |
+| `infra/compose/docker-compose.{images,prod}.yml`                                                                                                                                                                              | fork registry on the new `migrate` image                                                                                                  | Registry default                                                                            |
+| `apps/web/e2e/*` (about 40 specs)                                                                                                                                                                                             | `ui()` wrapping of brand wording                                                                                                          | Rebrand                                                                                     |
+| Test files that pinned upstream behavior we changed                                                                                                                                                                           | updated with the change                                                                                                                   | e.g. Auto Review default, ticket owner, docs fetch allow-list                               |
 
 ## Risks
 

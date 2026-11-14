@@ -26,30 +26,30 @@ snooze, background helper threads, message delivery recovery, Expo 58 and vitest
 
 ### Areas that moved upstream and how the fork follows
 
-| Area | Upstream change | Resolution |
-| --- | --- | --- |
-| Translations | One set of Lingui catalogs in `packages/i18n` for web and mobile; mobile dictionaries and `useI18n` removed | Take upstream's. Fork strings are re-extracted and our existing translations are copied into the new catalogs. Mobile board and avatar strings move to Lingui. Rebranding stays at load time (`brandMessages`). |
-| Board gating | The board is a per-account Lab; `TICKET_BOARD_ENABLED=true` turns it on for everyone | Take upstream's labs model. Our date reminders, mention wakes and ticket tools check the owner's labs. Deploys that set `TICKET_BOARD_ENABLED=true` behave as before. |
-| Prompts | Model prompts moved into `*.prompt.ts` files | Our brand wording is applied there; the brand guard's server-text list follows. |
-| Run wiring | `createRunRuntime` and `createRunReconciler` in adapters build the handlers and housekeeping for API and worker | Our ticket date reconciler and ticket notifications are added there. |
-| Avatar look | Look picker with identities, `botLookState` helpers in core, shipped shapes | Our 14 offered shapes (brand blob, three original bodies, ten families) replace the shipped shapes; retired static shapes still read as the default look. |
-| Emails | Welcome email rewritten around three steps with Discord and GitHub links | Only the apps step stays, from brand store links; the signature is the company name; no hosted hero image. |
-| Setup and desktop | Setup IPC split into modules, native macOS stack, signed fork releases | Take upstream's; our brand and hosted-service handling are re-applied. |
+| Area              | Upstream change                                                                                                 | Resolution                                                                                                                                                                                                      |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Translations      | One set of Lingui catalogs in `packages/i18n` for web and mobile; mobile dictionaries and `useI18n` removed     | Take upstream's. Fork strings are re-extracted and our existing translations are copied into the new catalogs. Mobile board and avatar strings move to Lingui. Rebranding stays at load time (`brandMessages`). |
+| Board gating      | The board is a per-account Lab; `TICKET_BOARD_ENABLED=true` turns it on for everyone                            | Take upstream's labs model. Our date reminders, mention wakes and ticket tools check the owner's labs. Deploys that set `TICKET_BOARD_ENABLED=true` behave as before.                                           |
+| Prompts           | Model prompts moved into `*.prompt.ts` files                                                                    | Our brand wording is applied there; the brand guard's server-text list follows.                                                                                                                                 |
+| Run wiring        | `createRunRuntime` and `createRunReconciler` in adapters build the handlers and housekeeping for API and worker | Our ticket date reconciler and ticket notifications are added there.                                                                                                                                            |
+| Avatar look       | Look picker with identities, `botLookState` helpers in core, shipped shapes                                     | Our 14 offered shapes (brand blob, three original bodies, ten families) replace the shipped shapes; retired static shapes still read as the default look.                                                       |
+| Emails            | Welcome email rewritten around three steps with Discord and GitHub links                                        | Only the apps step stays, from brand store links; the signature is the company name; no hosted hero image.                                                                                                      |
+| Setup and desktop | Setup IPC split into modules, native macOS stack, signed fork releases                                          | Take upstream's; our brand and hosted-service handling are re-applied.                                                                                                                                          |
 
 ### Conflict list and resolution
 
 108 files conflicted (before counting the translation catalogs that moved).
 
-| File | Resolution |
-| --- | --- |
-| `AGENTS.md`, `README.md`, `CHANGELOG.md`, `NOTICE` | Keep ours; `NOTICE` also gains upstream's third-party credits. |
+| File                                                                                      | Resolution                                                                                                                        |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md`, `README.md`, `CHANGELOG.md`, `NOTICE`                                        | Keep ours; `NOTICE` also gains upstream's third-party credits.                                                                    |
 | `.github/workflows/{ci,release-desktop,release-android-apk,desktop-macos-screenshot}.yml` | Keep the fork's jobs and no update feed. Take upstream's step changes; the Android job uses `pnpm exec eas` as upstream now does. |
-| `package.json` files, `pnpm-lock.yaml` | Upstream's versions plus our `@nurlings/brand` and extras; lockfile regenerated. |
-| `apps/web/src/locales/*`, `apps/mobile/lib/locales/*` | Removed upstream. Fork translations are carried into `packages/i18n`. |
-| Prompt, email, team-chat and messaging text | Upstream's code with brand names re-applied. |
-| Board code (`ticket-*`, `ticket-changes`, API and worker wiring) | Upstream's labs model with our date, mention, approve and file features kept. |
-| Avatar files (web and mobile) | See the avatar row above. |
-| Desktop `main.ts`, setup tests, install script | Upstream's structure; our brand, hosted-service and image-registry handling re-applied. |
+| `package.json` files, `pnpm-lock.yaml`                                                    | Upstream's versions plus our `@nurlings/brand` and extras; lockfile regenerated.                                                  |
+| `apps/web/src/locales/*`, `apps/mobile/lib/locales/*`                                     | Removed upstream. Fork translations are carried into `packages/i18n`.                                                             |
+| Prompt, email, team-chat and messaging text                                               | Upstream's code with brand names re-applied.                                                                                      |
+| Board code (`ticket-*`, `ticket-changes`, API and worker wiring)                          | Upstream's labs model with our date, mention, approve and file features kept.                                                     |
+| Avatar files (web and mobile)                                                             | See the avatar row above.                                                                                                         |
+| Desktop `main.ts`, setup tests, install script                                            | Upstream's structure; our brand, hosted-service and image-registry handling re-applied.                                           |
 
 ## Risks
 

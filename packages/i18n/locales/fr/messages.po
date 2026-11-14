@@ -1793,6 +1793,7 @@ msgstr "Demande avant d'envoyer, de dépenser ou de modifier quoi que ce soit da
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "Demande uniquement avant les achats et la première utilisation de votre ordinateur. Seules les règles Bloquer s'appliquent."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "asleep"
 msgstr ""
@@ -2006,6 +2007,7 @@ msgstr "Bloquer"
 msgid "Block"
 msgstr "Bloquer"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "blocked"
 msgstr ""
@@ -4982,6 +4984,7 @@ msgstr "Le document a changé. Rouvrez-le pour modifier la dernière version."
 msgid "Don’t have an account?"
 msgstr "Vous n'avez pas de compte ?"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "done"
 msgstr ""
@@ -6042,6 +6045,7 @@ msgstr "Importer des données"
 msgid "In progress"
 msgstr "En cours"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "in review"
 msgstr ""
@@ -7122,6 +7126,7 @@ msgstr "Connexion requise"
 msgid "Needs takeover"
 msgstr "Nécessite une intervention"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "needs you"
 msgstr ""
@@ -9604,8 +9609,8 @@ msgstr "Aide à la configuration"
 msgid "Shape"
 msgstr "Forme"
 
-#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
-#. placeholder {0}: index + 1
+#. placeholder {0}: offeredShapes.length + index + 1
+#. placeholder {0}: position + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
 msgstr "Forme {0}"
@@ -10625,6 +10630,7 @@ msgstr "Ces paramètres enregistrés sont illisibles. Supprimez-les et ajoutez-l
 msgid "They get {weeks} weeks free."
 msgstr "Il profite de {weeks} semaines gratuites."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "thinking"
 msgstr ""

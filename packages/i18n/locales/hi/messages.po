@@ -1793,6 +1793,7 @@ msgstr "आपके ऐप्स में कुछ भी भेजने, �
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "केवल खरीदारी और आपके कंप्यूटर के पहले उपयोग से पहले पूछता है। केवल ब्लॉक नियम लागू होते हैं।"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "asleep"
 msgstr ""
@@ -2006,6 +2007,7 @@ msgstr "ब्लॉक करें"
 msgid "Block"
 msgstr "ब्लॉक करें"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "blocked"
 msgstr ""
@@ -4982,6 +4984,7 @@ msgstr "दस्तावेज़ बदल गया है। नवीन�
 msgid "Don’t have an account?"
 msgstr "खाता नहीं है?"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "done"
 msgstr ""
@@ -6042,6 +6045,7 @@ msgstr "डेटा आयात करें"
 msgid "In progress"
 msgstr "प्रगति में"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "in review"
 msgstr ""
@@ -7122,6 +7126,7 @@ msgstr "साइन इन ज़रूरी है"
 msgid "Needs takeover"
 msgstr "नियंत्रण लेना ज़रूरी"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "needs you"
 msgstr ""
@@ -9604,8 +9609,8 @@ msgstr "सेटअप सहायता"
 msgid "Shape"
 msgstr "आकार"
 
-#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
-#. placeholder {0}: index + 1
+#. placeholder {0}: offeredShapes.length + index + 1
+#. placeholder {0}: position + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
 msgstr "आकार {0}"
@@ -10625,6 +10630,7 @@ msgstr "ये सहेजी गई सेटिंग्स पढ़ी न�
 msgid "They get {weeks} weeks free."
 msgstr "उन्हें {weeks} हफ़्ते मुफ़्त मिलते हैं।"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "thinking"
 msgstr ""

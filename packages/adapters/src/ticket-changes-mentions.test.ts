@@ -130,7 +130,7 @@ describe("a Nurling mentioning the user", () => {
     s.send.mockRejectedValueOnce(new Error("push down"));
     await expect(s.notifier(mentioned)).resolves.toBeUndefined();
     const bare = createTicketChangeNotifier({
-        prisma: {} as unknown as PrismaClient,
+      prisma: {} as unknown as PrismaClient,
       jobs: {} as never,
       boardEvents: { notify: vi.fn(async () => {}) } as never,
     });

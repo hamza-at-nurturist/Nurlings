@@ -41,16 +41,16 @@
 
 `tickets` gets these columns, all additive:
 
-| Column | Type | Meaning |
-|---|---|---|
-| `startAt` | timestamptz null | Start instant |
-| `startHasTime` | bool default false | false: a date, resolved to 9 AM |
-| `dueAt` | timestamptz null | Due instant |
-| `dueHasTime` | bool default false | false: a date, resolved to 23:59 |
-| `startWokenAt` | timestamptz null | Start wake handled (fired or skipped) |
-| `dueWarnedAt` | timestamptz null | Heads-up handled |
-| `overdueNotifiedAt` | timestamptz null | Overdue push handled |
-| `scheduleAt` | timestamptz null, indexed | Earliest pending reminder |
+| Column              | Type                      | Meaning                               |
+| ------------------- | ------------------------- | ------------------------------------- |
+| `startAt`           | timestamptz null          | Start instant                         |
+| `startHasTime`      | bool default false        | false: a date, resolved to 9 AM       |
+| `dueAt`             | timestamptz null          | Due instant                           |
+| `dueHasTime`        | bool default false        | false: a date, resolved to 23:59      |
+| `startWokenAt`      | timestamptz null          | Start wake handled (fired or skipped) |
+| `dueWarnedAt`       | timestamptz null          | Heads-up handled                      |
+| `overdueNotifiedAt` | timestamptz null          | Overdue push handled                  |
+| `scheduleAt`        | timestamptz null, indexed | Earliest pending reminder             |
 
 The reminder times are pure functions of the stored row, in `ticket-dates.ts`:
 
@@ -144,8 +144,8 @@ and it doesn't match the rest of the modal.
      - it wakes the owner with `wakeTicketAssignee`, which gains an optional `prompt`, using the
        heads-up prompt when both the start and the heads-up fire;
      - and/or it pushes the user.
-  A ticket that loses its owner is left out by the reconciler query, so it doesn't spin. Its
-  reminders resume when an owner is set.
+       A ticket that loses its owner is left out by the reconciler query, so it doesn't spin. Its
+       reminders resume when an owner is set.
 - **Prompts** (model-facing, not UI):
   - the start wake reuses `ticketWakePrompt`;
   - the heads-up is "Ticket {ref} is due {when}. Read it with ticket_get. Finish it, or comment on the

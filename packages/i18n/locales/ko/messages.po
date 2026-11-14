@@ -1793,6 +1793,7 @@ msgstr "앱에서 무언가를 보내거나, 결제하거나, 변경하기 전�
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "구매할 때와 컴퓨터를 처음 사용할 때만 묻습니다. 차단 규칙만 적용됩니다."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "asleep"
 msgstr ""
@@ -2006,6 +2007,7 @@ msgstr "차단"
 msgid "Block"
 msgstr "차단"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "blocked"
 msgstr ""
@@ -4982,6 +4984,7 @@ msgstr "문서가 변경되었습니다. 최신 버전을 편집하려면 다시
 msgid "Don’t have an account?"
 msgstr "계정이 없나요?"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "done"
 msgstr ""
@@ -6042,6 +6045,7 @@ msgstr "데이터 가져오기"
 msgid "In progress"
 msgstr "진행 중"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "in review"
 msgstr ""
@@ -7122,6 +7126,7 @@ msgstr "로그인 필요"
 msgid "Needs takeover"
 msgstr "인수 필요"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "needs you"
 msgstr ""
@@ -9604,8 +9609,8 @@ msgstr "설정 도움말"
 msgid "Shape"
 msgstr "모양"
 
-#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
-#. placeholder {0}: index + 1
+#. placeholder {0}: offeredShapes.length + index + 1
+#. placeholder {0}: position + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
 msgstr "모양 {0}"
@@ -10625,6 +10630,7 @@ msgstr "저장된 설정을 읽을 수 없습니다. 삭제한 후 다시 추가
 msgid "They get {weeks} weeks free."
 msgstr "친구는 {weeks}주 동안 무료로 사용해요."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "thinking"
 msgstr ""

@@ -1793,6 +1793,7 @@ msgstr "Vraagt het voordat er iets wordt verstuurd, uitgegeven of gewijzigd in j
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "Vraagt het alleen vóór aankopen en het eerste gebruik van je computer. Alleen Blokkeren-regels gelden."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "asleep"
 msgstr "slaapt"
@@ -2006,6 +2007,7 @@ msgstr "Blokkeren"
 msgid "Block"
 msgstr "Blokkeren"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "blocked"
 msgstr "geblokkeerd"
@@ -4982,6 +4984,7 @@ msgstr "Het document is gewijzigd. Open het opnieuw om de nieuwste versie te bew
 msgid "Don’t have an account?"
 msgstr "Heb je geen account?"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "done"
 msgstr "klaar"
@@ -6042,6 +6045,7 @@ msgstr "Gegevens importeren"
 msgid "In progress"
 msgstr "Bezig"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "in review"
 msgstr "in review"
@@ -7122,6 +7126,7 @@ msgstr "Aanmelden vereist"
 msgid "Needs takeover"
 msgstr "Heeft overname nodig"
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "needs you"
 msgstr "heeft je nodig"
@@ -9604,8 +9609,8 @@ msgstr "Installatiehulp"
 msgid "Shape"
 msgstr "Vorm"
 
-#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
-#. placeholder {0}: index + 1
+#. placeholder {0}: offeredShapes.length + index + 1
+#. placeholder {0}: position + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
 msgstr "Vorm {0}"
@@ -10625,6 +10630,7 @@ msgstr "Deze opgeslagen instellingen kunnen niet worden gelezen. Verwijder ze en
 msgid "They get {weeks} weeks free."
 msgstr "Zij krijgen {weeks} weken gratis."
 
+#: apps/mobile/components/bot-avatar.tsx
 #: apps/web/src/components/AvatarStateNames.tsx
 msgid "thinking"
 msgstr "denkt na"
