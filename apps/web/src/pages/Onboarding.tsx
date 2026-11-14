@@ -101,7 +101,6 @@ export function OnboardingPage() {
         {step === "survey" ? <SignupSurvey onDone={() => setSurveyDone(true)} /> : null}
         {step === "model" ? <ModelStep model={model} fieldId={fieldId} /> : null}
         {step === "bot" ? (
-      color: FIRST_BOT_AVATAR,
           <FirstBotRetry error={error} onRetry={() => void createFirstBot()} />
         ) : null}
       </div>

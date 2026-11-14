@@ -112,6 +112,7 @@ export function ShellSidePanel({
                 </span>
               ) : null}
               <div className="ml-auto flex gap-1">
+                {botTab && active ? <BotPanelExpand key={active.id} /> : null}
                 <Button
                   variant="ghost"
                   size="icon-sm"
@@ -126,7 +127,6 @@ export function ShellSidePanel({
           {panel === "create-group" ? (
             <CreateGroupForm
               bots={bots}
-                {botTab && active ? <BotPanelExpand key={active.id} /> : null}
               onCancel={() => setPanel(null)}
               onCreate={(input) => createGroup(input)}
               onOpenBot={(botId) => {

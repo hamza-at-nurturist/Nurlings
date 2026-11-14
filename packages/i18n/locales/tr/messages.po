@@ -1,17 +1,18 @@
+#
 msgid ""
 msgstr ""
-"POT-Creation-Date: 2026-08-26 21:16+0300\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"X-Generator: @lingui/cli\n"
-"Language: tr\n"
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-26 21:16+0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
+"X-Generator: @lingui/cli\n"
 
 #: apps/web/src/pages/shell/sidebar-roster.tsx
 msgid " (unread)"
@@ -36,6 +37,11 @@ msgstr "{0, plural, one {# ücretsiz ay kazanıldı} other {# ücretsiz ay kazan
 #: apps/web/src/pages/AdminAccessPage.tsx
 msgid "{0, plural, one {# free month} other {# free months}}"
 msgstr "{0, plural, one {# ücretsiz ay} other {# ücretsiz ay}}"
+
+#. placeholder {0}: models.length
+#: apps/web/src/pages/model-settings/provider-page.tsx
+msgid "{0, plural, one {# model} other {# models}}"
+msgstr ""
 
 #. placeholder {0}: skills.length - shownSkills.length
 #: apps/web/src/components/integrations/plugin-marketplace.tsx
@@ -71,12 +77,15 @@ msgid "{0, plural, one {Waiting for sign-in — the link expires in about # minu
 msgstr "{0, plural, one {Oturum açma bekleniyor — bağlantının süresi yaklaşık # dakika içinde doluyor.} other {Oturum açma bekleniyor — bağlantının süresi yaklaşık # dakika içinde doluyor.}}"
 
 #. placeholder {0}: file.name
+#: apps/web/src/components/board/TicketModal/use-staged-files.ts
 #: apps/web/src/pages/shell/use-composer-actions.ts
 msgid "{0} (max {ATTACHMENT_MAX_COUNT} attachments)"
 msgstr "{0} (en fazla {ATTACHMENT_MAX_COUNT} ek)"
 
 #. placeholder {0}: file.name
 #. placeholder {1}: attachmentSizeLabel(attachmentMaxBytes(bootstrapMe))
+#. placeholder {1}: attachmentSizeLabel(maxBytes)
+#: apps/web/src/components/board/TicketModal/use-staged-files.ts
 #: apps/web/src/pages/shell/use-composer-actions.ts
 msgid "{0} (over {1})"
 msgstr "{0} ({1} üzeri)"
@@ -86,10 +95,43 @@ msgstr "{0} ({1} üzeri)"
 msgid "{0} {unitLabel}"
 msgstr "{0} {unitLabel}"
 
+#. placeholder {0}: actorText(line.actor)
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+msgid "{0} approved it"
+msgstr ""
+
+#. placeholder {0}: actorText(line.actor)
+#. placeholder {1}: line.owner
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+msgid "{0} assigned it to {1}"
+msgstr ""
+
+#. placeholder {0}: actorText(line.actor)
+#. placeholder {1}: line.name
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+msgid "{0} attached {1}"
+msgstr ""
+
 #. placeholder {0}: block.name
 #: apps/web/src/pages/shell/message-cards.tsx
 msgid "{0} connection"
 msgstr "{0} bağlantısı"
+
+#. placeholder {0}: line.name ?? t`Someone`
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+msgid "{0} couldn't finish, reply to retry"
+msgstr ""
+
+#. placeholder {0}: actorText(line.actor)
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+msgid "{0} created this"
+msgstr ""
+
+#. placeholder {0}: actorText(line.actor)
+#. placeholder {1}: line.owner
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+msgid "{0} created this and assigned it to {1}"
+msgstr ""
 
 #. placeholder {0}: parts.amount
 #: apps/web/src/components/ArtifactFileCard.tsx
@@ -116,6 +158,11 @@ msgstr "{0} çalışmıyor"
 msgid "{0} is running"
 msgstr "{0} çalışıyor"
 
+#. placeholder {0}: botName(run.botId)
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+msgid "{0} is working…"
+msgstr ""
+
 #. placeholder {0}: parts.amount
 #: apps/web/src/components/ArtifactFileCard.tsx
 msgid "{0} KB"
@@ -130,6 +177,12 @@ msgstr "{0} kaldı"
 #: apps/web/src/components/ArtifactFileCard.tsx
 msgid "{0} MB"
 msgstr "{0} MB"
+
+#. placeholder {0}: actorText(line.actor)
+#. placeholder {1}: statuses[line.status as TicketStatus]
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+msgid "{0} moved it to {1}"
+msgstr ""
 
 #. placeholder {0}: sender.name
 #: apps/web/src/pages/ExternalConversationSettings.tsx
@@ -150,6 +203,31 @@ msgstr "{0}, sen açana kadar duraklatılmış durumda"
 #: apps/web/src/components/PlanUsage.tsx
 msgid "{0}% used"
 msgstr "%{0} kullanıldı"
+
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} approved it"
+msgstr ""
+
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} assigned it to {owner}"
+msgstr ""
+
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} attached {name}"
+msgstr ""
+
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this"
+msgstr ""
+
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} created this and assigned it to {owner}"
+msgstr ""
+
+#. placeholder {0}: statuses[line.status]
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{actor} moved it to {0}"
+msgstr ""
 
 #: apps/web/src/lib/billing.ts
 msgid "{amount} / {period}"
@@ -231,6 +309,10 @@ msgstr "{connectedCount, plural, one {# bağlı} other {# bağlı}}"
 #: apps/web/src/pages/shell/message-view.tsx
 msgid "{count, plural, one {# message with {peer}} other {# messages with {peer}}}"
 msgstr "{count, plural, one {{peer} ile # mesaj} other {{peer} ile # mesaj}}"
+
+#: apps/mobile/components/model-providers.tsx
+msgid "{count, plural, one {# model} other {# models}}"
+msgstr ""
 
 #: apps/web/src/components/markdown-copy.tsx
 msgid "{count, plural, one {# row} other {# rows}}"
@@ -435,6 +517,10 @@ msgstr "{name} soruyor: {text}"
 msgid "{name} connection"
 msgstr "{name} bağlantısı"
 
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} couldn't finish, reply to retry"
+msgstr ""
+
 #. js-lingui-explicit-id
 #: apps/web/src/lib/browser-notifications.ts
 msgid "{name} failed"
@@ -452,6 +538,10 @@ msgstr "{name} kullanıyor"
 #: apps/mobile/components/thread/thread-list-controls.tsx
 msgid "{name} is working"
 msgstr "{name} çalışıyor"
+
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "{name} is working…"
+msgstr ""
 
 #: apps/mobile/components/model-role-settings.tsx
 #: apps/web/src/pages/ModelRoleSettings.tsx
@@ -705,7 +795,14 @@ msgstr "{variable} ayrılmış bir ad. Başka bir ad seç."
 msgid "{vcpus} vCPU, {memoryGb} GB, {hours} computer hours a month"
 msgstr "{vcpus} vCPU, {memoryGb} GB, ayda {hours} bilgisayar saati"
 
+#: apps/mobile/components/nurlings-board/board-card-face.tsx
+#: apps/web/src/components/board/BoardView/BoardCard.tsx
+msgid "{workerName} is working…"
+msgstr ""
+
+#. placeholder {0}: bot.name
 #. placeholder {0}: mention.name
+#: apps/mobile/components/nurlings-board/mention-options.tsx
 #: apps/web/src/pages/shell/composer-parts.tsx
 msgid "@{0}"
 msgstr "@{0}"
@@ -871,6 +968,11 @@ msgstr "Hepsi biraz"
 msgid "A command's output"
 msgstr "Bir komutun çıktısı"
 
+#: apps/mobile/app/(settings)/labs.tsx
+#: apps/web/src/pages/LabsSettingsPanel.tsx
+msgid "A kanban board of tickets your bots can work on"
+msgstr ""
+
 #: apps/mobile/components/approval-settings-rows.tsx
 #: apps/web/src/components/ApprovalRulesSettings.tsx
 msgid "A model approves routine actions and asks you about the rest."
@@ -978,9 +1080,11 @@ msgstr "Etkin"
 msgid "Active: {name}"
 msgstr "Etkin: {name}"
 
+#: apps/mobile/app/nurlings/ticket.tsx
 #: apps/mobile/components/inbox-header.tsx
 #: apps/mobile/components/vault-item-sheet.tsx
 #: apps/mobile/lib/use-home-header.ts
+#: apps/web/src/components/board/TicketModal/NarrowTicket.tsx
 #: apps/web/src/components/vault/VaultItemActivity.tsx
 #: apps/web/src/pages/shell/sidebar-header.tsx
 msgid "Activity"
@@ -989,6 +1093,7 @@ msgstr "Etkinlik"
 #: apps/mobile/app/(settings)/integrations.tsx
 #: apps/mobile/app/(settings)/plugin.tsx
 #: apps/mobile/components/thread/ask-block.tsx
+#: apps/web/src/components/board/BoardView/QuickAdd.tsx
 #: apps/web/src/components/integrations/plugin-marketplace.tsx
 #: apps/web/src/components/SecretAskCard.tsx
 #: apps/web/src/pages/McpServerForm.tsx
@@ -1169,6 +1274,10 @@ msgstr "Sunucu URL'si ekle"
 msgid "Add skills"
 msgstr "Beceri ekle"
 
+#: apps/web/src/components/board/TicketModal/DatePicker.tsx
+msgid "Add time"
+msgstr ""
+
 #: apps/web/src/components/teach/SkillDraftCard.tsx
 msgid "Add to routine"
 msgstr "Rutine ekle"
@@ -1221,7 +1330,6 @@ msgstr "Adres satırı 2"
 msgid "Adds"
 msgstr "Eklenecekler"
 
-#: apps/mobile/app/(settings)/model-connection.tsx
 #: apps/mobile/app/bot-settings.tsx
 #: apps/mobile/components/compatible-endpoint-form.tsx
 #: apps/mobile/components/routine-schedule-editor.tsx
@@ -1229,7 +1337,6 @@ msgstr "Eklenecekler"
 #: apps/web/src/pages/McpServerForm.tsx
 #: apps/web/src/pages/memory-providers/MemoryProviderAdvanced.tsx
 #: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/ModelSettingsOverlay.tsx
 #: apps/web/src/pages/onboarding/model-step.tsx
 #: apps/web/src/pages/routine-editor/model-settings.tsx
 #: apps/web/src/pages/shell/bot-panel.tsx
@@ -1264,6 +1371,8 @@ msgstr "Yapay zekâ modelleri"
 
 #: apps/mobile/app/(settings)/integrations.tsx
 #: apps/mobile/app/(settings)/vault.tsx
+#: apps/mobile/components/nurlings-board/nurling-filter.tsx
+#: apps/web/src/components/board/BoardView/NurlingFilter.tsx
 #: apps/web/src/components/VaultSettings.tsx
 #: apps/web/src/pages/PluginsOverlay.tsx
 msgid "All"
@@ -1589,7 +1698,12 @@ msgid "Approvals"
 msgstr "Onaylar"
 
 #: apps/mobile/app/(settings)/messaging.tsx
+#: apps/mobile/app/nurlings/ticket.tsx
 #: apps/mobile/components/McpApprovalCard.tsx
+#: apps/mobile/components/nurlings-board/board-card.tsx
+#: apps/web/src/components/board/BoardView/BoardCard.tsx
+#: apps/web/src/components/board/TicketModal/NarrowTicket.tsx
+#: apps/web/src/components/board/TicketModal/TicketModal.tsx
 #: apps/web/src/pages/MessagingSettingsPanel.tsx
 #: apps/web/src/pages/PluginSubmissionsPanel.tsx
 #: apps/web/src/pages/shell/message-cards.tsx
@@ -1679,6 +1793,10 @@ msgstr "Uygulamalarında bir şey göndermeden, harcamadan veya değiştirmeden 
 msgid "Asks only before purchases and the first use of your computer. Only Block rules apply."
 msgstr "Yalnızca satın almalardan ve bilgisayarının ilk kullanımından önce sorar. Yalnızca Engelle kuralları geçerlidir."
 
+#: apps/web/src/components/AvatarStateNames.tsx
+msgid "asleep"
+msgstr ""
+
 #: apps/mobile/app/bot-profile.tsx
 #: apps/mobile/lib/computer.ts
 #: apps/web/src/pages/shell/computer-panel.tsx
@@ -1702,7 +1820,9 @@ msgstr "saat {timeSelect}"
 msgid "Attach as file"
 msgstr "Dosya olarak ekle"
 
+#: apps/mobile/components/nurlings-board/reply-composer.tsx
 #: apps/mobile/components/thread-composer.tsx
+#: apps/web/src/components/board/TicketModal/ReplyBox.tsx
 #: apps/web/src/pages/shell/composer.tsx
 msgid "Attach file"
 msgstr "Dosya ekle"
@@ -1797,10 +1917,12 @@ msgstr "Avatar Stüdyosu"
 #: apps/mobile/components/add-custom-integration.tsx
 #: apps/mobile/components/integration-detail.tsx
 #: apps/mobile/components/vault-item-sheet.tsx
+#: apps/web/src/components/board/BoardView/BoardView.tsx
+#: apps/web/src/components/board/TicketModal/NarrowTicket.tsx
 #: apps/web/src/components/bot-templates/bot-templates-dialog.tsx
 #: apps/web/src/components/integrations/plugin-marketplace.tsx
 #: apps/web/src/components/integrations/skills-dialog.tsx
-#: apps/web/src/components/vault/VaultPageHeader.tsx
+#: apps/web/src/components/SettingsPageHeader.tsx
 #: apps/web/src/pages/AdminAccessPage.tsx
 #: apps/web/src/pages/AdminPluginsPage.tsx
 #: apps/web/src/pages/Artifacts.tsx
@@ -1884,8 +2006,13 @@ msgstr "Engelle"
 msgid "Block"
 msgstr "Engelle"
 
+#: apps/web/src/components/AvatarStateNames.tsx
+msgid "blocked"
+msgstr ""
+
 #: apps/mobile/app/(settings)/approvals.tsx
 #: apps/mobile/lib/board.ts
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/web/src/components/ApprovalRulesSettings.tsx
 #: apps/web/src/lib/ticket-status.ts
 msgid "Blocked"
@@ -1893,8 +2020,16 @@ msgstr "Engellendi"
 
 #: apps/mobile/app/_layout.tsx
 #: apps/mobile/app/(settings)/account.tsx
+#: apps/mobile/app/(settings)/labs.tsx
+#: apps/mobile/app/nurlings/board.tsx
+#: apps/mobile/components/inbox-header.tsx
+#: apps/mobile/lib/use-home-header.ts
+#: apps/web/src/components/board/BoardView/BoardView.tsx
+#: apps/web/src/components/board/TicketModal/NarrowTicket.tsx
+#: apps/web/src/components/board/TicketModal/TicketModal.tsx
 #: apps/web/src/components/SidebarFooter.tsx
 #: apps/web/src/pages/Board.tsx
+#: apps/web/src/pages/LabsSettingsPanel.tsx
 msgid "Board"
 msgstr "Pano"
 
@@ -2084,6 +2219,7 @@ msgstr "Aramalar yazıya dökme gerektirir"
 msgid "Calls, dictation, and replies read aloud."
 msgstr "Aramalar, dikte ve sesli okunan yanıtlar."
 
+#: apps/mobile/components/nurlings-board/reply-composer.tsx
 #: apps/mobile/lib/thread-attachments.ts
 msgid "Camera"
 msgstr "Kamera"
@@ -2122,6 +2258,7 @@ msgstr "Görselleri okuyamaz"
 #: apps/mobile/app/index.tsx
 #: apps/mobile/app/new-bot.tsx
 #: apps/mobile/app/new-space.tsx
+#: apps/mobile/app/nurlings/ticket.tsx
 #: apps/mobile/app/pages.tsx
 #: apps/mobile/app/routine.tsx
 #: apps/mobile/app/routines.tsx
@@ -2152,6 +2289,7 @@ msgstr "Görselleri okuyamaz"
 #: apps/mobile/lib/unsent-send-warning.ts
 #: apps/mobile/lib/use-inbox-chat-actions.ts
 #: apps/web/src/components/AskCard.tsx
+#: apps/web/src/components/board/TicketModal/DeleteTicket.tsx
 #: apps/web/src/components/ConfirmDialog.tsx
 #: apps/web/src/components/integrations/plugin-marketplace.tsx
 #: apps/web/src/components/markdown-link-prompt.tsx
@@ -2408,6 +2546,10 @@ msgstr "Sağlayıcı seç"
 msgid "Choose backup"
 msgstr "Yedek seç"
 
+#: apps/mobile/components/nurlings-board/ticket-properties.tsx
+msgid "Choose date…"
+msgstr ""
+
 #: apps/web/src/pages/shell/agent-import.tsx
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Choose file"
@@ -2455,6 +2597,7 @@ msgid "Clean up"
 msgstr "Temizle"
 
 #: apps/mobile/app/search.tsx
+#: apps/mobile/components/nurlings-board/ticket-properties.tsx
 #: apps/mobile/lib/bot-lifecycle.ts
 #: apps/web/src/components/SecretAskCard.tsx
 #: apps/web/src/pages/shell/dialogs.tsx
@@ -2527,6 +2670,7 @@ msgid "Close computer"
 msgstr "Bilgisayarı kapat"
 
 #: apps/mobile/components/image-artifact-viewer.tsx
+#: apps/web/src/components/board/TicketModal/TicketImage.tsx
 msgid "Close image"
 msgstr "Görseli kapat"
 
@@ -2586,6 +2730,13 @@ msgstr "Kullanıcı ayarlarını kapat"
 msgid "Close voice settings"
 msgstr "Ses ayarlarını kapat"
 
+#: apps/mobile/components/nurlings-board/nurling-filter.tsx
+#: apps/mobile/lib/board.ts
+#: apps/mobile/lib/nurlings-board/labels.ts
+#: apps/web/src/lib/ticket-status.ts
+msgid "Closed"
+msgstr ""
+
 #: apps/web/src/pages/memory-providers/ConnectionModeFields.tsx
 msgid "Cloud"
 msgstr "Bulut"
@@ -2607,6 +2758,10 @@ msgctxt "email sign-in"
 msgid "Code"
 msgstr "Kod"
 
+#: apps/web/src/components/board/TicketModal/TicketModal.tsx
+msgid "Collapse"
+msgstr ""
+
 #. placeholder {0}: headerName(group)
 #: apps/web/src/pages/shell/sidebar-roster.tsx
 msgid "Collapse {0}"
@@ -2615,6 +2770,10 @@ msgstr "{0} bölümünü daralt"
 #: apps/mobile/components/inbox-rows.tsx
 msgid "Collapse {name}"
 msgstr "{name} daralt"
+
+#: apps/web/src/pages/shell/bot-panel-expand.tsx
+msgid "Collapse panel"
+msgstr ""
 
 #: apps/mobile/components/bot-look-picker.tsx
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
@@ -2914,6 +3073,10 @@ msgstr "Bağlanıyor…"
 msgid "Connection"
 msgstr "Bağlantı"
 
+#: apps/mobile/app/(settings)/model-settings.tsx
+msgid "Connection not found"
+msgstr ""
+
 #: apps/mobile/app/(settings)/integrations.tsx
 #: apps/mobile/app/(settings)/plugin.tsx
 msgid "Connection pending"
@@ -2949,9 +3112,8 @@ msgstr "Kişiler"
 msgid "Contains code to run"
 msgstr "Çalıştırılacak kod içeriyor"
 
-#: apps/mobile/components/compatible-endpoint-form.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 msgid "Context limit"
 msgstr "Bağlam sınırı"
 
@@ -2995,6 +3157,11 @@ msgstr "{name} ile devam et"
 #: apps/web/src/components/SocialSignInButtons.tsx
 msgid "Continue with email"
 msgstr "E-posta ile devam et"
+
+#: apps/mobile/components/social-sign-in-buttons.tsx
+#: apps/web/src/components/SocialSignInButtons.tsx
+msgid "Continue with passkey"
+msgstr ""
 
 #: apps/mobile/components/computer-keyboard-bar.tsx
 msgid "Control"
@@ -3387,8 +3554,10 @@ msgstr "Kapatılamadı"
 msgid "Could not dismiss this server"
 msgstr "Bu sunucu kapatılamadı"
 
+#. placeholder {0}: file.name
 #. placeholder {0}: props.name
 #: apps/web/src/components/ArtifactFileCard.tsx
+#: apps/web/src/components/board/TicketModal/TicketFileCard.tsx
 msgid "Could not download {0}. Try again."
 msgstr "{0} indirilemedi. Tekrar dene."
 
@@ -3530,9 +3699,11 @@ msgstr "Hafıza yüklenemedi"
 
 #: apps/mobile/app/(settings)/model-connection.tsx
 #: apps/mobile/app/(settings)/model-picker.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
 #: apps/mobile/app/(settings)/models.tsx
 #: apps/mobile/app/bot-model.tsx
 #: apps/mobile/app/bot-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 #: apps/web/src/pages/model-settings/use-model-settings.ts
 msgid "Could not load model settings"
 msgstr "Model ayarları yüklenemedi"
@@ -3813,6 +3984,7 @@ msgid "Could not run routine"
 msgstr "Rutin çalıştırılamadı"
 
 #: apps/mobile/app/(settings)/general.tsx
+#: apps/mobile/app/(settings)/labs.tsx
 #: apps/mobile/app/(settings)/memory-note.tsx
 #: apps/mobile/app/(settings)/team-conversation.tsx
 #: apps/mobile/components/vault-item-editor.tsx
@@ -3846,6 +4018,11 @@ msgstr "Grup kaydedilemedi"
 #: apps/web/src/pages/onboarding/use-onboarding-model.ts
 msgid "Could not save model"
 msgstr "Model kaydedilemedi"
+
+#: apps/mobile/app/(settings)/model-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
+msgid "Could not save model settings"
+msgstr ""
 
 #: apps/mobile/app/routine.tsx
 #: apps/web/src/pages/shell/use-routine-editor.ts
@@ -4141,6 +4318,10 @@ msgstr "Bilgisayar başlatılamadı"
 msgid "Couldn't update bot style"
 msgstr "Bot stili güncellenemedi"
 
+#: apps/web/src/pages/LabsSettingsPanel.tsx
+msgid "Couldn't update Labs"
+msgstr ""
+
 #: apps/web/src/pages/MessagingSettingsPanel.tsx
 msgid "Couldn't update messaging settings"
 msgstr "Mesajlaşma ayarları güncellenemedi"
@@ -4382,13 +4563,10 @@ msgstr "Reddet"
 
 #: apps/mobile/app/bot-settings.tsx
 #: apps/mobile/components/bot-look-picker.tsx
-#: apps/mobile/components/compatible-endpoint-form.tsx
 #: apps/mobile/components/model-role-settings.tsx
 #: apps/web/src/components/ComputerProviderSettings.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
 #: apps/web/src/pages/model-settings/role-model-picker.tsx
 #: apps/web/src/pages/ModelRoleSettings.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Default"
 msgstr "Varsayılan"
@@ -4419,6 +4597,7 @@ msgstr "Varsayılan kapsam"
 #: apps/mobile/app/artifact.tsx
 #: apps/mobile/app/artifacts.tsx
 #: apps/mobile/app/index.tsx
+#: apps/mobile/app/nurlings/ticket.tsx
 #: apps/mobile/app/pages.tsx
 #: apps/mobile/app/routine.tsx
 #: apps/mobile/app/routines.tsx
@@ -4430,6 +4609,7 @@ msgstr "Varsayılan kapsam"
 #: apps/mobile/lib/bot-lifecycle.ts
 #: apps/mobile/lib/confirm-delete-section.ts
 #: apps/web/src/components/AccountAccess.tsx
+#: apps/web/src/components/board/TicketModal/DeleteTicket.tsx
 #: apps/web/src/components/pages/PagesList.tsx
 #: apps/web/src/components/PasskeySettings.tsx
 #: apps/web/src/pages/Artifacts.tsx
@@ -4466,6 +4646,7 @@ msgstr "{0} sil"
 #. placeholder {0}: bot.name
 #. placeholder {0}: deleting.name
 #. placeholder {0}: item.name
+#: apps/mobile/app/nurlings/ticket.tsx
 #: apps/web/src/pages/McpServersOverlay.tsx
 #: apps/web/src/pages/OrganizationSettingsPanel.tsx
 #: apps/web/src/pages/shell/dialogs.tsx
@@ -4494,6 +4675,10 @@ msgstr "{name} ve botu silinsin mi?"
 #: apps/mobile/lib/inbox-spaces.ts
 msgid "Delete {name}?"
 msgstr "{name} silinsin mi?"
+
+#: apps/web/src/components/board/TicketModal/DeleteTicket.tsx
+msgid "Delete {refLabel}?"
+msgstr ""
 
 #: apps/mobile/app/(settings)/profile.tsx
 #: apps/mobile/app/paywall.tsx
@@ -4550,6 +4735,11 @@ msgstr "Bu rutin silinsin mi?"
 msgid "Delete this Space's credentials?"
 msgstr "Bu alanın kimlik bilgileri silinsin mi?"
 
+#: apps/mobile/app/nurlings/ticket.tsx
+#: apps/web/src/components/board/TicketModal/DeleteTicket.tsx
+msgid "Delete ticket"
+msgstr ""
+
 #: apps/mobile/components/account-deletion.tsx
 msgid "Delete your account?"
 msgstr "Hesabın silinsin mi?"
@@ -4594,6 +4784,9 @@ msgstr "Reddedildi"
 msgid "Deny"
 msgstr "Reddet"
 
+#: apps/mobile/app/nurlings/ticket.tsx
+#: apps/web/src/components/board/TicketModal/ClampedDescription.tsx
+#: apps/web/src/components/board/TicketModal/TicketPane.tsx
 #: apps/web/src/pages/Board.tsx
 #: apps/web/src/pages/shell/agent-import-plan.tsx
 msgid "Description"
@@ -4789,6 +4982,10 @@ msgstr "Belge değişti. Son sürümü düzenlemek için yeniden açın."
 msgid "Don’t have an account?"
 msgstr "Hesabın yok mu?"
 
+#: apps/web/src/components/AvatarStateNames.tsx
+msgid "done"
+msgstr ""
+
 #: apps/mobile/app/(settings)/vault.tsx
 #: apps/mobile/app/bot-settings.tsx
 #: apps/mobile/components/ComputerCard.tsx
@@ -4798,6 +4995,7 @@ msgstr "Hesabın yok mu?"
 #: apps/mobile/components/vault-item-sheet.tsx
 #: apps/mobile/lib/activity.ts
 #: apps/mobile/lib/board.ts
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/web/src/components/AccountDataSettings.tsx
 #: apps/web/src/components/ComputerCard.tsx
 #: apps/web/src/components/ToolActivityDisclosure.tsx
@@ -4851,6 +5049,15 @@ msgstr "Taslak beceri"
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Drag, drop, or paste an image"
 msgstr "Görüntüyü sürükleyip bırakın veya yapıştırın"
+
+#: apps/mobile/components/nurlings-board/ticket-properties.tsx
+#: apps/web/src/components/board/TicketModal/Properties.tsx
+msgid "Due"
+msgstr ""
+
+#: apps/web/src/components/board/TicketModal/CardDates.tsx
+msgid "Due {due}"
+msgstr ""
 
 #: apps/web/src/pages/BotContextMenu.tsx
 msgid "Duplicate"
@@ -4969,27 +5176,24 @@ msgstr "Bir sunucu URL'si gir"
 msgid "Enter a valid email"
 msgstr "Geçerli bir e-posta girin"
 
-#: apps/web/src/pages/model-settings/use-model-settings.ts
-#: apps/web/src/pages/onboarding/use-onboarding-model.ts
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 msgid "Enter a whole number from 1 to {MAX_MODEL_CONTEXT_WINDOW} for the context limit."
 msgstr "Bağlam sınırı için 1 ile {MAX_MODEL_CONTEXT_WINDOW} arasında bir tam sayı girin."
 
-#: apps/web/src/pages/model-settings/use-model-settings.ts
-#: apps/web/src/pages/onboarding/use-onboarding-model.ts
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 msgid "Enter a whole number from 1 to {MAX_MODEL_MAX_TOKENS} for maximum output tokens."
 msgstr "Maksimum çıktı token sayısı için 1 ile {MAX_MODEL_MAX_TOKENS} arasında bir tam sayı girin."
 
-#: apps/mobile/app/(settings)/model-connection.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
 msgid "Enter a whole number from 1 to {max} for maximum output tokens."
 msgstr "Maksimum çıktı token'ı için 1 ile {max} arasında bir tam sayı gir."
 
-#: apps/mobile/app/(settings)/model-connection.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
 msgid "Enter a whole number from 1 to {max} for the context limit."
 msgstr "Bağlam sınırı için 1 ile {max} arasında bir tam sayı gir."
 
-#: apps/mobile/app/(settings)/model-connection.tsx
-#: apps/web/src/pages/model-settings/use-model-settings.ts
-#: apps/web/src/pages/onboarding/use-onboarding-model.ts
+#: apps/mobile/app/(settings)/model-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 msgid "Enter a whole number from 1 to 1000 for the image limit."
 msgstr "Görüntü sınırı için 1 ile 1000 arasında bir tam sayı girin."
 
@@ -5133,6 +5337,7 @@ msgstr "Örn: Proje Falcon"
 msgid "exact-model-id"
 msgstr "exact-model-id"
 
+#: apps/web/src/components/board/TicketModal/TicketModal.tsx
 #: apps/web/src/pages/shell/message-cards.tsx
 msgid "Expand"
 msgstr "Genişlet"
@@ -5145,6 +5350,10 @@ msgstr "{0} bölümünü genişlet"
 #: apps/mobile/components/inbox-rows.tsx
 msgid "Expand {name}"
 msgstr "{name} genişlet"
+
+#: apps/web/src/pages/shell/bot-panel-expand.tsx
+msgid "Expand panel"
+msgstr ""
 
 #: apps/web/src/components/markdown-copy.tsx
 msgid "Expand table"
@@ -5196,8 +5405,6 @@ msgid "External conversation"
 msgstr "Harici sohbet"
 
 #: apps/mobile/lib/thinking-level.ts
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
 msgid "Extra high"
 msgstr "Çok yüksek"
 
@@ -5241,6 +5448,7 @@ msgstr "Hata yönetimi"
 msgid "Fields to compare (optional)"
 msgstr "Karşılaştırılacak alanlar (isteğe bağlı)"
 
+#: apps/mobile/components/nurlings-board/reply-composer.tsx
 #: apps/mobile/components/thread/message-bubble.tsx
 #: apps/mobile/lib/search-sheet.ts
 #: apps/mobile/lib/thread-attachments.ts
@@ -5248,6 +5456,13 @@ msgstr "Karşılaştırılacak alanlar (isteğe bağlı)"
 #: apps/web/src/pages/SpaceSearch.tsx
 msgid "File"
 msgstr "Dosya"
+
+#: apps/mobile/app/nurlings/ticket.tsx
+#: apps/mobile/components/nurlings-board/board-card-face.tsx
+#: apps/web/src/components/board/BoardView/BoardCard.tsx
+#: apps/web/src/components/board/TicketModal/TicketFiles.tsx
+msgid "Files"
+msgstr ""
 
 #: apps/web/src/pages/routine-editor/trigger-cards.tsx
 msgid "Files or folders on the computer"
@@ -5648,6 +5863,10 @@ msgstr "{label} gizle"
 msgid "Hide chats"
 msgstr "Sohbetleri gizle"
 
+#: apps/web/src/components/board/BoardView/BoardView.tsx
+msgid "Hide closed"
+msgstr ""
+
 #: apps/web/src/pages/routine-editor/trigger-cards.tsx
 msgid "Hide key"
 msgstr "Anahtarı gizle"
@@ -5666,11 +5885,10 @@ msgstr "Parolayı gizle"
 msgid "Hide transcript"
 msgstr "Dökümü gizle"
 
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/mobile/lib/thinking-level.ts
 #: apps/web/src/lib/ticket-priority.ts
 #: apps/web/src/pages/memory-providers/HindsightSettingsForm.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
 msgid "High"
 msgstr "Yüksek"
 
@@ -5766,6 +5984,10 @@ msgstr "Bitirdim"
 msgid "Icon set"
 msgstr "Simge seti"
 
+#: apps/web/src/components/AvatarStateNames.tsx
+msgid "idle"
+msgstr ""
+
 #: apps/web/src/pages/VoiceSettingsOverlay.tsx
 msgid "If you heard that, voice is ready."
 msgstr "Bunu duyduysan ses hazır."
@@ -5815,11 +6037,17 @@ msgid "Import data"
 msgstr "Verileri içe aktar"
 
 #: apps/mobile/lib/board.ts
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/web/src/lib/ticket-status.ts
 msgid "In progress"
 msgstr "Devam ediyor"
 
+#: apps/web/src/components/AvatarStateNames.tsx
+msgid "in review"
+msgstr ""
+
 #: apps/mobile/lib/board.ts
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/web/src/lib/ticket-status.ts
 msgid "In review"
 msgstr "İncelemede"
@@ -6068,6 +6296,13 @@ msgid "Label"
 msgstr "Etiket"
 
 #: apps/mobile/app/(settings)/_layout.tsx
+#: apps/mobile/app/(settings)/account.tsx
+#: apps/mobile/app/(settings)/labs.tsx
+#: apps/web/src/pages/settings-nav.ts
+msgid "Labs"
+msgstr ""
+
+#: apps/mobile/app/(settings)/_layout.tsx
 #: apps/mobile/app/(settings)/general.tsx
 #: apps/mobile/app/(settings)/language.tsx
 #: apps/web/src/pages/AccountSettingsOverlay.tsx
@@ -6091,6 +6326,10 @@ msgstr "Son kontrol {0}: değişiklik var"
 #: apps/web/src/pages/routine-editor/trigger-cards.tsx
 msgid "Last check {0}: no changes"
 msgstr "Son kontrol {0}: değişiklik yok"
+
+#: apps/web/src/components/SocialSignInButtons.tsx
+msgid "Last used"
+msgstr ""
 
 #: apps/web/src/components/DesktopUpdates.tsx
 msgid "Later"
@@ -6312,11 +6551,10 @@ msgstr "Sabitlemek, taşımak veya bildirimleri sessize almak için uzun bas"
 msgid "Looks like it contains a key"
 msgstr "Bir anahtar içeriyor gibi görünüyor"
 
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/mobile/lib/thinking-level.ts
 #: apps/web/src/lib/ticket-priority.ts
 #: apps/web/src/pages/memory-providers/HindsightSettingsForm.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
 msgid "Low"
 msgstr "Düşük"
 
@@ -6341,15 +6579,9 @@ msgid "Manage"
 msgstr "Yönet"
 
 #. placeholder {0}: option.name
-#. placeholder {0}: providerName(choice)
-#: apps/web/src/pages/ModelRoleSettings.tsx
 #: apps/web/src/pages/SettingsOverlay.tsx
 msgid "Manage {0}"
 msgstr "{0} yönet"
-
-#: apps/mobile/components/model-role-settings.tsx
-msgid "Manage {provider}"
-msgstr "{provider} yönet"
 
 #: apps/mobile/app/(settings)/billing.tsx
 #: apps/web/src/components/ModelCredits.tsx
@@ -6362,10 +6594,20 @@ msgstr "Faturalandırmayı yönet"
 msgid "Manage MCP servers"
 msgstr "MCP sunucularını yönet"
 
+#: apps/mobile/components/model-role-settings.tsx
+#: apps/web/src/pages/ModelRoleSettings.tsx
+msgid "Manage model"
+msgstr ""
+
 #: apps/mobile/app/bot-settings.tsx
 #: apps/web/src/pages/shell/bot-settings-sections.tsx
 msgid "Manage other bots"
 msgstr "Diğer botları yönet"
+
+#: apps/mobile/components/model-role-settings.tsx
+#: apps/web/src/pages/ModelRoleSettings.tsx
+msgid "Manage provider"
+msgstr ""
 
 #: apps/web/src/pages/plugins/domain-search.tsx
 msgid "Manual"
@@ -6400,8 +6642,6 @@ msgid "Marketing"
 msgstr "Pazarlama"
 
 #: apps/mobile/lib/thinking-level.ts
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
 msgid "Max"
 msgstr "Maksimum"
 
@@ -6414,19 +6654,20 @@ msgstr "Maksimum"
 msgid "Maximize"
 msgstr "Büyüt"
 
-#: apps/mobile/components/compatible-endpoint-form.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 msgid "Maximum images per request"
 msgstr "İstek başına maksimum görüntü sayısı"
 
-#: apps/mobile/app/(settings)/model-connection.tsx
-#: apps/mobile/components/compatible-endpoint-form.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/ModelSettingsOverlay.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 msgid "Maximum output tokens"
 msgstr "Maksimum çıktı token sayısı"
+
+#: apps/mobile/app/(settings)/model-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
+msgid "Maximum output tokens must be below the context limit."
+msgstr ""
 
 #: apps/web/src/pages/memory-providers/SerenitySettingsForm.tsx
 msgid "MCP endpoint"
@@ -6445,8 +6686,6 @@ msgstr "MCP sunucuları"
 
 #: apps/mobile/lib/thinking-level.ts
 #: apps/web/src/pages/memory-providers/HindsightSettingsForm.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
 msgid "Medium"
 msgstr "Orta"
 
@@ -6589,8 +6828,6 @@ msgid "Microphone failed"
 msgstr "Mikrofon hatası"
 
 #: apps/mobile/lib/thinking-level.ts
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
 msgid "Minimal"
 msgstr "Minimal"
 
@@ -6671,6 +6908,8 @@ msgstr "Model sağlayıcısı"
 #: apps/mobile/app/(settings)/_layout.tsx
 #: apps/mobile/app/(settings)/account.tsx
 #: apps/mobile/app/(settings)/space.tsx
+#: apps/mobile/components/connection-model-list.tsx
+#: apps/web/src/pages/model-settings/provider-page.tsx
 #: apps/web/src/pages/ModelSettingsOverlay.tsx
 #: apps/web/src/pages/settings-nav.ts
 #: apps/web/src/pages/SpaceSettingOverrides.tsx
@@ -6728,6 +6967,7 @@ msgstr "Her ayın 1'inde"
 #: apps/mobile/app/(settings)/vault.tsx
 #: apps/mobile/app/artifact.tsx
 #: apps/mobile/components/integration-plugins.tsx
+#: apps/mobile/components/nurlings-board/board-card.tsx
 #: apps/mobile/components/thread/message-row.tsx
 #: apps/web/src/components/SpaceMembersSettings.tsx
 #: apps/web/src/pages/plugins/plugin-browse.tsx
@@ -6758,6 +6998,8 @@ msgstr "Bunları ortak hafızana taşı."
 #: apps/mobile/components/board-list.tsx
 #: apps/mobile/components/bot-organize-modal.tsx
 #: apps/mobile/components/inbox-swipe-row.ios.tsx
+#: apps/mobile/components/nurlings-board/board-card.tsx
+#: apps/web/src/components/board/BoardView/BoardCard.tsx
 #: apps/web/src/pages/BotContextMenu.tsx
 msgid "Move to"
 msgstr "Taşı"
@@ -6766,6 +7008,13 @@ msgstr "Taşı"
 #: apps/web/src/pages/ModelRoleSettings.tsx
 msgid "Move up"
 msgstr "Yukarı taşı"
+
+#. placeholder {0}: statuses[line.status as TicketStatus]
+#. placeholder {0}: statuses[line.status]
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "Moved back to {0}"
+msgstr ""
 
 #: apps/mobile/components/CallCard.tsx
 #: apps/web/src/components/call/CallCard.tsx
@@ -6873,7 +7122,13 @@ msgstr "Oturum açılması gerekiyor"
 msgid "Needs takeover"
 msgstr "Devralma bekliyor"
 
+#: apps/web/src/components/AvatarStateNames.tsx
+msgid "needs you"
+msgstr ""
+
 #: apps/mobile/components/ComputerCard.tsx
+#: apps/mobile/components/nurlings-board/board-card-face.tsx
+#: apps/web/src/components/board/TicketModal/NeedsYou.tsx
 #: apps/web/src/components/ComputerCard.tsx
 #: apps/web/src/lib/roster-status.ts
 msgid "Needs you"
@@ -7025,6 +7280,7 @@ msgid "Next settings sections"
 msgstr "Sonraki ayar bölümleri"
 
 #: apps/mobile/lib/inbox-swipe.ts
+#: apps/web/src/components/board/TicketModal/DatePicker.tsx
 #: apps/web/src/pages/BotContextMenu.tsx
 msgid "Next week"
 msgstr "Gelecek hafta"
@@ -7069,6 +7325,10 @@ msgstr "Bot yok"
 msgid "No bots match"
 msgstr "Eşleşen bot yok"
 
+#: apps/web/src/components/board/TicketModal/DatePicker.tsx
+msgid "No date"
+msgstr ""
+
 #: apps/mobile/components/thread/message-bubble.tsx
 #: apps/web/src/components/AskCard.tsx
 #: apps/web/src/components/SecretAskCard.tsx
@@ -7094,8 +7354,10 @@ msgstr "Bu sayfada eşleşen çıktı yok."
 msgid "No matching bots"
 msgstr "Eşleşen bot yok"
 
+#: apps/mobile/components/connection-model-list.tsx
 #: apps/mobile/components/model-picker-list.tsx
 #: apps/web/src/pages/model-settings/compatible-model-fields.tsx
+#: apps/web/src/pages/model-settings/provider-page.tsx
 #: apps/web/src/pages/model-settings/role-model-picker.tsx
 #: apps/web/src/pages/shell/chat-model-picker.tsx
 msgid "No matching models"
@@ -7229,6 +7491,7 @@ msgstr "Web sitesi ve parola sütunları bulunamadı."
 msgid "None"
 msgstr "Yok"
 
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/web/src/lib/ticket-priority.ts
 msgid "Normal"
 msgstr "Normal"
@@ -7455,6 +7718,7 @@ msgstr "Yalnızca siz"
 #: apps/mobile/app/(settings)/wallet.tsx
 #: apps/mobile/app/pages.tsx
 #: apps/mobile/components/ImportSetupCard.tsx
+#: apps/mobile/components/nurlings-board/board-card.tsx
 #: apps/web/src/components/bot-templates/bot-templates-dialog.tsx
 #: apps/web/src/components/ComputerCard.tsx
 #: apps/web/src/components/markdown-link-prompt.tsx
@@ -7643,7 +7907,9 @@ msgstr "Çıktı"
 
 #: apps/mobile/app/page-share.tsx
 #: apps/mobile/app/space-members.tsx
+#: apps/mobile/components/nurlings-board/ticket-properties.tsx
 #: apps/mobile/lib/identity-display.ts
+#: apps/web/src/components/board/TicketModal/Properties.tsx
 #: apps/web/src/components/pages/SharePopover.tsx
 #: apps/web/src/components/SpaceMembersSettings.tsx
 #: apps/web/src/lib/identity-display.ts
@@ -7859,6 +8125,7 @@ msgstr "Telefon araması"
 msgid "Photo"
 msgstr "Fotoğraf"
 
+#: apps/mobile/components/nurlings-board/reply-composer.tsx
 #: apps/mobile/lib/thread-attachments.ts
 msgid "Photo library"
 msgstr "Fotoğraf arşivi"
@@ -7988,6 +8255,8 @@ msgstr "Önceki sayfa"
 msgid "Previous settings sections"
 msgstr "Önceki ayar bölümleri"
 
+#: apps/mobile/components/nurlings-board/ticket-properties.tsx
+#: apps/web/src/components/board/TicketModal/Properties.tsx
 #: apps/web/src/pages/Board.tsx
 msgid "Priority"
 msgstr "Öncelik"
@@ -8123,12 +8392,6 @@ msgstr "Hazır"
 #: apps/web/src/pages/PluginSubmissionsPanel.tsx
 msgid "Reason"
 msgstr "Neden"
-
-#: apps/mobile/components/compatible-endpoint-form.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
-msgid "Reasoning effort"
-msgstr "Akıl yürütme düzeyi"
 
 #: apps/web/src/pages/memory-providers/SerenitySettingsForm.tsx
 msgid "Recall and write"
@@ -8341,6 +8604,9 @@ msgstr "Kaldır"
 
 #. placeholder {0}: attachment.file.name
 #. placeholder {0}: device.name
+#. placeholder {0}: file.name
+#: apps/mobile/components/nurlings-board/reply-composer.tsx
+#: apps/web/src/components/board/TicketModal/ReplyBox.tsx
 #: apps/web/src/components/ComputerDeviceSettings.tsx
 #: apps/web/src/pages/shell/composer-parts.tsx
 msgid "Remove {0}"
@@ -8405,6 +8671,11 @@ msgstr "Git olayını kaldır"
 #: apps/web/src/components/ModelHeadersEditor.tsx
 msgid "Remove header"
 msgstr "Üstbilgiyi kaldır"
+
+#. placeholder {0}: mention.name
+#: apps/web/src/components/board/TicketModal/MentionChip.tsx
+msgid "Remove mention {0}"
+msgstr ""
 
 #: apps/web/src/pages/routine-editor/trigger-cards.tsx
 msgid "Remove message trigger"
@@ -8530,7 +8801,9 @@ msgstr "Yanıtlar ve tamamlanan işler"
 msgid "Replies to"
 msgstr "Yanıt verdiği"
 
+#: apps/mobile/components/nurlings-board/reply-composer.tsx
 #: apps/mobile/components/thread/message-row.tsx
+#: apps/web/src/components/board/TicketModal/ReplyBox.tsx
 #: apps/web/src/pages/shell/message-hover-actions.tsx
 #: apps/web/src/pages/shell/quote-selection-button.tsx
 msgid "Reply"
@@ -8592,6 +8865,11 @@ msgstr "Bilgisayar sıfırlansın mı?"
 #: apps/web/src/pages/Auth.tsx
 msgid "Reset password"
 msgstr "Parolayı sıfırla"
+
+#: apps/mobile/app/(settings)/model-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
+msgid "Reset to defaults"
+msgstr ""
 
 #: apps/mobile/app/sign-in.tsx
 #: apps/web/src/pages/Auth.tsx
@@ -8883,6 +9161,7 @@ msgstr "Cumartesi"
 
 #: apps/mobile/app/(settings)/memory-note.tsx
 #: apps/mobile/app/(settings)/model-connection.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
 #: apps/mobile/app/(settings)/profile.tsx
 #: apps/mobile/app/(settings)/skill.tsx
 #: apps/mobile/app/(settings)/spending-limit.tsx
@@ -8914,6 +9193,7 @@ msgstr "Cumartesi"
 #: apps/web/src/pages/KnowledgeSection.tsx
 #: apps/web/src/pages/McpServerForm.tsx
 #: apps/web/src/pages/model-settings/connection-controls.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 #: apps/web/src/pages/model-settings/providers-section.tsx
 #: apps/web/src/pages/ModelSettingsOverlay.tsx
 #: apps/web/src/pages/RoutineEditor.tsx
@@ -8977,7 +9257,9 @@ msgid "Saved, but this server fills logins only on their own site."
 msgstr "Kaydedildi, ancak bu sunucu girişleri yalnızca kendi sitelerinde dolduruyor."
 
 #: apps/mobile/app/(settings)/model-connection.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
 #: apps/mobile/lib/use-subscription-sign-in.ts
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 #: apps/web/src/pages/model-settings/use-model-settings.ts
 msgid "Saved."
 msgstr "Kaydedildi."
@@ -8992,6 +9274,7 @@ msgid "Saving..."
 msgstr "Kaydediliyor..."
 
 #: apps/mobile/app/(settings)/model-connection.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
 #: apps/mobile/app/bot-settings.tsx
 #: apps/mobile/app/group-settings.tsx
 #: apps/web/src/components/SecretAskCard.tsx
@@ -9000,6 +9283,7 @@ msgstr "Kaydediliyor..."
 #: apps/web/src/pages/GroupPanel.tsx
 #: apps/web/src/pages/McpServerForm.tsx
 #: apps/web/src/pages/model-settings/connection-controls.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 #: apps/web/src/pages/model-settings/providers-section.tsx
 #: apps/web/src/pages/ModelSettingsOverlay.tsx
 #: apps/web/src/pages/RoutineEditor.tsx
@@ -9043,6 +9327,7 @@ msgstr "Ekran bağlı değil"
 #: apps/web/src/components/VaultSettings.tsx
 #: apps/web/src/pages/Artifacts.tsx
 #: apps/web/src/pages/model-settings/compatible-model-fields.tsx
+#: apps/web/src/pages/model-settings/provider-page.tsx
 #: apps/web/src/pages/model-settings/providers-section.tsx
 #: apps/web/src/pages/model-settings/role-model-picker.tsx
 #: apps/web/src/pages/plugins/domain-search.tsx
@@ -9093,6 +9378,7 @@ msgstr "MCP sunucularında “{query}” ara"
 
 #: apps/web/src/components/FoundModelPicker.tsx
 #: apps/web/src/pages/model-settings/compatible-model-fields.tsx
+#: apps/web/src/pages/model-settings/provider-page.tsx
 #: apps/web/src/pages/model-settings/role-model-picker.tsx
 #: apps/web/src/pages/shell/chat-model-picker.tsx
 msgid "Search models"
@@ -9167,7 +9453,9 @@ msgstr "Metni seç"
 msgid "Self-hosted"
 msgstr "Kendi sunucunuz"
 
+#: apps/mobile/components/nurlings-board/composer-bar.tsx
 #: apps/mobile/components/thread-composer.tsx
+#: apps/web/src/components/board/TicketModal/ReplyBox.tsx
 #: apps/web/src/pages/shell/composer-parts.tsx
 msgid "Send"
 msgstr "Gönder"
@@ -9316,6 +9604,7 @@ msgstr "Kurulum yardımı"
 msgid "Shape"
 msgstr "Şekil"
 
+#. placeholder {0}: (organicIdentities?.length ?? 0) + position + 1
 #. placeholder {0}: index + 1
 #: apps/web/src/pages/shell/avatar-studio-popover.tsx
 msgid "Shape {0}"
@@ -9377,6 +9666,15 @@ msgstr "Ortak hafıza"
 msgid "Show"
 msgstr "Göster"
 
+#. placeholder {0}: older.length
+#: apps/mobile/components/nurlings-board/board-column.tsx
+msgid "Show {0} older"
+msgstr ""
+
+#: apps/web/src/components/board/BoardView/BoardColumn.tsx
+msgid "Show {hidden} older"
+msgstr ""
+
 #: apps/mobile/components/thread/message-bubble.tsx
 msgid "Show {label}"
 msgstr "{label} göster"
@@ -9395,6 +9693,10 @@ msgstr "Botları göster"
 msgid "Show chats"
 msgstr "Sohbetleri göster"
 
+#: apps/web/src/components/board/BoardView/BoardView.tsx
+msgid "Show closed"
+msgstr ""
+
 #: apps/web/src/pages/routine-editor/trigger-cards.tsx
 msgid "Show key"
 msgstr "Anahtarı göster"
@@ -9408,9 +9710,11 @@ msgid "Show list"
 msgstr "Listeyi göster"
 
 #: apps/mobile/app/(settings)/integrations.tsx
+#: apps/mobile/app/nurlings/ticket.tsx
 #: apps/mobile/app/pages.tsx
 #: apps/mobile/components/bot-context-cards.tsx
 #: apps/mobile/components/integration-plugins.tsx
+#: apps/web/src/components/board/TicketModal/ClampedDescription.tsx
 #: apps/web/src/components/pages/PagesList.tsx
 #: apps/web/src/pages/KnowledgeSection.tsx
 #: apps/web/src/pages/plugins/plugin-browse.tsx
@@ -9610,7 +9914,10 @@ msgstr "İlgisiz hafıza kayıtlarını atla"
 msgid "Skipped"
 msgstr "Atlandı"
 
+#. placeholder {0}: result.skipped.map((s) => s.name).join(", ")
 #. placeholder {0}: skipped.join(", ")
+#: apps/mobile/components/nurlings-board/reply-composer.tsx
+#: apps/web/src/components/board/TicketModal/use-staged-files.ts
 #: apps/web/src/pages/shell/use-composer-actions.ts
 msgid "Skipped {0}"
 msgstr "{0} atlandı"
@@ -9661,6 +9968,13 @@ msgstr "Bazı eklentiler yüklenemedi."
 msgid "Some settings are not imported"
 msgstr "Bazı ayarlar içe aktarılmaz"
 
+#: apps/mobile/app/nurlings/ticket.tsx
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+#: apps/web/src/components/board/TicketModal/LatestActivity.tsx
+msgid "Someone"
+msgstr ""
+
 #: apps/mobile/app/computer.tsx
 msgid "Something went wrong while it was starting. Try again in a moment."
 msgstr "Başlatılırken bir sorun oluştu. Birazdan tekrar dene."
@@ -9676,6 +9990,7 @@ msgstr "Bir şeyler ters gitti. Tekrar dene."
 #: apps/mobile/app/(settings)/spending-limit.tsx
 #: apps/mobile/app/(settings)/vault.tsx
 #: apps/mobile/app/new-organization.tsx
+#: apps/mobile/app/nurlings/ticket.tsx
 #: apps/mobile/app/page-share.tsx
 #: apps/mobile/components/IncomingCall.tsx
 #: apps/mobile/lib/api.ts
@@ -9784,6 +10099,8 @@ msgstr "SSO geçici olarak kullanılamıyor. Yeniden deneyin."
 msgid "Star on GitHub"
 msgstr "GitHub'da yıldızla"
 
+#: apps/mobile/components/nurlings-board/ticket-properties.tsx
+#: apps/web/src/components/board/TicketModal/Properties.tsx
 #: apps/web/src/pages/shell/computer-overlay.tsx
 msgid "Start"
 msgstr "Başlat"
@@ -9791,6 +10108,10 @@ msgstr "Başlat"
 #: apps/web/src/components/ModelCredits.tsx
 msgid "Start {name} trial"
 msgstr "{name} denemesini başlat"
+
+#: apps/web/src/components/board/TicketModal/CardDates.tsx
+msgid "Start {start}"
+msgstr ""
 
 #: apps/web/src/components/ModelCredits.tsx
 #: apps/web/src/pages/Paywall.tsx
@@ -9859,7 +10180,9 @@ msgstr "Başlatılıyor…"
 msgid "State or region"
 msgstr "Eyalet veya bölge"
 
+#: apps/mobile/components/nurlings-board/ticket-properties.tsx
 #: apps/mobile/components/run-error-sheet.tsx
+#: apps/web/src/components/board/TicketModal/Properties.tsx
 #: apps/web/src/pages/ActivityList.tsx
 #: apps/web/src/pages/Board.tsx
 msgid "Status"
@@ -9970,15 +10293,13 @@ msgstr "Özetler ve bilgiler"
 msgid "Sunday"
 msgstr "Pazar"
 
-#: apps/mobile/components/compatible-endpoint-form.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 msgid "Supports images"
 msgstr "Görüntüleri destekler"
 
-#: apps/mobile/components/compatible-endpoint-form.tsx
-#: apps/web/src/pages/model-settings/compatible-model-fields.tsx
-#: apps/web/src/pages/onboarding/model-step.tsx
+#: apps/mobile/app/(settings)/model-settings.tsx
+#: apps/web/src/pages/model-settings/model-settings-panel.tsx
 msgid "Supports thinking"
 msgstr "Düşünmeyi destekler"
 
@@ -10087,6 +10408,11 @@ msgstr "Teams mesajı"
 #: apps/mobile/components/run-error-sheet.tsx
 msgid "Technical details"
 msgstr "Teknik ayrıntılar"
+
+#: apps/mobile/components/nurlings-board/quick-add.tsx
+#: apps/web/src/components/board/BoardView/QuickAdd.tsx
+msgid "Tell a {noun} what to do…"
+msgstr ""
 
 #: apps/web/src/components/ComputerProviderSettings.tsx
 msgid "Template"
@@ -10298,6 +10624,10 @@ msgstr "Bu kayıtlı ayarlar okunamıyor. Kaldırıp yeniden ekle."
 #: apps/web/src/components/InviteDialog.tsx
 msgid "They get {weeks} weeks free."
 msgstr "Arkadaşın {weeks} hafta ücretsiz kullanır."
+
+#: apps/web/src/components/AvatarStateNames.tsx
+msgid "thinking"
+msgstr ""
 
 #: apps/mobile/app/bot-settings.tsx
 #: apps/mobile/components/model-role-settings.tsx
@@ -10556,6 +10886,11 @@ msgstr "Bu, bağlantıyı her alandan kaldırır."
 msgid "This removes the space for everyone."
 msgstr "Bu, alanı herkes için kaldırır."
 
+#: apps/mobile/app/nurlings/ticket.tsx
+#: apps/web/src/components/board/TicketModal/DeleteTicket.tsx
+msgid "This removes the ticket, its comments and its history. It can't be undone."
+msgstr ""
+
 #: apps/web/src/pages/Auth.tsx
 msgid "This reset link is invalid or expired"
 msgstr "Bu sıfırlama bağlantısı geçersiz veya süresi dolmuş"
@@ -10600,6 +10935,10 @@ msgstr "Bu şablon az önce güncellendi. Tekrar göz at."
 msgid "This week"
 msgstr "Bu hafta"
 
+#: apps/web/src/components/board/TicketModal/DatePicker.tsx
+msgid "This weekend"
+msgstr ""
+
 #: apps/mobile/app/_layout.tsx
 #: apps/mobile/components/chat-header-title.tsx
 #: apps/mobile/components/thread/thread-header.tsx
@@ -10610,6 +10949,19 @@ msgstr "Konu"
 #: apps/web/src/lib/cron.ts
 msgid "Thursday"
 msgstr "Perşembe"
+
+#: apps/mobile/app/nurlings/ticket.tsx
+#: apps/web/src/components/board/TicketModal/NarrowTicket.tsx
+msgid "Ticket"
+msgstr ""
+
+#: apps/mobile/app/nurlings/ticket.tsx
+msgid "Ticket sections"
+msgstr ""
+
+#: apps/web/src/components/board/TicketModal/DatePicker.tsx
+msgid "Time"
+msgstr ""
 
 #: apps/mobile/components/routine-schedule-editor.tsx
 #: apps/web/src/pages/RoutineSchedule.tsx
@@ -10625,6 +10977,7 @@ msgid "Timing may differ"
 msgstr "Zamanlama farklı olabilir"
 
 #: apps/mobile/components/vault-item-editor.tsx
+#: apps/web/src/components/board/TicketModal/TicketPane.tsx
 #: apps/web/src/pages/Board.tsx
 msgid "Title"
 msgstr "Başlık"
@@ -10644,6 +10997,7 @@ msgid "To add"
 msgstr "Eklenecek"
 
 #: apps/mobile/lib/board.ts
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/web/src/lib/ticket-status.ts
 msgid "To do"
 msgstr "Yapılacak"
@@ -10655,6 +11009,8 @@ msgstr "Kime:"
 
 #: apps/mobile/app/paywall.tsx
 #: apps/mobile/components/time-separator.tsx
+#: apps/mobile/lib/nurlings-board/labels.ts
+#: apps/web/src/components/board/TicketModal/DatePicker.tsx
 #: apps/web/src/pages/Artifacts.tsx
 #: apps/web/src/pages/shell/chat-context.tsx
 msgid "Today"
@@ -10669,6 +11025,8 @@ msgid "Tokens"
 msgstr "Token"
 
 #: apps/mobile/lib/inbox-swipe.ts
+#: apps/mobile/lib/nurlings-board/labels.ts
+#: apps/web/src/components/board/TicketModal/DatePicker.tsx
 #: apps/web/src/pages/BotContextMenu.tsx
 msgid "Tomorrow"
 msgstr "Yarın"
@@ -10915,7 +11273,9 @@ msgstr "Ertelemeyi kaldır"
 msgid "Unsnooze {0}"
 msgstr "Ertelemeyi kaldır: {0}"
 
+#. placeholder {0}: item.file.name
 #. placeholder {0}: pending.file.name
+#: apps/web/src/components/board/TicketModal/use-staged-files.ts
 #: apps/web/src/pages/shell/use-composer-actions.ts
 msgid "Unsupported file type: {0}"
 msgstr "Desteklenmeyen dosya türü: {0}"
@@ -11027,6 +11387,7 @@ msgstr "Şimdi yükselt"
 msgid "Upload"
 msgstr "Yükle"
 
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/web/src/lib/ticket-priority.ts
 msgid "Urgent"
 msgstr "Acil"
@@ -11500,6 +11861,7 @@ msgid "Woke"
 msgstr "Uyandı"
 
 #: apps/mobile/lib/board.ts
+#: apps/mobile/lib/nurlings-board/labels.ts
 #: apps/web/src/lib/ticket-status.ts
 msgid "Won't do"
 msgstr "Yapılmayacak"
@@ -11508,6 +11870,10 @@ msgstr "Yapılmayacak"
 #: apps/web/src/components/SignupSurvey.tsx
 msgid "Work"
 msgstr "İş"
+
+#: apps/web/src/components/AvatarStateNames.tsx
+msgid "working"
+msgstr ""
 
 #: apps/mobile/components/bot-avatar.tsx
 #: apps/mobile/components/inbox-activity.tsx
@@ -11566,16 +11932,23 @@ msgid "Yearly −{percent}%"
 msgstr "Yıllık −%{percent}"
 
 #: apps/mobile/components/time-separator.tsx
+#: apps/mobile/lib/nurlings-board/labels.ts
+#: apps/web/src/components/board/TicketModal/DatePicker.tsx
 #: apps/web/src/pages/shell/chat-context.tsx
 #: apps/web/src/pages/shell/sidebar-roster.tsx
 msgid "Yesterday"
 msgstr "Dün"
 
 #: apps/mobile/app/index.tsx
+#: apps/mobile/app/nurlings/ticket.tsx
 #: apps/mobile/app/page-share.tsx
 #: apps/mobile/components/CallCard.tsx
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
 #: apps/mobile/components/thread/thread-rows.tsx
 #: apps/mobile/components/thread/thread-screen.tsx
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+#: apps/web/src/components/board/TicketModal/LatestActivity.tsx
+#: apps/web/src/components/board/TicketModal/TicketFiles.tsx
 #: apps/web/src/components/pages/SharePopover.tsx
 #: apps/web/src/pages/AccountSettingsOverlay.tsx
 #: apps/web/src/pages/Shell.tsx
@@ -11583,6 +11956,15 @@ msgstr "Dün"
 #: apps/web/src/pages/shell/shell-sidebar.tsx
 msgid "You"
 msgstr "Sen"
+
+#. placeholder {0}: line.name
+#: apps/mobile/components/nurlings-board/activity-feed.tsx
+msgid "You attached {0}"
+msgstr ""
+
+#: apps/web/src/components/board/TicketModal/ActivityFeed.tsx
+msgid "You attached {name}"
+msgstr ""
 
 #: apps/web/src/pages/McpOAuthCallback.tsx
 msgid "You can close this tab if it does not redirect automatically."
@@ -11740,6 +12122,11 @@ msgstr "Denemeniz biter ve kartınızdan bugün ödeme alınır."
 #: apps/web/src/pages/shell/composer-error.tsx
 msgid "Your trial's computer hours are used up."
 msgstr "Deneme sürenin bilgisayar saatleri tükendi."
+
+#: apps/mobile/components/nurlings-board/board-column.tsx
+#: apps/web/src/components/board/BoardView/BoardColumn.tsx
+msgid "Your turn"
+msgstr ""
 
 #: apps/mobile/lib/user-error.ts
 #: apps/web/src/lib/user-error.ts

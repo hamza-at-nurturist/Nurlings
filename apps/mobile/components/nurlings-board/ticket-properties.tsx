@@ -1,5 +1,6 @@
 import type { MenuAction } from "@expo/ui/community/menu";
 import { MenuView } from "@expo/ui/community/menu";
+import { useLingui } from "@lingui/react/macro";
 import type { Bot, Ticket, TicketDateKind, TicketPriority, TicketStatus } from "@rakazo/contracts";
 import { TICKET_PRIORITIES, TICKET_STATUSES } from "@rakazo/contracts";
 import { formatTicketDate, isTicketOverdue, quickPickDates } from "@rakazo/core/nurlings-board";
@@ -7,7 +8,7 @@ import { typeScale } from "@rakazo/ui-tokens";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { dateLocaleForUi, useI18n } from "../../lib/i18n";
+import { dateLocaleForUi, useUiLocale } from "../../lib/i18n";
 import { useMobileTokens, useResolvedAppearance } from "../../lib/native";
 import { pickerStart } from "../../lib/nurlings-board/date-input";
 import { priorityLabels, relativeDayLabels, statusLabels } from "../../lib/nurlings-board/labels";
@@ -78,7 +79,8 @@ export function TicketProperties({
   disabled: boolean;
   onChange: (patch: PropertiesPatch) => void;
 }) {
-  const { t, locale } = useI18n();
+  const { t } = useLingui();
+  const locale = useUiLocale();
   const tokens = useMobileTokens();
   const [picking, setPicking] = useState<TicketDateKind | null>(null);
   const statuses = statusLabels();
@@ -92,12 +94,12 @@ export function TicketProperties({
   const quick = quickPickDates(now, timeZone);
 
   const dateChip = (kind: TicketDateKind, at: string | null, hasTime: boolean) => {
-    const title = kind === "start" ? t("Start") : t("Due");
+    const title = kind === "start" ? t`Start` : t`Due`;
     const actions: MenuAction[] = [
       { id: "today", title: labels.today },
       { id: "tomorrow", title: labels.tomorrow },
-      { id: "pick", title: t("Choose date…") },
-      ...(at ? [{ id: "clear", title: t("Clear"), attributes: { destructive: true } }] : []),
+      { id: "pick", title: t`Choose date…` },
+      ...(at ? [{ id: "clear", title: t`Clear`, attributes: { destructive: true } }] : []),
     ];
     const red = kind === "due" && overdue;
     return (
@@ -132,7 +134,7 @@ export function TicketProperties({
   return (
     <View style={styles.row}>
       <Chip
-        label={t("Status")}
+        label={t`Status`}
         disabled={disabled}
         actions={TICKET_STATUSES.map((status) => ({
           id: `${STATUS}${status}`,
@@ -150,7 +152,7 @@ export function TicketProperties({
         </Text>
       </Chip>
       <Chip
-        label={t("Owner")}
+        label={t`Owner`}
         disabled={disabled || bots.length === 0}
         actions={bots.map((bot) => ({
           id: `${OWNER}${bot.id}`,
@@ -165,13 +167,13 @@ export function TicketProperties({
         {owner ? (
           <OwnerMark bot={owner} working={false} size={20} color={tokens.foreground} />
         ) : (
-          <Text style={[typeScale.caption, { color: tokens.mutedForeground }]}>{t("Owner")}</Text>
+          <Text style={[typeScale.caption, { color: tokens.mutedForeground }]}>{t`Owner`}</Text>
         )}
       </Chip>
       {dateChip("due", ticket.dueAt ?? null, ticket.dueHasTime ?? false)}
       {dateChip("start", ticket.startAt ?? null, ticket.startHasTime ?? false)}
       <Chip
-        label={t("Priority")}
+        label={t`Priority`}
         disabled={disabled}
         actions={TICKET_PRIORITIES.map((priority) => ({
           id: `${PRIORITY}${priority}`,

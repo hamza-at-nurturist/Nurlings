@@ -1,6 +1,6 @@
-import { brand } from "@nurlings/brand";
 import { ph } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react/macro";
+import { brand } from "@nurlings/brand";
 import type { AiConsentStatus } from "@rakazo/contracts";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Linking, ScrollView, StyleSheet } from "react-native";

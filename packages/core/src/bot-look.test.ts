@@ -38,12 +38,17 @@ describe("botLookState", () => {
   it("keeps the shape when the color changes and the color when the shape changes", () => {
     expect(botLookWithColor("#00C972::shape_3", "#FF781C")).toBe("#FF781C::shape_3");
     expect(botLookWithColor("#00C972", "#FF781C")).toBe("#FF781C");
-    expect(botLookState(botLookWithShape("#FF781C", 5))).toEqual({
+    expect(botLookState(botLookWithShape("#FF781C", 10))).toEqual({
       photo: false,
-      shapeIndex: 5,
+      shapeIndex: 10,
       color: "#FF781C",
       defaultLook: false,
     });
+  });
+
+  it("counts a retired static shape (0 to 7) as the default look, since it draws the bot's own body", () => {
+    expect(botLookState("#FF781C::shape_5").defaultLook).toBe(true);
+    expect(botLookState("#FF781C::shape_8").defaultLook).toBe(false);
   });
 
   it("selects a color saved as its earlier value", () => {

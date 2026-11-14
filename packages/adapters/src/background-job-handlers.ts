@@ -11,7 +11,6 @@ import type {
   SandboxProvider,
   SecretStore,
 } from "@rakazo/adapter-kit";
-import type { LabFeature } from "@rakazo/contracts";
 import {
   memoryRetainTurnJob,
   memoryRetainTurnRecoveryJobKey,
@@ -19,6 +18,7 @@ import {
   SandboxUnavailableError,
   SandboxUnresponsiveError,
 } from "@rakazo/adapter-kit";
+import type { LabFeature } from "@rakazo/contracts";
 import type { PrismaClient, ThreadEvents } from "@rakazo/db";
 import { runAsSystem, runAsTenant } from "@rakazo/db";
 import { getLogger } from "@rakazo/logging";

@@ -20,7 +20,6 @@ function setup(bot: unknown = { name: "Chief", notifyOnFinish: true, thread: { i
   const send = vi.fn(async (_message: Record<string, unknown>, _context: unknown) => {});
   const findFirst = vi.fn(async () => bot);
   const notifier = createTicketChangeNotifier({
-    ticketBoardEnabled: true,
     prisma: { bot: { findFirst } } as unknown as PrismaClient,
     jobs: {} as never,
     boardEvents: { notify: vi.fn(async () => {}) } as never,
@@ -131,8 +130,7 @@ describe("a Nurling mentioning the user", () => {
     s.send.mockRejectedValueOnce(new Error("push down"));
     await expect(s.notifier(mentioned)).resolves.toBeUndefined();
     const bare = createTicketChangeNotifier({
-      ticketBoardEnabled: true,
-      prisma: {} as unknown as PrismaClient,
+        prisma: {} as unknown as PrismaClient,
       jobs: {} as never,
       boardEvents: { notify: vi.fn(async () => {}) } as never,
     });

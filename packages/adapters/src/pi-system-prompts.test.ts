@@ -1,6 +1,6 @@
 import { brand } from "@nurlings/brand";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { builtinAgentTools } from "./builtin-tools.js";
+import { builtinAgentTools } from "./builtin.tool-definition.js";
 import { withUserFacingGuidance } from "./user-facing-guidance.js";
 
 type FakeTool = {

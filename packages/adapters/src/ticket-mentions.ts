@@ -3,8 +3,8 @@ import { runContinueJob } from "@rakazo/adapter-kit";
 import type { LabFeature, TicketMention } from "@rakazo/contracts";
 import {
   hasLab,
-  resolveLabs,
   isTicketCompletedStatus,
+  resolveLabs,
   TICKET_MENTIONS_MAX,
   TicketStatusSchema,
 } from "@rakazo/contracts";

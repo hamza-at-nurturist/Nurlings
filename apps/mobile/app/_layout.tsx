@@ -1,7 +1,7 @@
-import { brand } from "@nurlings/brand";
 import { i18n } from "@lingui/core";
 import { I18nProvider } from "@lingui/react";
 import { useLingui } from "@lingui/react/macro";
+import { brand } from "@nurlings/brand";
 import type { LinkFavicons } from "@rakazo/chat-ui/native";
 import {
   CodeCopyButtonContext,

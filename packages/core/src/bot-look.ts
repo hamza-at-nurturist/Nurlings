@@ -7,6 +7,7 @@ import {
   organicAvatarSampleIdentity,
 } from "./avatar-shape.js";
 import { DEFAULT_BOT_AVATAR_COLOR, resolvePersonaColorDef } from "./bot-avatar-colors.js";
+import { PICKABLE_ORGANIC_SHAPE_INDEXES } from "./bot-avatar-shapes.js";
 import { newClientId } from "./client-id.js";
 
 /** One preview identity per organic look, so a new bot can show a body before it has an id. */
@@ -56,7 +57,10 @@ export interface BotLookState {
   shapeIndex: number | null;
   /** The palette color; a bot saved with a color's earlier, deeper value still selects it. */
   color: string;
-  /** Neither a photo nor a studio shape: the bot's own body. */
+  /**
+   * Neither a photo nor an offered shape: the bot's own body. A retired static shape (0 to 7)
+   * draws that body too, so it counts as the default look.
+   */
   defaultLook: boolean;
 }
 
@@ -70,7 +74,8 @@ export function botLookState(value: string): BotLookState {
     photo,
     shapeIndex,
     color: resolvePersonaColorDef("preview", stored).hex,
-    defaultLook: !photo && shapeIndex === null,
+    defaultLook:
+      !photo && (shapeIndex === null || !PICKABLE_ORGANIC_SHAPE_INDEXES.includes(shapeIndex)),
   };
 }
 

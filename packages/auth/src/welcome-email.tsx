@@ -29,25 +29,25 @@ export function welcomeEmail(
           <Text style={stepStyle}>
             <strong>{say("Get the apps")}</strong>
           </Text>
-        <Text style={{ marginTop: 0 }}>
-          {withNodes(
-            say("Rakazo runs on {platforms}, so your bots can reach you wherever you are."),
-            {
-              // The language's own list ("A, B, and C", "A, B y C"), with each app a link.
-              platforms: new Intl.ListFormat(locale, { type: "conjunction" })
-                .formatToParts(Object.keys(APPS))
-                .map((part, index) =>
-                  part.type === "element" ? (
-                    <Link key={part.value} href={APPS[part.value]} style={linkStyle}>
-                      {part.value}
-                    </Link>
-                  ) : (
-                    <span key={`${index}${part.value}`}>{part.value}</span>
+          <Text style={{ marginTop: 0 }}>
+            {withNodes(
+              say("Rakazo runs on {platforms}, so your bots can reach you wherever you are."),
+              {
+                // The language's own list ("A, B, and C", "A, B y C"), with each app a link.
+                platforms: new Intl.ListFormat(locale, { type: "conjunction" })
+                  .formatToParts(Object.keys(APPS))
+                  .map((part, index) =>
+                    part.type === "element" ? (
+                      <Link key={part.value} href={APPS[part.value]} style={linkStyle}>
+                        {part.value}
+                      </Link>
+                    ) : (
+                      <span key={`${index}${part.value}`}>{part.value}</span>
+                    ),
                   ),
-                ),
-            },
-          )}
-        </Text>
+              },
+            )}
+          </Text>
         </>
       ) : null}
       <Text style={{ marginTop: "28px" }}>{say("Questions? Just reply. I read every one.")}</Text>

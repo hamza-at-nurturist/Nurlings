@@ -8,6 +8,8 @@ import { mobileTokens, resolveMobileAppearance } from "../lib/appearance";
 import type { CreateAction } from "../lib/create-chooser";
 import { createMenuActions, isCreateAction } from "../lib/create-chooser";
 import { useThemedStyles } from "../lib/native";
+import { useNurlingsBoardEnabled } from "../lib/nurlings-board/enabled";
+import { NURLINGS_BOARD_PATH } from "../lib/nurlings-board/routes";
 import { GlassSurface } from "./glass-surface";
 import { CREATE_MENU_GAP, createHomeStyles } from "./home-styles";
 import { NativeSymbol } from "./native-symbol";
@@ -38,6 +40,7 @@ export function InboxHeader({
   const styles = useThemedStyles(createHomeStyles);
   const { t } = useLingui();
   const router = useRouter();
+  const boardEnabled = useNurlingsBoardEnabled() === true;
   const insets = useSafeAreaInsets();
   return (
     <View
@@ -82,6 +85,15 @@ export function InboxHeader({
         >
           <NativeSymbol ios="magnifyingglass" android="search" size={17} />
         </HeaderButton>
+        {boardEnabled ? (
+          <HeaderButton
+            testID="home-board-button"
+            accessibilityLabel={t`Board`}
+            onPress={() => router.push(NURLINGS_BOARD_PATH)}
+          >
+            <NativeSymbol ios="rectangle.split.3x1" android="albums-outline" size={17} />
+          </HeaderButton>
+        ) : null}
         <MenuView
           actions={createMenuActions(Platform.OS)}
           {...(Platform.OS === "android" ? { style: { marginBottom: -CREATE_MENU_GAP } } : {})}

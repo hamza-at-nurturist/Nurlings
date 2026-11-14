@@ -9,7 +9,7 @@ import { createApp } from "./app.js";
 
 const describePostgres =
   process.env.VERIFY_DATABASE === "1" && process.env.DATABASE_URL
-    ? describe.sequential
+    ? describe
     : describe.skip;
 
 const ORIGIN = "http://127.0.0.1:5173";

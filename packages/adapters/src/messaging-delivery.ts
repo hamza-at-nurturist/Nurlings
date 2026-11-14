@@ -1,5 +1,5 @@
-import { brand } from "@nurlings/brand";
 import { setTimeout as sleep } from "node:timers/promises";
+import { brand } from "@nurlings/brand";
 import type {
   AdapterContext,
   ArtifactStore,

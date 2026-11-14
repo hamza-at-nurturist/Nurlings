@@ -5,6 +5,8 @@ import { useLayoutEffect } from "react";
 import type { CreateAction } from "./create-chooser";
 import { createMenuItems } from "./create-chooser";
 import { useUiLocale } from "./i18n";
+import { useNurlingsBoardEnabled } from "./nurlings-board/enabled";
+import { NURLINGS_BOARD_PATH } from "./nurlings-board/routes";
 
 /** Liquid Glass home header: account on the left; activity, search and create on the right. */
 export function useHomeHeader({
@@ -30,6 +32,7 @@ export function useHomeHeader({
   const router = useRouter();
   const { t, i18n } = useLingui();
   const locale = useUiLocale();
+  const boardEnabled = useNurlingsBoardEnabled() === true;
   useLayoutEffect(() => {
     if (!nativeHeader) return;
     const signedIn = ready && hasSession;
@@ -65,6 +68,18 @@ export function useHomeHeader({
           icon: { type: "sfSymbol" as const, name: "magnifyingglass" },
           onPress: () => router.push("/search"),
         },
+        ...(boardEnabled
+          ? [
+              {
+                type: "button" as const,
+                label: t`Board`,
+                accessibilityLabel: t`Board`,
+                identifier: "home-board-button",
+                icon: { type: "sfSymbol" as const, name: "rectangle.split.3x1" },
+                onPress: () => router.push(NURLINGS_BOARD_PATH),
+              },
+            ]
+          : []),
         {
           type: "menu" as const,
           label: t`Create`,
@@ -88,6 +103,7 @@ export function useHomeHeader({
     hasSession,
     initials,
     activityMode,
+    boardEnabled,
     toggleActivityMode,
     runCreateAction,
     headerTitle,

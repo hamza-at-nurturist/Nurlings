@@ -33,8 +33,8 @@ export function ticketStatusLabel(status: TicketStatus): string {
     case "done":
       return t`Done`;
     case "closed":
-    case "archived":
-      return t("Closed");
       return t`Won't do`;
+    case "archived":
+      return t`Closed`;
   }
 }

@@ -1,8 +1,9 @@
+import { useLingui } from "@lingui/react/macro";
 import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import { ticketCard } from "@rakazo/core/nurlings-board";
 import { fontWeight, typeScale } from "@rakazo/ui-tokens";
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
-import { dateLocaleForUi, useI18n } from "../../lib/i18n";
+import { dateLocaleForUi, useUiLocale } from "../../lib/i18n";
 import { useMobileTokens } from "../../lib/native";
 import type { CardMenuAction } from "../../lib/nurlings-board/card-menu";
 import { relativeDayLabels, statusLabels } from "../../lib/nurlings-board/labels";
@@ -44,7 +45,8 @@ export function BoardColumn({
   onRefresh: () => void;
   onAction: (ticket: TicketListItem, action: CardMenuAction) => void;
 }) {
-  const { t, locale } = useI18n();
+  const { t } = useLingui();
+  const locale = useUiLocale();
   const tokens = useMobileTokens();
   const shown = showOlder ? [...tickets, ...older] : tickets;
   const yourTurn = status === "review" && shown.length > 0;
@@ -79,7 +81,7 @@ export function BoardColumn({
         {yourTurn ? (
           <View style={styles.turn}>
             <Pill background={tokens.warning} foreground="#000000">
-              {t("Your turn")}
+              {t`Your turn`}
             </Pill>
           </View>
         ) : null}
@@ -109,10 +111,10 @@ export function BoardColumn({
           !showOlder && older.length > 0 ? (
             <Pressable accessibilityRole="button" onPress={onShowOlder} style={styles.older}>
               <Text style={[typeScale.caption, { color: tokens.mutedForeground }]}>
-                {t("Show {count} older", { count: older.length })}
+                {t`Show ${older.length} older`}
               </Text>
             </Pressable>
-          ) : null
+          ) : undefined
         }
       />
     </View>

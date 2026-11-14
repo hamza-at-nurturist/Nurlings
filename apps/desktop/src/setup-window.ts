@@ -1,5 +1,5 @@
-import { brand } from "@nurlings/brand";
 import path from "node:path";
+import { brand } from "@nurlings/brand";
 import type { DesktopReachability, DesktopSetup } from "@rakazo/contracts";
 import { parseServerHeaders } from "@rakazo/contracts";
 import type { Session } from "electron";

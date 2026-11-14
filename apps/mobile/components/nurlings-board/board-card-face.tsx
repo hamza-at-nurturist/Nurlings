@@ -1,15 +1,15 @@
+import { useLingui } from "@lingui/react/macro";
 import type { TicketCard } from "@rakazo/core/nurlings-board";
 import { fontWeight, typeScale } from "@rakazo/ui-tokens";
 import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useI18n } from "../../lib/i18n";
 import { useMobileTokens } from "../../lib/native";
 import { NativeSymbol } from "../native-symbol";
 import { OwnerMark, Pill } from "./shared";
 
 /** What a card looks like. The list renders it with the ⋯ menu; the drag overlay renders a copy. */
 export function BoardCardFace({ card, menu }: { card: TicketCard; menu: ReactNode }) {
-  const { t } = useI18n();
+  const { t } = useLingui();
   const tokens = useMobileTokens();
   const workerName = card.worker?.name;
   const dueColor = card.dates.overdue ? tokens.destructive : tokens.mutedForeground;
@@ -29,7 +29,7 @@ export function BoardCardFace({ card, menu }: { card: TicketCard; menu: ReactNod
         <View style={styles.topEnd}>
           {card.needsUser ? (
             <Pill background={tokens.muted} foreground={tokens.foreground}>
-              {t("Needs you")}
+              {t`Needs you`}
             </Pill>
           ) : null}
           {menu}
@@ -46,7 +46,7 @@ export function BoardCardFace({ card, menu }: { card: TicketCard; menu: ReactNod
       </Text>
       {workerName ? (
         <Text numberOfLines={1} style={[typeScale.footnote, { color: tokens.statusWorking }]}>
-          {t("{name} is working…", { name: workerName })}
+          {t`${workerName} is working…`}
         </Text>
       ) : card.lastComment ? (
         <Text numberOfLines={2} style={[typeScale.footnote, { color: tokens.mutedForeground }]}>
@@ -67,7 +67,7 @@ export function BoardCardFace({ card, menu }: { card: TicketCard; menu: ReactNod
           </View>
         ) : null}
         {card.fileCount > 0 ? (
-          <View style={styles.meta} accessibilityLabel={t("Files")}>
+          <View style={styles.meta} accessibilityLabel={t`Files`}>
             <NativeSymbol
               ios="paperclip"
               android="attach-outline"

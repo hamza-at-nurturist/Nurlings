@@ -1,5 +1,5 @@
-import { brand } from "@nurlings/brand";
 import { ph, t } from "@lingui/core/macro";
+import { brand } from "@nurlings/brand";
 import type { AiDataUse, AiRecipient } from "@rakazo/contracts";
 import { Alert, AppState, Linking } from "react-native";
 

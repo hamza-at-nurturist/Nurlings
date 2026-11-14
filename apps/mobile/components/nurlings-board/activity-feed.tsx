@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import { ChatMarkdown } from "@rakazo/chat-ui/native";
 import type { Artifact, Bot, TicketComment, TicketRun, TicketStatus } from "@rakazo/contracts";
 import { botHexColor, resolvePersonaColorDef, WORKING_RUN_STATUSES } from "@rakazo/core";
@@ -10,8 +11,9 @@ import type {
 import { activityRows, resolveMentionTargets, splitMentions } from "@rakazo/core/nurlings-board";
 import { fontWeight, typeScale } from "@rakazo/ui-tokens";
 import { useEffect, useRef } from "react";
+import type { ScrollViewInstance } from "react-native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { dateLocaleForUi, useI18n } from "../../lib/i18n";
+import { dateLocaleForUi, useUiLocale } from "../../lib/i18n";
 import { useMobileTokens, useResolvedAppearance } from "../../lib/native";
 import { statusLabels } from "../../lib/nurlings-board/labels";
 import { BotAvatar } from "../bot-avatar";
@@ -34,10 +36,11 @@ export function ActivityFeed({
   runs: TicketRun[];
   ownerBotId: string | null;
 }) {
-  const { t, locale } = useI18n();
+  const { t } = useLingui();
+  const locale = useUiLocale();
   const tokens = useMobileTokens();
   const scheme = useResolvedAppearance();
-  const scroll = useRef<ScrollView>(null);
+  const scroll = useRef<ScrollViewInstance>(null);
   const statuses = statusLabels();
   const working = runs.filter((run) =>
     WORKING_RUN_STATUSES.some((status) => status === run.status),
@@ -48,37 +51,28 @@ export function ActivityFeed({
   }, [last]);
 
   const botName = (id: string | null) =>
-    (id ? bots.find((bot) => bot.id === id)?.name : undefined) ?? t("Someone");
-  const actorText = (actor: ActivityActor) => (actor.you ? t("You") : (actor.name ?? t("Someone")));
+    (id ? bots.find((bot) => bot.id === id)?.name : undefined) ?? t`Someone`;
+  const actorText = (actor: ActivityActor) => (actor.you ? t`You` : (actor.name ?? t`Someone`));
   const lineText = (line: ActivityLine): string => {
     switch (line.kind) {
       case "created":
         return line.owner
-          ? t("{actor} created this and assigned it to {owner}", {
-              actor: actorText(line.actor),
-              owner: line.owner,
-            })
-          : t("{actor} created this", { actor: actorText(line.actor) });
+          ? t`${actorText(line.actor)} created this and assigned it to ${line.owner}`
+          : t`${actorText(line.actor)} created this`;
       case "moved":
-        return t("{actor} moved it to {status}", {
-          actor: actorText(line.actor),
-          status: statuses[line.status as TicketStatus],
-        });
+        return t`${actorText(line.actor)} moved it to ${statuses[line.status as TicketStatus]}`;
       case "assigned":
-        return t("{actor} assigned it to {owner}", {
-          actor: actorText(line.actor),
-          owner: line.owner,
-        });
+        return t`${actorText(line.actor)} assigned it to ${line.owner}`;
       case "approved":
-        return t("{actor} approved it", { actor: actorText(line.actor) });
+        return t`${actorText(line.actor)} approved it`;
       case "resumed":
-        return t("Moved back to {status}", { status: statuses[line.status as TicketStatus] });
+        return t`Moved back to ${statuses[line.status as TicketStatus]}`;
       case "attached":
         return line.actor.you
-          ? t("You attached {name}", { name: line.name })
-          : t("{actor} attached {name}", { actor: actorText(line.actor), name: line.name });
+          ? t`You attached ${line.name}`
+          : t`${actorText(line.actor)} attached ${line.name}`;
       case "failed":
-        return t("{name} couldn't finish, reply to retry", { name: line.name ?? t("Someone") });
+        return t`${line.name ?? t`Someone`} couldn't finish, reply to retry`;
     }
   };
 
@@ -94,7 +88,7 @@ export function ActivityFeed({
       ? bots.find((row) => row.id === comment.authorBotId)
       : undefined;
     const mine = !comment.authorBotId && comment.authorUserId === viewer.id;
-    const name = mine ? t("You") : (bot?.name ?? comment.authorName ?? t("Someone"));
+    const name = mine ? t`You` : (bot?.name ?? comment.authorName ?? t`Someone`);
     const targets = resolveMentionTargets(comment.mentions ?? [], bots, viewer);
     return (
       <View style={[styles.card, { backgroundColor: tokens.card, borderColor: tokens.border }]}>
@@ -232,7 +226,7 @@ export function ActivityFeed({
             { color: tokens.statusWorking, paddingHorizontal: 4, marginTop: 8 },
           ]}
         >
-          {t("{name} is working…", { name: botName(run.botId) })}
+          {t`${botName(run.botId)} is working…`}
         </Text>
       ))}
     </ScrollView>

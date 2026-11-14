@@ -100,16 +100,7 @@ vi.mock("../native", () => ({
   useMobileTokens: () => colors,
   useResolvedAppearance: () => "dark",
 }));
-vi.mock("../i18n", () => ({
-  t: (text: string, values?: Record<string, string | number>) =>
-    text.replace(/\{(\w+)\}/g, (_, key: string) => String(values?.[key] ?? "")),
-  useI18n: () => ({
-    locale: "en",
-    t: (text: string, values?: Record<string, string | number>) =>
-      text.replace(/\{(\w+)\}/g, (_, key: string) => String(values?.[key] ?? "")),
-  }),
-  dateLocaleForUi: () => "en-US",
-}));
+vi.mock("../i18n", () => ({ dateLocaleForUi: () => "en-US", useUiLocale: () => "en" }));
 vi.mock("../../components/bot-avatar", () => ({ BotAvatar: () => null }));
 vi.mock("../../components/native-symbol", () => ({ NativeSymbol: () => null }));
 vi.mock("../../components/nurlings-board/board-drag", () => ({

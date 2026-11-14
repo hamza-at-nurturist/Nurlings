@@ -344,7 +344,7 @@ export function PluginBrowse({
             : null}
         </>
       )}
-      {catalogLoaded && !category ? (
+      {catalogLoaded && !category && SUBMIT_PLUGIN_URL ? (
         <div className="mt-10 flex justify-center">
           <a
             href={SUBMIT_PLUGIN_URL}

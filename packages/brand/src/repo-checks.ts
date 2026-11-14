@@ -145,7 +145,14 @@ const SERVER_TEXT_FILES = [
   "packages/adapters/src/compacted-summary.ts",
   "packages/adapters/src/automated-messages.ts",
   "packages/adapters/src/auto-review.ts",
-  "apps/api/src/team-chat-judge.ts",
+  "packages/adapters/src/team-chat-judge.prompt.ts",
+  "packages/adapters/src/team-chat-judge.ts",
+  "packages/adapters/src/messaging-delivery.ts",
+  "packages/adapters/src/runtime.prompt.ts",
+  "packages/adapters/src/history-compaction.prompt.ts",
+  "packages/adapters/src/automated-messages.prompt.ts",
+  "packages/adapters/src/auto-review.prompt.ts",
+  "packages/adapters/src/background-helpers.prompt.ts",
 ];
 /**
  * Lines that name the upstream on purpose: internal errors and the legacy automated-message label

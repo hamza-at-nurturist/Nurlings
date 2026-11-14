@@ -1,4 +1,4 @@
-import { IOS_APP_STORE_URL } from "@rakazo/contracts";
+import { brand } from "@nurlings/brand";
 import { useQuery } from "@tanstack/react-query";
 import * as Application from "expo-application";
 import { Linking, Platform } from "react-native";
@@ -33,7 +33,7 @@ export async function fetchStoreVersion(bundleId: string): Promise<string | null
 
 /** Whether the App Store has a newer native build than the one installed. iOS only. */
 export function useStoreUpdateAvailable(): boolean {
-  const bundleId = Platform.OS === "ios" ? Application.applicationId : null;
+  const bundleId = Platform.OS === "ios" && brand.urls.iosApp ? Application.applicationId : null;
   const installed = Application.nativeApplicationVersion;
   const { data } = useQuery(
     {
@@ -48,5 +48,6 @@ export function useStoreUpdateAvailable(): boolean {
 }
 
 export function openStoreListing(): void {
-  void Linking.openURL(IOS_APP_STORE_URL).catch(() => undefined);
+  const url = brand.urls.iosApp;
+  if (url) void Linking.openURL(url).catch(() => undefined);
 }

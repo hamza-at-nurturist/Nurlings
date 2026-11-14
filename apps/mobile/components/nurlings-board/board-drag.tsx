@@ -16,7 +16,7 @@ import type {
   FlatList as FlatListType,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  View as ViewType,
+  ViewInstance,
 } from "react-native";
 import { StyleSheet } from "react-native";
 import type { SharedValue } from "react-native-reanimated";
@@ -53,7 +53,7 @@ export type BoardDrag = {
   hover: SharedValue<number>;
   begin: (
     item: { id: string; status: TicketStatus; card: TicketCard },
-    view: ViewType,
+    view: ViewInstance,
     grab: Point,
   ) => void;
   move: (dx: number, dy: number) => void;
@@ -69,7 +69,9 @@ export function useBoardDrag(): BoardDrag | null {
   return useContext(Context);
 }
 
-function measure(view: ViewType): Promise<{ x: number; y: number; width: number; height: number }> {
+function measure(
+  view: ViewInstance,
+): Promise<{ x: number; y: number; width: number; height: number }> {
   return new Promise((resolve) =>
     view.measureInWindow((x, y, width, height) => resolve({ x, y, width, height })),
   );
@@ -94,7 +96,7 @@ export function BoardDragProvider({
   layout: PagerLayout;
   /** The board's width and height: the edges auto-scroll reacts to. */
   size: { width: number; height: number };
-  container: RefObject<ViewType | null>;
+  container: RefObject<ViewInstance | null>;
   pager: RefObject<Scrollable | null>;
   /** The pager's live scroll offset, kept up to date by the board. */
   pagerOffset: RefObject<number>;

@@ -1,9 +1,9 @@
+import { useLingui } from "@lingui/react/macro";
 import type { Bot } from "@rakazo/contracts";
 import { typeScale } from "@rakazo/ui-tokens";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
-import { useI18n } from "../../lib/i18n";
 import { useMobileTokens } from "../../lib/native";
 import type { MentionInputState } from "../../lib/nurlings-board/mention-input";
 import {
@@ -46,7 +46,7 @@ export function ComposerBar({
   onSend: (input: ComposerSend) => Promise<boolean>;
   testID?: string;
 }) {
-  const { t } = useI18n();
+  const { t } = useLingui();
   const tokens = useMobileTokens();
   const [state, setState] = useState<MentionInputState>(emptyMentionInput);
   const [selection, setSelection] = useState<{ start: number; end: number } | undefined>();
@@ -102,7 +102,7 @@ export function ComposerBar({
         />
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t("Send")}
+          accessibilityLabel={t`Send`}
           disabled={!canSend}
           onPress={() => void send()}
           style={[styles.send, { backgroundColor: tokens.primary, opacity: canSend ? 1 : 0.4 }]}

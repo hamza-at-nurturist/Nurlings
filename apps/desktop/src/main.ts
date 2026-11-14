@@ -630,6 +630,11 @@ app.whenReady().then(async () => {
       }),
   });
   desktop.currentSetup = await readSetup(userDataDir);
+  if (isUpstreamCloudSetup(desktop.currentSetup)) {
+    // This profile chose the upstream's hosted service: forget it so setup opens again.
+    desktop.currentSetup = null;
+    await clearSetup(userDataDir);
+  }
   const userStackDir = stackDir(userDataDir);
   const resourceDir = stackResourceDir({
     packaged: app.isPackaged,
@@ -655,11 +660,6 @@ app.whenReady().then(async () => {
     }
     // A stack can start or stop without a server switch; its phase transitions refresh
     // the stop item.
-  if (isUpstreamCloudSetup(currentSetup)) {
-    // This profile chose the upstream's hosted service: forget it so setup opens again.
-    currentSetup = null;
-    await clearSetup(userDataDir);
-  }
     stopStackMenu.stackChanged(state.phase);
   };
   const serverBundle = nativeStackEligible({

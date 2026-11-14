@@ -1,12 +1,13 @@
 import { t } from "@lingui/core/macro";
 import { Trans } from "@lingui/react/macro";
 import type { BotAvatarSet } from "@rakazo/contracts";
-import { resolveBotAvatarSet } from "@rakazo/contracts";
+import { resolveBotAvatarSet, SELECTABLE_BOT_AVATAR_SETS } from "@rakazo/contracts";
 import {
   botLookState,
   botLookWithColor,
   botLookWithShape,
-  SHIPPED_BOT_AVATAR_SHAPE_KEYS,
+  PICKABLE_ORGANIC_SHAPE_INDEXES,
+  PINNED_FAMILY_FIRST_SHAPE_INDEX,
 } from "@rakazo/core";
 import {
   BOT_COLORS,
@@ -55,11 +56,16 @@ export function BotLookPicker({
     color: currentColor,
     defaultLook: isDefaultLook,
   } = botLookState(value);
+  // The organic family bodies are the identities' own previews when the caller offers those, so
+  // only the brand blob and the original bodies come from the shapes.
+  const offeredShapes = organicIdentities
+    ? PICKABLE_ORGANIC_SHAPE_INDEXES.filter((shape) => shape < PINNED_FAMILY_FIRST_SHAPE_INDEX)
+    : PICKABLE_ORGANIC_SHAPE_INDEXES;
 
   return (
     <div className="space-y-4">
       {/* Only one bot's own editor overrides the account's set; a new bot takes the default. */}
-      {onAvatarSetChange ? (
+      {onAvatarSetChange && SELECTABLE_BOT_AVATAR_SETS.length > 1 ? (
         <Tabs
           value={avatarSet}
           onValueChange={(next) =>
@@ -116,13 +122,13 @@ export function BotLookPicker({
                 onClick={() => onChange(currentColor, organicIdentity)}
               />
             ))}
-            {SHIPPED_BOT_AVATAR_SHAPE_KEYS.map((key, index) => (
+            {offeredShapes.map((shape, position) => (
               <BotShapePreview
-                key={key}
-                shapeIndex={index}
-                color={currentColor}
-                selected={shapeIndex === index}
-                onClick={() => onChange(botLookWithShape(currentColor, index))}
+                key={shape}
+                label={t`Shape ${(organicIdentities?.length ?? 0) + position + 1}`}
+                color={botLookWithShape(currentColor, shape)}
+                selected={shapeIndex === shape}
+                onClick={() => onChange(botLookWithShape(currentColor, shape))}
               />
             ))}
           </div>

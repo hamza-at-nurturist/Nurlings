@@ -9,7 +9,7 @@ import { createApp } from "./app.js";
 
 const describePostgres =
   process.env.VERIFY_DATABASE === "1" && process.env.DATABASE_URL
-    ? describe.sequential
+    ? describe
     : describe.skip;
 
 const ORIGIN = "http://127.0.0.1:5173";
@@ -100,7 +100,7 @@ describePostgres("ticket dates (PostgreSQL)", () => {
       const deps = {
         prisma: handles.prisma,
         jobs: { enqueue } as never,
-        deploymentLabs: ["board"],
+        deploymentLabs: ["board" as const],
         notifications: () => ({ describe: vi.fn(), send }) as never,
       };
       const tenant = {

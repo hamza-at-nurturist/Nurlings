@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import type { Ticket } from "@rakazo/contracts";
 import { TICKET_DESCRIPTION_MAX_LENGTH } from "@rakazo/contracts";
 import { mergeActivity } from "@rakazo/core/nurlings-board";
@@ -26,7 +27,7 @@ import type { PropertiesPatch } from "../../components/nurlings-board/ticket-pro
 import { TicketProperties } from "../../components/nurlings-board/ticket-properties";
 import { rpc } from "../../lib/api";
 import { useFloatingHeaderInset, useHeaderHeightIfAny } from "../../lib/floating-header";
-import { dateLocaleForUi, useI18n } from "../../lib/i18n";
+import { dateLocaleForUi, useUiLocale } from "../../lib/i18n";
 import { useMobileTokens } from "../../lib/native";
 import { iosAtLeast } from "../../lib/native-controls";
 import { useNurlingsBoardEnabled } from "../../lib/nurlings-board/enabled";
@@ -53,7 +54,7 @@ export default function TicketScreen() {
   const enabled = useNurlingsBoardEnabled();
   const router = useRouter();
   const tokens = useMobileTokens();
-  const { t } = useI18n();
+  const { t } = useLingui();
 
   useEffect(() => {
     if (enabled === false) router.replace("/");
@@ -63,7 +64,7 @@ export default function TicketScreen() {
     return (
       <View style={[styles.center, { backgroundColor: tokens.background }]}>
         <Text style={[typeScale.body, { color: tokens.mutedForeground }]}>
-          {t("Something went wrong. Try again.")}
+          {t`Something went wrong. Try again.`}
         </Text>
       </View>
     );
@@ -79,7 +80,8 @@ export default function TicketScreen() {
 }
 
 function TicketView({ ticketId }: { ticketId: string }) {
-  const { t, locale } = useI18n();
+  const { t } = useLingui();
+  const locale = useUiLocale();
   const tokens = useMobileTokens();
   const navigation = useNavigation();
   const router = useRouter();
@@ -145,12 +147,12 @@ function TicketView({ ticketId }: { ticketId: string }) {
   function confirmDelete() {
     if (!ticket) return;
     Alert.alert(
-      t("Delete {ref}?", { ref: ticket.ref }),
-      t("This removes the ticket, its comments and its history. It can't be undone."),
+      t`Delete ${ticket.ref}?`,
+      t`This removes the ticket, its comments and its history. It can't be undone.`,
       [
-        { text: t("Cancel"), style: "cancel" },
+        { text: t`Cancel`, style: "cancel" },
         {
-          text: t("Delete"),
+          text: t`Delete`,
           style: "destructive",
           onPress: () => {
             setBusy(true);
@@ -200,10 +202,10 @@ function TicketView({ ticketId }: { ticketId: string }) {
     ? latest.comment.authorBotId
       ? (bots.find((bot) => bot.id === latest.comment.authorBotId)?.name ??
         latest.comment.authorName ??
-        t("Someone"))
+        t`Someone`)
       : latest.comment.authorUserId === viewer.id
-        ? t("You")
-        : (latest.comment.authorName ?? t("Someone"))
+        ? t`You`
+        : (latest.comment.authorName ?? t`Someone`)
     : "";
 
   return (
@@ -214,12 +216,12 @@ function TicketView({ ticketId }: { ticketId: string }) {
     >
       <View style={styles.segments}>
         <NativeSegmentedControl<Segment>
-          accessibilityLabel={t("Ticket sections")}
+          accessibilityLabel={t`Ticket sections`}
           value={segment}
           onChange={setSegment}
           options={[
-            { value: "ticket", label: t("Ticket") },
-            { value: "activity", label: t("Activity") },
+            { value: "ticket", label: t`Ticket` },
+            { value: "activity", label: t`Activity` },
           ]}
         />
       </View>
@@ -273,14 +275,14 @@ function TicketView({ ticketId }: { ticketId: string }) {
           ) : null}
           <DescriptionField
             value={ticket.description ?? ""}
-            label={t("Description")}
-            showMore={t("Show more")}
+            label={t`Description`}
+            showMore={t`Show more`}
             disabled={busy}
             onSave={(description) => void save({ description: description || null })}
           />
-          <TicketFiles files={activity.files} label={t("Files")} />
+          <TicketFiles files={activity.files} label={t`Files`} />
           <NativeActionButton
-            label={t("Delete ticket")}
+            label={t`Delete ticket`}
             prominence="destructive"
             disabled={busy}
             onPress={confirmDelete}
@@ -289,7 +291,7 @@ function TicketView({ ticketId }: { ticketId: string }) {
         {ticket.status === "review" ? (
           <View style={[styles.approve, { paddingBottom: Math.max(insets.bottom, 12) }]}>
             <NativeActionButton
-              label={t("Approve")}
+              label={t`Approve`}
               prominence="primary"
               busy={busy}
               onPress={() => void approve()}

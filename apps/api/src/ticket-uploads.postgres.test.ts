@@ -9,7 +9,7 @@ import { createApp } from "./app.js";
 
 const describePostgres =
   process.env.VERIFY_DATABASE === "1" && process.env.DATABASE_URL
-    ? describe.sequential
+    ? describe
     : describe.skip;
 
 const ORIGIN = "http://127.0.0.1:5173";
@@ -118,11 +118,14 @@ describePostgres("ticket uploads (PostgreSQL)", () => {
       };
       const artifacts = { get: vi.fn(async () => new Uint8Array([1, 2, 3])) };
       const read = await runAsTenant({ spaceId: ticket.spaceId, userId }, () =>
-        readTicketForRun({ prisma: handles.prisma, deploymentLabs: ["board"], artifacts } as never, {
-          ref: ticket.ref,
-          acceptsImages: true,
-          context,
-        }),
+        readTicketForRun(
+          { prisma: handles.prisma, deploymentLabs: ["board"], artifacts } as never,
+          {
+            ref: ticket.ref,
+            acceptsImages: true,
+            context,
+          },
+        ),
       );
       const result = read.result as {
         content: Array<{ type: string }>;
