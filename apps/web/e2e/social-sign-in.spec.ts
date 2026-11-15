@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { socialPresentation } from "../../../packages/auth/src/social-presentation";
 import { LAST_SIGN_IN_COOKIE } from "../../../packages/contracts/src/auth";
-import { captureScreenshot, completeOnboarding, openUserSettings, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, openUserSettings, signup, ui } from "./helpers";
 
 const passwordOnly = {
   passwordAuth: true,
@@ -79,7 +79,7 @@ test("sign-in offers Google and Apple before email", async ({ page }, testInfo) 
   await page.emulateMedia({ colorScheme: "light" });
 
   await page.goto("/sign-up");
-  await expect(page.getByRole("heading", { name: "Create your Rakazo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: ui("Create your Rakazo") })).toBeVisible();
   await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Continue with Apple" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Continue with email" })).toBeVisible();
@@ -205,7 +205,7 @@ test("one provider spans the chooser row", async ({ page }, testInfo) => {
 test("sign-in hides the chooser when none are configured", async ({ page }, testInfo) => {
   await mockSignedOut(page, []);
   await page.goto("/sign-in");
-  await expect(page.getByRole("heading", { name: "Sign in to Rakazo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: ui("Sign in to Rakazo") })).toBeVisible();
   await expect(page.getByText("Welcome back")).toHaveCount(0);
   await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Password", { exact: true })).toBeVisible();

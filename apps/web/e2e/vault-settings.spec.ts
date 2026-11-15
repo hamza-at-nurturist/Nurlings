@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, openUserSettings, rpc, signup } from "./helpers";
+import {
+  captureScreenshot,
+  completeOnboarding,
+  openUserSettings,
+  rpc,
+  signup,
+  ui,
+} from "./helpers";
 
 // RFC 6238's test key, written in pieces so it never reads as a saved secret.
 const TEST_KEY = ("GEZDGNBV" + "GY3TQOJQ").repeat(2);
@@ -104,7 +111,10 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   activityUnavailable = false;
   await activityFailure.getByRole("button", { name: "Retry", exact: true }).click();
   await expect(activityFailure).toHaveCount(0);
-  const activity = detail.getByRole("button", { name: "Used 2h ago by Research bot", exact: true });
+  const activity = detail.getByRole("button", {
+    name: ui("Used 2h ago by Research bot"),
+    exact: true,
+  });
   await expect(detail.getByText("•••• 4242", { exact: true })).toBeVisible();
   await expect(detail.getByText("Home", { exact: true })).toBeVisible();
   await captureScreenshot(page, testInfo, "vault-card-detail");
@@ -164,7 +174,7 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   // A new item's save returns to the list, as every new item's does.
   await vault.getByText("scoped.example.test", { exact: true }).click();
   const chosen = detail.getByTestId("vault-item-access-detail");
-  await expect(chosen).toHaveText(/^Bots./);
+  await expect(chosen).toHaveText(new RegExp(`^${ui("Bots")}.`));
   await expect(chosen).not.toContainText("Researcher");
 
   // A key no bot may use yet: every bot let go of.
@@ -173,12 +183,12 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   await editor.getByLabel("Site", { exact: true }).fill("https://none.example.test");
   await editor.getByLabel("Value", { exact: true }).fill(`fake-none-key-${stamp}`);
   await editor.getByTestId("agent-access").getByRole("button").click();
-  await page.getByRole("menuitemcheckbox", { name: "All bots" }).click();
+  await page.getByRole("menuitemcheckbox", { name: ui("All bots") }).click();
   await page.keyboard.press("Escape");
   await editor.getByRole("button", { name: "Save", exact: true }).click();
   await expect(editor).toHaveCount(0);
   await vault.getByText("none.example.test", { exact: true }).click();
-  await expect(detail.getByTestId("vault-item-access-detail")).toHaveText("BotsNo bots");
+  await expect(detail.getByTestId("vault-item-access-detail")).toHaveText(ui("BotsNo bots"));
   await captureScreenshot(page, testInfo, "vault-item-no-bots");
 
   // A login the user is asked about before each sign-in.
@@ -215,7 +225,7 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   await editor.getByTestId("vault-item-access").getByRole("button", { name: "Block" }).click();
   await editor.getByRole("button", { name: "Save", exact: true }).click();
   await expect(editor).toHaveCount(0);
-  await expect(detail.getByText("Saved, but this server can't block bots yet.")).toBeVisible();
+  await expect(detail.getByText(ui("Saved, but this server can't block bots yet."))).toBeVisible();
   await captureScreenshot(page, testInfo, "vault-old-server-block");
 
   await page.getByTestId("settings-back").click();
@@ -294,7 +304,7 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   await page.keyboard.press("Escape");
   await editor.getByRole("button", { name: "Save", exact: true }).click();
   await expect(
-    detail.getByText("Saved, but this server can't limit an item to chosen bots."),
+    detail.getByText(ui("Saved, but this server can't limit an item to chosen bots.")),
   ).toBeVisible();
   await captureScreenshot(page, testInfo, "vault-old-server-chosen-bots");
   await page.getByTestId("settings-back").click();
@@ -324,7 +334,9 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   await again.getByText("scoped.example.test", { exact: true }).click();
   await page.getByTestId("vault-item-edit").click();
   await expect(
-    editor.getByText("This limits only this Space's bots. Your other Spaces choose for their own."),
+    editor.getByText(
+      ui("This limits only this Space's bots. Your other Spaces choose for their own."),
+    ),
   ).toBeVisible();
   await captureScreenshot(page, testInfo, "vault-item-other-spaces");
 
@@ -337,7 +349,7 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   await own.getByText("scoped.example.test", { exact: true }).click();
   await page.getByTestId("vault-item-edit").click();
   await expect(
-    editor.getByText("This Space keeps its own vault, so its bots can't use account items."),
+    editor.getByText(ui("This Space keeps its own vault, so its bots can't use account items.")),
   ).toBeVisible();
   await expect(editor.getByTestId("agent-access")).toHaveCount(0);
   await captureScreenshot(page, testInfo, "vault-item-own-vault-space");

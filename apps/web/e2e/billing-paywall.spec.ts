@@ -377,7 +377,7 @@ test("start a bigger tier's trial from the tiers layout", async ({ page }, testI
   await page.route("**/rpc/billing/status", (route) => route.fulfill({ json: { json: status } }));
   await page.reload();
   await expect(page.getByRole("heading", { name: "Max" })).toBeVisible();
-  await expect(page.getByText("A 2× more powerful computer for your bot")).toBeVisible();
+  await expect(page.getByText(ui("A 2× more powerful computer for your bot"))).toBeVisible();
   await expect(page.getByText("$49", { exact: true })).toBeVisible();
   await expect(page.getByRole("combobox", { name: "Monthly credits" })).toContainText(
     "$30 / month",
@@ -397,7 +397,7 @@ test("start a bigger tier's trial from the tiers layout", async ({ page }, testI
     page.waitForURL(/[?&]paid/),
     page.getByRole("button", { name: "Start Pro trial", exact: true }).click(),
   ]);
-  await expect(page.getByRole("heading", { name: "Choose how to use Rakazo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: ui("Choose how to use Rakazo") })).toBeVisible();
   expect(selected).toEqual({ funding: "byok", interval: "year", tier: "pro" });
 });
 

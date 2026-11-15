@@ -1,7 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { BLOCKED_ITEM_ANSWER } from "@rakazo/contracts";
-import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup } from "./helpers";
+import { activeBotId, captureScreenshot, completeOnboarding, rpc, signup, ui } from "./helpers";
 
 test("renders masked secret card and saves without putting the value in chat", async ({
   page,
@@ -85,7 +85,7 @@ test("renders masked secret card and saves without putting the value in chat", a
   );
   await secretField.fill(secretValue);
   await card.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(card.getByText(BLOCKED_ITEM_ANSWER, { exact: true })).toBeVisible();
+  await expect(card.getByText(ui(BLOCKED_ITEM_ANSWER), { exact: true })).toBeVisible();
   await captureScreenshot(page, testInfo, "secret-card-blocked");
   await page.unroute("**/rpc/threads/answer");
 

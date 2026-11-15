@@ -390,7 +390,7 @@ test("imports a Grok Bot export as a new bot", async ({ page }, testInfo) => {
     .getByRole("textbox", { name: "Paste the reply" })
     .fill(grokReply(grokBot, { name: "Wren", instructions: "Plan trips." }));
   await grok.getByRole("button", { name: "Continue" }).click();
-  await expect(grok.getByText("Which Bot?")).toBeVisible();
+  await expect(grok.getByText(ui("Which Bot?"))).toBeVisible();
   await captureScreenshot(page, testInfo, "agent-import-grok-choose-bot");
   await clickAndWaitForRpc(
     page,
