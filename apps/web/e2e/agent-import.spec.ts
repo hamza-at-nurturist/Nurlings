@@ -118,7 +118,7 @@ test("imports an OpenClaw folder and another assistant's document as new bots", 
   const choose = panel.getByTestId("agent-import-choose");
   await expect(choose.getByRole("heading")).toHaveText([
     "OpenClaw or Hermes",
-    "Grok Bot",
+    ui("Grok Bot"),
     "Another assistant",
   ]);
   await expect(choose.getByRole("button")).toHaveText([
