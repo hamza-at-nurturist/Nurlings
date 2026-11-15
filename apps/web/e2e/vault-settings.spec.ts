@@ -150,7 +150,7 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   await editor.getByRole("button", { name: "Save", exact: true }).click();
   await expect(editor).toHaveCount(0);
   await vault.getByText("api.example.test", { exact: true }).click();
-  await expect(detail.getByTestId("vault-item-access-detail")).toHaveText(ui("BotsBlock"));
+  await expect(detail.getByTestId("vault-item-access-detail")).toHaveText(`${ui("Bots")}Block`);
   await captureScreenshot(page, testInfo, "vault-item-access-detail");
 
   // A key every bot but one may use.
@@ -188,7 +188,9 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   await editor.getByRole("button", { name: "Save", exact: true }).click();
   await expect(editor).toHaveCount(0);
   await vault.getByText("none.example.test", { exact: true }).click();
-  await expect(detail.getByTestId("vault-item-access-detail")).toHaveText(ui("BotsNo bots"));
+  await expect(detail.getByTestId("vault-item-access-detail")).toHaveText(
+    `${ui("Bots")}${ui("No bots")}`,
+  );
   await captureScreenshot(page, testInfo, "vault-item-no-bots");
 
   // A login the user is asked about before each sign-in.
@@ -208,7 +210,7 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   await editor.getByRole("button", { name: "Save", exact: true }).click();
   await expect(editor).toHaveCount(0);
   await vault.getByText("ask.example.test", { exact: true }).click();
-  await expect(detail.getByTestId("vault-item-access-detail")).toHaveText(ui("BotsAsk first"));
+  await expect(detail.getByTestId("vault-item-access-detail")).toHaveText(`${ui("Bots")}Ask first`);
 
   // A server from before Block saves the item but drops the setting: the save finishes on the
   // item, which says so.
