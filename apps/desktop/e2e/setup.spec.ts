@@ -115,8 +115,8 @@ test("first run offers this computer and an existing instance, with no hosted ch
 
   await expect(setup.getByRole("heading", { name: `Welcome to ${brand.name}` })).toBeVisible();
   await expect(setup.getByText(brandText("Choose where Rakazo runs.", brand))).toBeVisible();
-  await expect(setup.getByText("This computer")).toBeVisible();
-  await expect(setup.getByText("Existing instance")).toBeVisible();
+  await expect(setup.getByText("This computer", { exact: true })).toBeVisible();
+  await expect(setup.getByText("Existing instance", { exact: true })).toBeVisible();
   await expect(setup.getByText(/Rakazo/)).toHaveCount(0);
   await expect(setup.getByRole("radio")).toHaveCount(2);
   await expect(setup.locator(".card")).toHaveCount(0);
