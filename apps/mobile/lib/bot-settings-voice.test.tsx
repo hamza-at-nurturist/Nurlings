@@ -621,7 +621,8 @@ describe("bot settings device voice menu", () => {
     expect(container.textContent).not.toContain("Shape");
   });
 
-  it("keeps a legacy set until explicitly switched, saves the choice, and reloads it", async () => {
+  // A Nurlings build offers one icon set, so the set menu is hidden (see SELECTABLE_BOT_AVATAR_SETS).
+  it.skip("keeps a legacy set until explicitly switched, saves the choice, and reloads it", async () => {
     await render();
     await act(async () =>
       container.querySelector<HTMLButtonElement>('[aria-label="Edit avatar"]')!.click(),
