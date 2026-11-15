@@ -112,7 +112,7 @@ test("saves a contact, a card billed to it, and a login from Settings, showing n
   await activityFailure.getByRole("button", { name: "Retry", exact: true }).click();
   await expect(activityFailure).toHaveCount(0);
   const activity = detail.getByRole("button", {
-    name: ui("Used 2h ago by Research bot"),
+    name: "Used 2h ago by Research bot",
     exact: true,
   });
   await expect(detail.getByText("•••• 4242", { exact: true })).toBeVisible();

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, openUserSettings, signup } from "./helpers";
 
 test("a ticket opens as a two-tab sheet on a phone", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -8,6 +8,14 @@ test("a ticket opens as a two-tab sheet on a phone", async ({ page }, testInfo) 
   const reply = "Use the county records if Redfin blocks you.";
   await signup(page, `ticket-mobile-${stamp}@rakazo.test`, "password12", "Phone QA");
   await completeOnboarding(page);
+  // The board is a per-account Lab.
+  await page.getByTestId("user-menu-trigger").click();
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  const settings = await openUserSettings(page, "labs");
+  await settings.getByTestId("lab-board-toggle").click();
+  await expect(settings.getByTestId("lab-board-toggle")).toBeChecked();
+  await settings.getByRole("button", { name: "Close user settings" }).click();
+  await expect(settings).toBeHidden();
   await page.getByTestId("user-menu-trigger").click();
   await page.getByRole("button", { name: "Board", exact: true }).click();
   await expect(page).toHaveURL(/\/app\/board$/);
