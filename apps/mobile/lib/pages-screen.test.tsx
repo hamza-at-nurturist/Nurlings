@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { act, createElement, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
+import { branded } from "./test-brand";
 
 type Button = { text: string; onPress?: (value?: string) => void };
 type Summary = {
@@ -86,12 +87,6 @@ vi.mock("../components/native-action-button", () => ({
 }));
 vi.mock("../components/native-symbol", () => ({ NativeSymbol: () => null }));
 vi.mock("./activity", () => ({ formatActivityRelativeTime: () => "now" }));
-vi.mock("./i18n", () => ({
-  useI18n: () => ({
-    t: (text: string, values?: Record<string, string>) =>
-      text.replace(/\{(\w+)\}/g, (_, key: string) => values?.[key] ?? key),
-  }),
-}));
 vi.mock("./native", () => ({
   native: {},
   useMobileTokens: () => ({}),
@@ -99,6 +94,9 @@ vi.mock("./native", () => ({
 }));
 vi.mock("./session", () => ({ registerSessionDiskCache: () => undefined }));
 vi.mock("./page-runtime", () => ({ loadPageRuntime: async () => "" }));
+vi.mock("./api-server", () => ({}));
+vi.mock("./api-auth", () => ({}));
+vi.mock("./api-live", () => ({}));
 vi.mock("./api", () => ({
   rpc: vi.fn(async (proc: string, input: Record<string, string>) => {
     const page = host.server.find((each) => each.id === input.pageId);
@@ -212,7 +210,7 @@ it("shows what the server has after a rename, pin or delete whose answer was los
 
   await act(async () => host.menus.get("Launch")!.press("delete"));
   await act(async () => host.alert!.find((each) => each.text === "Delete")!.onPress?.());
-  expect(rows(container)).toEqual(["Pages this bot builds for you appear here."]);
+  expect(rows(container)).toEqual([branded("Pages this bot builds for you appear here.")]);
   host.loseAnswer = false;
   await act(async () => root.unmount());
 });

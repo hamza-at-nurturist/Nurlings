@@ -4,25 +4,25 @@
 
 `apps/web/src/components/board/TicketModal/`:
 
-| File | Role |
-|---|---|
-| `TicketModal.tsx` | Keeps state, saving and drag-drop; renders `WideTicket` or `NarrowTicket` from `useNarrowModal()` |
-| `NarrowTicket.tsx` (new) | Full-screen sheet: header, `Tabs`, swipe, pinned Approve and reply box |
-| `TicketPane.tsx` (new) | Title, properties, description and files, shared by both layouts (lifted out of `TicketModal.tsx`) |
-| `LatestActivity.tsx` (new) | The one-line newest-comment row |
-| `ClampedDescription.tsx` (new) | Three-line clamp, `Show more`, tap to edit |
-| `TicketImage.tsx` (new) | Square thumbnail via `useArtifactImage` and the full-screen viewer `Dialog` |
-| `use-narrow-modal.ts` (new) | `matchMedia("(max-width: 1023px)")` through `useSyncExternalStore`; false where `matchMedia` is missing (jsdom) |
-| `use-swipe.ts` (new) | Horizontal swipe on touch: 60px and twice the vertical travel; ignored when it starts in a field |
-| `use-visual-viewport.ts` (new) | The visual viewport's height and top offset, for the keyboard |
-| `activity-seen.ts` (new) | Last-viewed per ticket in `localStorage`, pruned; pure `unseenCount(items, seenAt, viewerId)` |
-| `Properties.tsx` | Gains `layout: "grid" \| "chips"`; same menus, chip triggers and menu rows 44px |
-| `DatePicker.tsx` | Gains `chip`: the 44px pill, naming itself ("Start", "Due") while empty |
-| `chip.ts` (new) | The chip class both share |
-| `use-ticket-activity.ts` | Also returns `loaded`, so the new-activity count waits for the first fetch |
-| `TicketFiles.tsx` | Splits images (`image/png`, `image/jpeg`, `image/gif`, `image/webp`) into the thumbnail grid; `narrow` makes other cards full width |
-| `TicketFileCard.tsx` | Accepts a `className` for full width |
-| `ReplyBox.tsx` | Gains `touch`: 16px text, 44px attach and send |
+| File                           | Role                                                                                                                                |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `TicketModal.tsx`              | Keeps state, saving and drag-drop; renders `WideTicket` or `NarrowTicket` from `useNarrowModal()`                                   |
+| `NarrowTicket.tsx` (new)       | Full-screen sheet: header, `Tabs`, swipe, pinned Approve and reply box                                                              |
+| `TicketPane.tsx` (new)         | Title, properties, description and files, shared by both layouts (lifted out of `TicketModal.tsx`)                                  |
+| `LatestActivity.tsx` (new)     | The one-line newest-comment row                                                                                                     |
+| `ClampedDescription.tsx` (new) | Three-line clamp, `Show more`, tap to edit                                                                                          |
+| `TicketImage.tsx` (new)        | Square thumbnail via `useArtifactImage` and the full-screen viewer `Dialog`                                                         |
+| `use-narrow-modal.ts` (new)    | `matchMedia("(max-width: 1023px)")` through `useSyncExternalStore`; false where `matchMedia` is missing (jsdom)                     |
+| `use-swipe.ts` (new)           | Horizontal swipe on touch: 60px and twice the vertical travel; ignored when it starts in a field                                    |
+| `use-visual-viewport.ts` (new) | The visual viewport's height and top offset, for the keyboard                                                                       |
+| `activity-seen.ts` (new)       | Last-viewed per ticket in `localStorage`, pruned; pure `unseenCount(items, seenAt, viewerId)`                                       |
+| `Properties.tsx`               | Gains `layout: "grid" \| "chips"`; same menus, chip triggers and menu rows 44px                                                     |
+| `DatePicker.tsx`               | Gains `chip`: the 44px pill, naming itself ("Start", "Due") while empty                                                             |
+| `chip.ts` (new)                | The chip class both share                                                                                                           |
+| `use-ticket-activity.ts`       | Also returns `loaded`, so the new-activity count waits for the first fetch                                                          |
+| `TicketFiles.tsx`              | Splits images (`image/png`, `image/jpeg`, `image/gif`, `image/webp`) into the thumbnail grid; `narrow` makes other cards full width |
+| `TicketFileCard.tsx`           | Accepts a `className` for full width                                                                                                |
+| `ReplyBox.tsx`                 | Gains `touch`: 16px text, 44px attach and send                                                                                      |
 
 `ActivityFeed.tsx`, `activity.ts` and `mentions` are unchanged. Tests sit next to each
 file.

@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 
 import type { BotAvatarSet } from "@rakazo/contracts";
-import { ORGANIC_AVATAR_LOOKS } from "@rakazo/core";
+import {
+  ORGANIC_AVATAR_LOOKS,
+  ORGANIC_PREVIEW_IDENTITIES,
+  organicAvatarFamily,
+} from "@rakazo/core";
 import type { ReactNode } from "react";
 import { act } from "react";
 import type { Root } from "react-dom/client";
@@ -144,32 +148,18 @@ describe("CreateBotDialog", () => {
     expect(ORGANIC_AVATAR_LOOKS).toContain(family);
   });
 
-  it("pins an organic family when its chip is picked", async () => {
+  it("sends the organic family of the body picked from the previews", async () => {
     const onCreate = vi.fn(async (_input: CreateBotDialogInput) => undefined);
     await render(onCreate);
     await click(button("Color #FF781C"));
-    // Shape 5 is the first pinned family (Chief and the three original bodies come first).
+    // Chief and the three original bodies come first; the ten organic previews follow.
     await click(button("Shape 5"));
     await typeName("Scout");
     await click(button("Create"));
-    expect(onCreate).toHaveBeenLastCalledWith({
-      name: "Scout",
-      color: "#FF781C::shape_12",
-    });
+    const input = onCreate.mock.lastCall![0];
+    expect(input).toMatchObject({ name: "Scout", color: "#FF781C" });
+    expect(input.avatarFamily).toBe(organicAvatarFamily(ORGANIC_PREVIEW_IDENTITIES[0]!));
   });
-
-  it("returns to the preview body when Default is picked after a chip", async () => {
-    const onCreate = vi.fn(async (_input: CreateBotDialogInput) => undefined);
-    await render(onCreate);
-    await click(button("Color #FF781C"));
-    await click(button("Shape 5"));
-    await click(button("Default"));
-    await typeName("Scout");
-    await click(button("Create"));
-    expect(onCreate.mock.lastCall?.[0]).toMatchObject({ color: "#FF781C" });
-    expect(onCreate.mock.lastCall?.[0]).toHaveProperty("avatarFamily");
-  });
-
   it("sends an original body without an organic family", async () => {
     const onCreate = vi.fn(async (_input: CreateBotDialogInput) => undefined);
     await render(onCreate);

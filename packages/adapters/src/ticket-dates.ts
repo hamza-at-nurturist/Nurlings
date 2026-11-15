@@ -1,7 +1,9 @@
 import type { JobPublisher, NotificationProvider } from "@rakazo/adapter-kit";
 import { ticketDatesJob } from "@rakazo/adapter-kit";
-import type { TicketDateKind, TicketStatus } from "@rakazo/contracts";
+import type { LabFeature, TicketDateKind, TicketStatus } from "@rakazo/contracts";
 import {
+  hasLab,
+  resolveLabs,
   TICKET_START_AFTER_DUE_ERROR,
   TicketStatusSchema,
   ticketLocalDateTime,
@@ -220,12 +222,11 @@ export async function runTicketDates(
   deps: {
     prisma: PrismaClient;
     jobs: JobPublisher;
-    ticketBoardEnabled?: boolean;
+    deploymentLabs?: readonly LabFeature[];
     notifications?: () => NotificationProvider | undefined;
   },
   input: { ticketId: string },
 ): Promise<void> {
-  if (!deps.ticketBoardEnabled) return;
   const now = new Date();
   const cutoff = new Date(now.getTime() + CLOCK_SKEW_MS);
   const outcome = await deps.prisma.$transaction(async (tx) => {
@@ -238,7 +239,13 @@ export async function runTicketDates(
       },
     });
     if (!row?.scheduleAt || row.scheduleAt > cutoff) return null;
-    const open = Boolean(row.assigneeBotId) && isTicketDateOpen(row.status);
+    // The board is a per-user lab: a reminder for a ticket whose owner has it off stays quiet.
+    const ownerId = row.assigneeBot?.userId;
+    const owner = ownerId
+      ? await tx.user.findUnique({ where: { id: ownerId }, select: { labs: true } })
+      : null;
+    const boardOn = !ownerId || hasLab(resolveLabs(owner?.labs, deps.deploymentLabs), "board");
+    const open = boardOn && Boolean(row.assigneeBotId) && isTicketDateOpen(row.status);
     const data: Partial<DateState> = {};
     let wake: "start" | "due" | null = null;
     let overdue = false;

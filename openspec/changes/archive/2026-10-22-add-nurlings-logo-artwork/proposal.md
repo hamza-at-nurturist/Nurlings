@@ -39,10 +39,12 @@ favicon, splash screen and in-app logo instead of a temporary stand-in.
 ## Capabilities
 
 ### New Capabilities
+
 - `logo-artwork`: the Nurlings logo artwork as the single source of every icon and in-app mark, and
   the rules the generated files must meet.
 
 ### Modified Capabilities
+
 <!-- None. The brand configuration and app identity specs are archived separately; this change adds
      a capability and edits no existing requirement. -->
 

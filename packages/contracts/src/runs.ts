@@ -11,6 +11,9 @@ export const COMPUTER_ALLOWANCE_USED_ERROR = "No computer hours left.";
 export const COMPUTER_PROVIDER_UNAVAILABLE_ERROR =
   "Computers are unavailable right now. Try again later.";
 
+/** A running computer did not answer a request; its work may or may not have happened. */
+export const COMPUTER_UNRESPONSIVE_ERROR = "The computer stopped responding. Try again.";
+
 /** Whether an error says the computer hours are spent, which only a plan change can fix. */
 export function isComputerAllowanceUsed(message: string | null | undefined): boolean {
   return message?.startsWith(COMPUTER_ALLOWANCE_USED_ERROR) ?? false;
@@ -33,6 +36,8 @@ export const RUN_TRIGGERS = [
   "media",
   "created",
   "tickets",
+  "helper",
+  "helper_result",
 ] as const;
 export const RunTriggerSchema = z.enum(RUN_TRIGGERS);
 export type RunTrigger = z.infer<typeof RunTriggerSchema>;

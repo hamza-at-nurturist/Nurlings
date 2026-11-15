@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { selectedSpaceId, selectSpace } from "../api";
+import { selectedSpaceId } from "../api";
 import { threadSpaceRequest, threadSpaceSwitchResult } from "../notification-open";
+import { selectSpaceAcrossOrganizations } from "../organizations";
 
 /**
  * Moves the app into the space a notification belongs to before its ticket loads, with the same
@@ -23,7 +24,7 @@ export function useTicketSpace(
     }
     let cancelled = false;
     const requested = request.spaceId;
-    void selectSpace(requested).then((switched) => {
+    void selectSpaceAcrossOrganizations(requested).then((switched) => {
       if (cancelled) return;
       if (threadSpaceSwitchResult(requested, switched, selectedSpaceId()) === "ready") {
         setActive(requested);

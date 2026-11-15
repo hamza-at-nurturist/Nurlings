@@ -44,8 +44,8 @@ not an over-the-air update.
 
 One string, an accessible name only; nothing visible is added besides the ⋯ glyph.
 
-| Copy | Where | Why it is needed / why not removable |
-|---|---|---|
+| Copy            | Where                                     | Why it is needed / why not removable                                                                             |
+| --------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `More` (reused) | Accessible name of the ⋯ button on a card | A glyph-only control needs a name for screen readers. Short on purpose. Not visible, so nothing to reveal later. |
 
 The drag has no visible text: no hint, no "drop here", no empty-column prose. `More` already
@@ -53,11 +53,11 @@ exists in all five mobile catalogs, so no locale file changes.
 
 ### Native-only, and what CI covers
 
-| Part | Covered by |
-|---|---|
-| Drop target from position, edge-scroll speed, status validity | Unit tests (CI): core for validity, `apps/mobile/lib/nurlings-board` for geometry |
-| Card renders the ⋯ button with its name; menu actions unchanged | Existing and updated mobile render tests (CI) |
-| Type correctness | `pnpm --filter @rakazo/mobile check` (CI) |
+| Part                                                                                              | Covered by                                                                                                                    |
+| ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Drop target from position, edge-scroll speed, status validity                                     | Unit tests (CI): core for validity, `apps/mobile/lib/nurlings-board` for geometry                                             |
+| Card renders the ⋯ button with its name; menu actions unchanged                                   | Existing and updated mobile render tests (CI)                                                                                 |
+| Type correctness                                                                                  | `pnpm --filter @rakazo/mobile check` (CI)                                                                                     |
 | Lift, floating copy, auto-scroll feel, highlight, haptic, pager and list not fighting the gesture | Not covered. Needs a device or emulator; CI cannot capture it. Stated in the PR; tested by the maintainer on a preview build. |
 
 ### Upstream merge safety

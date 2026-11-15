@@ -55,10 +55,6 @@ vi.mock("../appearance", () => ({
   mobileTokens: () => ({}),
   resolveMobileAppearance: () => "light",
 }));
-vi.mock("../i18n", () => {
-  const i18n = { t: (text: string) => text, locale: "en" };
-  return { useI18n: () => i18n };
-});
 vi.mock("../native", () => ({ native: {}, useThemedStyles: () => ({}) }));
 vi.mock("../material-icons", () => ({ materialIcons: {} }));
 vi.mock("./enabled", () => ({ useNurlingsBoardEnabled: () => mocks.enabled.value }));
@@ -157,7 +153,7 @@ describe("entries open the Nurlings Board", () => {
   it("opens from Settings, behind the same flag", () => {
     const account = readFileSync(path.join(mobileRoot, "app/(settings)/account.tsx"), "utf8");
     expect(account.replace(/\s+/g, " ")).toContain(
-      `me?.ticketBoardEnabled ? [{ title: t("Board"), href: "${NURLINGS_BOARD_PATH}" } as const] : []`,
+      `title: t\`Board\`, href: "${NURLINGS_BOARD_PATH}",`,
     );
   });
 

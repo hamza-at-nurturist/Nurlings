@@ -49,8 +49,8 @@ changes at all.
 
 New files wherever possible. Edits to existing upstream files:
 
-| File | Edit |
-|---|---|
+| File                           | Edit                                                           |
+| ------------------------------ | -------------------------------------------------------------- |
 | `apps/web/src/pages/Shell.tsx` | one hook call (a few lines) next to the other computer effects |
 
 New: `apps/web/src/lib/computer-boot-watch.ts` and its test.

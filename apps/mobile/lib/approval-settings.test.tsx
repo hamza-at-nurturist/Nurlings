@@ -34,11 +34,10 @@ vi.mock("./native", () => ({
   native: {},
   useResolvedAppearance: () => "light",
 }));
-vi.mock("./i18n", () => {
-  const i18n = { t: (text: string) => text };
-  return { useI18n: () => i18n };
-});
 vi.mock("./user-error", () => ({ errorText: (_: unknown, fallback: string) => fallback }));
+vi.mock("./api-server", () => ({}));
+vi.mock("./api-auth", () => ({}));
+vi.mock("./api-live", () => ({}));
 vi.mock("./api", () => ({
   rpc: state.rpc,
   captureApiRequestContext: async (spaceId: string) => ({ headers: { space: spaceId } }),

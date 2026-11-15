@@ -1,4 +1,5 @@
-import { MenuView } from "@expo/ui/community/menu";
+import { ph } from "@lingui/core/macro";
+import { useLingui } from "@lingui/react/macro";
 import type {
   CapabilityInstall,
   Connection,
@@ -7,14 +8,8 @@ import type {
   McpServerConnection,
   McpSourcePreset,
   PluginMarketplaceEntry,
-  RpcOutput,
 } from "@rakazo/contracts";
-import {
-  CONNECTION_LABEL_MAX_LENGTH,
-  mcpServerConnection,
-  mcpServerNeedsSignIn,
-  SUBMIT_PLUGIN_URL,
-} from "@rakazo/contracts";
+import { mcpServerConnection, mcpServerNeedsSignIn, SUBMIT_PLUGIN_URL } from "@rakazo/contracts";
 import type { PluginCategory } from "@rakazo/core";
 import {
   buildFeaturedConnectorTiles,
@@ -22,9 +17,7 @@ import {
   catalogItemAccounts,
   catalogItemKey,
   connectCatalogItem,
-  EMPTY_PLUGIN_CATALOG_MESSAGE,
   filterConnectionCatalogItems,
-  humanizeToolName,
   integrationCatalogsReady,
   isCatalogItemConnected,
   matchesWordPrefixes,
@@ -35,21 +28,29 @@ import type { NativeStackNavigationOptions } from "expo-router";
 import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   AppState,
   Linking,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import type {
+  AddCustomOption,
+  SourceAuth,
+  SourceKind,
+} from "../../components/add-custom-integration";
+import { AddCustomForm, AddCustomMenu } from "../../components/add-custom-integration";
 import { BotTemplateIcon } from "../../components/bot-template-icon";
 import { ConnectorIcon } from "../../components/connector-icon";
+import type { ConnectionTool } from "../../components/integration-detail";
+import { IntegrationDetail } from "../../components/integration-detail";
+import { PLUGIN_PAGE_SIZE, PluginSection } from "../../components/integration-plugins";
+import { createIntegrationsStyles, LOGO_SIZE } from "../../components/integrations-styles";
 import { MenuPicker } from "../../components/menu-picker";
 import { NativeActionButton } from "../../components/native-action-button";
 import { NativeSymbol } from "../../components/native-symbol";
@@ -57,7 +58,6 @@ import { PluginIcon } from "../../components/plugin-icon";
 import { Chevron } from "../../components/row-accessories";
 import { rpc } from "../../lib/api";
 import { mobileTokens } from "../../lib/appearance";
-import { useI18n } from "../../lib/i18n";
 import type { IntegrationsCacheScope, IntegrationsSnapshot } from "../../lib/integrations-cache";
 import {
   integrationsCacheScope,
@@ -67,7 +67,7 @@ import {
   writeIntegrationsCache,
 } from "../../lib/integrations-cache";
 import { loadLastBotId } from "../../lib/last-bot";
-import { native, useResolvedAppearance, useThemedStyles } from "../../lib/native";
+import { native, useThemedStyles } from "../../lib/native";
 import { iosAtLeast } from "../../lib/native-controls";
 import type { PluginParams } from "../../lib/plugin-marketplace";
 import {
@@ -78,18 +78,9 @@ import {
   managedPluginParams,
   pluginCategories,
   pluginParams,
-  pluginSite,
 } from "../../lib/plugin-marketplace";
 import { useSideInsets } from "../../lib/side-insets";
 import { errorText } from "../../lib/user-error";
-
-type SourceAuth = "none" | "bearer" | "header" | "oauth";
-type SourceKind = "mcp" | "api" | "graphql";
-type ConnectionTool = RpcOutput<"connections/tools">[number];
-
-const LOGO_SIZE = 32;
-const SECTION_SIZE = 4;
-const PLUGIN_PAGE_SIZE = 20;
 
 export default function Integrations() {
   const sideInsets = useSideInsets();
@@ -97,20 +88,19 @@ export default function Integrations() {
   // A merged brand's plugin page sends people back here to manage the app's accounts.
   const { app: appToOpen } = useLocalSearchParams<{ app?: string }>();
   const navigation = useNavigation();
-  const scheme = useResolvedAppearance();
   const styles = useThemedStyles(createIntegrationsStyles);
-  const { t } = useI18n();
+  const { t } = useLingui();
   const categoryLabels: Record<PluginCategory, string> = {
-    productivity: t("Productivity"),
-    communication: t("Communication"),
-    sales: t("Sales & CRM"),
-    marketing: t("Marketing"),
-    finance: t("Finance"),
-    people: t("Recruiting & HR"),
-    design: t("Design"),
-    code: t("Developer"),
-    data: t("Data"),
-    ops: t("Security & Ops"),
+    productivity: t`Productivity`,
+    communication: t`Communication`,
+    sales: t`Sales & CRM`,
+    marketing: t`Marketing`,
+    finance: t`Finance`,
+    people: t`Recruiting & HR`,
+    design: t`Design`,
+    code: t`Developer`,
+    data: t`Data`,
+    ops: t`Security & Ops`,
   };
   const categoryLabel = (name: string) => categoryLabels[name as PluginCategory] ?? name;
   const { width } = useWindowDimensions();
@@ -349,7 +339,7 @@ export default function Integrations() {
           isIntegrationsScopeCurrent(scope) &&
           sourceGeneration === sourcesGeneration.current
         )
-          setMcpError(errorText(reason, t("Could not load MCP servers")));
+          setMcpError(errorText(reason, t`Could not load MCP servers`));
       });
     void rpc("capabilities/list")
       .then((installs) => {
@@ -414,17 +404,18 @@ export default function Integrations() {
     writeIntegrationsCache(scope, next);
   }
 
-  async function retryRefresh() {
+  async function retryRefresh(isCurrent?: () => boolean) {
     const focus = focusGeneration.current;
     try {
       await refresh();
     } catch (reason) {
       if (
+        (!isCurrent || isCurrent()) &&
         mounted.current &&
         focus === focusGeneration.current &&
         (!cacheScope.current || isIntegrationsScopeCurrent(cacheScope.current))
       ) {
-        setCatalogError(errorText(reason, t("Could not load integrations")));
+        setCatalogError(errorText(reason, t`Could not load integrations`));
       }
     }
   }
@@ -514,55 +505,20 @@ export default function Integrations() {
       : { source: install.source, installedSource: install.source, name: install.name };
   }
 
-  function renderPluginRow(entry: PluginMarketplaceEntry) {
-    const installed = installedSources.has(entry.installedSource);
-    return (
-      <Pressable
-        key={entry.id}
-        accessibilityRole="button"
-        accessibilityLabel={entry.displayName}
-        onPress={() => openPlugin(pluginParams(entry))}
-        style={({ pressed }) => [
-          styles.row,
-          catalogColumns === 2 ? styles.catalogCell : null,
-          pressed && styles.pressed,
-        ]}
-      >
-        <PluginIcon
-          logo={entry.logo}
-          name={entry.displayName}
-          site={pluginSite(entry)}
-          size={LOGO_SIZE}
-        />
-        <View style={styles.grow}>
-          <Text numberOfLines={1} style={styles.title}>
-            {entry.displayName}
-          </Text>
-          {entry.description ? (
-            <Text numberOfLines={1} style={styles.secondary}>
-              {entry.description}
-            </Text>
-          ) : null}
-        </View>
-        {installed ? <Text style={styles.secondary}>{t("Added")}</Text> : <Chevron />}
-      </Pressable>
-    );
-  }
-
   function serverStatus(state: McpServerConnection): string {
     switch (state) {
       case "disabled":
-        return t("Disabled");
+        return t`Disabled`;
       case "needs_client":
-        return t("Needs an OAuth client ID");
+        return t`Needs an OAuth client ID`;
       case "needs_sign_in":
-        return t("Needs sign-in");
+        return t`Needs sign-in`;
       case "not_working":
-        return t("Not working");
+        return t`Not working`;
       case "connected":
-        return t("Connected");
+        return t`Connected`;
       case "not_connected":
-        return t("Not connected");
+        return t`Not connected`;
     }
   }
 
@@ -589,7 +545,7 @@ export default function Integrations() {
         {signIn ? (
           <NativeActionButton
             fill={false}
-            label={t("Sign in")}
+            label={t`Sign in`}
             onPress={() => openPlugin(params)}
             prominence="secondary"
           />
@@ -642,7 +598,7 @@ export default function Integrations() {
         state !== "needs_client" &&
         (server.oauthStatus === "reconnect" || server.id === oauthServerId) ? (
           <NativeActionButton
-            label={server.oauthStatus === "reconnect" ? t("Reconnect") : t("Connect")}
+            label={server.oauthStatus === "reconnect" ? t`Reconnect` : t`Connect`}
             fill={false}
             busy={pending === `oauth:${server.id}`}
             onPress={() => void authorizeMcp(server.id)}
@@ -659,12 +615,12 @@ export default function Integrations() {
       <>
         {apps || mcpError ? (
           <View testID="connected-apps" style={styles.catalogStack}>
-            <Text style={styles.section}>{t("Apps")}</Text>
+            <Text style={styles.section}>{t`Apps`}</Text>
             {mcpError ? (
               <View>
                 <Text style={styles.error}>{mcpError}</Text>
                 <NativeActionButton
-                  label={t("Retry")}
+                  label={t`Retry`}
                   fill={false}
                   onPress={() => void retryRefresh()}
                   prominence="secondary"
@@ -676,8 +632,8 @@ export default function Integrations() {
               return renderInstalledPlugin(
                 install,
                 servers.length === 1
-                  ? t("1 connector")
-                  : t("{count} connectors", { count: servers.length }),
+                  ? t`1 connector`
+                  : t`${ph({ count: servers.length })} connectors`,
                 servers.some(mcpServerNeedsSignIn),
               );
             })}
@@ -699,7 +655,7 @@ export default function Integrations() {
                 </View>
                 <NativeActionButton
                   fill={false}
-                  label={pending === source.id ? t("Removing…") : t("Remove")}
+                  label={pending === source.id ? t`Removing…` : t`Remove`}
                   onPress={() => void removeSource(source)}
                   prominence="destructive"
                 />
@@ -707,91 +663,6 @@ export default function Integrations() {
             ))}
           </View>
         ) : null}
-      </>
-    );
-  }
-
-  function renderPlugins() {
-    if (pluginsState === "loading") {
-      return catalogReady ? (
-        <ActivityIndicator color={native.secondaryLabel} accessibilityLabel={t("Loading…")} />
-      ) : null;
-    }
-    const failed =
-      pluginsState === "partial" ? (
-        <View style={styles.catalogStack}>
-          <Text style={styles.secondary}>{t("Some plugins could not be loaded.")}</Text>
-          <NativeActionButton
-            label={t("Retry")}
-            fill={false}
-            onPress={() => {
-              setPluginsState("loading");
-              void retryRefresh();
-            }}
-            prominence="secondary"
-          />
-        </View>
-      ) : null;
-    if (filtering) {
-      return (
-        <>
-          {failed}
-          {pluginMatches.length || brandMatches.length ? (
-            <View
-              testID="plugin-results"
-              style={catalogColumns === 2 ? styles.catalogGrid : styles.catalogStack}
-            >
-              {brandMatches.map(({ item }) => renderCatalogTile(item, item.name))}
-              {pluginMatches.slice(0, pluginCount).map(renderPluginRow)}
-            </View>
-          ) : null}
-          {pluginCount < pluginMatches.length ? (
-            <NativeActionButton
-              label={t("Show more")}
-              onPress={() => setPluginCount((count) => count + PLUGIN_PAGE_SIZE)}
-              prominence="secondary"
-            />
-          ) : null}
-        </>
-      );
-    }
-    const uncategorized = plugins.filter((entry) => !entry.category);
-    const sections: Array<[string, PluginMarketplaceEntry[]]> = [
-      ...categories.map((name): [string, PluginMarketplaceEntry[]] => [
-        name,
-        plugins.filter((entry) => entry.category === name),
-      ]),
-      ...(uncategorized.length
-        ? [[OTHER_PLUGINS, uncategorized] as [string, PluginMarketplaceEntry[]]]
-        : []),
-    ].filter(([, entries]) => entries.length);
-    return (
-      <>
-        {failed}
-        {sections.map(([name, entries]) => (
-          <View key={name} testID="plugin-section" style={styles.catalogStack}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>
-                {name === OTHER_PLUGINS ? t("More") : categoryLabel(name)}
-              </Text>
-              {entries.length > SECTION_SIZE ? (
-                <Pressable
-                  accessibilityRole="button"
-                  hitSlop={8}
-                  onPress={() => {
-                    setCategory(name);
-                    setPluginCount(PLUGIN_PAGE_SIZE);
-                  }}
-                >
-                  <Text style={styles.link}>{t("View all")}</Text>
-                </Pressable>
-              ) : null}
-            </View>
-            <View style={catalogColumns === 2 ? styles.catalogGrid : styles.catalogStack}>
-              {entries.slice(0, SECTION_SIZE).map(renderPluginRow)}
-            </View>
-          </View>
-        ))}
       </>
     );
   }
@@ -856,17 +727,17 @@ export default function Integrations() {
       if (result.status === "connected") {
         if (result.row) updateAccount(result.row);
         void notifyAppConnected(item, isCurrent);
-        await refresh();
+        await retryRefresh(isCurrent);
         if (isCurrent()) setToolsTick((tick) => tick + 1);
         return;
       }
       Alert.alert(
-        t("Connection pending"),
-        t("Finish connecting in the browser, then refresh this page."),
+        t`Connection pending`,
+        t`Finish connecting in the browser, then refresh this page.`,
       );
     } catch (reason) {
       if (controller.signal.aborted || !isCurrent()) return;
-      setCatalogError(errorText(reason, t("Could not connect")));
+      setCatalogError(errorText(reason, t`Could not connect`));
     } finally {
       if (connectionAttempt.current === controller) {
         connectionAttempt.current = null;
@@ -884,11 +755,11 @@ export default function Integrations() {
       await rpc("connections/revoke", { connectionId: row.id });
       if (!isCurrent()) return;
       updateAccount({ ...row, status: "revoked" });
-      await refresh();
+      await retryRefresh(isCurrent);
       if (isCurrent()) setToolsTick((tick) => tick + 1);
     } catch (reason) {
       if (!isCurrent()) return;
-      setCatalogError(errorText(reason, t("Could not revoke connection")));
+      setCatalogError(errorText(reason, t`Could not revoke connection`));
     } finally {
       if (isCurrent()) setPending(null);
     }
@@ -911,7 +782,7 @@ export default function Integrations() {
       setLabelDrafts((current) => ({ ...current, [row.id]: updated.displayName }));
     } catch (reason) {
       if (!isCurrent()) return;
-      setCatalogError(errorText(reason, t("Could not rename connection")));
+      setCatalogError(errorText(reason, t`Could not rename connection`));
     } finally {
       if (isCurrent()) setPending(null);
     }
@@ -934,12 +805,12 @@ export default function Integrations() {
         if (!isCurrent()) return;
         updateAccount({ ...row, status: "revoked" });
       }
-      await refresh();
+      await retryRefresh(isCurrent);
       if (isCurrent()) closeDetail();
     } catch (reason) {
       if (!isCurrent()) return;
-      setCatalogError(errorText(reason, t("Could not revoke connection")));
       await refresh().catch(() => undefined);
+      if (isCurrent()) setCatalogError(errorText(reason, t`Could not revoke connection`));
     } finally {
       if (isCurrent()) setPending(null);
     }
@@ -973,7 +844,7 @@ export default function Integrations() {
         await refresh();
       }
     } catch (reason) {
-      if (isCurrent()) setMcpError(errorText(reason, t("Could not start MCP OAuth")));
+      if (isCurrent()) setMcpError(errorText(reason, t`Could not start MCP OAuth`));
     } finally {
       if (isCurrent()) setPending(null);
     }
@@ -987,7 +858,7 @@ export default function Integrations() {
     setSourceError(null);
     const displayName =
       name.trim() ||
-      (sourcePreset?.name ?? (sourceKind === "graphql" ? "GraphQL" : t("Custom connector")));
+      (sourcePreset?.name ?? (sourceKind === "graphql" ? "GraphQL" : t`Custom connector`));
     const auth =
       sourceAuth === "header"
         ? { type: "header", name: authHeader.trim() }
@@ -1025,7 +896,7 @@ export default function Integrations() {
       await refresh();
       if (created) await authorizeMcp(created.id);
     } catch (reason) {
-      if (isCurrent()) setSourceError(errorText(reason, t("Could not add source")));
+      if (isCurrent()) setSourceError(errorText(reason, t`Could not add source`));
     } finally {
       if (isCurrent()) setPending(null);
     }
@@ -1038,7 +909,7 @@ export default function Integrations() {
       await rpc("capabilities/remove", { id: source.id });
       setSources((current) => current.filter((item) => item.id !== source.id));
     } catch (reason) {
-      setSourceError(errorText(reason, t("Could not remove source")));
+      setSourceError(errorText(reason, t`Could not remove source`));
     } finally {
       setPending(null);
     }
@@ -1051,10 +922,10 @@ export default function Integrations() {
     if (connected) {
       return (
         <NativeActionButton
-          accessibilityLabel={t("Added")}
+          accessibilityLabel={t`Added`}
           disabled={connecting}
           fill={false}
-          label={connecting ? t("Working…") : t("Added")}
+          label={connecting ? t`Working…` : t`Added`}
           onPress={() => openDetail(item)}
           prominence="secondary"
         />
@@ -1062,10 +933,10 @@ export default function Integrations() {
     }
     return (
       <NativeActionButton
-        accessibilityLabel={t("Add {name}", { name: label })}
+        accessibilityLabel={t`Add ${ph({ name: label })}`}
         disabled={connecting}
         fill={false}
-        label={connecting ? t("Working…") : t("Add")}
+        label={connecting ? t`Working…` : t`Add`}
         onPress={() => void connect(item)}
         prominence="secondary"
       />
@@ -1108,120 +979,9 @@ export default function Integrations() {
     );
   }
 
-  function renderDetail(item: ConnectionCatalogItem) {
-    const accounts = accountsFor(item);
-    const key = catalogItemKey(item);
-    const connecting = pending === key;
-    const uninstalling = pending === `uninstall:${key}`;
-    const toolCount = tools.length;
-
-    return (
-      <View style={styles.detail}>
-        <View style={styles.detailHeader}>
-          <View style={styles.detailTitleRow}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("Back")}
-              onPress={closeDetail}
-              style={styles.backButton}
-            >
-              <Text style={styles.link}>{t("Back")}</Text>
-            </Pressable>
-            <ConnectorIcon logo={item.logo} name={item.name} size={LOGO_SIZE} />
-            <Text numberOfLines={1} style={styles.detailTitle}>
-              {item.name}
-            </Text>
-          </View>
-          <NativeActionButton
-            accessibilityLabel={t("Uninstall")}
-            disabled={uninstalling || connecting}
-            fill={false}
-            label={uninstalling ? t("Working…") : t("Uninstall")}
-            onPress={() => void uninstall(item)}
-            prominence="destructive"
-          />
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.section}>{t("Accounts")}</Text>
-          {accounts.map((row) => (
-            <View key={row.id} style={styles.accountRow}>
-              <TextInput
-                value={labelDrafts[row.id] ?? row.displayName}
-                maxLength={CONNECTION_LABEL_MAX_LENGTH}
-                onChangeText={(value) =>
-                  setLabelDrafts((current) => ({ ...current, [row.id]: value }))
-                }
-                onEndEditing={() => void renameAccount(row)}
-                accessibilityLabel={t("Account label")}
-                style={styles.accountLabel}
-              />
-              <NativeActionButton
-                accessibilityLabel={t("Remove {name}", { name: row.displayName })}
-                disabled={pending === row.id || uninstalling}
-                fill={false}
-                label={pending === row.id ? t("Working…") : t("Remove")}
-                onPress={() => void revokeAccount(row)}
-                prominence="destructive"
-              />
-            </View>
-          ))}
-          <NativeActionButton
-            accessibilityLabel={t("Add another {name}", { name: item.name })}
-            disabled={connecting || uninstalling}
-            label={connecting ? t("Working…") : t("Add another")}
-            onPress={() => void connect(item)}
-            prominence="secondary"
-          />
-        </View>
-
-        <View style={styles.card}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ expanded: toolsOpen }}
-            onPress={() => setToolsOpen((open) => !open)}
-            style={styles.toolsToggle}
-          >
-            <Text style={styles.title}>
-              {toolsLoading
-                ? t("Tools")
-                : toolCount === 1
-                  ? t("1 tool")
-                  : t("{count} tools", { count: toolCount })}
-            </Text>
-            <Chevron expanded={toolsOpen} />
-          </Pressable>
-          {toolsOpen ? (
-            <View style={styles.toolsBody}>
-              {toolsLoading ? (
-                <ActivityIndicator
-                  color={native.secondaryLabel}
-                  accessibilityLabel={t("Loading tools…")}
-                />
-              ) : tools.length === 0 ? (
-                <Text style={styles.secondary}>{t("No tools available.")}</Text>
-              ) : (
-                tools.map((tool) => (
-                  <Text key={tool.name} style={styles.toolName}>
-                    {humanizeToolName(tool.name)}
-                  </Text>
-                ))
-              )}
-            </View>
-          ) : null}
-        </View>
-      </View>
-    );
-  }
-
-  const addOptions: Array<{
-    id: string;
-    label: string;
-    kind: "github" | SourceKind;
-    preset?: McpSourcePreset;
-  }> = [
-    { id: "github", label: t("From GitHub"), kind: "github" },
-    { id: "mcp", label: t("MCP server"), kind: "mcp" },
+  const addOptions: AddCustomOption[] = [
+    { id: "github", label: t`From GitHub`, kind: "github" },
+    { id: "mcp", label: t`MCP server`, kind: "mcp" },
     { id: "api", label: "OpenAPI", kind: "api" },
     { id: "graphql", label: "GraphQL", kind: "graphql" },
     ...sourcePresets.map((preset) => ({
@@ -1232,7 +992,7 @@ export default function Integrations() {
     })),
   ];
 
-  function startAdding(option: (typeof addOptions)[number] | undefined) {
+  function startAdding(option: AddCustomOption | undefined) {
     if (!option) return;
     closeDetail();
     setSourceError(null);
@@ -1248,8 +1008,8 @@ export default function Integrations() {
       unstable_headerRightItems: () => [
         {
           type: "menu" as const,
-          label: t("Add custom"),
-          accessibilityLabel: t("Add custom"),
+          label: t`Add custom`,
+          accessibilityLabel: t`Add custom`,
           icon: { type: "sfSymbol" as const, name: "plus" },
           menu: {
             items: addOptions.map((option) => ({
@@ -1263,156 +1023,6 @@ export default function Integrations() {
     } satisfies NativeStackNavigationOptions);
   }, [navigation, sourcePresets, t]);
 
-  function renderAddMenuFallback() {
-    if (iosAtLeast(26)) return null;
-    return (
-      <MenuView
-        colorScheme={scheme}
-        title={t("Add custom")}
-        actions={addOptions.map((option) => ({ id: option.id, title: option.label }))}
-        onPressAction={({ nativeEvent }) =>
-          startAdding(addOptions.find((option) => option.id === nativeEvent.event))
-        }
-      >
-        {/* A plain view: on Android the menu opens from its own Pressable, which a
-            nested Pressable would take the touch from. */}
-        <View
-          accessible
-          accessibilityRole="button"
-          accessibilityLabel={t("Add custom")}
-          style={styles.addCustom}
-        >
-          <NativeSymbol ios="plus" android="add" size={20} />
-        </View>
-      </MenuView>
-    );
-  }
-
-  function renderAdding() {
-    return (
-      <View style={styles.catalogStack}>
-        <NativeActionButton
-          fill={false}
-          label={t("Back")}
-          onPress={closeAdding}
-          prominence="secondary"
-        />
-        {adding === "github" ? (
-          <View testID="plugin-git-import" style={styles.card}>
-            <TextInput
-              value={gitUrl}
-              onChangeText={setGitUrl}
-              accessibilityLabel={t("Plugin GitHub URL")}
-              placeholder="https://github.com/owner/plugin"
-              placeholderTextColor={native.tertiaryLabel}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="url"
-              maxLength={2048}
-              style={styles.input}
-            />
-            <NativeActionButton
-              disabled={!gitUrl.trim()}
-              label={t("Preview")}
-              onPress={() => openPlugin(gitImportParams(gitUrl))}
-              prominence="secondary"
-            />
-          </View>
-        ) : null}
-        {sourceError ? <Text style={styles.error}>{sourceError}</Text> : null}
-        {adding === "source" && sourceKind ? (
-          <View style={styles.card}>
-            <Text style={styles.title}>
-              {sourcePreset
-                ? t("Connect {name}", { name: sourcePreset.name })
-                : sourceKind === "mcp"
-                  ? t("Remote MCP server")
-                  : sourceKind === "graphql"
-                    ? t("GraphQL endpoint")
-                    : t("OpenAPI JSON")}
-            </Text>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder={t("Display name")}
-              placeholderTextColor={native.tertiaryLabel}
-              style={styles.input}
-            />
-            {!sourcePreset?.url ? (
-              <TextInput
-                value={url}
-                onChangeText={setUrl}
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholder={
-                  sourcePreset?.urlPlaceholder ??
-                  (sourceKind === "mcp"
-                    ? t("https://example.com/mcp")
-                    : sourceKind === "graphql"
-                      ? t("https://example.com/graphql")
-                      : t("https://example.com/openapi.json"))
-                }
-                placeholderTextColor={native.tertiaryLabel}
-                style={styles.input}
-              />
-            ) : null}
-            {!sourcePreset ? (
-              <MenuPicker
-                label={t("Authentication")}
-                plain
-                value={sourceAuth}
-                choices={[
-                  { key: "none", label: t("No auth") },
-                  { key: "bearer", label: t("Bearer") },
-                  { key: "header", label: t("API key") },
-                  ...(sourceKind === "mcp" ? [{ key: "oauth", label: t("OAuth") }] : []),
-                ]}
-                onChange={(key) => setSourceAuth(key as SourceAuth)}
-              />
-            ) : null}
-            {sourceAuth === "header" ? (
-              <TextInput
-                value={authHeader}
-                onChangeText={setAuthHeader}
-                autoCapitalize="none"
-                autoCorrect={false}
-                accessibilityLabel={t("API key header name")}
-                placeholder="x-api-key"
-                placeholderTextColor={native.tertiaryLabel}
-                style={styles.input}
-              />
-            ) : null}
-            {sourceAuth === "bearer" || sourceAuth === "header" ? (
-              <TextInput
-                value={credential}
-                onChangeText={setCredential}
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholder={sourceAuth === "header" ? t("API key") : t("Bearer token")}
-                placeholderTextColor={native.tertiaryLabel}
-                style={styles.input}
-              />
-            ) : null}
-            <View style={styles.accountActions}>
-              <NativeActionButton
-                busy={pending === "source"}
-                label={t("Verify and add")}
-                onPress={() => void addSource()}
-                prominence="secondary"
-              />
-              <NativeActionButton
-                label={t("Cancel")}
-                onPress={closeAdding}
-                prominence="secondary"
-              />
-            </View>
-          </View>
-        ) : null}
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView edges={["bottom"]} style={styles.screen}>
       <ScrollView
@@ -1422,10 +1032,31 @@ export default function Integrations() {
         keyboardShouldPersistTaps="handled"
       >
         {adding ? (
-          renderAdding()
+          <AddCustomForm
+            adding={adding}
+            gitUrl={gitUrl}
+            setGitUrl={setGitUrl}
+            onPreviewGit={() => openPlugin(gitImportParams(gitUrl))}
+            sourceError={sourceError}
+            sourceKind={sourceKind}
+            sourcePreset={sourcePreset}
+            name={name}
+            setName={setName}
+            url={url}
+            setUrl={setUrl}
+            sourceAuth={sourceAuth}
+            setSourceAuth={setSourceAuth}
+            authHeader={authHeader}
+            setAuthHeader={setAuthHeader}
+            credential={credential}
+            setCredential={setCredential}
+            busy={pending === "source"}
+            onAdd={() => void addSource()}
+            onClose={closeAdding}
+          />
         ) : (
           <>
-            {!detailItem ? renderAddMenuFallback() : null}
+            {!detailItem ? <AddCustomMenu options={addOptions} onSelect={startAdding} /> : null}
             {!detailItem ? (
               <TextInput
                 value={query}
@@ -1434,8 +1065,8 @@ export default function Integrations() {
                   setVisibleCount(CONNECTION_CATALOG_PAGE_SIZE);
                   setPluginCount(PLUGIN_PAGE_SIZE);
                 }}
-                accessibilityLabel={t("Search apps")}
-                placeholder={t("Search apps")}
+                accessibilityLabel={t`Search apps`}
+                placeholder={t`Search apps`}
                 placeholderTextColor={native.tertiaryLabel}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -1447,11 +1078,11 @@ export default function Integrations() {
             {!detailItem && (categories.length >= 2 || category) ? (
               <View style={styles.categoryPicker}>
                 <MenuPicker
-                  label={t("Category")}
+                  label={t`Category`}
                   showLabel={false}
                   plain
                   choices={[
-                    { key: "", label: t("All") },
+                    { key: "", label: t`All` },
                     ...categories.map((name) => ({ key: name, label: categoryLabel(name) })),
                   ]}
                   value={category}
@@ -1472,7 +1103,7 @@ export default function Integrations() {
                 style={({ pressed }) => [styles.row, pressed && styles.pressed]}
               >
                 <BotTemplateIcon size={LOGO_SIZE} />
-                <Text style={[styles.title, styles.grow]}>{t("Templates")}</Text>
+                <Text style={[styles.title, styles.grow]}>{t`Templates`}</Text>
                 <Chevron />
               </Pressable>
             ) : null}
@@ -1486,7 +1117,7 @@ export default function Integrations() {
               <View style={styles.catalogStack}>
                 <Text style={styles.error}>{catalogError}</Text>
                 <NativeActionButton
-                  label={t("Retry")}
+                  label={t`Retry`}
                   fill={false}
                   onPress={() => void retryRefresh()}
                   prominence="secondary"
@@ -1495,7 +1126,22 @@ export default function Integrations() {
             ) : null}
 
             {detailItem ? (
-              renderDetail(detailItem)
+              <IntegrationDetail
+                item={detailItem}
+                accounts={accountsFor(detailItem)}
+                pending={pending}
+                labelDrafts={labelDrafts}
+                setLabelDrafts={setLabelDrafts}
+                tools={tools}
+                toolsLoading={toolsLoading}
+                toolsOpen={toolsOpen}
+                setToolsOpen={setToolsOpen}
+                onBack={closeDetail}
+                onUninstall={() => void uninstall(detailItem)}
+                onRename={(row) => void renameAccount(row)}
+                onRevoke={(row) => void revokeAccount(row)}
+                onConnect={() => void connect(detailItem)}
+              />
             ) : (
               <>
                 {!catalogReady && !catalogError ? (
@@ -1521,7 +1167,9 @@ export default function Integrations() {
                 ) : null}
 
                 {catalogsReady && catalog.length === 0 && plugins.length === 0 && !filtering ? (
-                  <Text style={styles.secondary}>{t(EMPTY_PLUGIN_CATALOG_MESSAGE)}</Text>
+                  <Text
+                    style={styles.secondary}
+                  >{t`Configure a plugin catalog on the server to connect apps.`}</Text>
                 ) : null}
 
                 {catalogReady && catalog.length > 0 && !category ? (
@@ -1550,7 +1198,7 @@ export default function Integrations() {
                                 </Text>
                                 {disabled ? (
                                   <Text style={styles.secondary}>
-                                    {t("Not in the plugin catalog")}
+                                    {t`Not in the plugin catalog`}
                                   </Text>
                                 ) : null}
                               </View>
@@ -1568,22 +1216,45 @@ export default function Integrations() {
                 brandMatches.length === 0 &&
                 savedServerMatches.length === 0 &&
                 filtering ? (
-                  <Text style={styles.secondary}>{t("No apps match your search.")}</Text>
+                  <Text style={styles.secondary}>{t`No apps match your search.`}</Text>
                 ) : null}
 
                 {!category && renderedApps.length < catalogApps.length ? (
                   <NativeActionButton
-                    label={t("Show more")}
+                    label={t`Show more`}
                     onPress={() => setVisibleCount((count) => count + CONNECTION_CATALOG_PAGE_SIZE)}
                     prominence="secondary"
                   />
                 ) : null}
 
-                {renderPlugins()}
+                <PluginSection
+                  pluginsState={pluginsState}
+                  catalogReady={catalogReady}
+                  onRetry={() => {
+                    setPluginsState("loading");
+                    void retryRefresh();
+                  }}
+                  filtering={filtering}
+                  pluginMatches={pluginMatches}
+                  brandMatches={brandMatches}
+                  pluginCount={pluginCount}
+                  onShowMore={() => setPluginCount((count) => count + PLUGIN_PAGE_SIZE)}
+                  plugins={plugins}
+                  categories={categories}
+                  categoryLabel={categoryLabel}
+                  onViewCategory={(name) => {
+                    setCategory(name);
+                    setPluginCount(PLUGIN_PAGE_SIZE);
+                  }}
+                  installedSources={installedSources}
+                  columns={catalogColumns}
+                  onOpenPlugin={openPlugin}
+                  renderAppTile={(item) => renderCatalogTile(item, item.name)}
+                />
                 {pluginsState !== "loading" && SUBMIT_PLUGIN_URL ? (
                   <NativeActionButton
                     fill={false}
-                    label={t("Submit a plugin")}
+                    label={t`Submit a plugin`}
                     onPress={() => void Linking.openURL(`${SUBMIT_PLUGIN_URL}`)}
                     prominence="quiet"
                     size="compact"
@@ -1597,109 +1268,4 @@ export default function Integrations() {
       </ScrollView>
     </SafeAreaView>
   );
-}
-
-function createIntegrationsStyles() {
-  const destructive = mobileTokens().destructive;
-  return StyleSheet.create({
-    connectionStatus: { flexDirection: "row", alignItems: "center", gap: 4 },
-    screen: { flex: 1, backgroundColor: native.page },
-    content: { padding: 20, gap: 14 },
-    explanation: { color: native.secondaryLabel, fontSize: 14, lineHeight: 20 },
-    section: { color: native.secondaryLabel, fontSize: 14, fontWeight: "600", marginTop: 2 },
-    card: { padding: 16, borderRadius: 16, backgroundColor: native.fill, gap: 12 },
-    input: {
-      minHeight: 48,
-      borderRadius: 12,
-      backgroundColor: native.fillPressed,
-      color: native.label,
-      paddingHorizontal: 14,
-      fontSize: 15,
-    },
-    catalogGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-    catalogStack: { gap: 8 },
-    catalogCell: { flexGrow: 1, flexBasis: "47%", maxWidth: "49%" },
-    row: {
-      minHeight: 56,
-      paddingHorizontal: 12,
-      paddingVertical: 12,
-      borderRadius: 14,
-      backgroundColor: native.fill,
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 10,
-    },
-    logoPlaceholder: {
-      width: LOGO_SIZE,
-      height: LOGO_SIZE,
-      borderRadius: 10,
-      backgroundColor: native.fillPressed,
-    },
-    titlePlaceholder: {
-      width: "65%",
-      height: 14,
-      borderRadius: 4,
-      backgroundColor: native.fillPressed,
-    },
-    pillPlaceholder: {
-      width: 52,
-      height: 30,
-      borderRadius: 15,
-      backgroundColor: native.fillPressed,
-    },
-    grow: { flex: 1, gap: 3, minWidth: 0 },
-    title: { color: native.label, fontSize: 15, fontWeight: "600" },
-    secondary: { color: native.secondaryLabel, fontSize: 13 },
-    pressed: { backgroundColor: native.fillPressed },
-    categoryPicker: { alignSelf: "flex-start" },
-    sectionHeader: {
-      marginTop: 10,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
-    sectionTitle: { color: native.label, fontSize: 16, fontWeight: "600" },
-    accountActions: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      alignItems: "center",
-      gap: 8,
-    },
-    accountRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 8,
-    },
-    accountLabel: {
-      flex: 1,
-      minHeight: 36,
-      borderRadius: 10,
-      backgroundColor: native.fillPressed,
-      color: native.label,
-      paddingHorizontal: 10,
-      fontSize: 13,
-    },
-    link: { color: native.label, fontSize: 14, fontWeight: "600" },
-    error: { color: destructive, fontSize: 14 },
-    detail: { gap: 14 },
-    detailHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 12,
-    },
-    detailTitleRow: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10, minWidth: 0 },
-    backButton: { paddingVertical: 4 },
-    detailTitle: { flex: 1, color: native.label, fontSize: 17, fontWeight: "600" },
-    toolsToggle: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 8,
-    },
-    toolsBody: { gap: 8, paddingTop: 4 },
-    toolName: { color: native.label, fontSize: 14 },
-    addCustom: { alignSelf: "flex-end", padding: 12 },
-  });
 }

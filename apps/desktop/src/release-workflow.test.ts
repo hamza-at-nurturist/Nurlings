@@ -114,7 +114,7 @@ describe("desktop release workflow", () => {
     expect(workflow).not.toMatch(/secrets\.APPLE_TEAM_ID/);
   });
 
-  it("publishes only a complete stable, upgrade-only release", () => {
+  it("publishes only a complete stable, upgrade-only feed", () => {
     expect(workflow).toContain("^v([0-9]+)\\.([0-9]+)\\.([0-9]+)$");
     expect(workflow).toContain("must be newer than published release");
     expect(workflow).toContain("group: release-desktop-stable");

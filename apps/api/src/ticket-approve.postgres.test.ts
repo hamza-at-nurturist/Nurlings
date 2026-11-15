@@ -8,9 +8,7 @@ import { sessionCookieHeader } from "../../../packages/testkit/src/index.js";
 import { createApp } from "./app.js";
 
 const describePostgres =
-  process.env.VERIFY_DATABASE === "1" && process.env.DATABASE_URL
-    ? describe.sequential
-    : describe.skip;
+  process.env.VERIFY_DATABASE === "1" && process.env.DATABASE_URL ? describe : describe.skip;
 
 const ORIGIN = "http://127.0.0.1:5173";
 
@@ -122,7 +120,7 @@ describePostgres("ticket approval and replies (PostgreSQL)", () => {
           await system(() => handles.prisma.bot.findFirstOrThrow({ where: { id: owner.id } }))
         ).userId,
       };
-      const deps = { prisma: handles.prisma, ticketBoardEnabled: true };
+      const deps = { prisma: handles.prisma, deploymentLabs: ["board"] };
       await runAsTenant(tenant, () =>
         commentTicket(deps, {
           spaceId: ticket.spaceId,

@@ -76,14 +76,14 @@ owner from a user. Details in `design.md`.
 
 ### Proposed copy
 
-| Copy | Where | Why it is needed |
-|---|---|---|
-| `Tell a Nurling what to do…` | quick-add placeholder | It is the only label the box has and says it creates work for a Nurling. Hidden once you type. |
-| `All` | filter, first button | The way back from a filtered board; avatars alone have no "everyone". |
-| `Your turn` | In review column header, only while it has tickets | The single pointer at the column waiting on you; gone when empty. |
-| `Show {count} older` | under Done, only when older Done tickets exist | Done is trimmed to a week; without it older work looks lost. Gone once shown. |
-| `{name} is working…` | card, only while a run is active | Says live work is happening on that ticket, which no other part of the card does. |
-| `Move to` | card menu trigger's accessible name and menu label | The keyboard and touch route to drag; icon-only trigger, so the name is for assistive tech. |
+| Copy                         | Where                                              | Why it is needed                                                                               |
+| ---------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `Tell a Nurling what to do…` | quick-add placeholder                              | It is the only label the box has and says it creates work for a Nurling. Hidden once you type. |
+| `All`                        | filter, first button                               | The way back from a filtered board; avatars alone have no "everyone".                          |
+| `Your turn`                  | In review column header, only while it has tickets | The single pointer at the column waiting on you; gone when empty.                              |
+| `Show {count} older`         | under Done, only when older Done tickets exist     | Done is trimmed to a week; without it older work looks lost. Gone once shown.                  |
+| `{name} is working…`         | card, only while a run is active                   | Says live work is happening on that ticket, which no other part of the card does.              |
+| `Move to`                    | card menu trigger's accessible name and menu label | The keyboard and touch route to drag; icon-only trigger, so the name is for assistive tech.    |
 
 Reused unchanged: status names, `Needs you`, `Approve`, card dates. Removed: `New ticket` (button
 and dialog title), `No tickets yet` (empty columns with zero counts and the quick-add box already
@@ -93,16 +93,16 @@ say it), the create dialog's field labels.
 
 New code lives under `apps/web/src/components/board/BoardView/`. Small edits to upstream files:
 
-| File | Edit |
-|---|---|
-| `apps/web/src/pages/Board.tsx` | `BoardPage` renders `BoardView`; see design decision 1 |
-| `packages/contracts/src/board.ts` | `TicketListItemSchema` (defaulted extra fields); `assigneeBotId` optional on create |
-| `packages/db/src/board.ts` | one `listTicketCards` helper |
-| `packages/adapters/src/ticket-tools.ts` | `createTicket` resolves Chief when a user gives no owner |
-| `packages/adapters/src/ticket-wake.ts`, `ticket-changes.ts` | triage prompt; board event sent after the wake |
-| `apps/api/src/router.ts` | `tickets.list` merges the card fields; `create` skips the owner check when none is given |
-| `packages/db/prisma` | two concurrent index migrations (`runs.taskId`, `artifacts.runId`) |
-| `TicketModal/MentionPicker.tsx`, `ReplyBox.tsx` | picker can open below; mention state moves to a shared hook |
+| File                                                        | Edit                                                                                     |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `apps/web/src/pages/Board.tsx`                              | `BoardPage` renders `BoardView`; see design decision 1                                   |
+| `packages/contracts/src/board.ts`                           | `TicketListItemSchema` (defaulted extra fields); `assigneeBotId` optional on create      |
+| `packages/db/src/board.ts`                                  | one `listTicketCards` helper                                                             |
+| `packages/adapters/src/ticket-tools.ts`                     | `createTicket` resolves Chief when a user gives no owner                                 |
+| `packages/adapters/src/ticket-wake.ts`, `ticket-changes.ts` | triage prompt; board event sent after the wake                                           |
+| `apps/api/src/router.ts`                                    | `tickets.list` merges the card fields; `create` skips the owner check when none is given |
+| `packages/db/prisma`                                        | two concurrent index migrations (`runs.taskId`, `artifacts.runId`)                       |
+| `TicketModal/MentionPicker.tsx`, `ReplyBox.tsx`             | picker can open below; mention state moves to a shared hook                              |
 
 What stays internal on purpose: `Chief` is found by the existing `onboarding:first` spawn key, not
 a new column or setting, so no schema or upstream onboarding code changes.

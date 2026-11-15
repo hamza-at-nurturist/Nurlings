@@ -1,5 +1,5 @@
-import type { ModelBackupChoice, ModelCatalogEntry, ModelCredential } from "./domain.js";
-import { OPENAI_COMPATIBLE_PROVIDER_ID } from "./domain.js";
+import type { ModelBackupChoice, ModelCatalogEntry, ModelCredential } from "./model-connections.js";
+import { OPENAI_COMPATIBLE_PROVIDER_ID } from "./model-connections.js";
 import { canonicalPiProviderId } from "./model-provider.js";
 
 export type ConnectedBackupOption = ModelBackupChoice & {
@@ -49,7 +49,7 @@ export function connectionDisplayName(
     defaultNames.includes(label)
   )
     return provider;
-  if (label.toLowerCase().startsWith(providerName.toLowerCase())) return label;
+  if (label.toLowerCase().startsWith(provider.toLowerCase())) return label;
   return `${provider} (${label})`;
 }
 

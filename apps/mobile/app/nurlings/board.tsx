@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import { WORKING_RUN_STATUSES } from "@rakazo/core";
 import { boardColumns, isMoveTarget } from "@rakazo/core/nurlings-board";
@@ -13,7 +14,6 @@ import { NurlingFilter } from "../../components/nurlings-board/nurling-filter";
 import { QuickAdd } from "../../components/nurlings-board/quick-add";
 import { rpc } from "../../lib/api";
 import { useFloatingHeaderInset, useHeaderHeightIfAny } from "../../lib/floating-header";
-import { useI18n } from "../../lib/i18n";
 import { useMobileTokens } from "../../lib/native";
 import { iosAtLeast } from "../../lib/native-controls";
 import type { CardMenuAction } from "../../lib/nurlings-board/card-menu";
@@ -29,7 +29,7 @@ import { errorText } from "../../lib/user-error";
 
 /** The Board: a Nurling filter, six paged columns of live cards, and quick-add. */
 export default function BoardScreen() {
-  const { t } = useI18n();
+  const { t } = useLingui();
   const tokens = useMobileTokens();
   const router = useRouter();
   const navigation = useNavigation();
@@ -46,7 +46,7 @@ export default function BoardScreen() {
   const { timeZone } = useBoardMe();
 
   useLayoutEffect(() => {
-    navigation.setOptions(glassHeaderOptions(t("Board")));
+    navigation.setOptions(glassHeaderOptions(t`Board`));
   }, [navigation, t]);
 
   // A board that is off, or a link into one, goes home without showing anything.

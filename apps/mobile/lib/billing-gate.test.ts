@@ -12,7 +12,7 @@ const read = (file: string) =>
  */
 describe("mobile billing entries follow the server's billingEnabled flag", () => {
   it("only opens the paywall after the server says billing is on", () => {
-    const home = read("app/index.tsx");
+    const home = read("lib/use-home-inbox.ts");
     // Billing off forgets referrals; only the billing-on branch reads status and may open the paywall.
     const gate = home.indexOf("if (!nextMe.billingEnabled) forgetReferrals(); else {");
     const paywall = home.indexOf('router.push("/paywall")');
@@ -21,6 +21,6 @@ describe("mobile billing entries follow the server's billingEnabled flag", () =>
   });
 
   it("only lists Billing in account settings when billing is on", () => {
-    expect(read("app/(settings)/account.tsx")).toContain("{me?.billingEnabled ? (");
+    expect(read("app/(settings)/account.tsx")).toContain("me?.billingEnabled ? settingsLink(");
   });
 });

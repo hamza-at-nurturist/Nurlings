@@ -4,16 +4,16 @@
 
 `apps/web/src/components/board/BoardView/`:
 
-| File | Role |
-|---|---|
-| `BoardView.tsx` | Page: loads tickets, Nurlings and timezone, follows `boards.subscribe` (copied from `Board.tsx`), owns filter, selection and the open modal; its header (back, title, `NurlingFilter`, `QuickAdd`) and the container-query layout |
-| `NurlingFilter.tsx` | `ToggleGroup` with "All" and one `BotAvatar` item per Nurling |
-| `QuickAdd.tsx` | The input, the `@` picker, submit |
-| `quick-add.ts` | Pure: text + picked Nurlings → `{ title, description, assigneeBotId? }` |
-| `BoardColumn.tsx` | Dot, name, count, "Your turn", drop target, "Show N older" |
-| `BoardCard.tsx` | One card, drag source, "Move to" menu, Approve |
-| `columns.ts` | Pure: tickets + filter + now → six columns, Done split into recent and older |
-| `../TicketModal/use-mention-input.ts` | The `@` token, options, highlight, picks: lifted out of `ReplyBox` so both use one copy |
+| File                                  | Role                                                                                                                                                                                                                              |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BoardView.tsx`                       | Page: loads tickets, Nurlings and timezone, follows `boards.subscribe` (copied from `Board.tsx`), owns filter, selection and the open modal; its header (back, title, `NurlingFilter`, `QuickAdd`) and the container-query layout |
+| `NurlingFilter.tsx`                   | `ToggleGroup` with "All" and one `BotAvatar` item per Nurling                                                                                                                                                                     |
+| `QuickAdd.tsx`                        | The input, the `@` picker, submit                                                                                                                                                                                                 |
+| `quick-add.ts`                        | Pure: text + picked Nurlings → `{ title, description, assigneeBotId? }`                                                                                                                                                           |
+| `BoardColumn.tsx`                     | Dot, name, count, "Your turn", drop target, "Show N older"                                                                                                                                                                        |
+| `BoardCard.tsx`                       | One card, drag source, "Move to" menu, Approve                                                                                                                                                                                    |
+| `columns.ts`                          | Pure: tickets + filter + now → six columns, Done split into recent and older                                                                                                                                                      |
+| `../TicketModal/use-mention-input.ts` | The `@` token, options, highlight, picks: lifted out of `ReplyBox` so both use one copy                                                                                                                                           |
 
 Tests sit next to each file. `TicketModal/*` is reused as is, except `MentionPicker` gains a
 `side` prop (`"above"` default, `"below"` for the header) and `ReplyBox` uses the shared hook.

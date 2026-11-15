@@ -237,7 +237,7 @@ describe("email languages", () => {
     const english = await welcomeEmail(user, "https://example.test/u");
     expect(english.subject).toBe(`Welcome to ${brand.name}`);
     expect(english.text).toContain("Hi Ana,");
-    expect(english.text).not.toContain("also has apps for");
+    expect(english.text).not.toContain("runs on");
   });
 
   it.each(Object.entries(CATALOGS))(

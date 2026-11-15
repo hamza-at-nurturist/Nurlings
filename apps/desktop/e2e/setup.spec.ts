@@ -1,11 +1,12 @@
 import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import type { Server, ServerResponse } from "node:http";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import { brand } from "@nurlings/brand";
+import { brand, brandText } from "@nurlings/brand";
 import type { ElectronApplication, Page } from "@playwright/test";
 import { _electron as electron, expect, test } from "@playwright/test";
 import type { RakazoDesktop } from "@rakazo/contracts";
@@ -92,6 +93,10 @@ function launch(extraEnv: Record<string, string> = {}) {
   };
   // A stale RAKAZO_WEB_URL from the developer's shell would bypass setup entirely.
   delete env.RAKAZO_WEB_URL;
+  // A first launch opens Rakazo Cloud; these specs stay offline and start in setup instead.
+  if (!extraEnv.RAKAZO_WEB_URL && !existsSync(path.join(userData, "setup.json"))) {
+    env.RAKAZO_FORCE_SETUP = "1";
+  }
   const executablePath = process.env.RAKAZO_E2E_EXECUTABLE;
   return electron.launch({
     ...(executablePath ? { executablePath: path.resolve(executablePath) } : {}),
@@ -109,9 +114,9 @@ test("first run offers this computer and an existing instance, with no hosted ch
   const setup = await app.firstWindow();
 
   await expect(setup.getByRole("heading", { name: `Welcome to ${brand.name}` })).toBeVisible();
-  await expect(setup.getByText("Choose which server this app should use.")).toBeVisible();
-  await expect(setup.getByText("This computer")).toBeVisible();
-  await expect(setup.getByText("Existing instance")).toBeVisible();
+  await expect(setup.getByText(brandText("Choose where Rakazo runs.", brand))).toBeVisible();
+  await expect(setup.getByText("This computer", { exact: true })).toBeVisible();
+  await expect(setup.getByText("Existing instance", { exact: true })).toBeVisible();
   await expect(setup.getByText(/Rakazo/)).toHaveCount(0);
   await expect(setup.getByRole("radio")).toHaveCount(2);
   await expect(setup.locator(".card")).toHaveCount(0);

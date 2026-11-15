@@ -8,21 +8,21 @@
 `composer-mentions`, `botHexColor`), has no DOM or React Native dependency, and already depends on
 `@rakazo/contracts`. A new package would only add a workspace entry for the same audience.
 
-| Module | Holds | Today |
-|---|---|---|
-| `columns.ts` | `boardColumns` (six columns, owner filter, 7-day Done rule) | `web/.../BoardView/columns.ts` |
-| `dates.ts` | `localDate`, `localTime`, `quickPickDates`, `formatTicketDate`, `isTicketOverdue`, and `cardDates(ticket, now, tz, labels, locale)` returning `{ start, due, overdue }` | `web/.../TicketModal/dates.ts` |
-| `card.ts` | `ticketCard(ticket, { bots, now, tz, labels, locale })`: ref, needsUser, title, working owner or worker, last comment, owner, dates, file count, `finished`, `canApprove` | fields read inline in `BoardCard.tsx` |
-| `quick-add.ts` | `quickAddTicket(text, picked)` | `web/.../BoardView/quick-add.ts` |
-| `mentions.ts` | `hasMentionToken`, `splitMentions`, `resolveMentionTargets`, `activeMentionToken`, `mentionColor`, plus the two pure halves of the web `useMentionInput`: `mentionOptions(bots, query)` (filter, prefix first, max 8) and `applyMention(text, token, caret, bot)` (new text and caret) | `web/.../TicketModal/mentions.ts`, `use-mention-input.ts` |
-| `activity.ts` | `mergeActivity`, and `activityRows(items, viewer)`: drops events with no line, marks each row `separated` with `needsTimeSeparator`, and returns each line as data (`{ kind: "moved", actor, status }`) | `mergeActivity` in `web/.../activity.ts`; the loop and `eventLine` in `ActivityFeed.tsx` |
-| `files.ts` | `isTicketImage` (the four thumbnail types) and `shortFileType` | `THUMBNAIL_MIME_TYPES` in `TicketImage.tsx`, `shortFileType` in `TicketFileCard.tsx` |
-| `types.ts` | `Viewer` | `Viewer` in `ActivityFeed.tsx` |
+| Module         | Holds                                                                                                                                                                                                                                                                                  | Today                                                                                    |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `columns.ts`   | `boardColumns` (six columns, owner filter, 7-day Done rule)                                                                                                                                                                                                                            | `web/.../BoardView/columns.ts`                                                           |
+| `dates.ts`     | `localDate`, `localTime`, `quickPickDates`, `formatTicketDate`, `isTicketOverdue`, and `cardDates(ticket, now, tz, labels, locale)` returning `{ start, due, overdue }`                                                                                                                | `web/.../TicketModal/dates.ts`                                                           |
+| `card.ts`      | `ticketCard(ticket, { bots, now, tz, labels, locale })`: ref, needsUser, title, working owner or worker, last comment, owner, dates, file count, `finished`, `canApprove`                                                                                                              | fields read inline in `BoardCard.tsx`                                                    |
+| `quick-add.ts` | `quickAddTicket(text, picked)`                                                                                                                                                                                                                                                         | `web/.../BoardView/quick-add.ts`                                                         |
+| `mentions.ts`  | `hasMentionToken`, `splitMentions`, `resolveMentionTargets`, `activeMentionToken`, `mentionColor`, plus the two pure halves of the web `useMentionInput`: `mentionOptions(bots, query)` (filter, prefix first, max 8) and `applyMention(text, token, caret, bot)` (new text and caret) | `web/.../TicketModal/mentions.ts`, `use-mention-input.ts`                                |
+| `activity.ts`  | `mergeActivity`, and `activityRows(items, viewer)`: drops events with no line, marks each row `separated` with `needsTimeSeparator`, and returns each line as data (`{ kind: "moved", actor, status }`)                                                                                | `mergeActivity` in `web/.../activity.ts`; the loop and `eventLine` in `ActivityFeed.tsx` |
+| `files.ts`     | `isTicketImage` (the four thumbnail types) and `shortFileType`                                                                                                                                                                                                                         | `THUMBNAIL_MIME_TYPES` in `TicketImage.tsx`, `shortFileType` in `TicketFileCard.tsx`     |
+| `types.ts`     | `Viewer`                                                                                                                                                                                                                                                                               | `Viewer` in `ActivityFeed.tsx`                                                           |
 
 What stays per platform, on purpose:
 
 - **Copy.** Web uses Lingui, mobile uses `t()` and typed locale maps. The shared code returns
-  *which* sentence (`{ kind: "moved", actor, status }`), each platform turns it into text. The
+  _which_ sentence (`{ kind: "moved", actor, status }`), each platform turns it into text. The
   strings match word for word.
 - **React state and DOM.** `useMentionInput` (textarea, refs, `useLayoutEffect`) keeps its web
   shell around the shared pure halves; mobile has its own `TextInput` shell.
@@ -67,15 +67,15 @@ apps/mobile/
 
 Existing upstream files touched, and nothing else:
 
-| File | Change |
-|---|---|
-| `app/index.tsx` | One header button (iOS 26 item and `HeaderButton`) shown when `useNurlingsBoardEnabled()` is true |
-| `lib/notification-open.ts` | One early branch: a payload or `rakazo://ticket` link with a `ticketId` returns the route built by `lib/nurlings-board/notification.ts` |
-| `components/thread-composer.tsx` | `export` added to `MentionOptionIcon` and `MentionChipIcon`; no other change |
-| `packages/adapter-kit/src/types.ts`, `packages/adapters/src/expo-push.ts`, `ticket-changes.ts`, `ticket-dates.ts` | Optional `ticketId` on the notification |
-| `lib/locales/{de,ja,nl,ru,zh}.ts` | One `...NURLINGS_BOARD_XX` spread line at the top of each map; the translations are in `lib/locales/nurlings-board/` |
-| `packages/core/package.json` | One `./nurlings-board` entry in `exports` |
-| `lib/home-route.test.tsx`, `lib/artifacts-navigation.test.tsx` | `boardEnabled: false` in the scope these tests evaluate the home source with |
+| File                                                                                                              | Change                                                                                                                                  |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/index.tsx`                                                                                                   | One header button (iOS 26 item and `HeaderButton`) shown when `useNurlingsBoardEnabled()` is true                                       |
+| `lib/notification-open.ts`                                                                                        | One early branch: a payload or `rakazo://ticket` link with a `ticketId` returns the route built by `lib/nurlings-board/notification.ts` |
+| `components/thread-composer.tsx`                                                                                  | `export` added to `MentionOptionIcon` and `MentionChipIcon`; no other change                                                            |
+| `packages/adapter-kit/src/types.ts`, `packages/adapters/src/expo-push.ts`, `ticket-changes.ts`, `ticket-dates.ts` | Optional `ticketId` on the notification                                                                                                 |
+| `lib/locales/{de,ja,nl,ru,zh}.ts`                                                                                 | One `...NURLINGS_BOARD_XX` spread line at the top of each map; the translations are in `lib/locales/nurlings-board/`                    |
+| `packages/core/package.json`                                                                                      | One `./nurlings-board` entry in `exports`                                                                                               |
+| `lib/home-route.test.tsx`, `lib/artifacts-navigation.test.tsx`                                                    | `boardEnabled: false` in the scope these tests evaluate the home source with                                                            |
 
 Not touched: `app/_layout.tsx`, `lib/api.ts` (`MobileMe` stays as is; `enabled.ts` reads
 `ticketBoardEnabled` from its own `rpc<{ ticketBoardEnabled?: boolean }>("me")`), `subscribeThread`,

@@ -1,7 +1,7 @@
+import { useLingui } from "@lingui/react/macro";
 import type { Bot } from "@rakazo/contracts";
 import { fontWeight, typeScale } from "@rakazo/ui-tokens";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
-import { useI18n } from "../../lib/i18n";
 import { useMobileTokens } from "../../lib/native";
 import { BotAvatar } from "../bot-avatar";
 
@@ -19,7 +19,7 @@ export function NurlingFilter({
   showClosed?: boolean;
   onToggleClosed?: () => void;
 }) {
-  const { t } = useI18n();
+  const { t } = useLingui();
   const tokens = useMobileTokens();
   return (
     <ScrollView
@@ -44,7 +44,7 @@ export function NurlingFilter({
             },
           ]}
         >
-          {t("All")}
+          {t`All`}
         </Text>
       </Pressable>
       {bots.map((bot) => (
@@ -84,7 +84,7 @@ export function NurlingFilter({
               },
             ]}
           >
-            {t("Closed")}
+            {t`Closed`}
           </Text>
         </Pressable>
       ) : null}

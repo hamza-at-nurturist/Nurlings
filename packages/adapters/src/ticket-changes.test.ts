@@ -10,7 +10,7 @@ const change: TicketChange = {
   assigneeBotId: "bot-1",
   wakeAssignee: true,
 };
-function setup(ticketBoardEnabled: boolean, status = "todo", queuedRun = false) {
+function setup(ownerLabs: string[], status = "todo", queuedRun = false) {
   const notify = vi.fn(async () => {});
   const enqueue = vi.fn(async () => {});
   const createRun = vi.fn(async () => ({ id: "run-1" }));
@@ -27,6 +27,7 @@ function setup(ticketBoardEnabled: boolean, status = "todo", queuedRun = false) 
     bot: {
       findFirst: vi.fn(async () => ({ id: "bot-1", userId: "user-1", thread: { id: "thread-1" } })),
     },
+    user: { findUnique: vi.fn(async () => ({ labs: ownerLabs })) },
     task: { create: createTask },
     run: {
       create: createRun,
@@ -35,7 +36,6 @@ function setup(ticketBoardEnabled: boolean, status = "todo", queuedRun = false) 
   };
   const transaction = vi.fn(async (fn: (client: typeof tx) => Promise<unknown>) => fn(tx));
   const changes = createTicketChangeNotifier({
-    ticketBoardEnabled,
     prisma: { $transaction: transaction } as unknown as PrismaClient,
     jobs: { enqueue } as never,
     boardEvents: { notify } as never,
@@ -44,17 +44,18 @@ function setup(ticketBoardEnabled: boolean, status = "todo", queuedRun = false) 
 }
 
 describe("ticket changes", () => {
-  it("does nothing when disabled, including creation and assignment", async () => {
-    const s = setup(false);
+  it("publishes but does not wake a bot whose owner has the board off", async () => {
+    const s = setup([]);
     await s.changes(change);
-    expect(s.notify).not.toHaveBeenCalled();
-    expect(s.transaction).not.toHaveBeenCalled();
+    expect(s.notify).toHaveBeenCalledTimes(1);
+    expect(s.createTask).not.toHaveBeenCalled();
+    expect(s.createRun).not.toHaveBeenCalled();
     expect(s.enqueue).not.toHaveBeenCalled();
   });
   it.each(["todo", "doing", "review", "blocked"])(
     "wakes an assigned %s ticket once using a hidden run",
     async (status) => {
-      const s = setup(true, status);
+      const s = setup(["board"], status);
       await s.changes(change);
       expect(s.createRun).toHaveBeenCalledTimes(1);
       expect(s.createRun).toHaveBeenCalledWith({
@@ -73,7 +74,7 @@ describe("ticket changes", () => {
   it.each(["done", "closed", "cancelled"])(
     "does not wake a reassigned %s ticket",
     async (status) => {
-      const s = setup(true, status);
+      const s = setup(["board"], status);
       await s.changes(change);
       expect(s.notify).toHaveBeenCalledTimes(1);
       expect(s.createTask).not.toHaveBeenCalled();
@@ -82,7 +83,7 @@ describe("ticket changes", () => {
     },
   );
   it("starts the run for the ticket and tells the owner to read the new comments", async () => {
-    const s = setup(true);
+    const s = setup(["board"]);
     await s.changes(change);
     expect(s.createTask).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -96,7 +97,7 @@ describe("ticket changes", () => {
     expect(prompt).toContain("comments added since you last looked");
   });
   it("does not queue a second run while one for the ticket is still queued", async () => {
-    const s = setup(true, "doing", true);
+    const s = setup(["board"], "doing", true);
     await s.changes(change);
     expect(s.tx.run.findFirst).toHaveBeenCalledWith({
       where: {
@@ -114,32 +115,32 @@ describe("ticket changes", () => {
     expect(s.notify).toHaveBeenCalledTimes(1);
   });
   it("only publishes changes for comments or status edits", async () => {
-    const s = setup(true);
+    const s = setup(["board"]);
     await s.changes({ ...change, wakeAssignee: false });
     expect(s.notify).toHaveBeenCalledTimes(1);
     expect(s.transaction).not.toHaveBeenCalled();
     expect(s.enqueue).not.toHaveBeenCalled();
   });
   it("does not wake an unassigned ticket", async () => {
-    const s = setup(true);
+    const s = setup(["board"]);
     await s.changes({ ...change, assigneeBotId: null });
     expect(s.transaction).not.toHaveBeenCalled();
   });
   it("tells the board after the wake, so its reload sees the queued run", async () => {
-    const s = setup(true);
+    const s = setup(["board"]);
     await s.changes(change);
     expect(s.createRun.mock.invocationCallOrder[0]).toBeLessThan(
       s.notify.mock.invocationCallOrder[0]!,
     );
   });
   it("still tells the board when the wake fails", async () => {
-    const s = setup(true);
+    const s = setup(["board"]);
     s.transaction.mockRejectedValueOnce(new Error("down"));
     await expect(s.changes(change)).rejects.toThrow("down");
     expect(s.notify).toHaveBeenCalledTimes(1);
   });
   it("wakes with the given prompt instead of the usual one", async () => {
-    const s = setup(true);
+    const s = setup(["board"]);
     await s.changes({ ...change, wakePrompt: "Triage RAK-1." });
     expect(s.createTask).toHaveBeenCalledWith({
       data: expect.objectContaining({ prompt: "Triage RAK-1." }),

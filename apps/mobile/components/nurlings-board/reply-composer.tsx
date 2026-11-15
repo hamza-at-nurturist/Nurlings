@@ -1,12 +1,12 @@
 import type { MenuAction } from "@expo/ui/community/menu";
 import { MenuView } from "@expo/ui/community/menu";
+import { useLingui } from "@lingui/react/macro";
 import type { Bot, TicketComment } from "@rakazo/contracts";
 import { attachmentMaxBytes, TICKET_COMMENT_MAX_LENGTH } from "@rakazo/contracts";
 import { typeScale } from "@rakazo/ui-tokens";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { rpc } from "../../lib/api";
-import { useI18n } from "../../lib/i18n";
 import { useMobileTokens, useResolvedAppearance } from "../../lib/native";
 import type { PickedAttachment } from "../../lib/pick-attachments";
 import { pickDocuments, pickFromLibrary, takePhoto } from "../../lib/pick-attachments";
@@ -34,7 +34,7 @@ export function ReplyComposer({
   onSent: (comment: TicketComment) => void;
   onError: (message: string) => void;
 }) {
-  const { t } = useI18n();
+  const { t } = useLingui();
   const tokens = useMobileTokens();
   const scheme = useResolvedAppearance();
   const [staged, setStaged] = useState<PickedAttachment[]>([]);
@@ -42,9 +42,9 @@ export function ReplyComposer({
   const [busy, setBusy] = useState(false);
 
   const attachActions: MenuAction[] = [
-    { id: "library", title: t("Photo library"), image: "photo.on.rectangle" },
-    { id: "camera", title: t("Camera"), image: "camera" },
-    { id: "file", title: t("File"), image: "doc" },
+    { id: "library", title: t`Photo library`, image: "photo.on.rectangle" },
+    { id: "camera", title: t`Camera`, image: "camera" },
+    { id: "file", title: t`File`, image: "doc" },
   ];
 
   async function attach(source: string) {
@@ -54,9 +54,7 @@ export function ReplyComposer({
       const result = await picker(staged.length, attachmentMaxBytes());
       setStaged((current) => [...current, ...result.attachments]);
       setNotice(
-        result.skipped.length
-          ? t("Skipped {names}", { names: result.skipped.map((s) => s.name).join(", ") })
-          : "",
+        result.skipped.length ? t`Skipped ${result.skipped.map((s) => s.name).join(", ")}` : "",
       );
     } catch (cause) {
       onError(errorText(cause));
@@ -70,7 +68,7 @@ export function ReplyComposer({
       busy={busy}
       sendWithoutText={staged.length > 0}
       maxLength={TICKET_COMMENT_MAX_LENGTH}
-      placeholder={t("Reply")}
+      placeholder={t`Reply`}
       left={
         ownerBotId ? (
           <MenuView
@@ -81,7 +79,7 @@ export function ReplyComposer({
             <View
               accessible
               accessibilityRole="button"
-              accessibilityLabel={t("Attach file")}
+              accessibilityLabel={t`Attach file`}
               style={[styles.attach, { backgroundColor: tokens.muted }]}
             >
               <NativeSymbol ios="plus" android="add" size={18} color={tokens.mutedForeground} />
@@ -104,7 +102,7 @@ export function ReplyComposer({
                 <Pressable
                   key={file.id}
                   accessibilityRole="button"
-                  accessibilityLabel={t("Remove {name}", { name: file.name })}
+                  accessibilityLabel={t`Remove ${file.name}`}
                   onPress={() =>
                     setStaged((current) => current.filter((row) => row.id !== file.id))
                   }

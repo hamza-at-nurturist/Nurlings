@@ -11,20 +11,20 @@ upstream ships it so we can keep merging Rakazo updates.
 
 ## Scope
 
-| In scope | Out of scope |
-|---|---|
-| **Web app**: every visible "Rakazo", page titles, sign-in headings, sidebar, favicon, logo/wordmark, "Powered by Nurturist AI" line | API/server code beyond the items on the left, auth origins (`rakazo://` is kept) |
-| **Desktop (Electron)**: visible text, app display name, window title, icons, About screen (upstream has no tray; none added) | The bot User-Agent, internal error strings |
-| **Mobile (Expo)**: visible text, display name, icons, splash; **bundle id / Android package → `com.nurturistai.nurlings`** | Bot User-Agent |
-| **Visible links** in those UIs → https://nurlings.nurturistai.com; Rakazo Discord/GitHub/cloud links removed | `apps/www` marketing site |
-| **Desktop setup**: remove the option to sign in to Rakazo's hosted cloud | Telemetry (already env-gated; left alone) |
-| **Disable** desktop auto-updater and mobile OTA (no re-pointing) | Internal identifiers: `@rakazo/*`, `RAKAZO_*`, DB names |
-| **Central brand config** feeding all of the above | README, `docs/`, issue templates, `SECURITY.md` (left as-is) |
-| **LICENSE** kept; **NOTICE** with Rakazo credit | Provider-console names (OAuth/Slack/etc.) — listed as manual steps |
-| *(added)* **Disable server self-update** (just disable, no re-pointing) | |
-| *(added)* **Our own images**: a GitHub Actions workflow builds the images from this repo and pushes them to private GHCR; compose files and installer pull ours; documented client authentication | |
-| *(added)* **Server text clients see**: account emails, chat-channel messages, update messages, model/billing blurbs, OAuth client name — text only, from the brand config | |
-| *(added)* **Minimal API support for the new bundle id**: Android package in `assetlinks.json`; allowed origins unchanged | |
+| In scope                                                                                                                                                                                          | Out of scope                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Web app**: every visible "Rakazo", page titles, sign-in headings, sidebar, favicon, logo/wordmark, "Powered by Nurturist AI" line                                                               | API/server code beyond the items on the left, auth origins (`rakazo://` is kept) |
+| **Desktop (Electron)**: visible text, app display name, window title, icons, About screen (upstream has no tray; none added)                                                                      | The bot User-Agent, internal error strings                                       |
+| **Mobile (Expo)**: visible text, display name, icons, splash; **bundle id / Android package → `com.nurturistai.nurlings`**                                                                        | Bot User-Agent                                                                   |
+| **Visible links** in those UIs → https://nurlings.nurturistai.com; Rakazo Discord/GitHub/cloud links removed                                                                                      | `apps/www` marketing site                                                        |
+| **Desktop setup**: remove the option to sign in to Rakazo's hosted cloud                                                                                                                          | Telemetry (already env-gated; left alone)                                        |
+| **Disable** desktop auto-updater and mobile OTA (no re-pointing)                                                                                                                                  | Internal identifiers: `@rakazo/*`, `RAKAZO_*`, DB names                          |
+| **Central brand config** feeding all of the above                                                                                                                                                 | README, `docs/`, issue templates, `SECURITY.md` (left as-is)                     |
+| **LICENSE** kept; **NOTICE** with Rakazo credit                                                                                                                                                   | Provider-console names (OAuth/Slack/etc.) — listed as manual steps               |
+| _(added)_ **Disable server self-update** (just disable, no re-pointing)                                                                                                                           |                                                                                  |
+| _(added)_ **Our own images**: a GitHub Actions workflow builds the images from this repo and pushes them to private GHCR; compose files and installer pull ours; documented client authentication |                                                                                  |
+| _(added)_ **Server text clients see**: account emails, chat-channel messages, update messages, model/billing blurbs, OAuth client name — text only, from the brand config                         |                                                                                  |
+| _(added)_ **Minimal API support for the new bundle id**: Android package in `assetlinks.json`; allowed origins unchanged                                                                          |                                                                                  |
 
 Decisions you made (recorded in `design.md`): (1) UI copy says **Nurling / Nurlings** instead of
 bot/bots; (2) `apps/www` out; (3) bundle id and Android package → `com.nurturistai.nurlings`,
@@ -50,7 +50,7 @@ Expo owner and project id removed, clear placeholders left; (6) docs/privacy lin
 - **Server text** (text only): the four account emails (verify, sign-in code, password reset,
   account deletion), passkey/app name, chat-channel messages (group intro, "linked to your …
   agent", "Open … for details"), update messages, model/billing blurbs, MCP OAuth client name.
-  (There is no invite *email*: invites are chat-channel messages, covered above.)
+  (There is no invite _email_: invites are chat-channel messages, covered above.)
 - **Images**: new workflow `publish-nurlings-images.yml` builds `app`, `computer` and `updater` from
   this repo and pushes them to `ghcr.io/<owner>/nurlings/<name>` (private); upstream's publish
   workflow is guarded to run only in Rakazo's repo; compose defaults, `.env.images.example` and the
@@ -67,6 +67,7 @@ Expo owner and project id removed, clear placeholders left; (6) docs/privacy lin
 ## Capabilities
 
 ### New Capabilities
+
 - `brand-config`: single source of truth for brand values and how each surface consumes it.
 - `user-facing-branding`: all text people read — in the three UIs and in server-generated email,
   chat, update and settings text — says Nurlings / Nurling(s).
@@ -79,6 +80,7 @@ Expo owner and project id removed, clear placeholders left; (6) docs/privacy lin
 - `license-attribution`: Apache-2.0 compliance — `LICENSE` untouched, `NOTICE` with credit.
 
 ### Modified Capabilities
+
 None — `openspec/specs/` is empty; these specs are created by archiving this change.
 
 ## Impact
@@ -97,13 +99,13 @@ None — `openspec/specs/` is empty; these specs are created by archiving this c
 
 ## What stays as-is on purpose
 
-| Kept | Why |
-|---|---|
-| **`rakazo://` URL scheme**, Expo `slug`, desktop `appId` `dev.rakazo.desktop`, Linux `executableName` | Not needed for the bundle-id change (see below); keeps auth origins untouched |
-| `@rakazo/*` packages (≈2,300 references), `RAKAZO_*` env vars (incl. `RAKAZO_IMAGE`, `RAKAZO_DOWNLOAD_BASE`), `x-rakazo-*` headers, DB/Docker/systemd names, storage keys (`rakazo.*`), native module names, TS identifiers | Internal; renaming makes every upstream merge huge |
-| `OFFICIAL_REPO_URL`, `PUBLISHED_IMAGE_REPO`, updater sidecar logic | Self-update is disabled, not re-pointed; the code is unreachable |
-| Bot User-Agent, internal error messages (`throw new Error(…)`), `apps/www`, README/docs, telemetry wiring | Out of scope |
-| Model-facing prompts ("You are a Rakazo bot…"): the fallback system prompts, the helper prompt, the approval-resume text and the summarizer prompt | In scope (added later); so are the automated-message label and the compaction prefix (upstream wording still matched) |
+| Kept                                                                                                                                                                                                                        | Why                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **`rakazo://` URL scheme**, Expo `slug`, desktop `appId` `dev.rakazo.desktop`, Linux `executableName`                                                                                                                       | Not needed for the bundle-id change (see below); keeps auth origins untouched                                         |
+| `@rakazo/*` packages (≈2,300 references), `RAKAZO_*` env vars (incl. `RAKAZO_IMAGE`, `RAKAZO_DOWNLOAD_BASE`), `x-rakazo-*` headers, DB/Docker/systemd names, storage keys (`rakazo.*`), native module names, TS identifiers | Internal; renaming makes every upstream merge huge                                                                    |
+| `OFFICIAL_REPO_URL`, `PUBLISHED_IMAGE_REPO`, updater sidecar logic                                                                                                                                                          | Self-update is disabled, not re-pointed; the code is unreachable                                                      |
+| Bot User-Agent, internal error messages (`throw new Error(…)`), `apps/www`, README/docs, telemetry wiring                                                                                                                   | Out of scope                                                                                                          |
+| Model-facing prompts ("You are a Rakazo bot…"): the fallback system prompts, the helper prompt, the approval-resume text and the summarizer prompt                                                                          | In scope (added later); so are the automated-message label and the compaction prefix (upstream wording still matched) |
 
 Rule of thumb: **if a client or their users can read it in an app, an email, a chat message or a
 settings screen, it is branded; if only code or an operator log can, it stays.**
@@ -162,20 +164,20 @@ a new generator (`export:assets`) derives every platform size from them, upstrea
 `export:brand` command delegates to it, and nothing is written into `apps/www`. Drop real artwork over the files
 marked **source**; do not hand-edit generated files.
 
-| Surface | File(s) the app uses | Size / format | Source asset |
-|---|---|---|---|
-| macOS (Electron) | `Nurlings.icon` bundle (Icon Composer; compiled by electron-builder, Xcode 26+) | 1024×1024 PNG layer | `app-icon/Nurlings.icon` |
-| Windows (Electron) | `icon.ico` | frames 16, 32, 48, 64, 128, 256 | `app-icon/app-icon-1024.png` |
-| Linux (Electron) | `icon.png` | 1024×1024 (≥512 required) | `app-icon/app-icon-1024.png` |
-| Tray (Electron) | — upstream has no tray; none added | — | — |
-| iOS | `Nurlings.icon` bundle (Expo `ios.icon`); App Store icon | 1024×1024; **no alpha** for the store copy | `app-icon/Nurlings.icon` |
-| Android launcher | `icon.png`; adaptive `foreground`, `background`, `monochrome` | 1024×1024 each; adaptive art inside the central 66% safe zone | `android/*` |
-| Android notification | `notification-icon.png` | 72×72 white-on-alpha silhouette | `android/notification-72.png` |
-| Android store (manual) | Play hi-res icon / feature graphic | 512×512 / 1024×500 | `app-icon`, `social` |
-| Mobile splash | `splash-icon.png` (+ bg `#FCFCFC` light / `#141414` dark from brand colours) | 1024×1024 transparent, art ≈620px centred | `splash/splash-icon-1024.png` |
-| Mobile web | `favicon.png` | 128×128 | `favicon/favicon-128.png` |
-| Web app (`apps/web/public`) | `favicon.ico` (16, 32, 48), `favicon-16x16`, `favicon-32x32`, `favicon.png` 128, `apple-touch-icon` 180, `icon-192`, `icon-512`, manifest icons | as listed | `app-icon/app-icon-1024.png` |
-| In-app wordmark | `Wordmark` component in `packages/ui-web` (CSS face + name today) | SVG/CSS; reads brand name | `logo/nurlings-wordmark.svg` |
+| Surface                     | File(s) the app uses                                                                                                                            | Size / format                                                 | Source asset                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ----------------------------- |
+| macOS (Electron)            | `Nurlings.icon` bundle (Icon Composer; compiled by electron-builder, Xcode 26+)                                                                 | 1024×1024 PNG layer                                           | `app-icon/Nurlings.icon`      |
+| Windows (Electron)          | `icon.ico`                                                                                                                                      | frames 16, 32, 48, 64, 128, 256                               | `app-icon/app-icon-1024.png`  |
+| Linux (Electron)            | `icon.png`                                                                                                                                      | 1024×1024 (≥512 required)                                     | `app-icon/app-icon-1024.png`  |
+| Tray (Electron)             | — upstream has no tray; none added                                                                                                              | —                                                             | —                             |
+| iOS                         | `Nurlings.icon` bundle (Expo `ios.icon`); App Store icon                                                                                        | 1024×1024; **no alpha** for the store copy                    | `app-icon/Nurlings.icon`      |
+| Android launcher            | `icon.png`; adaptive `foreground`, `background`, `monochrome`                                                                                   | 1024×1024 each; adaptive art inside the central 66% safe zone | `android/*`                   |
+| Android notification        | `notification-icon.png`                                                                                                                         | 72×72 white-on-alpha silhouette                               | `android/notification-72.png` |
+| Android store (manual)      | Play hi-res icon / feature graphic                                                                                                              | 512×512 / 1024×500                                            | `app-icon`, `social`          |
+| Mobile splash               | `splash-icon.png` (+ bg `#FCFCFC` light / `#141414` dark from brand colours)                                                                    | 1024×1024 transparent, art ≈620px centred                     | `splash/splash-icon-1024.png` |
+| Mobile web                  | `favicon.png`                                                                                                                                   | 128×128                                                       | `favicon/favicon-128.png`     |
+| Web app (`apps/web/public`) | `favicon.ico` (16, 32, 48), `favicon-16x16`, `favicon-32x32`, `favicon.png` 128, `apple-touch-icon` 180, `icon-192`, `icon-512`, manifest icons | as listed                                                     | `app-icon/app-icon-1024.png`  |
+| In-app wordmark             | `Wordmark` component in `packages/ui-web` (CSS face + name today)                                                                               | SVG/CSS; reads brand name                                     | `logo/nurlings-wordmark.svg`  |
 
 The Rakazo orange-bot mascot and `rakazo-mark.png` are not reused anywhere in our branding.
 
@@ -198,15 +200,14 @@ per area with their top tokens, not per line. Some in-scope lines are listed for
 deliberately not changed: internal `throw new Error(…)` strings in `team-chat-bridge.ts` and the
 repo-matching constants/tests in `self-update.ts` (self-update is disabled, not re-pointed).
 
-
 Total occurrences in tracked text files: **8696** in **1565** files.
 
-| Group | In scope: hits (files) | Out of scope: hits (files) |
-|---|---:|---:|
-| user-facing | 438 (80) | 552 (108) |
-| app-identity | 26 (8) | 20 (7) |
-| external-links | 43 (15) | 256 (52) |
-| internal | 2477 (696) | 4884 (803) |
+| Group          | In scope: hits (files) | Out of scope: hits (files) |
+| -------------- | ---------------------: | -------------------------: |
+| user-facing    |               438 (80) |                  552 (108) |
+| app-identity   |                 26 (8) |                     20 (7) |
+| external-links |                43 (15) |                   256 (52) |
+| internal       |             2477 (696) |                 4884 (803) |
 
 **In scope** = (a) customer-facing UI: `apps/web`, `apps/desktop`, `apps/mobile`, `packages/ui-web`, `packages/chat-ui`, `packages/ui-tokens`, and three shared UI constants in `packages/contracts`; (b) the dedicated-server files listed in `SERVER_SCOPE_FILES` in `inventory.py` (account emails, chat-channel text, update messages, model/billing blurbs, OAuth client name, Android package for passkeys, compose files, installer, image workflow). **Out of scope** = everything else (rest of API/server, adapters, core, infra, CI, docs, `apps/www`, root docs, test kit). Out-of-scope hits are kept as-is.
 
@@ -341,40 +342,39 @@ Total occurrences in tracked text files: **8696** in **1565** files.
 
 ### Out of scope — 552 hits (left as-is)
 
-| Area | Hits | Files | Top tokens |
-|---|---:|---:|---|
-| apps/www | 381 | 41 | `Rakazo` ×380, `Rakazo-Startseite` ×1 |
-| docs/self-host.md | 25 | 1 | `Rakazo` ×25 |
-| packages/testkit (tests) | 19 | 7 | `Rakazo` ×18, `Contents/MacOS/Rakazo` ×1 |
-| packages/adapters (tests) | 17 | 11 | `Rakazo` ×14, `Rakazo-owned` ×3 |
-| README.md | 14 | 1 | `Rakazo` ×14 |
-| packages/adapters | 14 | 9 | `Rakazo` ×11, `Rakazo-owned` ×3 |
-| docs/computer-runtime.md | 9 | 1 | `Rakazo` ×6, `Rakazo-owned` ×3 |
-| infra/railway | 9 | 1 | `Rakazo` ×9 |
-| infra/compose | 8 | 4 | `Rakazo` ×8 |
-| SETUP_PROMPT.md | 7 | 1 | `Rakazo` ×7 |
-| .github/ISSUE_TEMPLATE | 5 | 3 | `Rakazo` ×5 |
-| VISION.md | 5 | 1 | `Rakazo` ×5 |
-| infra/sandboxes | 5 | 4 | `Rakazo` ×5 |
-| apps/www (tests) | 4 | 2 | `Rakazo` ×4 |
-| .github/workflows | 3 | 3 | `out/mac-arm64/Rakazo.app/Contents/MacOS/Rakazo` ×1, `Rakazo` ×1, `app/Contents/MacOS/Rakazo` ×1 |
-| CHANGELOG.md | 3 | 1 | `Rakazo` ×3 |
-| docs/mobile-release.md | 3 | 1 | `Rakazo` ×3 |
-| packages/auth (tests) | 3 | 1 | `Rakazo` ×3 |
-| CONTRIBUTING.md | 2 | 1 | `Rakazo` ×2 |
-| apps/api (tests) | 2 | 1 | `Rakazo` ×2 |
-| docs/agent-verification.md | 2 | 1 | `Rakazo` ×2 |
-| infra/systemd | 2 | 2 | `Rakazo` ×2 |
-| packages/core | 2 | 2 | `d:Rakazo` ×1, `Rakazo` ×1 |
-| AGENTS.md | 1 | 1 | `Rakazo` ×1 |
-| LICENSE | 1 | 1 | `Rakazo` ×1 |
-| SECURITY.md | 1 | 1 | `Rakazo` ×1 |
-| docs/ai-data-sharing-review.md | 1 | 1 | `Rakazo` ×1 |
-| docs/content-encryption.md | 1 | 1 | `Rakazo` ×1 |
-| docs/context-and-evals-tasks.md | 1 | 1 | `Rakazo` ×1 |
-| docs/performance.md | 1 | 1 | `Rakazo` ×1 |
-| infra/compose (tests) | 1 | 1 | `Rakazo` ×1 |
-
+| Area                            | Hits | Files | Top tokens                                                                                       |
+| ------------------------------- | ---: | ----: | ------------------------------------------------------------------------------------------------ |
+| apps/www                        |  381 |    41 | `Rakazo` ×380, `Rakazo-Startseite` ×1                                                            |
+| docs/self-host.md               |   25 |     1 | `Rakazo` ×25                                                                                     |
+| packages/testkit (tests)        |   19 |     7 | `Rakazo` ×18, `Contents/MacOS/Rakazo` ×1                                                         |
+| packages/adapters (tests)       |   17 |    11 | `Rakazo` ×14, `Rakazo-owned` ×3                                                                  |
+| README.md                       |   14 |     1 | `Rakazo` ×14                                                                                     |
+| packages/adapters               |   14 |     9 | `Rakazo` ×11, `Rakazo-owned` ×3                                                                  |
+| docs/computer-runtime.md        |    9 |     1 | `Rakazo` ×6, `Rakazo-owned` ×3                                                                   |
+| infra/railway                   |    9 |     1 | `Rakazo` ×9                                                                                      |
+| infra/compose                   |    8 |     4 | `Rakazo` ×8                                                                                      |
+| SETUP_PROMPT.md                 |    7 |     1 | `Rakazo` ×7                                                                                      |
+| .github/ISSUE_TEMPLATE          |    5 |     3 | `Rakazo` ×5                                                                                      |
+| VISION.md                       |    5 |     1 | `Rakazo` ×5                                                                                      |
+| infra/sandboxes                 |    5 |     4 | `Rakazo` ×5                                                                                      |
+| apps/www (tests)                |    4 |     2 | `Rakazo` ×4                                                                                      |
+| .github/workflows               |    3 |     3 | `out/mac-arm64/Rakazo.app/Contents/MacOS/Rakazo` ×1, `Rakazo` ×1, `app/Contents/MacOS/Rakazo` ×1 |
+| CHANGELOG.md                    |    3 |     1 | `Rakazo` ×3                                                                                      |
+| docs/mobile-release.md          |    3 |     1 | `Rakazo` ×3                                                                                      |
+| packages/auth (tests)           |    3 |     1 | `Rakazo` ×3                                                                                      |
+| CONTRIBUTING.md                 |    2 |     1 | `Rakazo` ×2                                                                                      |
+| apps/api (tests)                |    2 |     1 | `Rakazo` ×2                                                                                      |
+| docs/agent-verification.md      |    2 |     1 | `Rakazo` ×2                                                                                      |
+| infra/systemd                   |    2 |     2 | `Rakazo` ×2                                                                                      |
+| packages/core                   |    2 |     2 | `d:Rakazo` ×1, `Rakazo` ×1                                                                       |
+| AGENTS.md                       |    1 |     1 | `Rakazo` ×1                                                                                      |
+| LICENSE                         |    1 |     1 | `Rakazo` ×1                                                                                      |
+| SECURITY.md                     |    1 |     1 | `Rakazo` ×1                                                                                      |
+| docs/ai-data-sharing-review.md  |    1 |     1 | `Rakazo` ×1                                                                                      |
+| docs/content-encryption.md      |    1 |     1 | `Rakazo` ×1                                                                                      |
+| docs/context-and-evals-tasks.md |    1 |     1 | `Rakazo` ×1                                                                                      |
+| docs/performance.md             |    1 |     1 | `Rakazo` ×1                                                                                      |
+| infra/compose (tests)           |    1 |     1 | `Rakazo` ×1                                                                                      |
 
 ## App identity (Electron/Expo display names, icons, splash, favicons, manifests)
 
@@ -402,14 +402,13 @@ Total occurrences in tracked text files: **8696** in **1565** files.
 
 ### Out of scope — 20 hits (left as-is)
 
-| Area | Hits | Files | Top tokens |
-|---|---:|---:|---|
-| apps/www (tests) | 8 | 2 | `Rakazo-1.0.0-universal.dmg` ×2, `Rakazo-1.0.0.AppImage` ×2, `Rakazo-2.0.0-universal.dmg` ×1 |
-| .github/workflows | 6 | 2 | `apps/desktop/out/mac-universal/Rakazo.app` ×2, `apps/desktop/out/mac-arm64/Rakazo.app/Contents/Resources/Assets.car` ×1, `apps/desktop/out/mac-arm64/Rakazo.app/Contents/Resources/icon.icns` ×1 |
-| README.md | 2 | 1 | `Rakazo-` ×1, `./Rakazo-` ×1 |
-| apps/www | 2 | 1 | `Rakazo` ×2 |
-| packages/testkit (tests) | 2 | 1 | `Rakazo.app` ×2 |
-
+| Area                     | Hits | Files | Top tokens                                                                                                                                                                                        |
+| ------------------------ | ---: | ----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| apps/www (tests)         |    8 |     2 | `Rakazo-1.0.0-universal.dmg` ×2, `Rakazo-1.0.0.AppImage` ×2, `Rakazo-2.0.0-universal.dmg` ×1                                                                                                      |
+| .github/workflows        |    6 |     2 | `apps/desktop/out/mac-universal/Rakazo.app` ×2, `apps/desktop/out/mac-arm64/Rakazo.app/Contents/Resources/Assets.car` ×1, `apps/desktop/out/mac-arm64/Rakazo.app/Contents/Resources/icon.icns` ×1 |
+| README.md                |    2 |     1 | `Rakazo-` ×1, `./Rakazo-` ×1                                                                                                                                                                      |
+| apps/www                 |    2 |     1 | `Rakazo` ×2                                                                                                                                                                                       |
+| packages/testkit (tests) |    2 |     1 | `Rakazo.app` ×2                                                                                                                                                                                   |
 
 ## External links (rakazo.com, GitHub, Discord, Cloud/waitlist, store/APK, registries, update feeds)
 
@@ -456,30 +455,29 @@ Total occurrences in tracked text files: **8696** in **1565** files.
 
 ### Out of scope — 256 hits (left as-is)
 
-| Area | Hits | Files | Top tokens |
-|---|---:|---:|---|
-| apps/www | 120 | 17 | `hello@rakazo.com` ×11, `https://rakazo.com/self-hosted-ai-agent` ×10, `https://github.com/elie222/rakazo/blob/main/docs/self-host.md` ×9 |
-| README.md | 22 | 1 | `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` ×4, `https://apps.apple.com/app/rakazo/id6801531099` ×2, `https://img.shields.io/github/stars/elie222/rakazo` ×1 |
-| apps/www (tests) | 17 | 3 | `https://rakazo.com` ×5, `https://github.com/elie222/rakazo/releases/download/v2.0.0/Rakazo-2.0.0-universal.dmg` ×2, `www.rakazo.com` ×2 |
-| packages/adapters (tests) | 13 | 5 | `elie222/rakazo` ×6, `http://localhost:6767/v3/container-tags/rakazo` ×3, `Rakazo/0.1` ×2 |
-| packages/core (tests) | 13 | 2 | `https://github.com/elie222/rakazo.git` ×3, `https://github.com/elie222/rakazo` ×2, `https://git.example.com:8443/team/rakazo.git` ×2 |
-| .github/ISSUE_TEMPLATE | 11 | 3 | `security@rakazo.com` ×3, `https://github.com/elie222/rakazo/blob/main/SECURITY.md` ×3, `mailto:security@rakazo.com` ×2 |
-| packages/adapters | 11 | 5 | `Rakazo/0.1` ×4, `https://github.com/elie222/rakazo` ×4, `https://github.com/elie222/rakazo/releases/tag/v0.4.2` ×1 |
-| docs/self-host.md | 8 | 1 | `ghcr.io/elie222/rakazo/computer` ×3, `ghcr.io/elie222/rakazo/app` ×2, `https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose/install-images.sh` ×1 |
-| CONTRIBUTING.md | 6 | 1 | `security@rakazo.com` ×1, `mailto:security@rakazo.com` ×1, `support@rakazo.com` ×1 |
-| infra/sandboxes (tests) | 6 | 1 | `ghcr.io/elie222/rakazo/computer` ×3, `ghcr.io/elie222/rakazo/computer:edge` ×3 |
-| infra/updater (tests) | 6 | 1 | `https://github.com/elie222/rakazo` ×6 |
-| apps/api (tests) | 5 | 1 | `https://github.com/elie222/rakazo` ×3, `ghcr.io/elie222/rakazo/app` ×2 |
-| .github/workflows | 3 | 2 | `inbox-zero/rakazo` ×2, `https://app.rakazo.com` ×1 |
-| SECURITY.md | 3 | 1 | `security@rakazo.com` ×1, `support@rakazo.com` ×1, `elie@rakazo.com` ×1 |
-| .env.example | 2 | 1 | `ghcr.io/elie222/rakazo/app` ×1, `ghcr.io/elie222/rakazo/updater` ×1 |
-| SETUP_PROMPT.md | 2 | 1 | `https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose/install-images.sh` ×1, `https://github.com/elie222/rakazo.git` ×1 |
-| docs/mobile-release.md | 2 | 1 | `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` ×2 |
-| infra/compose | 2 | 1 | `RAKAZO_HOST:app.example.com` ×2 |
-| packages/testkit (tests) | 2 | 2 | `https://github.com/elie222/rakazo/actions` ×1, `elie222/rakazo` ×1 |
-| infra/railway | 1 | 1 | `https://railway.com/new/template/rakazo-template` ×1 |
-| packages/core | 1 | 1 | `elie222/rakazo` ×1 |
-
+| Area                      | Hits | Files | Top tokens                                                                                                                                                                                |
+| ------------------------- | ---: | ----: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| apps/www                  |  120 |    17 | `hello@rakazo.com` ×11, `https://rakazo.com/self-hosted-ai-agent` ×10, `https://github.com/elie222/rakazo/blob/main/docs/self-host.md` ×9                                                 |
+| README.md                 |   22 |     1 | `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` ×4, `https://apps.apple.com/app/rakazo/id6801531099` ×2, `https://img.shields.io/github/stars/elie222/rakazo` ×1 |
+| apps/www (tests)          |   17 |     3 | `https://rakazo.com` ×5, `https://github.com/elie222/rakazo/releases/download/v2.0.0/Rakazo-2.0.0-universal.dmg` ×2, `www.rakazo.com` ×2                                                  |
+| packages/adapters (tests) |   13 |     5 | `elie222/rakazo` ×6, `http://localhost:6767/v3/container-tags/rakazo` ×3, `Rakazo/0.1` ×2                                                                                                 |
+| packages/core (tests)     |   13 |     2 | `https://github.com/elie222/rakazo.git` ×3, `https://github.com/elie222/rakazo` ×2, `https://git.example.com:8443/team/rakazo.git` ×2                                                     |
+| .github/ISSUE_TEMPLATE    |   11 |     3 | `security@rakazo.com` ×3, `https://github.com/elie222/rakazo/blob/main/SECURITY.md` ×3, `mailto:security@rakazo.com` ×2                                                                   |
+| packages/adapters         |   11 |     5 | `Rakazo/0.1` ×4, `https://github.com/elie222/rakazo` ×4, `https://github.com/elie222/rakazo/releases/tag/v0.4.2` ×1                                                                       |
+| docs/self-host.md         |    8 |     1 | `ghcr.io/elie222/rakazo/computer` ×3, `ghcr.io/elie222/rakazo/app` ×2, `https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose/install-images.sh` ×1                         |
+| CONTRIBUTING.md           |    6 |     1 | `security@rakazo.com` ×1, `mailto:security@rakazo.com` ×1, `support@rakazo.com` ×1                                                                                                        |
+| infra/sandboxes (tests)   |    6 |     1 | `ghcr.io/elie222/rakazo/computer` ×3, `ghcr.io/elie222/rakazo/computer:edge` ×3                                                                                                           |
+| infra/updater (tests)     |    6 |     1 | `https://github.com/elie222/rakazo` ×6                                                                                                                                                    |
+| apps/api (tests)          |    5 |     1 | `https://github.com/elie222/rakazo` ×3, `ghcr.io/elie222/rakazo/app` ×2                                                                                                                   |
+| .github/workflows         |    3 |     2 | `inbox-zero/rakazo` ×2, `https://app.rakazo.com` ×1                                                                                                                                       |
+| SECURITY.md               |    3 |     1 | `security@rakazo.com` ×1, `support@rakazo.com` ×1, `elie@rakazo.com` ×1                                                                                                                   |
+| .env.example              |    2 |     1 | `ghcr.io/elie222/rakazo/app` ×1, `ghcr.io/elie222/rakazo/updater` ×1                                                                                                                      |
+| SETUP_PROMPT.md           |    2 |     1 | `https://raw.githubusercontent.com/elie222/rakazo/main/infra/compose/install-images.sh` ×1, `https://github.com/elie222/rakazo.git` ×1                                                    |
+| docs/mobile-release.md    |    2 |     1 | `https://github.com/elie222/rakazo/releases/download/android/rakazo.apk` ×2                                                                                                               |
+| infra/compose             |    2 |     1 | `RAKAZO_HOST:app.example.com` ×2                                                                                                                                                          |
+| packages/testkit (tests)  |    2 |     2 | `https://github.com/elie222/rakazo/actions` ×1, `elie222/rakazo` ×1                                                                                                                       |
+| infra/railway             |    1 |     1 | `https://railway.com/new/template/rakazo-template` ×1                                                                                                                                     |
+| packages/core             |    1 |     1 | `elie222/rakazo` ×1                                                                                                                                                                       |
 
 ## Internal (@rakazo/* packages, RAKAZO_* env, DB/Docker names, code identifiers, comments)
 
@@ -571,73 +569,72 @@ Top tokens: `https://rakazo.test/reset-password` ×2
 
 ### Out of scope — 4884 hits (left as-is)
 
-| Area | Hits | Files | Top tokens |
-|---|---:|---:|---|
-| packages/adapters (tests) | 857 | 164 | `@rakazo/adapter-kit` ×113, `@rakazo/db` ×49, `rakazo-push-` ×38 |
-| packages/adapters | 639 | 185 | `@rakazo/adapter-kit` ×169, `@rakazo/contracts` ×78, `@rakazo/db` ×70 |
-| infra/sandboxes (tests) | 522 | 13 | `rakazo-browser` ×55, `rakazo.botId` ×46, `rakazo.managed` ×33 |
-| packages/testkit (tests) | 486 | 83 | `@rakazo.test` ×136, `@rakazo/adapters` ×39, `@rakazo/db` ×36 |
-| infra/sandboxes | 376 | 23 | `rakazo-browser` ×38, `rakazo-focus-or-launch` ×23, `/home/rakazo` ×19 |
-| apps/api (tests) | 262 | 48 | `user@rakazo.test` ×54, `@rakazo/db` ×41, `@rakazo/contracts` ×29 |
-| infra/compose | 240 | 17 | `rakazo-c` ×38, `RAKAZO_IPTABLES` ×9, `RAKAZO_IP6TABLES` ×9 |
-| apps/api | 213 | 47 | `@rakazo/db` ×48, `@rakazo/contracts` ×39, `@rakazo/adapter-kit` ×25 |
-| docs/self-host.md | 165 | 1 | `RAKAZO_DEPLOY_DIR` ×12, `/srv/rakazo` ×10, `rakazo` ×7 |
-| apps/www | 160 | 23 | `rakazo` ×89, `row.rakazo` ×6, `/blog/openclaw-vs-hermes-vs-rakazo` ×5 |
-| packages/core (tests) | 136 | 25 | `@rakazo/contracts` ×22, `RAKAZO_DESKTOP` ×13, `/tmp/rakazo` ×11 |
-| packages/core | 118 | 37 | `@rakazo/contracts` ×35, `/tmp/rakazo` ×7, `/tmp/rakazo/browser-profile-` ×4 |
-| infra/updater (tests) | 104 | 7 | `RAKAZO_IMAGE_TAG` ×17, `RAKAZO_UPDATER_TOKEN` ×7, `RAKAZO_DEPLOY_DIR` ×7 |
-| packages/db | 77 | 31 | `@rakazo/contracts` ×23, `rakazo_app` ×16, `@rakazo/core` ×14 |
-| .github/workflows | 74 | 10 | `postgres://rakazo:rakazo` ×14, `@rakazo/desktop` ×10, `postgres://rakazo:rakazo@127.0.0.1:5433/rakazo` ×7 |
-| pnpm-lock.yaml | 59 | 1 | `@rakazo/* (lockfile)` ×59 |
-| .env.example | 50 | 1 | `rakazo` ×3, `RAKAZO_DEPLOY_DIR` ×3, `RAKAZO_COMPOSE_FILE` ×3 |
-| packages/logging (tests) | 48 | 5 | `rakazo-api` ×35, `rakazo-worker` ×6, `rakazo-logs` ×3 |
-| packages/db (tests) | 36 | 14 | `@rakazo/contracts` ×7, `@rakazo.test` ×5, `postgres://rakazo:rakazo` ×4 |
-| infra/updater | 29 | 4 | `@rakazo/core` ×4, `@rakazo/logging` ×3, `@rakazo/updater` ×2 |
-| docs/self-host-restricted-network.md | 24 | 1 | `RAKAZO_DOWNLOAD_BASE` ×4, `RAKAZO_INSTALLER_URL` ×3, `RAKAZO_DOWNLOAD_SKIP_EXISTING` ×2 |
-| apps/worker | 21 | 3 | `@rakazo/adapters` ×4, `@rakazo/core` ×4, `@rakazo/adapter-kit` ×3 |
-| packages/contracts | 16 | 7 | `Rakazo  (comment)` ×4, `RakazoDesktopUpdate` ×2, `RakazoDesktopOAuthCallback` ×2 |
-| infra/systemd | 15 | 4 | `rakazo/alerts` ×3, `/var/lib/rakazo/alerts` ×3, `-/etc/rakazo/backup.env` ×2 |
-| packages/auth (tests) | 12 | 3 | `@rakazo/db` ×5, `rakazo://sign-in` ×2, `rakazo` ×2 |
-| README.md | 11 | 1 | `rakazo` ×3, `RAKAZO_DOWNLOAD_BASE` ×1, `RAKAZO_DOWNLOAD_SKIP_EXISTING` ×1 |
-| infra/railway | 11 | 2 | `@rakazo/api` ×4, `@rakazo/worker` ×2, `@rakazo/web` ×2 |
-| package.json | 10 | 1 | `@rakazo/db` ×3, `@rakazo/api` ×2, `rakazo` ×1 |
-| SETUP_PROMPT.md | 9 | 1 | `rakazo_app` ×3, `RAKAZO_INSTALLER_URL` ×1, `https://example.com/mirror/rakazo/infra/compose/install-images.sh` ×1 |
-| infra/compose (tests) | 8 | 1 | `rakazo` ×3, `/var/lib/rakazo/firewall-change` ×1, `/usr/local/sbin/rakazo-host-alert` ×1 |
-| scripts/restore.sh | 8 | 1 | `rakazo` ×5, `rakazo_app` ×2, `SRC/rakazo.sql` ×1 |
-| packages/logging | 7 | 4 | `@rakazo/logging` ×1, `rakazo-api` ×1, `rakazo-worker` ×1 |
-| packages/memory | 7 | 2 | `@rakazo/adapter-kit` ×3, `@rakazo/db` ×3, `@rakazo/memory` ×1 |
-| packages/auth | 6 | 3 | `@rakazo/core` ×2, `@rakazo/db` ×2, `@rakazo/auth` ×1 |
-| packages/contracts (tests) | 6 | 3 | `RAKAZO_TOKEN` ×2, `RAKAZO_CSP_SCRIPT_SRC` ×2, `rakazo-token` ×1 |
-| CHANGELOG.md | 5 | 1 | `rakazo_app` ×1, `RAKAZO_OPENAI_COMPAT_PRIVATE_HOSTS` ×1, `RAKAZO_LOCAL_MODELS` ×1 |
-| docs/content-encryption.md | 5 | 1 | `@rakazo/api` ×4, `@rakazo/adapter-kit` ×1 |
-| docs/infisical-secrets.md | 5 | 1 | `@rakazo/api` ×4, `/rakazo` ×1 |
-| docs/self-host-secrets.md | 5 | 1 | `rakazo` ×2, `rakazo_app` ×1, `RAKAZO_UPDATER_TOKEN` ×1 |
-| packages/adapter-kit | 5 | 4 | `@rakazo/contracts` ×4, `@rakazo/adapter-kit` ×1 |
-| packages/memory (tests) | 4 | 2 | `@rakazo/adapter-kit` ×2, `@rakazo/db` ×2 |
-| scripts/backup.sh | 4 | 1 | `rakazo` ×2, `OUT/rakazo.sql` ×1, `RAKAZO_BACKUP_SKIP_HOMES:-0` ×1 |
-| docs/bot-secrets.md | 3 | 1 | `RAKAZO_SECRETS_ALLOW_PRIVATE_HTTP` ×2, `RAKAZO_` ×1 |
-| docs/computer-runtime.md | 3 | 1 | `rakazo` ×1, `/home/user/rakazo-home` ×1, `RAKAZO_COMPUTER_IMAGE` ×1 |
-| docs/self-host-sandbox-providers.md | 3 | 1 | `RAKAZO_COMPUTER_IMAGE` ×1, `RAKAZO_COMPUTER_IMAGE_TAG` ×1, `rakazo-computer` ×1 |
-| turbo.json | 3 | 1 | `RAKAZO_HOST` ×1, `RAKAZO_DEV_HOST` ×1, `RAKAZO_ALLOWED_HOSTS` ×1 |
-| .github/scripts | 2 | 1 | `/rakazo-mobile-screenshots.log` ×1, `/rakazo-mobile-android.log` ×1 |
-| AGENTS.md | 2 | 1 | `@rakazo/desktop` ×1, `@rakazo/ui-tokens` ×1 |
-| CONTRIBUTING.md | 2 | 1 | `@rakazo/web` ×2 |
-| apps/www (tests) | 2 | 1 | `process.env.RAKAZO_GITHUB_API` ×2 |
-| docs/agent-verification.md | 2 | 1 | `rakazo/computer:local` ×2 |
-| .agents/skills | 1 | 1 | `rakazo-playwright-screenshots` ×1 |
-| .agents/skills (tests) | 1 | 1 | `rakazo-playwright-screenshots` ×1 |
-| .gitattributes | 1 | 1 | `infra/sandboxes/computer/rakazo-browser` ×1 |
-| apps/worker (tests) | 1 | 1 | `@rakazo/adapters` ×1 |
-| docs/mobile-release.md | 1 | 1 | `@rakazo/mobile` ×1 |
-| docs/tool-activity.md | 1 | 1 | `rakazo.showToolActivity` ×1 |
-| scripts/build-server.mjs | 1 | 1 | `@rakazo` ×1 |
-
+| Area                                 | Hits | Files | Top tokens                                                                                                         |
+| ------------------------------------ | ---: | ----: | ------------------------------------------------------------------------------------------------------------------ |
+| packages/adapters (tests)            |  857 |   164 | `@rakazo/adapter-kit` ×113, `@rakazo/db` ×49, `rakazo-push-` ×38                                                   |
+| packages/adapters                    |  639 |   185 | `@rakazo/adapter-kit` ×169, `@rakazo/contracts` ×78, `@rakazo/db` ×70                                              |
+| infra/sandboxes (tests)              |  522 |    13 | `rakazo-browser` ×55, `rakazo.botId` ×46, `rakazo.managed` ×33                                                     |
+| packages/testkit (tests)             |  486 |    83 | `@rakazo.test` ×136, `@rakazo/adapters` ×39, `@rakazo/db` ×36                                                      |
+| infra/sandboxes                      |  376 |    23 | `rakazo-browser` ×38, `rakazo-focus-or-launch` ×23, `/home/rakazo` ×19                                             |
+| apps/api (tests)                     |  262 |    48 | `user@rakazo.test` ×54, `@rakazo/db` ×41, `@rakazo/contracts` ×29                                                  |
+| infra/compose                        |  240 |    17 | `rakazo-c` ×38, `RAKAZO_IPTABLES` ×9, `RAKAZO_IP6TABLES` ×9                                                        |
+| apps/api                             |  213 |    47 | `@rakazo/db` ×48, `@rakazo/contracts` ×39, `@rakazo/adapter-kit` ×25                                               |
+| docs/self-host.md                    |  165 |     1 | `RAKAZO_DEPLOY_DIR` ×12, `/srv/rakazo` ×10, `rakazo` ×7                                                            |
+| apps/www                             |  160 |    23 | `rakazo` ×89, `row.rakazo` ×6, `/blog/openclaw-vs-hermes-vs-rakazo` ×5                                             |
+| packages/core (tests)                |  136 |    25 | `@rakazo/contracts` ×22, `RAKAZO_DESKTOP` ×13, `/tmp/rakazo` ×11                                                   |
+| packages/core                        |  118 |    37 | `@rakazo/contracts` ×35, `/tmp/rakazo` ×7, `/tmp/rakazo/browser-profile-` ×4                                       |
+| infra/updater (tests)                |  104 |     7 | `RAKAZO_IMAGE_TAG` ×17, `RAKAZO_UPDATER_TOKEN` ×7, `RAKAZO_DEPLOY_DIR` ×7                                          |
+| packages/db                          |   77 |    31 | `@rakazo/contracts` ×23, `rakazo_app` ×16, `@rakazo/core` ×14                                                      |
+| .github/workflows                    |   74 |    10 | `postgres://rakazo:rakazo` ×14, `@rakazo/desktop` ×10, `postgres://rakazo:rakazo@127.0.0.1:5433/rakazo` ×7         |
+| pnpm-lock.yaml                       |   59 |     1 | `@rakazo/* (lockfile)` ×59                                                                                         |
+| .env.example                         |   50 |     1 | `rakazo` ×3, `RAKAZO_DEPLOY_DIR` ×3, `RAKAZO_COMPOSE_FILE` ×3                                                      |
+| packages/logging (tests)             |   48 |     5 | `rakazo-api` ×35, `rakazo-worker` ×6, `rakazo-logs` ×3                                                             |
+| packages/db (tests)                  |   36 |    14 | `@rakazo/contracts` ×7, `@rakazo.test` ×5, `postgres://rakazo:rakazo` ×4                                           |
+| infra/updater                        |   29 |     4 | `@rakazo/core` ×4, `@rakazo/logging` ×3, `@rakazo/updater` ×2                                                      |
+| docs/self-host-restricted-network.md |   24 |     1 | `RAKAZO_DOWNLOAD_BASE` ×4, `RAKAZO_INSTALLER_URL` ×3, `RAKAZO_DOWNLOAD_SKIP_EXISTING` ×2                           |
+| apps/worker                          |   21 |     3 | `@rakazo/adapters` ×4, `@rakazo/core` ×4, `@rakazo/adapter-kit` ×3                                                 |
+| packages/contracts                   |   16 |     7 | `Rakazo  (comment)` ×4, `RakazoDesktopUpdate` ×2, `RakazoDesktopOAuthCallback` ×2                                  |
+| infra/systemd                        |   15 |     4 | `rakazo/alerts` ×3, `/var/lib/rakazo/alerts` ×3, `-/etc/rakazo/backup.env` ×2                                      |
+| packages/auth (tests)                |   12 |     3 | `@rakazo/db` ×5, `rakazo://sign-in` ×2, `rakazo` ×2                                                                |
+| README.md                            |   11 |     1 | `rakazo` ×3, `RAKAZO_DOWNLOAD_BASE` ×1, `RAKAZO_DOWNLOAD_SKIP_EXISTING` ×1                                         |
+| infra/railway                        |   11 |     2 | `@rakazo/api` ×4, `@rakazo/worker` ×2, `@rakazo/web` ×2                                                            |
+| package.json                         |   10 |     1 | `@rakazo/db` ×3, `@rakazo/api` ×2, `rakazo` ×1                                                                     |
+| SETUP_PROMPT.md                      |    9 |     1 | `rakazo_app` ×3, `RAKAZO_INSTALLER_URL` ×1, `https://example.com/mirror/rakazo/infra/compose/install-images.sh` ×1 |
+| infra/compose (tests)                |    8 |     1 | `rakazo` ×3, `/var/lib/rakazo/firewall-change` ×1, `/usr/local/sbin/rakazo-host-alert` ×1                          |
+| scripts/restore.sh                   |    8 |     1 | `rakazo` ×5, `rakazo_app` ×2, `SRC/rakazo.sql` ×1                                                                  |
+| packages/logging                     |    7 |     4 | `@rakazo/logging` ×1, `rakazo-api` ×1, `rakazo-worker` ×1                                                          |
+| packages/memory                      |    7 |     2 | `@rakazo/adapter-kit` ×3, `@rakazo/db` ×3, `@rakazo/memory` ×1                                                     |
+| packages/auth                        |    6 |     3 | `@rakazo/core` ×2, `@rakazo/db` ×2, `@rakazo/auth` ×1                                                              |
+| packages/contracts (tests)           |    6 |     3 | `RAKAZO_TOKEN` ×2, `RAKAZO_CSP_SCRIPT_SRC` ×2, `rakazo-token` ×1                                                   |
+| CHANGELOG.md                         |    5 |     1 | `rakazo_app` ×1, `RAKAZO_OPENAI_COMPAT_PRIVATE_HOSTS` ×1, `RAKAZO_LOCAL_MODELS` ×1                                 |
+| docs/content-encryption.md           |    5 |     1 | `@rakazo/api` ×4, `@rakazo/adapter-kit` ×1                                                                         |
+| docs/infisical-secrets.md            |    5 |     1 | `@rakazo/api` ×4, `/rakazo` ×1                                                                                     |
+| docs/self-host-secrets.md            |    5 |     1 | `rakazo` ×2, `rakazo_app` ×1, `RAKAZO_UPDATER_TOKEN` ×1                                                            |
+| packages/adapter-kit                 |    5 |     4 | `@rakazo/contracts` ×4, `@rakazo/adapter-kit` ×1                                                                   |
+| packages/memory (tests)              |    4 |     2 | `@rakazo/adapter-kit` ×2, `@rakazo/db` ×2                                                                          |
+| scripts/backup.sh                    |    4 |     1 | `rakazo` ×2, `OUT/rakazo.sql` ×1, `RAKAZO_BACKUP_SKIP_HOMES:-0` ×1                                                 |
+| docs/bot-secrets.md                  |    3 |     1 | `RAKAZO_SECRETS_ALLOW_PRIVATE_HTTP` ×2, `RAKAZO_` ×1                                                               |
+| docs/computer-runtime.md             |    3 |     1 | `rakazo` ×1, `/home/user/rakazo-home` ×1, `RAKAZO_COMPUTER_IMAGE` ×1                                               |
+| docs/self-host-sandbox-providers.md  |    3 |     1 | `RAKAZO_COMPUTER_IMAGE` ×1, `RAKAZO_COMPUTER_IMAGE_TAG` ×1, `rakazo-computer` ×1                                   |
+| turbo.json                           |    3 |     1 | `RAKAZO_HOST` ×1, `RAKAZO_DEV_HOST` ×1, `RAKAZO_ALLOWED_HOSTS` ×1                                                  |
+| .github/scripts                      |    2 |     1 | `/rakazo-mobile-screenshots.log` ×1, `/rakazo-mobile-android.log` ×1                                               |
+| AGENTS.md                            |    2 |     1 | `@rakazo/desktop` ×1, `@rakazo/ui-tokens` ×1                                                                       |
+| CONTRIBUTING.md                      |    2 |     1 | `@rakazo/web` ×2                                                                                                   |
+| apps/www (tests)                     |    2 |     1 | `process.env.RAKAZO_GITHUB_API` ×2                                                                                 |
+| docs/agent-verification.md           |    2 |     1 | `rakazo/computer:local` ×2                                                                                         |
+| .agents/skills                       |    1 |     1 | `rakazo-playwright-screenshots` ×1                                                                                 |
+| .agents/skills (tests)               |    1 |     1 | `rakazo-playwright-screenshots` ×1                                                                                 |
+| .gitattributes                       |    1 |     1 | `infra/sandboxes/computer/rakazo-browser` ×1                                                                       |
+| apps/worker (tests)                  |    1 |     1 | `@rakazo/adapters` ×1                                                                                              |
+| docs/mobile-release.md               |    1 |     1 | `@rakazo/mobile` ×1                                                                                                |
+| docs/tool-activity.md                |    1 |     1 | `rakazo.showToolActivity` ×1                                                                                       |
+| scripts/build-server.mjs             |    1 |     1 | `@rakazo` ×1                                                                                                       |
 
 ## Tracked paths whose file or directory name contains "rakazo" (33 files)
 
-| Path | Scope | Treatment |
-|---|---|---|
-| `packages/ui-tokens/assets/Rakazo.icon/**` (2 files) | in scope (icon source) | replaced by `Nurlings.icon` placeholder bundle; Rakazo mascot not used |
-| `apps/mobile/modules/rakazo-notifications/**` (13), `apps/mobile/modules/rakazo-network-cache/**` (4) | in scope, internal | kept (native module identifiers; no visible text) |
-| `apps/www/public/brand/rakazo-mark.png`, `apps/www/public/og/blog-openclaw-vs-hermes-vs-rakazo.png`, `apps/www/src/content/blog/openclaw-vs-hermes-vs-rakazo.md` | out of scope (`apps/www`) | kept |
-| `infra/sandboxes/computer/rakazo-*` (5), `infra/systemd/rakazo-*` (6) | out of scope | kept |
+| Path                                                                                                                                                             | Scope                     | Treatment                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------- |
+| `packages/ui-tokens/assets/Rakazo.icon/**` (2 files)                                                                                                             | in scope (icon source)    | replaced by `Nurlings.icon` placeholder bundle; Rakazo mascot not used |
+| `apps/mobile/modules/rakazo-notifications/**` (13), `apps/mobile/modules/rakazo-network-cache/**` (4)                                                            | in scope, internal        | kept (native module identifiers; no visible text)                      |
+| `apps/www/public/brand/rakazo-mark.png`, `apps/www/public/og/blog-openclaw-vs-hermes-vs-rakazo.png`, `apps/www/src/content/blog/openclaw-vs-hermes-vs-rakazo.md` | out of scope (`apps/www`) | kept                                                                   |
+| `infra/sandboxes/computer/rakazo-*` (5), `infra/systemd/rakazo-*` (6)                                                                                            | out of scope              | kept                                                                   |

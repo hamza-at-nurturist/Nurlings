@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { RunErrorSheet, useRunError } from "../components/run-error-sheet";
 import { ThreadErrorNotice, ThreadFetchErrorNotice } from "../components/thread-error-notice";
 import { runErrorActionLabel } from "./run-error-presentation";
+import { branded } from "./test-brand";
 import { liveEndRunError } from "./thread-window";
 
 vi.mock("./haptics", () => ({
@@ -50,6 +51,9 @@ vi.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0 }),
 }));
 vi.mock("expo-clipboard", () => ({ setStringAsync: vi.fn() }));
+vi.mock("./api-server", () => ({}));
+vi.mock("./api-auth", () => ({}));
+vi.mock("./api-live", () => ({}));
 vi.mock("./api", () => ({ rpc: vi.fn() }));
 vi.mock("./integrations-cache", () => ({ isIntegrationsScopeCurrent: () => true }));
 vi.mock("./saved-chats", () => ({ liveSavedChatsScope: async () => null }));
@@ -57,13 +61,6 @@ vi.mock("./native", () => ({
   native: { fill: "native-fill" },
   useMobileTokens: () => ({ card: "token-card" }),
   useResolvedAppearance: () => "light",
-}));
-vi.mock("./i18n", () => ({
-  useI18n: () => ({
-    locale: "en",
-    t: (key: string, values?: Record<string, string>) =>
-      key.replace(/\{(\w+)\}/g, (_, name: string) => values?.[name] ?? name),
-  }),
 }));
 
 const details =
@@ -102,10 +99,12 @@ describe("run error recovery", () => {
       createElement(RunErrorSheet, { details, onClose, action: { label: "Add model", onPress } }),
     );
     expect(node.textContent).toContain(
-      "This bot's reply stopped at its key's weekly limit. Your own key has its own limits.",
+      branded(
+        "This bot's reply stopped at its key's weekly limit. Your own key has its own limits.",
+      ),
     );
     expect(node.textContent).not.toContain("opens connection settings");
-    expect(node.textContent).not.toContain("opens this bot's settings");
+    expect(node.textContent).not.toContain(branded("opens this bot's settings"));
     expect(node.textContent).not.toContain("403:");
     const click = (label: string) =>
       act(() => {
@@ -134,7 +133,7 @@ describe("run error recovery", () => {
     "This connection's request limit is too small. Choose another model.",
     "The model hit its output limit before finishing its reply.",
   ])("offers model recovery without suggesting a key failure for %s", (details) => {
-    const label = runErrorActionLabel((key) => key, normalizeRunError(details));
+    const label = runErrorActionLabel(normalizeRunError(details));
     expect(label).toBe("Change model");
     const node = mount(
       createElement(RunErrorSheet, {
@@ -181,7 +180,7 @@ describe("inline error card", () => {
     const onDetails = vi.fn();
     function Notice() {
       const error = useRunError(details, false);
-      const actionLabel = error ? runErrorActionLabel((key) => key, error) : null;
+      const actionLabel = error ? runErrorActionLabel(error) : null;
       return createElement(ThreadErrorNotice, {
         error: null,
         summary: error?.summary ?? null,

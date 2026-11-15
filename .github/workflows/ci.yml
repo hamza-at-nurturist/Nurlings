@@ -116,11 +116,6 @@ jobs:
         run: pnpm lint
       - name: Check the Nurlings brand guard
         run: pnpm brand:check
-      - name: Check translation catalogs are current
-        if: github.event_name == 'pull_request'
-        run: |
-          pnpm --filter @rakazo/web intl:extract
-          git diff --exit-code -- apps/web/src/locales
       - run: pnpm db:generate
         env:
           DATABASE_URL: postgres://rakazo:rakazo@127.0.0.1:5433/rakazo
@@ -153,6 +148,9 @@ jobs:
       - name: Issue triage labeling tests
         if: steps.areas.outputs.all_packages != 'false'
         run: python3 .github/scripts/apply-issue-triage.test.py
+      - name: PR screenshot section tests
+        if: steps.areas.outputs.all_packages != 'false'
+        run: python3 .github/scripts/pr-screenshots.test.py
       - name: Changed-area classification tests
         if: steps.areas.outputs.all_packages != 'false'
         run: python3 .github/scripts/changed-areas.test.py
@@ -209,10 +207,12 @@ jobs:
           mapfile -t packages < <(printf "%s" "$affected")
           # These read other packages' files without importing them, so the package graph misses them.
           targets=("${packages[@]}" \
+            .agents/skills/translate/catalog-gaps.test.ts \
             infra/updater/src/compose-env.test.ts \
             packages/adapters/src/builtin-skills.test.ts \
             packages/adapters/src/lark-lazy-loading.test.ts \
             packages/page-kit/src/kit/labels.test.tsx \
+            packages/testkit/src/eas-pnpm-version.test.ts \
             packages/testkit/src/ios-screenshot-catalog.test.ts)
           # Vitest rejects more shards than test files, so a small set runs whole on the first shard.
           files="$(pnpm exec vitest list --filesOnly "${targets[@]}" | grep -c '\.test\.' || true)"
@@ -455,7 +455,9 @@ jobs:
               apps/mobile \
               packages/chat-ui \
               packages/contracts \
-              packages/core
+              packages/core \
+              packages/logging \
+              packages/ui-tokens
           )
           if [[ "$(mobile_dependencies "$base")" != "$(mobile_dependencies "$GITHUB_SHA")" ]]; then
             files+=("pnpm-lock.yaml (mobile dependency tree)")
@@ -480,12 +482,12 @@ jobs:
                   *.ts|*.tsx) eligible=true ;;
                 esac
                 ;;
-              packages/chat-ui/src/*)
+              packages/chat-ui/src/*|packages/ui-tokens/src/*)
                 case "$file" in
                   *.ts|*.tsx|*.css) eligible=true ;;
                 esac
                 ;;
-              packages/contracts/src/*|packages/core/src/*)
+              packages/contracts/src/*|packages/core/src/*|packages/logging/src/*)
                 case "$file" in
                   *.ts|*.tsx) eligible=true ;;
                 esac
@@ -542,13 +544,6 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - name: Set up Expo
-        if: steps.ota.outputs.publish == 'true'
-        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
-        with:
-          eas-version: latest
-          packager: pnpm
-          token: ${{ secrets.EXPO_TOKEN }}
       - name: Install dependencies
         if: steps.ota.outputs.publish == 'true'
         run: pnpm install --frozen-lockfile
@@ -559,6 +554,7 @@ jobs:
         if: steps.ota.outputs.publish == 'true'
         working-directory: apps/mobile
         env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
@@ -586,7 +582,7 @@ jobs:
             echo "Sentry uploads require SENTRY_ORG and SENTRY_PROJECT." >&2
             exit 1
           fi
-          eas env:exec production 'pnpm exec expo export --platform ios --platform android --clear --source-maps --dump-assetmap' --non-interactive
+          pnpm exec eas env:exec production 'pnpm exec expo export --platform ios --platform android --clear --source-maps --dump-assetmap' --non-interactive
           if [[ -n "$SENTRY_AUTH_TOKEN" ]]; then
             # The SDK uploader only warns when there are no source maps; fail instead.
             if [[ -z "$(find dist -type f -name '*.map' -print -quit)" ]]; then
@@ -596,7 +592,7 @@ jobs:
             SENTRY_URL="${SENTRY_URL:-https://sentry.io/}" pnpm exec sentry-expo-upload-sourcemaps dist
           fi
           check_current_main
-          eas update --platform all --channel production --environment production --skip-bundler --input-dir dist --upload-source-maps --message "$GITHUB_SHA" --non-interactive
+          pnpm exec eas update --platform all --channel production --environment production --skip-bundler --input-dir dist --upload-source-maps --message "$GITHUB_SHA" --non-interactive
 
   deploy-production:
     # Upstream's own production host. The fork's only deploy is deploy-test in

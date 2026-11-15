@@ -1,11 +1,11 @@
 import { MenuView } from "@expo/ui/community/menu";
+import { useLingui } from "@lingui/react/macro";
 import type { TicketListItem, TicketStatus } from "@rakazo/contracts";
 import type { TicketCard } from "@rakazo/core/nurlings-board";
 import { useRef } from "react";
-import type { View as ViewType } from "react-native";
+import type { ViewInstance } from "react-native";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useI18n } from "../../lib/i18n";
 import { useResolvedAppearance } from "../../lib/native";
 import type { CardMenuAction } from "../../lib/nurlings-board/card-menu";
 import { cardMenu, parseCardMenuAction } from "../../lib/nurlings-board/card-menu";
@@ -24,16 +24,16 @@ export function BoardCard({
   status: TicketListItem["status"];
   onAction: (action: CardMenuAction) => void;
 }) {
-  const { t } = useI18n();
+  const { t } = useLingui();
   const scheme = useResolvedAppearance();
   const drag = useBoardDrag();
-  const view = useRef<ViewType>(null);
+  const view = useRef<ViewInstance>(null);
   const menu = cardMenu(
     { status: status as TicketStatus, canApprove: card.canApprove },
     {
-      moveTo: t("Move to"),
-      approve: t("Approve"),
-      open: t("Open"),
+      moveTo: t`Move to`,
+      approve: t`Approve`,
+      open: t`Open`,
       statuses: statusLabels(),
     },
   );
@@ -76,7 +76,7 @@ export function BoardCard({
                   if (action) onAction(action);
                 }}
               >
-                <Pressable accessibilityRole="button" accessibilityLabel={t("More")}>
+                <Pressable accessibilityRole="button" accessibilityLabel={t`More`}>
                   <MoreGlyph />
                 </Pressable>
               </MenuView>

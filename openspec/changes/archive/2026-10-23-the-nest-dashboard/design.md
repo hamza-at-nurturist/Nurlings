@@ -13,13 +13,13 @@
   waiting on the user. Dismissal of that error lives in `Shell` component state only.
 - `incomingCall`, `unread`, `updatedAt`: not state.
 
-| Mood | Derived from | New backend data? |
-|---|---|---|
-| Working | `status` in `queued`, `leased`, `running` (`WORKING_RUN_STATUSES`) | No |
-| Needs you | `status` in `waiting_input`, `waiting_takeover` (`WAITING_ON_USER_RUN_STATUSES`) | No (see note) |
-| Error | `runErrorId != null` | No (see note) |
-| Idle | `status = "idle"` and not sleeping | No |
-| **Sleeping** | **no such concept exists** | **Yes, a definition (derived, not stored)** |
+| Mood         | Derived from                                                                     | New backend data?                           |
+| ------------ | -------------------------------------------------------------------------------- | ------------------------------------------- |
+| Working      | `status` in `queued`, `leased`, `running` (`WORKING_RUN_STATUSES`)               | No                                          |
+| Needs you    | `status` in `waiting_input`, `waiting_takeover` (`WAITING_ON_USER_RUN_STATUSES`) | No (see note)                               |
+| Error        | `runErrorId != null`                                                             | No (see note)                               |
+| Idle         | `status = "idle"` and not sleeping                                               | No                                          |
+| **Sleeping** | **no such concept exists**                                                       | **Yes, a definition (derived, not stored)** |
 
 Precedence: needs you, then error, then working, then idle, then sleeping.
 
@@ -49,7 +49,7 @@ computes it and returns `mood` in the snapshot, so web and mobile cannot disagre
   `routines.history({routineId})`. There is no cross-bot list, so the dashboard would need N+1
   calls. A single server-side read is cleaner. **New endpoint needed.**
 - The card uses the stored `nextRunAt`; no cron expansion is needed.
-- A `watch` routine's `nextRunAt` is the next *check*, not a scheduled run. The card ignores
+- A `watch` routine's `nextRunAt` is the next _check_, not a scheduled run. The card ignores
   these for "next routine".
 - **Approvals are not a table.** A pending approval is an `ask` block (`status != "answered"`,
   optionally with `approvalEffectId` and `actions`) on a message whose run is `waiting_input`.
@@ -133,13 +133,13 @@ An inline SVG of the two slanted eyes, taken from the brand mark's orb geometry 
 `@nurlings/brand` (the eye sub-paths of `brand.mark.orb`; no copied path data). Moods change
 colour, shape and motion, never the shape family:
 
-| Mood | Look | Motion (subtle, CSS only) |
-|---|---|---|
-| Working | open eyes, orb gradient from the brand config | slow glance left and right |
-| Idle | open eyes, foreground colour | rare blink |
-| Sleeping | eyes closed to thin slits, muted | slow opacity "breath" |
-| Needs you | wide eyes, `warning` token | small lift, two cycles then still |
-| Error | eyes tilted down, `destructive` token | one short shake, then still |
+| Mood      | Look                                          | Motion (subtle, CSS only)         |
+| --------- | --------------------------------------------- | --------------------------------- |
+| Working   | open eyes, orb gradient from the brand config | slow glance left and right        |
+| Idle      | open eyes, foreground colour                  | rare blink                        |
+| Sleeping  | eyes closed to thin slits, muted              | slow opacity "breath"             |
+| Needs you | wide eyes, `warning` token                    | small lift, two cycles then still |
+| Error     | eyes tilted down, `destructive` token         | one short shake, then still       |
 
 Colours come from semantic tokens; only the working gradient comes from the brand config. No
 hardcoded hex. Navy `#03091F` is not a page background; the Nest follows the theme. Motion is off

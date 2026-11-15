@@ -1,3 +1,4 @@
+import { useLingui } from "@lingui/react/macro";
 import type { BotAvatarSet } from "@rakazo/contracts";
 import type {
   AvatarMotionMode,
@@ -55,7 +56,6 @@ import Svg, {
 import type { AvatarLife } from "../lib/avatar-life";
 import { playPoke, useAvatarOnScreen, useLife, usePoke, useSettling } from "../lib/avatar-life";
 import { mobileBotAvatarPresentation } from "../lib/bot-avatar";
-import { useI18n } from "../lib/i18n";
 import { mobileLogoAvatarActivity } from "../lib/logo-avatar-activity";
 import { useMobileTokens } from "../lib/native";
 import { dullBody, lidCap, organicAvatarView, TOOL_GAZE } from "../lib/organic-avatar-view";
@@ -208,11 +208,11 @@ function RakazoBotAvatar({
 
 function WorkingDot({ size, muted }: { size: number; muted: boolean }) {
   const tokens = useMobileTokens();
-  const { t } = useI18n();
+  const { t } = useLingui();
   const dot = avatarWorkingDot(size);
   return (
     <View
-      accessibilityLabel={t("Working")}
+      accessibilityLabel={t`Working`}
       style={{
         position: "absolute",
         right: muted ? undefined : dot.inset - dot.ring,
@@ -231,11 +231,11 @@ function WorkingDot({ size, muted }: { size: number; muted: boolean }) {
 
 function MutedBadge({ size }: { size: number }) {
   const tokens = useMobileTokens();
-  const { t } = useI18n();
+  const { t } = useLingui();
   return (
     <View
       accessible
-      accessibilityLabel={t("Notifications silenced")}
+      accessibilityLabel={t`Notifications silenced`}
       style={{
         position: "absolute",
         right: -2,
@@ -286,17 +286,17 @@ const NO_LIVE = { tool: "none", composing: false } as const;
 
 /** The spoken name: the Nurling's name, then its state; an idle avatar is just the name. */
 function useAvatarLabel(name: string | undefined, state: AvatarState): string | undefined {
-  const { t } = useI18n();
+  const { t } = useLingui();
   if (!name) return undefined;
   const spoken: Record<AvatarState, string | undefined> = {
     idle: undefined,
-    thinking: t("thinking"),
-    working: t("Working").toLowerCase(),
-    needs: t("needs you"),
-    review: t("in review"),
-    blocked: t("blocked"),
-    done: t("done"),
-    asleep: t("asleep"),
+    thinking: t`thinking`,
+    working: t`Working`.toLowerCase(),
+    needs: t`needs you`,
+    review: t`in review`,
+    blocked: t`blocked`,
+    done: t`done`,
+    asleep: t`asleep`,
   };
   const word = spoken[state];
   return word ? `${name}, ${word}` : name;

@@ -1,10 +1,8 @@
 import { brand } from "@nurlings/brand";
-import type { BotAvatarSet } from "@rakazo/contracts";
-import { BOT_AVATAR_SHAPE_COUNT } from "@rakazo/contracts";
-import type { BotColorDef, LogoAvatarActivity } from "@rakazo/core";
+import type { BotAvatarSet, BotColorDef } from "@rakazo/contracts";
+import { BOT_AVATAR_SHAPE_COUNT, BOT_COLOR_LIST, BOT_COLORS } from "@rakazo/contracts";
+import type { LogoAvatarActivity } from "@rakazo/core";
 import {
-  BOT_AVATAR_COLORS,
-  BOT_COLOR_LIST,
   BRAND_BLOB_SHAPE_INDEX,
   DEFAULT_BOT_AVATAR_COLOR,
   isRunWaitingOnUser,
@@ -28,7 +26,7 @@ import { OrganicAvatar } from "./organic-avatar.js";
 import "./styles.css";
 
 export type { BotColorDef };
-export { BOT_AVATAR_COLORS, BOT_COLOR_LIST, DEFAULT_BOT_AVATAR_COLOR, resolvePersonaColorDef };
+export { BOT_COLOR_LIST, BOT_COLORS, DEFAULT_BOT_AVATAR_COLOR, resolvePersonaColorDef };
 
 export const BOT_SHAPES = SHIPPED_BOT_AVATAR_SHAPES;
 export const SHIPPED_SHAPE_KEYS = SHIPPED_BOT_AVATAR_SHAPE_KEYS;

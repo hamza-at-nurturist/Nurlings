@@ -21,15 +21,15 @@ working untouched. Widening the old type instead would change every `switch` on 
 
 Mapping, in one place (first match wins):
 
-| Input | State |
-| --- | --- |
-| computer asleep flag | asleep |
-| run `waiting_input` or `waiting_takeover` | needs you |
-| run `failed`, or ticket `blocked` | blocked |
-| ticket `review` | in review |
-| run `queued`, `leased`, `running`, composing | thinking while composing, else working |
-| run `completed` within the settle window, or ticket `done`/`closed` | done |
-| anything else | idle |
+| Input                                                               | State                                  |
+| ------------------------------------------------------------------- | -------------------------------------- |
+| computer asleep flag                                                | asleep                                 |
+| run `waiting_input` or `waiting_takeover`                           | needs you                              |
+| run `failed`, or ticket `blocked`                                   | blocked                                |
+| ticket `review`                                                     | in review                              |
+| run `queued`, `leased`, `running`, composing                        | thinking while composing, else working |
+| run `completed` within the settle window, or ticket `done`/`closed` | done                                   |
+| anything else                                                       | idle                                   |
 
 Done after a run is shown for `AVATAR_DONE_MS` (4 seconds) and then idle, so a finished Nurling
 does not keep a green tick forever. A ticket that is `done` keeps it while the ticket view shows

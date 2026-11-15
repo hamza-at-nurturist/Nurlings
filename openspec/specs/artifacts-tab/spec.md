@@ -1,6 +1,7 @@
 # artifacts-tab Specification
 
 ## Purpose
+
 What the Artifacts tab lists by default and how dashboards in it read their live data.
 
 ## Requirements

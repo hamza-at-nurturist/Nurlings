@@ -2,7 +2,7 @@ import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import type { BoardColumn as BoardColumnData } from "@rakazo/core/nurlings-board";
 import type { RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
-import type { FlatList as FlatListType, View as ViewType } from "react-native";
+import type { FlatList as FlatListType, ViewInstance } from "react-native";
 import { FlatList, StyleSheet, useWindowDimensions, View } from "react-native";
 import type { CardMenuAction } from "../../lib/nurlings-board/card-menu";
 import { BoardColumn } from "./board-column";
@@ -46,7 +46,7 @@ export function BoardPages({
   const { width: windowWidth } = useWindowDimensions();
   const width = pageWidth(windowWidth);
   const list = useRef<FlatListType<BoardColumnData>>(null);
-  const container = useRef<ViewType>(null);
+  const container = useRef<ViewInstance>(null);
   const offset = useRef(0);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const layout = { pageWidth: width, gap: GAP, edge: EDGE, count: columns.length };

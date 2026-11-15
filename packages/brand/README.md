@@ -3,14 +3,14 @@
 The single place the Nurlings brand is defined: configuration, the helpers that rebrand upstream
 text, the logo artwork, and the checks that keep the white-label from regressing.
 
-| Piece | Where |
-|---|---|
+| Piece                                                                                             | Where                                                                |
+| ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | Brand configuration (name, bot terms, tagline, URLs, bundle id, registry, colours, updater flags) | `brand.json`, read through `import { brand } from "@nurlings/brand"` |
-| Rewrites upstream strings at load time (`Rakazo` → name, `bot(s)` → Nurling(s)) | `brandText`, `brandMessages` |
-| Source artwork (what you replace) | `assets/` |
-| PNG sources from the SVGs | `pnpm --filter @nurlings/brand make:sources` |
-| Per-platform icon generator | `pnpm --filter @nurlings/brand export:assets` |
-| Guards | `pnpm brand:check` |
+| Rewrites upstream strings at load time (`Rakazo` → name, `bot(s)` → Nurling(s))                   | `brandText`, `brandMessages`                                         |
+| Source artwork (what you replace)                                                                 | `assets/`                                                            |
+| PNG sources from the SVGs                                                                         | `pnpm --filter @nurlings/brand make:sources`                         |
+| Per-platform icon generator                                                                       | `pnpm --filter @nurlings/brand export:assets`                        |
+| Guards                                                                                            | `pnpm brand:check`                                                   |
 
 Do not write the product name as a literal in new code; read it from `brand`.
 
@@ -18,14 +18,14 @@ Do not write the product name as a literal in new code; read it from `brand`.
 
 The artwork is vector. Four SVG files are the only things you edit:
 
-| SVG | Used for |
-|---|---|
-| `assets/app-icon/nurlings-icon.svg` | The square app icon on the navy plate (iOS, Android, desktop, web) |
-| `assets/logo/nurlings-mark.svg` | The full mark, transparent: blob and orb. In-app logo, desktop setup, splash, adaptive foreground |
-| `assets/logo/nurlings-mark-small.svg` | The blob alone. Favicons, the Android themed icon and the notification icon, where the orb's eyes disappear |
-| `assets/logo/nurlings-logo.svg` | The original composition. Reference only; nothing reads it |
-| `assets/logo/nurlings-intro.svg` | The animated mark that plays once, then idles. Plain `<img>`: sign-in, the desktop setup screen and the web app's opening screen |
-| `assets/logo/nurlings-loader.svg` | The animated mark on a loop. Plain `<img>`: full loading states |
+| SVG                                   | Used for                                                                                                                         |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `assets/app-icon/nurlings-icon.svg`   | The square app icon on the navy plate (iOS, Android, desktop, web)                                                               |
+| `assets/logo/nurlings-mark.svg`       | The full mark, transparent: blob and orb. In-app logo, desktop setup, splash, adaptive foreground                                |
+| `assets/logo/nurlings-mark-small.svg` | The blob alone. Favicons, the Android themed icon and the notification icon, where the orb's eyes disappear                      |
+| `assets/logo/nurlings-logo.svg`       | The original composition. Reference only; nothing reads it                                                                       |
+| `assets/logo/nurlings-intro.svg`      | The animated mark that plays once, then idles. Plain `<img>`: sign-in, the desktop setup screen and the web app's opening screen |
+| `assets/logo/nurlings-loader.svg`     | The animated mark on a loop. Plain `<img>`: full loading states                                                                  |
 
 Both animated files switch their animation off for `prefers-reduced-motion`, and the apps draw the
 static mark if one fails to load. They are shown on the navy plate. Small inline spinners are left
@@ -71,43 +71,43 @@ file is used as an image.
 
 ## Source files (you edit these)
 
-| Source | Size | Used for |
-|---|---|---|
-| `assets/app-icon/nurlings-icon.svg`, `assets/logo/nurlings-mark.svg`, `assets/logo/nurlings-mark-small.svg`, `assets/logo/nurlings-logo.svg` | vector | The artwork itself (see above) |
-| `assets/logo/nurlings-mark.png` | 1024×1024, transparent | The full mark with a margin |
-| `assets/logo/nurlings-wordmark.svg` | vector | The mark and the product name (uses `currentColor`, for inline use) |
-| `assets/logo/nurlings-wordmark-light.svg` | vector | The same with fixed colours, navy text and blob, for light backgrounds outside the app (socials, docs, emails) |
-| `assets/logo/nurlings-wordmark-dark.svg` | vector | The same with fixed colours, white text and blob, for dark backgrounds outside the app |
-| `assets/app-icon/app-icon-1024.png` | 1024×1024, opaque, full-bleed | Web, desktop and iOS/Android launcher icons |
-| `assets/app-icon/Nurlings.icon/` | Icon Composer bundle; layer `Assets/nurlings-mark.png` is 1024×1024 | macOS and iOS app icon (edit with Xcode 26+ Icon Composer) |
-| `assets/android/adaptive-foreground-1024.png` | 1024×1024, transparent; the full mark inside the central 66% (a 676px circle) | Android adaptive icon foreground |
-| `assets/android/adaptive-background-1024.png` | 1024×1024, solid navy | Android adaptive icon background |
-| `assets/android/monochrome-1024.png` | 1024×1024, the blob alone in white on transparent, inside the central 66% | Android themed icon and the in-app mobile mark |
-| `assets/android/notification-72.png` | 72×72, the blob alone as a white silhouette | Android notification icon |
-| `assets/splash/splash-icon-1024.png` | 1024×1024 transparent, the mark about 620px wide and centred; the splash background is navy in both themes | Mobile splash screen |
-| `assets/favicon/favicon-128.png` | 128×128, rounded navy plate with the blob | Web and mobile web favicon |
+| Source                                                                                                                                       | Size                                                                                                       | Used for                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `assets/app-icon/nurlings-icon.svg`, `assets/logo/nurlings-mark.svg`, `assets/logo/nurlings-mark-small.svg`, `assets/logo/nurlings-logo.svg` | vector                                                                                                     | The artwork itself (see above)                                                                                 |
+| `assets/logo/nurlings-mark.png`                                                                                                              | 1024×1024, transparent                                                                                     | The full mark with a margin                                                                                    |
+| `assets/logo/nurlings-wordmark.svg`                                                                                                          | vector                                                                                                     | The mark and the product name (uses `currentColor`, for inline use)                                            |
+| `assets/logo/nurlings-wordmark-light.svg`                                                                                                    | vector                                                                                                     | The same with fixed colours, navy text and blob, for light backgrounds outside the app (socials, docs, emails) |
+| `assets/logo/nurlings-wordmark-dark.svg`                                                                                                     | vector                                                                                                     | The same with fixed colours, white text and blob, for dark backgrounds outside the app                         |
+| `assets/app-icon/app-icon-1024.png`                                                                                                          | 1024×1024, opaque, full-bleed                                                                              | Web, desktop and iOS/Android launcher icons                                                                    |
+| `assets/app-icon/Nurlings.icon/`                                                                                                             | Icon Composer bundle; layer `Assets/nurlings-mark.png` is 1024×1024                                        | macOS and iOS app icon (edit with Xcode 26+ Icon Composer)                                                     |
+| `assets/android/adaptive-foreground-1024.png`                                                                                                | 1024×1024, transparent; the full mark inside the central 66% (a 676px circle)                              | Android adaptive icon foreground                                                                               |
+| `assets/android/adaptive-background-1024.png`                                                                                                | 1024×1024, solid navy                                                                                      | Android adaptive icon background                                                                               |
+| `assets/android/monochrome-1024.png`                                                                                                         | 1024×1024, the blob alone in white on transparent, inside the central 66%                                  | Android themed icon and the in-app mobile mark                                                                 |
+| `assets/android/notification-72.png`                                                                                                         | 72×72, the blob alone as a white silhouette                                                                | Android notification icon                                                                                      |
+| `assets/splash/splash-icon-1024.png`                                                                                                         | 1024×1024 transparent, the mark about 620px wide and centred; the splash background is navy in both themes | Mobile splash screen                                                                                           |
+| `assets/favicon/favicon-128.png`                                                                                                             | 128×128, rounded navy plate with the blob                                                                  | Web and mobile web favicon                                                                                     |
 
 ## Generated files (do not edit)
 
-| Platform | File | Size |
-|---|---|---|
-| Web app | `apps/web/public/favicon.ico` | frames 16, 32, 48 |
-| Web app | `apps/web/public/favicon-16x16.png` | 16×16 |
-| Web app | `apps/web/public/favicon-32x32.png` | 32×32 |
-| Web app | `apps/web/public/favicon.png` | 128×128 |
-| Web app | `apps/web/public/apple-touch-icon.png` | 180×180 |
-| Web app | `apps/web/public/icon-192.png` | 192×192 |
-| Web app | `apps/web/public/icon-512.png` | 512×512 |
-| Windows | `apps/desktop/assets/icon.ico` | frames 16, 32, 48, 64, 128, 256 |
-| Linux | `apps/desktop/assets/icon.png` | 1024×1024 (512 minimum) |
-| macOS (development dock icon) | `apps/desktop/assets/icon-macos.png` | 1024×1024, rounded |
-| iOS and Android launcher | `apps/mobile/assets/icon.png` | 1024×1024, no alpha |
-| Android adaptive | `apps/mobile/assets/adaptive-icon.png` | 1024×1024 |
-| Android adaptive | `apps/mobile/assets/icon-background.png` | 1024×1024, no alpha |
-| Android themed / in-app mark | `apps/mobile/assets/monochrome-icon.png` | 1024×1024 |
-| Android notification | `apps/mobile/assets/notification-icon.png` | 72×72 |
-| Mobile splash | `apps/mobile/assets/splash-icon.png` | 1024×1024 |
-| Mobile web | `apps/mobile/assets/favicon.png` | 128×128 |
+| Platform                      | File                                       | Size                            |
+| ----------------------------- | ------------------------------------------ | ------------------------------- |
+| Web app                       | `apps/web/public/favicon.ico`              | frames 16, 32, 48               |
+| Web app                       | `apps/web/public/favicon-16x16.png`        | 16×16                           |
+| Web app                       | `apps/web/public/favicon-32x32.png`        | 32×32                           |
+| Web app                       | `apps/web/public/favicon.png`              | 128×128                         |
+| Web app                       | `apps/web/public/apple-touch-icon.png`     | 180×180                         |
+| Web app                       | `apps/web/public/icon-192.png`             | 192×192                         |
+| Web app                       | `apps/web/public/icon-512.png`             | 512×512                         |
+| Windows                       | `apps/desktop/assets/icon.ico`             | frames 16, 32, 48, 64, 128, 256 |
+| Linux                         | `apps/desktop/assets/icon.png`             | 1024×1024 (512 minimum)         |
+| macOS (development dock icon) | `apps/desktop/assets/icon-macos.png`       | 1024×1024, rounded              |
+| iOS and Android launcher      | `apps/mobile/assets/icon.png`              | 1024×1024, no alpha             |
+| Android adaptive              | `apps/mobile/assets/adaptive-icon.png`     | 1024×1024                       |
+| Android adaptive              | `apps/mobile/assets/icon-background.png`   | 1024×1024, no alpha             |
+| Android themed / in-app mark  | `apps/mobile/assets/monochrome-icon.png`   | 1024×1024                       |
+| Android notification          | `apps/mobile/assets/notification-icon.png` | 72×72                           |
+| Mobile splash                 | `apps/mobile/assets/splash-icon.png`       | 1024×1024                       |
+| Mobile web                    | `apps/mobile/assets/favicon.png`           | 128×128                         |
 
 The marketing site (`apps/www`) is not generated or changed here. The desktop app has no tray
 icon, so none is needed. The packaged macOS icon comes from the `Nurlings.icon` bundle, not from

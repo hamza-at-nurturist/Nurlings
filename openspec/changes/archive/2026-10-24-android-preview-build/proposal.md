@@ -28,12 +28,12 @@ app, publish somewhere else, and leave the main release alone.
 
 ### Upstream merge safety
 
-| File | Edit | Owner |
-|---|---|---|
-| `apps/mobile/eas.json` | one new build profile | upstream |
-| `apps/mobile/app.config.ts` | preview switch, profile name, skip Firebase file | upstream |
-| `.github/workflows/release-android-apk.yml` | `preview` input, parameterised names | fork |
-| `apps/mobile/lib/brand-expo-config.ts` (+ tests) | `previewIdentity` | fork |
+| File                                             | Edit                                             | Owner    |
+| ------------------------------------------------ | ------------------------------------------------ | -------- |
+| `apps/mobile/eas.json`                           | one new build profile                            | upstream |
+| `apps/mobile/app.config.ts`                      | preview switch, profile name, skip Firebase file | upstream |
+| `.github/workflows/release-android-apk.yml`      | `preview` input, parameterised names             | fork     |
+| `apps/mobile/lib/brand-expo-config.ts` (+ tests) | `previewIdentity`                                | fork     |
 
 Nothing here contacts Rakazo-owned infrastructure. CI creates the `android-preview` release and
 tag itself; no one pushes a tag by hand.

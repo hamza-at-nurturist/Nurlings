@@ -22,7 +22,6 @@ export async function readTicketForRun(
   deps: {
     prisma: PrismaClient;
     artifacts?: ArtifactStore;
-    ticketBoardEnabled?: boolean;
     maxUploadSizeBytes?: number;
   },
   input: { ref: string; acceptsImages: boolean; context: AdapterContext },

@@ -37,8 +37,8 @@ published images.
 ## This is a fork that must stay mergeable with upstream
 
 We keep pulling upstream Rakazo updates (`git remote upstream` → `elie222/rakazo`). Every
-decision in this repo's branding work is judged by one question: *does it make the next upstream
-merge bigger?* Therefore:
+decision in this repo's branding work is judged by one question: _does it make the next upstream
+merge bigger?_ Therefore:
 
 1. **White-label what clients see and what their dedicated server does.** Each client runs their
    own server. In scope: the web, desktop (Electron) and mobile (Expo) UIs; the text the server

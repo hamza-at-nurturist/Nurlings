@@ -1,10 +1,10 @@
+import { useLingui } from "@lingui/react/macro";
 import { brand } from "@nurlings/brand";
 import type { Bot } from "@rakazo/contracts";
 import { TICKET_DESCRIPTION_MAX_LENGTH } from "@rakazo/contracts";
 import { quickAddTicket } from "@rakazo/core/nurlings-board";
 import { useState } from "react";
 import { rpc } from "../../lib/api";
-import { useI18n } from "../../lib/i18n";
 import { errorText } from "../../lib/user-error";
 import { ComposerBar } from "./composer-bar";
 
@@ -18,7 +18,7 @@ export function QuickAdd({
   onCreated: () => void;
   onError: (message: string) => void;
 }) {
-  const { t } = useI18n();
+  const { t } = useLingui();
   const [busy, setBusy] = useState(false);
   const noun = brand.bot.singular;
   return (
@@ -27,7 +27,7 @@ export function QuickAdd({
       bots={bots}
       busy={busy}
       maxLength={TICKET_DESCRIPTION_MAX_LENGTH}
-      placeholder={t("Tell a {noun} what to do…", { noun })}
+      placeholder={t`Tell a ${noun} what to do…`}
       onSend={async ({ text, picked }) => {
         const ticket = quickAddTicket(text, picked);
         if (!ticket) return false;

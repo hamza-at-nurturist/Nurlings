@@ -10,8 +10,8 @@ import {
   modelCredentialDto,
   storedOpenAiCompatibleProbeKey,
 } from "./model-connect.js";
+import { parseModelSecret, serializeModelSecret } from "./model-secret.js";
 import { COMPATIBLE_ENDPOINT_PRESETS } from "./openai-compatible-url.js";
-import { parseModelSecret, serializeModelSecret } from "./pi-oauth.js";
 
 /** Fixtures connect as the deployment owner, who may use local model servers. */
 const connectAsOwner = (
@@ -646,7 +646,7 @@ it.each([true, false])(
 );
 
 it.each([null, "low", "high"] as const)(
-  "round-trips the nullable custom reasoning effort %s",
+  "stores an older app's connection effort %s without showing it as the model's",
   (thinkingLevel) => {
     const plaintext = connectAsOwner({
       provider: "openai-compatible",
@@ -669,8 +669,8 @@ it.each([null, "low", "high"] as const)(
           defaultModel: "arbitrary-model",
         },
         plaintext,
-      ),
-    ).toMatchObject({ thinkingLevel });
+      ).thinkingLevel,
+    ).toBeUndefined();
   },
 );
 

@@ -42,10 +42,10 @@ screen away into the app.
 
 New files wherever possible. Edits to existing files:
 
-| File | Edit | Owner |
-|---|---|---|
-| `apps/mobile/app/_layout.tsx` | render the splash over the app and hand it `ready`; one comment updated (the splash now hides the native one) | upstream |
-| `apps/mobile/lib/brand-expo-config.ts` (+ its test) | native splash uses a blank image so Android 12+ shows plain navy | fork |
+| File                                                | Edit                                                                                                          | Owner    |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | -------- |
+| `apps/mobile/app/_layout.tsx`                       | render the splash over the app and hand it `ready`; one comment updated (the splash now hides the native one) | upstream |
+| `apps/mobile/lib/brand-expo-config.ts` (+ its test) | native splash uses a blank image so Android 12+ shows plain navy                                              | fork     |
 
 New: `apps/mobile/components/brand-splash/` (component, fireflies), `apps/mobile/lib/` timeline,
 geometry and first-launch flag modules, `apps/mobile/assets/splash-blank.png`, and

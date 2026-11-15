@@ -14,6 +14,8 @@ type Options = {
   working?: boolean;
   recent?: number;
   botFound?: boolean;
+  /** The owner's labs; the board is a per-user lab. */
+  labs?: string[];
 };
 
 function setup(options: Options = {}) {
@@ -45,11 +47,12 @@ function setup(options: Options = {}) {
     },
     run: { findFirst: runFindFirst, create: createRun },
     task: { count: taskCount, create: createTask },
+    user: { findUnique: vi.fn(async () => ({ labs: options.labs ?? ["board"] })) },
   };
   const prisma = {
     $transaction: vi.fn(async (fn: (client: typeof tx) => Promise<unknown>) => fn(tx)),
   } as unknown as PrismaClient;
-  const deps = { prisma, jobs: { enqueue } as never, ticketBoardEnabled: true };
+  const deps = { prisma, jobs: { enqueue } as never };
   const wake = (input: { botId?: string; byBotId?: string } = {}) =>
     wakeMentionedBot(deps, {
       spaceId: "ws",
@@ -95,16 +98,13 @@ describe("wakeMentionedBot", () => {
   });
 
   it("does nothing when the board is off, for a finished ticket, or for an invalid Nurling", async () => {
-    const off = setup();
-    await wakeMentionedBot(
-      { ...off.deps, ticketBoardEnabled: false },
-      {
-        spaceId: "ws",
-        userId: "user-1",
-        ticketId: "t1",
-        botId: "scout",
-      },
-    );
+    const off = setup({ labs: [] });
+    await wakeMentionedBot(off.deps, {
+      spaceId: "ws",
+      userId: "user-1",
+      ticketId: "t1",
+      botId: "scout",
+    });
     expect(off.createTask).not.toHaveBeenCalled();
     for (const status of ["done", "closed"]) {
       const s = setup({ status });

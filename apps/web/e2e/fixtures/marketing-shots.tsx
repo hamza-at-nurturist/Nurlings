@@ -7,8 +7,8 @@ import { createRoot } from "react-dom/client";
 import { AskCard } from "../../src/components/AskCard";
 import { bootstrapI18n, i18n } from "../../src/lib/i18n";
 import { queryClient } from "../../src/lib/query";
+import type { RoutineDraftState } from "../../src/lib/routine-draft";
 import { rpc } from "../../src/lib/rpc";
-import type { RoutineDraftState } from "../../src/pages/RoutineEditor";
 import { RoutineEditor } from "../../src/pages/RoutineEditor";
 import { SettingsOverlay } from "../../src/pages/SettingsOverlay";
 import { BotSettings } from "../../src/pages/shell/bot-panel";
@@ -198,6 +198,8 @@ function RoutineShot() {
         onTestRun={() => undefined}
         onDelete={() => undefined}
         onEnsureWebhook={async () => undefined}
+        onRevealWebhook={async () => undefined}
+        onHideWebhook={() => undefined}
       />
     </main>
   );
@@ -229,7 +231,9 @@ function ApprovalShot() {
 }
 
 const subscriptionMe: Me = {
+  labs: [],
   ticketBoardEnabled: false,
+  labsAvailable: [],
   navLinks: [],
   phoneCallsEnabled: false,
   userId: "user-demo",
@@ -325,6 +329,9 @@ function SubscriptionShot() {
         onUsageOpen={() => undefined}
         timezone="UTC"
         onTimezoneChange={async () => undefined}
+        labs={[]}
+        labsAvailable={[]}
+        onLabsChange={async () => undefined}
         onClose={() => undefined}
       />
     </main>

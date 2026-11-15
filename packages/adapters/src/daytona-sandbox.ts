@@ -10,6 +10,8 @@ import type {
   ComputerObservation,
   ComputerRef,
   ControlLeaseRef,
+  PageBrowserCommand,
+  PageBrowserResult,
   PortableFile,
   ProcessEvent,
   SandboxProvider,
@@ -26,10 +28,12 @@ import {
   workspaceCwd,
   workspacePath,
 } from "./computer-support.js";
-import { PORTABLE_TRANSFER_BATCH_BYTES } from "./computer-workspace.js";
+import { PortableFileBatcher } from "./computer-workspace.js";
 import { LinuxDesktop, onBotScreen, PREPARE_LINUX_DESKTOP } from "./linux-desktop.js";
+import { installPageBrowserCommand } from "./page-browser-install.js";
 import { sandboxCommandArgv } from "./sandbox-command-environment.js";
-import { isSandboxGoneError } from "./sandbox-errors.js";
+import { abortedCommandEvents, timedOutCommandEvents } from "./sandbox-command-events.js";
+import { isSandboxGoneError, sandboxNotFoundError } from "./sandbox-errors.js";
 import { withAbort } from "./web-ssrf.js";
 import { shouldSkipPortableWorkspaceFile } from "./workspace-save-policy.js";
 
@@ -63,7 +67,7 @@ export type DaytonaSandbox = Pick<
 > & {
   process: Pick<Sandbox["process"], "executeCommand">;
   fs: Pick<Sandbox["fs"], "listFiles" | "getFileDetails"> & {
-    uploadFile(file: Buffer, remotePath: string): Promise<void>;
+    uploadFile(file: Buffer, remotePath: string, timeout?: number): Promise<void>;
     downloadFile(remotePath: string): Promise<Buffer>;
   };
   computerUse: Pick<Sandbox["computerUse"], "stop">;
@@ -116,6 +120,60 @@ export class DaytonaSandboxProvider implements SandboxProvider {
         boundedSandboxCommandTimeoutMs(undefined) / 1000,
       );
       return { code: result.exitCode, stdout: result.result, stderr: result.result };
+    },
+    runWithInput: async (computer, command, input, timeoutMs, context) => {
+      context.signal.throwIfAborted();
+      const sandbox = await this.box(computer);
+      const directory = `/tmp/rakazo-page-input-${randomUUID()}`;
+      const file = `${directory}/request`;
+      const timeout = Math.max(1, Math.ceil(timeoutMs / 1_000));
+      const created = await sandbox.process.executeCommand(
+        `mkdir -m 700 -- ${shellQuote(directory)}`,
+        undefined,
+        undefined,
+        timeout,
+      );
+      if (created.exitCode !== 0) throw new Error("Could not prepare browser input");
+      try {
+        context.signal.throwIfAborted();
+        try {
+          await sandbox.fs.uploadFile(Buffer.from(input), file, timeout);
+        } catch {
+          throw new Error("Could not transfer browser input");
+        }
+        context.signal.throwIfAborted();
+        try {
+          const result = await sandbox.process.executeCommand(
+            `bash -c ${shellQuote(`exec 0< ${shellQuote(file)} || exit 1; rm -f -- ${shellQuote(file)} && rmdir -- ${shellQuote(directory)} || exit 1; ${command}`)}`,
+            undefined,
+            undefined,
+            timeout,
+          );
+          context.signal.throwIfAborted();
+          return { code: result.exitCode, stdout: result.result };
+        } catch (error) {
+          if (error instanceof (await daytonaSdk()).DaytonaProcessExecutionTimeoutError)
+            return { code: 124, stdout: "" };
+          context.signal.throwIfAborted();
+          throw new Error("Page browser unavailable or interrupted");
+        }
+      } finally {
+        let cleaned = false;
+        try {
+          const result = await sandbox.process.executeCommand(
+            `rm -f -- ${shellQuote(file)} && { rmdir -- ${shellQuote(directory)} 2>/dev/null || test ! -e ${shellQuote(directory)}; }`,
+            undefined,
+            undefined,
+            10,
+          );
+          cleaned = result.exitCode === 0;
+        } catch {}
+        if (!cleaned)
+          getLogger().warn("sandbox.page_browser", {
+            provider: "daytona",
+            outcome: "input_cleanup_failed",
+          });
+      }
     },
     screenUrl: async (computer, port, context) => {
       const preview = await this.screenPreview(
@@ -234,8 +292,7 @@ export class DaytonaSandboxProvider implements SandboxProvider {
   ): AsyncIterable<ProcessEvent> {
     const request = onBotScreen(requested, context, DISPLAY_START);
     if (context.signal.aborted) {
-      yield { type: "stderr", data: "command aborted\n" };
-      yield { type: "exit", code: 130 };
+      yield* abortedCommandEvents();
       return;
     }
     const sandbox = await this.box(computer);
@@ -249,19 +306,14 @@ export class DaytonaSandboxProvider implements SandboxProvider {
         Math.max(1, Math.ceil(timeoutMs / 1_000)),
       );
       if (context.signal.aborted) {
-        yield { type: "stderr", data: "command aborted\n" };
-        yield { type: "exit", code: 130 };
+        yield* abortedCommandEvents();
         return;
       }
       if (result.result) yield { type: "stdout", data: result.result };
       yield { type: "exit", code: result.exitCode };
     } catch (error) {
       if (error instanceof (await daytonaSdk()).DaytonaProcessExecutionTimeoutError) {
-        yield {
-          type: "stderr",
-          data: `command timed out after ${timeoutMs} ms\n`,
-        };
-        yield { type: "exit", code: 124 };
+        yield* timedOutCommandEvents(timeoutMs);
         return;
       }
       throw error;
@@ -299,6 +351,14 @@ export class DaytonaSandboxProvider implements SandboxProvider {
   }
   async act(computer: ComputerRef, request: ComputerActionRequest, context: AdapterContext) {
     return this.desktops.act(computer, request, context);
+  }
+
+  async pageBrowser(
+    computer: ComputerRef,
+    request: PageBrowserCommand,
+    context: AdapterContext,
+  ): Promise<PageBrowserResult> {
+    return this.desktops.pageBrowser(computer, request, context);
   }
 
   async listFiles(
@@ -362,27 +422,18 @@ export class DaytonaSandboxProvider implements SandboxProvider {
   ): Promise<void> {
     const sandbox = await this.box(computer);
     await this.desktops.stopBrowsers(computer, context);
-    let batch: PortableFile[] = [];
-    let batchBytes = 0;
-    const flush = async () => {
+    const batcher = new PortableFileBatcher<PortableFile>(8, (file) => file.content.byteLength);
+    const flush = async (batch: PortableFile[]) => {
       if (!batch.length) return;
       await this.writeFiles(sandbox, batch);
-      batch = [];
-      batchBytes = 0;
     };
     for await (const file of files) {
       if (shouldSkipPortableWorkspaceFile(file.path)) continue;
       if (context.signal.aborted) throw context.signal.reason ?? new Error("import aborted");
-      if (
-        batch.length >= 8 ||
-        batchBytes + file.content.byteLength > PORTABLE_TRANSFER_BATCH_BYTES
-      ) {
-        await flush();
-      }
-      batch.push(file);
-      batchBytes += file.content.byteLength;
+      const full = batcher.add(file);
+      if (full) await flush(full);
     }
-    await flush();
+    await flush(batcher.take());
     // Browser profiles are imported without opening a shared browser.
   }
 
@@ -551,6 +602,19 @@ export class DaytonaSandboxProvider implements SandboxProvider {
         300,
       );
       if (runtime.exitCode !== 0) throw new Error("could not prepare computer desktop tools");
+      const pageBrowser = await sandbox.process
+        .executeCommand(
+          `bash -c ${shellQuote(installPageBrowserCommand())}`,
+          undefined,
+          undefined,
+          120,
+        )
+        .catch(() => ({ exitCode: 1 }));
+      if (pageBrowser.exitCode !== 0)
+        getLogger().warn("sandbox.page_browser", {
+          provider: "daytona",
+          outcome: "install_failed",
+        });
       if (this.preparations.get(sandbox.id) !== preparation) {
         throw new Error("Daytona workspace preparation was invalidated during teardown");
       }
@@ -670,9 +734,7 @@ async function isDaytonaSandboxMissing(error: unknown): Promise<boolean> {
 
 /** Named so the shared isSandboxGoneError recognizes it and the computer is replaced. */
 function daytonaSandboxGoneError(id: string, cause?: unknown): Error {
-  return Object.assign(new Error(`Daytona sandbox ${id} is gone`, { cause }), {
-    name: "SandboxNotFoundError",
-  });
+  return sandboxNotFoundError(`Daytona sandbox ${id} is gone`, { cause });
 }
 
 async function refreshDaytonaSandbox(sandbox: DaytonaSandbox): Promise<void> {
@@ -907,20 +969,12 @@ async function* walkDaytonaWorkspace(
 
 function daytonaExportBatches<T extends { entry: { size: number } }>(files: readonly T[]): T[][] {
   const batches: T[][] = [];
-  let batch: T[] = [];
-  let batchBytes = 0;
+  const batcher = new PortableFileBatcher<T>(8, (file) => file.entry.size);
   for (const file of files) {
-    if (
-      batch.length > 0 &&
-      (batch.length >= 8 || batchBytes + file.entry.size > PORTABLE_TRANSFER_BATCH_BYTES)
-    ) {
-      batches.push(batch);
-      batch = [];
-      batchBytes = 0;
-    }
-    batch.push(file);
-    batchBytes += file.entry.size;
+    const full = batcher.add(file);
+    if (full?.length) batches.push(full);
   }
-  if (batch.length) batches.push(batch);
+  const last = batcher.take();
+  if (last.length) batches.push(last);
   return batches;
 }

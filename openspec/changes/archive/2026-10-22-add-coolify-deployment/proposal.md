@@ -37,10 +37,12 @@ set a domain, fill a few keys, deploy".
 ## Capabilities
 
 ### New Capabilities
+
 - `coolify-deployment`: the contract for the Coolify compose file and its runbook (image pinning,
   routing, secrets, Docker-socket scope, persistence, health/startup order, updater off).
 
 ### Modified Capabilities
+
 <!-- None. `image-distribution` (archived with rebrand-nurlings) already owns the tag contract;
      this change only consumes it. -->
 

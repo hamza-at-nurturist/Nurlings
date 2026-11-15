@@ -1,7 +1,7 @@
+import { useLingui } from "@lingui/react/macro";
 import type { Bot } from "@rakazo/contracts";
 import { typeScale } from "@rakazo/ui-tokens";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useI18n } from "../../lib/i18n";
 import { useMobileTokens } from "../../lib/native";
 import { MentionOptionIcon } from "../thread-composer";
 
@@ -13,7 +13,7 @@ export function MentionOptions({
   bots: readonly Bot[];
   onPick: (bot: Bot) => void;
 }) {
-  const { t } = useI18n();
+  const { t } = useLingui();
   const tokens = useMobileTokens();
   if (bots.length === 0) return null;
   return (
@@ -26,7 +26,7 @@ export function MentionOptions({
         <Pressable
           key={bot.id}
           accessibilityRole="button"
-          accessibilityLabel={t("@{name}", { name: bot.name })}
+          accessibilityLabel={t`@${bot.name}`}
           onPress={() => onPick(bot)}
           style={styles.row}
         >
