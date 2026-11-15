@@ -123,8 +123,8 @@ export function serializeSetup(setup: DesktopSetup): string {
 }
 
 /**
- * Decides between the setup window and the app window. A first launch opens Rakazo
- * Cloud; other servers are a choice made from setup later. An explicit
+ * Decides between the setup window and the app window. A first launch shows setup; there is
+ * no hosted service to open. An explicit
  * `RAKAZO_WEB_URL` still wins over saved configuration so test and performance
  * harnesses can point the shell anywhere without touching a user's real setup.
  */
@@ -143,7 +143,8 @@ export function resolveStartupTarget(input: {
     if (saved !== null) return { kind: "app", url: saved.serverUrl, source: "saved" };
     return { kind: "setup" };
   }
-  return { kind: "app", url: RAKAZO_CLOUD_URL, source: "cloud" };
+  // The fork has no hosted service: a first launch shows setup, never the upstream's cloud.
+  return { kind: "setup" };
 }
 
 /** Turns a network failure into something a person can act on. */

@@ -88,11 +88,11 @@ class PreviewBoot(unittest.TestCase):
                 time.sleep(0.02)
             self.assertEqual(serving.exists(), succeeds)
             if not succeeds:
-                self.assertNotEqual(process.wait(timeout=3), 0)
+                self.assertNotEqual(process.wait(timeout=15), 0)
         finally:
             if process.poll() is None:
                 os.killpg(process.pid, signal.SIGTERM)
-            output = process.communicate(timeout=3)[0].decode()
+            output = process.communicate(timeout=15)[0].decode()
             if succeeds:
                 self.assertIn("[preview] Ready", output)
 

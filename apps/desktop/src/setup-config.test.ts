@@ -186,13 +186,9 @@ describe("server request headers", () => {
 describe("startup target", () => {
   const saved = { mode: "existing", serverUrl: "https://rakazo.example.com" } as const;
 
-  it("opens Rakazo Cloud on a first launch", () => {
-    expect(resolveStartupTarget({})).toEqual({
-      kind: "app",
-      url: RAKAZO_CLOUD_URL,
-      source: "cloud",
-    });
-    expect(resolveStartupTarget({ saved: null })).toMatchObject({ source: "cloud" });
+  it("shows setup on a first launch, since the fork has no hosted service to open", () => {
+    expect(resolveStartupTarget({})).toEqual({ kind: "setup" });
+    expect(resolveStartupTarget({ saved: null })).toEqual({ kind: "setup" });
   });
 
   it("opens the saved instance on later launches", () => {
