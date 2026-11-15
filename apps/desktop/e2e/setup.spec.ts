@@ -6,7 +6,7 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
-import { brand } from "@nurlings/brand";
+import { brand, brandText } from "@nurlings/brand";
 import type { ElectronApplication, Page } from "@playwright/test";
 import { _electron as electron, expect, test } from "@playwright/test";
 import type { RakazoDesktop } from "@rakazo/contracts";
@@ -114,7 +114,7 @@ test("first run offers this computer and an existing instance, with no hosted ch
   const setup = await app.firstWindow();
 
   await expect(setup.getByRole("heading", { name: `Welcome to ${brand.name}` })).toBeVisible();
-  await expect(setup.getByText("Choose which server this app should use.")).toBeVisible();
+  await expect(setup.getByText(brandText("Choose where Rakazo runs.", brand))).toBeVisible();
   await expect(setup.getByText("This computer")).toBeVisible();
   await expect(setup.getByText("Existing instance")).toBeVisible();
   await expect(setup.getByText(/Rakazo/)).toHaveCount(0);
