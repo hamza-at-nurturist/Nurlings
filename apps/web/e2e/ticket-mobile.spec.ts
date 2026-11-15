@@ -33,8 +33,13 @@ test("a ticket opens as a two-tab sheet on a phone", async ({ page }, testInfo) 
   await card.getByTestId("card-open").click();
   const sheet = page.getByRole("dialog", { name: title });
   await expect(sheet.getByTestId("ticket-sheet")).toBeVisible();
-  const box = await sheet.boundingBox();
-  expect(box).toMatchObject({ x: 0, y: 0, width: 390 });
+  // The sheet slides in, so wait for it to settle before measuring it.
+  await expect
+    .poll(async () => {
+      const box = await sheet.boundingBox();
+      return box && { x: Math.round(box.x), y: Math.round(box.y), width: Math.round(box.width) };
+    })
+    .toEqual({ x: 0, y: 0, width: 390 });
   await expect(sheet.getByRole("tab", { name: "Ticket" })).toHaveAttribute("aria-selected", "true");
   await expect(sheet.getByTestId("ticket-sheet")).toContainText(/Board\s*\/\s*NUR-\d+/);
   await expect(sheet.getByRole("button", { name: "Expand" })).toHaveCount(0);
