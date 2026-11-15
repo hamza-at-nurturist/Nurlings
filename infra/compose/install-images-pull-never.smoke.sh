@@ -281,39 +281,39 @@ download_ref() {
     [[ -z "$image_tag" ]] || export RAKAZO_IMAGE_TAG="$image_tag"
     run_install "$tmp/$name" "$@" >/dev/null 2>&1
   ) || fail "$name install failed"
-  grep -F 'docker-compose.images.yml' "$tmp/$name/curl.log" | grep -oE 'rakazo/[^/]+/infra/compose' | sort -u
+  grep -F 'docker-compose.images.yml' "$tmp/$name/curl.log" | grep -oE 'Nurlings/[^/]+/infra/compose' | sort -u
 }
 ref="$(download_ref untagged "")"
-[[ "$ref" == "rakazo/main/infra/compose" ]] || fail "no pin should use main, got: $ref"
+[[ "$ref" == "Nurlings/main/infra/compose" ]] || fail "no pin should use main, got: $ref"
 ref="$(download_ref shell-pin v0.8.0)"
-[[ "$ref" == "rakazo/v0.8.0/infra/compose" ]] || fail "shell pin should use its tag, got: $ref"
+[[ "$ref" == "Nurlings/v0.8.0/infra/compose" ]] || fail "shell pin should use its tag, got: $ref"
 ref="$(download_ref shell-edge edge)"
-[[ "$ref" == "rakazo/main/infra/compose" ]] || fail "edge should use main, got: $ref"
+[[ "$ref" == "Nurlings/main/infra/compose" ]] || fail "edge should use main, got: $ref"
 ref="$(download_ref shell-custom v0.8.0-custom)"
-[[ "$ref" == "rakazo/main/infra/compose" ]] || fail "a tag that is not a release should use main, got: $ref"
+[[ "$ref" == "Nurlings/main/infra/compose" ]] || fail "a tag that is not a release should use main, got: $ref"
 
 setup_work "$tmp/env-pin"
 printf 'RAKAZO_IMAGE_TAG=edge\nexport RAKAZO_IMAGE_TAG="v0.7.0" # pinned\r\n' >> "$tmp/env-pin/cwd/.env"
 run_install "$tmp/env-pin" >/dev/null 2>&1 || fail "env-pin install failed"
-grep -qF 'rakazo/v0.7.0/infra/compose/docker-compose.images.yml' "$tmp/env-pin/curl.log" ||
+grep -qF 'Nurlings/v0.7.0/infra/compose/docker-compose.images.yml' "$tmp/env-pin/curl.log" ||
   fail ".env pin should use its tag: $(cat "$tmp/env-pin/curl.log")"
 
 setup_work "$tmp/shell-wins"
 printf 'RAKAZO_IMAGE_TAG=v0.7.0\n' >> "$tmp/shell-wins/cwd/.env"
 (export RAKAZO_IMAGE_TAG=v0.8.0; run_install "$tmp/shell-wins" >/dev/null 2>&1) || fail "shell-wins install failed"
-grep -qF 'rakazo/v0.8.0/infra/compose/docker-compose.images.yml' "$tmp/shell-wins/curl.log" ||
+grep -qF 'Nurlings/v0.8.0/infra/compose/docker-compose.images.yml' "$tmp/shell-wins/curl.log" ||
   fail "the shell should win over .env, as in Compose: $(cat "$tmp/shell-wins/curl.log")"
 
 setup_work "$tmp/env-spaces"
 printf "RAKAZO_IMAGE_TAG=v0.6.0\\nexport RAKAZO_IMAGE_TAG = 'v0.7.0'\\n" >> "$tmp/env-spaces/cwd/.env"
 run_install "$tmp/env-spaces" >/dev/null 2>&1 || fail "env-spaces install failed"
-grep -qF 'rakazo/v0.7.0/infra/compose/docker-compose.images.yml' "$tmp/env-spaces/curl.log" ||
+grep -qF 'Nurlings/v0.7.0/infra/compose/docker-compose.images.yml' "$tmp/env-spaces/curl.log" ||
   fail ".env pin with spaces should use its tag: $(cat "$tmp/env-spaces/curl.log")"
 
 setup_work "$tmp/shell-empty"
 printf 'RAKAZO_IMAGE_TAG=v0.7.0\n' >> "$tmp/shell-empty/cwd/.env"
 (export RAKAZO_IMAGE_TAG=; run_install "$tmp/shell-empty" >/dev/null 2>&1) || fail "shell-empty install failed"
-grep -qF 'rakazo/main/infra/compose/docker-compose.images.yml' "$tmp/shell-empty/curl.log" ||
+grep -qF 'Nurlings/main/infra/compose/docker-compose.images.yml' "$tmp/shell-empty/curl.log" ||
   fail "an empty shell value should win over .env, as in Compose: $(cat "$tmp/shell-empty/curl.log")"
 
 setup_work "$tmp/mirror"
