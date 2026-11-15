@@ -331,7 +331,7 @@ describe("the Coolify runbook", () => {
   });
 
   it("only documents variables the compose file reads", () => {
-    const rows = [...readme.matchAll(/^\| `([A-Z][A-Z0-9_]+)` \|/gm)].map((m) => m[1] ?? "");
+    const rows = [...readme.matchAll(/^\| `([A-Z][A-Z0-9_]+)`\s*\|/gm)].map((m) => m[1] ?? "");
     expect(rows).toContain("NURLINGS_VERSION");
     for (const variable of rows)
       expect({ variable, found: source.includes(variable) }).toEqual({
