@@ -3,10 +3,20 @@
 ## Why
 
 Settings has one "Nurling style" control (stored as "Bot style" in the source and rebranded at
-display time): a two-way switch between Original and Nurlings. It swaps the whole avatar art and
-nothing finer. People who want a quieter avatar, with no shading, no eye shine or no flare, have
-no way to get one. This replaces the two-way switch with a few effect switches. Flat is the
-result of turning them off.
+display time): a two-way switch between Original and Nurlings. It has two problems:
+
+- **It does nothing for most bots.** The Nurlings look only draws for a bot with a plain colour
+  (`#hex`) or no colour. A bot whose look is a picked shape (`#hex::shape_N`) draws the same body in
+  both sets, because the logo branch runs only when no shape is stored (`bot-avatar.tsx` on web,
+  `usesLogoAvatar` on mobile). The Original and Nurlings buttons look broken to anyone with shaped
+  bots.
+- **It offers a look the build otherwise hides.** The bot pickers gate the icon set behind
+  `SELECTABLE_BOT_AVATAR_SETS.length > 1`, which is false here. The account control in
+  `general.tsx` and `AccountSettingsOverlay.tsx` is not gated, so it still offers the logo set.
+
+People who want a quieter avatar, with no shading, no eye shine or no flare, also have no way to
+get one. This replaces the two-way switch with a few effect switches that apply to every avatar.
+Flat is the result of turning them off.
 
 ## What exists today (checked on `main`)
 
@@ -25,9 +35,8 @@ result of turning them off.
     The crown light and rim light are highlights, not shadow.
   - Glint: the eye glint (`logo-avatar-glint`) on the Nurlings look, and the catchlight and gloss arc
     on the organic bodies.
-  - Eye flare: nothing in the code is called flare. The closest is the gradient sheen on each
-    Nurlings eye (`logo-eye` gradient). This proposal treats that as eye flare. **Needs maintainer
-    confirmation.**
+  - Eye flare: nothing in the code is called flare. It means the gradient sheen on each Nurlings
+    eye (`logo-eye` gradient), confirmed by the maintainer.
 
 ## What Changes
 

@@ -14,6 +14,9 @@ and `labs` (feature flags, wrong meaning). The API returns it on `me` and takes 
 Today Original and Nurlings are different art, not different effect levels, so "map Original onto
 switches" cannot be exact. Options:
 
+The set is already ignored for any bot with a picked shape, so most accounts see no difference
+between the two today. **Not decided yet: the maintainer has not confirmed an option.**
+
 1. **Keep the set, hide the choice (recommended).** Stored sets keep rendering. Glint applies to
    both looks (catchlight and gloss on Original, eye glint on Nurlings). Shadow and Eye flare apply
    to the Nurlings look, so they show only when the account is on it. Original users keep their
