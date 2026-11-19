@@ -1,6 +1,7 @@
 # computer-panel Specification
 
 ## Purpose
+
 How the computer panel behaves while a bot's computer is starting: a booting view that recovers on its own instead of staying stuck.
 
 ## Requirements
