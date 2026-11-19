@@ -1,4 +1,5 @@
 import path from "node:path";
+import { brand } from "@nurlings/brand";
 import type { AgentToolExecutionResult, ProcessEvent } from "@rakazo/adapter-kit";
 import type { ApprovalMode } from "@rakazo/core";
 import { redactSecrets } from "@rakazo/core";
@@ -40,8 +41,7 @@ export {
 /** Whether the run's owner has their desktop connected, or could connect one. */
 export type UserComputerState = "connected" | "offline" | undefined;
 
-const USER_COMPUTER_UNAVAILABLE =
-  'The user\'s computer is not connected. If the task needs it, ask them to open the Rakazo desktop app and turn on "Let bots use this computer" in its settings.';
+const USER_COMPUTER_UNAVAILABLE = `The user's computer is not connected. If the task needs it, ask them to open the ${brand.name} desktop app and turn on "Let bots use this computer" in its settings.`;
 
 /**
  * Whose own computer this run may reach: the person whose message started it, when they own the

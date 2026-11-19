@@ -61,9 +61,8 @@ it("embeds one watch app with the correct sources, icon, and companion identity"
     expect(regenerated.hash.project.objects.PBXSourcesBuildPhase[sources.value].files).toHaveLength(
       2,
     );
-    const watchSigning = config.expo.extra.eas.build.experimental.ios.appExtensions.find(
-      ({ targetName }) => targetName === "RakazoWatch",
-    );
+    // The watch app is not registered in app.json, so the identity comes from the app's own.
+    const watchBundleIdentifier = `${config.expo.ios.bundleIdentifier}.watchkitapp`;
     const settings = Object.values(regenerated.pbxXCBuildConfigurationSection()).filter(
       (entry) => entry.buildSettings?.PRODUCT_NAME?.replaceAll('"', "") === "RakazoWatch",
     );
@@ -73,7 +72,7 @@ it("embeds one watch app with the correct sources, icon, and companion identity"
         config.expo.ios.bundleIdentifier,
       );
       expect(buildSettings.PRODUCT_BUNDLE_IDENTIFIER.replaceAll('"', "")).toBe(
-        watchSigning.bundleIdentifier,
+        watchBundleIdentifier,
       );
     }
   } finally {

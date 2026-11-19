@@ -1340,7 +1340,7 @@ msgstr "वर्कस्पेस जोड़ें"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Added"
-msgstr ""
+msgstr "जोड़ा गया"
 
 #: apps/mobile/app/(settings)/integrations.tsx
 #: apps/mobile/app/(settings)/plugin.tsx
@@ -1471,7 +1471,7 @@ msgstr "अब तक"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Allow"
-msgstr ""
+msgstr "अनुमति दें"
 
 #: apps/mobile/lib/settings/ai-consent.ts
 #: apps/web/src/components/call/VoiceConsentDialog.tsx
@@ -2067,7 +2067,7 @@ msgstr "बिलिंग अवधि"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Block"
-msgstr ""
+msgstr "ब्लॉक करें"
 
 #: apps/web/src/components/settings/ApprovalRulesSettings.tsx
 msgid "Block"
@@ -2133,7 +2133,7 @@ msgstr "बॉट"
 #: apps/web/src/pages/shell/chat/message-view.tsx
 #: apps/web/src/pages/space/SpaceSearch.tsx
 msgid "Bot"
-msgstr ""
+msgstr "बॉट"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -2686,7 +2686,7 @@ msgstr "जुड़ने का विकल्प चुनने पर ट�
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Chosen bots"
-msgstr ""
+msgstr "चुने गए बॉट"
 
 #: apps/mobile/components/vault/vault-item-editor.tsx
 msgid "Chosen bots"
@@ -3838,7 +3838,7 @@ msgstr "बॉट लोड नहीं हो सके"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Could not load bots. Reload to try again."
-msgstr ""
+msgstr "बॉट लोड नहीं हो सके। दोबारा कोशिश करने के लिए फिर से लोड करें।"
 
 #: apps/web/src/pages/integrations/IntegrationSetup.tsx
 msgid "Could not load bots. Reload to try again."
@@ -5761,7 +5761,7 @@ msgstr "बाहरी बातचीत"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Extra high"
-msgstr ""
+msgstr "अतिरिक्त उच्च"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -6242,7 +6242,7 @@ msgstr "ट्रांसक्रिप्ट छिपाएँ"
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 #: apps/web/src/pages/space/ticket-priority.ts
 msgid "High"
-msgstr ""
+msgstr "उच्च"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -6361,7 +6361,7 @@ msgstr "इमेज"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Image input is not configured for this model."
-msgstr ""
+msgstr "इस मॉडल के लिए चित्र इनपुट कॉन्फ़िगर नहीं है।"
 
 #: apps/mobile/lib/api/user-error.ts
 #: apps/web/src/lib/query/user-error.ts
@@ -7003,7 +7003,7 @@ msgstr "लगता है कि इसमें कोई कुंजी ह
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 #: apps/web/src/pages/space/ticket-priority.ts
 msgid "Low"
-msgstr ""
+msgstr "निम्न"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7101,7 +7101,7 @@ msgstr "मार्केटिंग"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Max"
-msgstr ""
+msgstr "अधिकतम"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7145,7 +7145,7 @@ msgstr "MCP सर्वर"
 #: apps/mobile/lib/models/thinking-level.ts
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 msgid "Medium"
-msgstr ""
+msgstr "मध्यम"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7251,7 +7251,7 @@ msgstr "ज़िक्र: {mentions}"
 #: apps/web/src/pages/shell/composer/composer.tsx
 #: apps/web/src/pages/space/SpaceSearch.tsx
 msgid "Message"
-msgstr ""
+msgstr "संदेश"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -7313,7 +7313,7 @@ msgstr "माइक्रोफ़ोन विफल"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Minimal"
-msgstr ""
+msgstr "न्यूनतम"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7825,7 +7825,7 @@ msgstr "कोई प्रमाणीकरण नहीं"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "No bots"
-msgstr ""
+msgstr "कोई बॉट नहीं"
 
 #: apps/web/src/components/integrations/agent-access.tsx
 msgid "No bots"
@@ -10597,7 +10597,7 @@ msgstr "असंबंधित मेमोरी छोड़ें"
 #. js-lingui-explicit-id
 #: packages/i18n/src/meeting.ts
 msgid "Skipped"
-msgstr ""
+msgstr "छोड़ी गई"
 
 #: apps/mobile/components/cards/ComputerCard.tsx
 #: apps/web/src/components/computers/ComputerCard.tsx
@@ -10672,7 +10672,7 @@ msgstr "शुरू होते समय कुछ गड़बड़ हो 
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Something went wrong. Try again."
-msgstr ""
+msgstr "कुछ गलत हो गया। फिर से कोशिश करें।"
 
 #: apps/mobile/app/(settings)/approval-rule-add.tsx
 #: apps/mobile/app/(settings)/approvals.tsx
@@ -11532,7 +11532,7 @@ msgstr "यह Mac"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "This model cannot read images. Choose a model that supports images."
-msgstr ""
+msgstr "यह मॉडल चित्र नहीं पढ़ सकता। चित्रों का समर्थन करने वाला मॉडल चुनें।"
 
 #: apps/mobile/lib/api/user-error.ts
 #: apps/web/src/lib/query/user-error.ts

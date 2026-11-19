@@ -18,6 +18,7 @@ vi.mock("@lingui/react/macro", () => ({
 }));
 vi.mock("@rakazo/ui-web", () => ({
   Button: (props: ComponentProps<"button">) => <button type="button" {...props} />,
+  BrandAnimation: () => null,
   Spinner: () => null,
 }));
 vi.mock("../../../components/computers/ComputerMaintenanceActions", () => ({

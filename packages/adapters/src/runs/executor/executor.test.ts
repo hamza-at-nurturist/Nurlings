@@ -1,4 +1,5 @@
 import { normalizeContext } from "@earendil-works/pi-ai";
+import { brand } from "@nurlings/brand";
 import { WorkspaceTooLargeError } from "@rakazo/adapter-kit";
 import type { MessageBlock } from "@rakazo/contracts";
 import { FLEET_TOOL_NAMES } from "@rakazo/contracts";
@@ -1542,7 +1543,7 @@ describe("userTurnInstructions", () => {
       archiveBot,
       "Connected plugins: none",
       "Agent skills",
-      expect.stringContaining("read the Rakazo skill"),
+      expect.stringContaining(`read the ${brand.name} skill`),
       "Taught skills",
       ...stableTail,
       "Group context",

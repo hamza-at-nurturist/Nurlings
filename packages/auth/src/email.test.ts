@@ -331,7 +331,10 @@ it("asks for one thing in the model connection email: the connect step", async (
   expect(message.subject).toBe(`Connect a model to start using ${brand.name}`);
   expect(message.text).toContain("Hi Ana,");
   expect(message.text).toContain(
-    `Your ${brand.name} plan has started, but your bots can't reply until a model is connected.`,
+    brandText(
+      "Your Rakazo plan has started, but your bots can't reply until a model is connected.",
+      brand,
+    ),
   );
   expect(message.text).toContain(
     "Sign in with your ChatGPT or Claude subscription, or paste an API key.",

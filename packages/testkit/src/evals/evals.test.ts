@@ -79,17 +79,12 @@ const judgeDown: EvalJudge = async () => {
 };
 
 describe("eval web", () => {
-  it("serves this checkout's docs at the docs URLs the Rakazo skill links", async () => {
+  it("serves no docs, because the Nurlings skill links none", async () => {
     const web = evalWeb();
-    const page = await web.fetch(
-      { url: "https://rakazo.com/docs/account.md" },
-      {} as AdapterContext,
-    );
-    expect(page.text).toContain("Settings → Billing");
-    const home = await web.fetch({ url: "https://rakazo.com/docs.md" }, {} as AdapterContext);
-    expect(home.text).not.toBe(web.fetchResult.text);
-    const other = await web.fetch({ url: "https://example.test/x" }, {} as AdapterContext);
-    expect(other.text).toBe(web.fetchResult.text);
+    for (const url of ["https://rakazo.com/docs/account.md", "https://example.test/x"]) {
+      const page = await web.fetch({ url }, {} as AdapterContext);
+      expect(page.text).toBe(web.fetchResult.text);
+    }
   });
 });
 

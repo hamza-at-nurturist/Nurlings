@@ -1340,7 +1340,7 @@ msgstr "Dodaj obszar roboczy"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Added"
-msgstr ""
+msgstr "Dodano"
 
 #: apps/mobile/app/(settings)/integrations.tsx
 #: apps/mobile/app/(settings)/plugin.tsx
@@ -1471,7 +1471,7 @@ msgstr "Cały okres"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Allow"
-msgstr ""
+msgstr "Zezwól"
 
 #: apps/mobile/lib/settings/ai-consent.ts
 #: apps/web/src/components/call/VoiceConsentDialog.tsx
@@ -2067,7 +2067,7 @@ msgstr "Okres rozliczeniowy"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Block"
-msgstr ""
+msgstr "Zablokuj"
 
 #: apps/web/src/components/settings/ApprovalRulesSettings.tsx
 msgid "Block"
@@ -2133,7 +2133,7 @@ msgstr "bot"
 #: apps/web/src/pages/shell/chat/message-view.tsx
 #: apps/web/src/pages/space/SpaceSearch.tsx
 msgid "Bot"
-msgstr ""
+msgstr "Bot"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -2686,7 +2686,7 @@ msgstr "Wybranie opcji dołączania udostępnia transkrypcje tej Przestrzeni."
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Chosen bots"
-msgstr ""
+msgstr "Wybrane boty"
 
 #: apps/mobile/components/vault/vault-item-editor.tsx
 msgid "Chosen bots"
@@ -3838,7 +3838,7 @@ msgstr "Nie udało się wczytać botów"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Could not load bots. Reload to try again."
-msgstr ""
+msgstr "Nie udało się wczytać botów. Wczytaj ponownie, aby spróbować jeszcze raz."
 
 #: apps/web/src/pages/integrations/IntegrationSetup.tsx
 msgid "Could not load bots. Reload to try again."
@@ -5761,7 +5761,7 @@ msgstr "Rozmowa zewnętrzna"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Extra high"
-msgstr ""
+msgstr "Bardzo wysoki"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -6242,7 +6242,7 @@ msgstr "Ukryj transkrypcję"
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 #: apps/web/src/pages/space/ticket-priority.ts
 msgid "High"
-msgstr ""
+msgstr "Wysoki"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -6361,7 +6361,7 @@ msgstr "Obraz"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Image input is not configured for this model."
-msgstr ""
+msgstr "Ten model nie ma skonfigurowanej obsługi obrazów."
 
 #: apps/mobile/lib/api/user-error.ts
 #: apps/web/src/lib/query/user-error.ts
@@ -7003,7 +7003,7 @@ msgstr "Wygląda na to, że zawiera klucz"
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 #: apps/web/src/pages/space/ticket-priority.ts
 msgid "Low"
-msgstr ""
+msgstr "Niski"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7101,7 +7101,7 @@ msgstr "Marketing"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Max"
-msgstr ""
+msgstr "Maksymalny"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7145,7 +7145,7 @@ msgstr "Serwery MCP"
 #: apps/mobile/lib/models/thinking-level.ts
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 msgid "Medium"
-msgstr ""
+msgstr "Średni"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7251,7 +7251,7 @@ msgstr "Wzmianki: {mentions}"
 #: apps/web/src/pages/shell/composer/composer.tsx
 #: apps/web/src/pages/space/SpaceSearch.tsx
 msgid "Message"
-msgstr ""
+msgstr "Wiadomość"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -7313,7 +7313,7 @@ msgstr "Błąd mikrofonu"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Minimal"
-msgstr ""
+msgstr "Minimalny"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7825,7 +7825,7 @@ msgstr "Bez uwierzytelniania"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "No bots"
-msgstr ""
+msgstr "Brak botów"
 
 #: apps/web/src/components/integrations/agent-access.tsx
 msgid "No bots"
@@ -10597,7 +10597,7 @@ msgstr "Pomijaj niezwiązane wspomnienia"
 #. js-lingui-explicit-id
 #: packages/i18n/src/meeting.ts
 msgid "Skipped"
-msgstr ""
+msgstr "Pominięto"
 
 #: apps/mobile/components/cards/ComputerCard.tsx
 #: apps/web/src/components/computers/ComputerCard.tsx
@@ -10672,7 +10672,7 @@ msgstr "Wystąpił błąd podczas uruchamiania. Spróbuj ponownie za chwilę."
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Something went wrong. Try again."
-msgstr ""
+msgstr "Coś poszło nie tak. Spróbuj ponownie."
 
 #: apps/mobile/app/(settings)/approval-rule-add.tsx
 #: apps/mobile/app/(settings)/approvals.tsx
@@ -11532,7 +11532,7 @@ msgstr "ten Mac"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "This model cannot read images. Choose a model that supports images."
-msgstr ""
+msgstr "Ten model nie odczytuje obrazów. Wybierz model obsługujący obrazy."
 
 #: apps/mobile/lib/api/user-error.ts
 #: apps/web/src/lib/query/user-error.ts

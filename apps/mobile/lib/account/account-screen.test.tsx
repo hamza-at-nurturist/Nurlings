@@ -464,7 +464,7 @@ function holdPreferenceSave() {
 }
 
 function botStyleButton(screen: HTMLElement, label: string) {
-  const picker = screen.querySelector('[aria-label="Bot style"]')!;
+  const picker = screen.querySelector(branded('[aria-label="Bot style"]'))!;
   return Array.from(picker.querySelectorAll("button")).find((node) => node.textContent === label)!;
 }
 
@@ -482,7 +482,9 @@ it("saves an Original choice even when the saved style is absent", async () => {
   );
   expect(original().getAttribute("aria-pressed")).toBe("true");
   expect(
-    screen.querySelector('[aria-label="Bot style"][data-disabled]')?.getAttribute("data-disabled"),
+    screen
+      .querySelector(branded('[aria-label="Bot style"][data-disabled]'))
+      ?.getAttribute("data-disabled"),
   ).toBe("true");
   account.me = { ...account.me, botAvatarSet: "organic" };
   await act(async () => saving.resolve({}));
@@ -490,7 +492,9 @@ it("saves an Original choice even when the saved style is absent", async () => {
   expect(reads()).toBe(before + 1);
   expect(original().getAttribute("aria-pressed")).toBe("true");
   expect(
-    screen.querySelector('[aria-label="Bot style"][data-disabled]')?.getAttribute("data-disabled"),
+    screen
+      .querySelector(branded('[aria-label="Bot style"][data-disabled]'))
+      ?.getAttribute("data-disabled"),
   ).toBe("false");
 });
 
@@ -509,7 +513,9 @@ it("puts the bot style back and releases it when the save fails", async () => {
   expect(Alert.alert).toHaveBeenCalledWith("Couldn't update bot style");
   expect(botStyleButton(screen, "Rakazo").getAttribute("aria-pressed")).toBe("true");
   expect(
-    screen.querySelector('[aria-label="Bot style"][data-disabled]')?.getAttribute("data-disabled"),
+    screen
+      .querySelector(branded('[aria-label="Bot style"][data-disabled]'))
+      ?.getAttribute("data-disabled"),
   ).toBe("false");
 });
 

@@ -134,6 +134,7 @@ const SERVER_TEXT_FILES = [
   "packages/core/src/deployment/self-update.ts",
   "packages/adapters/src/runtime/pi/models/pi-models.ts",
   "packages/adapters/src/runtime/pi/models/pi-oauth.ts",
+  "packages/adapters/src/models/model-provider-registry.ts",
   "packages/adapters/src/mcp/mcp-oauth.ts",
   // Prompts sent to models: the fallback system prompts, helper prompt, approval resume text, and
   // the summarizer, safety-checker and engagement-judge instructions.

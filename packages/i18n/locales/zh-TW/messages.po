@@ -1341,7 +1341,7 @@ msgstr "新增工作區"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Added"
-msgstr ""
+msgstr "已新增"
 
 #: apps/mobile/app/(settings)/integrations.tsx
 #: apps/mobile/app/(settings)/plugin.tsx
@@ -1472,7 +1472,7 @@ msgstr "不限時間"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Allow"
-msgstr ""
+msgstr "允許"
 
 #: apps/mobile/lib/settings/ai-consent.ts
 #: apps/web/src/components/call/VoiceConsentDialog.tsx
@@ -2068,7 +2068,7 @@ msgstr "帳單週期"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Block"
-msgstr ""
+msgstr "封鎖"
 
 #: apps/web/src/components/settings/ApprovalRulesSettings.tsx
 msgid "Block"
@@ -2134,7 +2134,7 @@ msgstr "機器人"
 #: apps/web/src/pages/shell/chat/message-view.tsx
 #: apps/web/src/pages/space/SpaceSearch.tsx
 msgid "Bot"
-msgstr ""
+msgstr "機器人"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -2687,7 +2687,7 @@ msgstr "選擇加入方式後，文字紀錄將與此空間共用。"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Chosen bots"
-msgstr ""
+msgstr "指定的機器人"
 
 #: apps/mobile/components/vault/vault-item-editor.tsx
 msgid "Chosen bots"
@@ -3839,7 +3839,7 @@ msgstr "無法載入機器人清單"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Could not load bots. Reload to try again."
-msgstr ""
+msgstr "無法載入機器人。請重新載入後再試一次。"
 
 #: apps/web/src/pages/integrations/IntegrationSetup.tsx
 msgid "Could not load bots. Reload to try again."
@@ -5762,7 +5762,7 @@ msgstr "外部對話"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Extra high"
-msgstr ""
+msgstr "極高"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -6243,7 +6243,7 @@ msgstr "隱藏文字紀錄"
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 #: apps/web/src/pages/space/ticket-priority.ts
 msgid "High"
-msgstr ""
+msgstr "高"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -6362,7 +6362,7 @@ msgstr "圖片"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Image input is not configured for this model."
-msgstr ""
+msgstr "此模型尚未設定圖片輸入。"
 
 #: apps/mobile/lib/api/user-error.ts
 #: apps/web/src/lib/query/user-error.ts
@@ -7004,7 +7004,7 @@ msgstr "似乎包含金鑰"
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 #: apps/web/src/pages/space/ticket-priority.ts
 msgid "Low"
-msgstr ""
+msgstr "低"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7102,7 +7102,7 @@ msgstr "行銷"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Max"
-msgstr ""
+msgstr "最大"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7146,7 +7146,7 @@ msgstr "MCP 伺服器"
 #: apps/mobile/lib/models/thinking-level.ts
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 msgid "Medium"
-msgstr ""
+msgstr "中"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7252,7 +7252,7 @@ msgstr "提及：{mentions}"
 #: apps/web/src/pages/shell/composer/composer.tsx
 #: apps/web/src/pages/space/SpaceSearch.tsx
 msgid "Message"
-msgstr ""
+msgstr "訊息"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -7314,7 +7314,7 @@ msgstr "麥克風失敗"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Minimal"
-msgstr ""
+msgstr "最低"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7826,7 +7826,7 @@ msgstr "無驗證"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "No bots"
-msgstr ""
+msgstr "沒有機器人"
 
 #: apps/web/src/components/integrations/agent-access.tsx
 msgid "No bots"
@@ -10598,7 +10598,7 @@ msgstr "略過無關記憶"
 #. js-lingui-explicit-id
 #: packages/i18n/src/meeting.ts
 msgid "Skipped"
-msgstr ""
+msgstr "已略過"
 
 #: apps/mobile/components/cards/ComputerCard.tsx
 #: apps/web/src/components/computers/ComputerCard.tsx
@@ -10673,7 +10673,7 @@ msgstr "啟動時出了點問題。請稍後重試。"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Something went wrong. Try again."
-msgstr ""
+msgstr "出了點問題。請重試。"
 
 #: apps/mobile/app/(settings)/approval-rule-add.tsx
 #: apps/mobile/app/(settings)/approvals.tsx
@@ -11533,7 +11533,7 @@ msgstr "這臺 Mac"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "This model cannot read images. Choose a model that supports images."
-msgstr ""
+msgstr "此模型無法讀取圖片。請選擇支援圖片的模型。"
 
 #: apps/mobile/lib/api/user-error.ts
 #: apps/web/src/lib/query/user-error.ts

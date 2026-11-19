@@ -69,7 +69,7 @@ describe("the updater compose service", () => {
   it("is opt-in because it grants root-equivalent Docker access", () => {
     expect(updater.profiles).toEqual(["updater"]);
     expect(updater.environment?.RAKAZO_COMPUTER_IMAGE).toBe(
-      `\${RAKAZO_COMPUTER_IMAGE:-ghcr.io/elie222/rakazo/computer}`,
+      `\${RAKAZO_COMPUTER_IMAGE:-${brand.registry}/computer}`,
     );
     expect(updater.environment?.RAKAZO_AUTO_UPDATE_INTERVAL_HOURS).toBe(
       interpolated("RAKAZO_AUTO_UPDATE_INTERVAL_HOURS", "0"),

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { brand } from "@nurlings/brand";
 import { deferred } from "@rakazo/core/test-async";
 import { afterEach, describe, expect, it } from "vitest";
 import type { UpdaterCommandRunner } from "./index.js";
@@ -11,8 +12,8 @@ import { resolveUpdaterConfig } from "./updater-logic.js";
 
 const older = "1".repeat(40);
 const newer = "2".repeat(40);
-const appImage = "ghcr.io/elie222/rakazo/app";
-const computerImage = "ghcr.io/elie222/rakazo/computer";
+const appImage = `${brand.registry}/app`;
+const computerImage = `${brand.registry}/computer`;
 const cachePrefix = `cached-${createHash("sha256").update("cache-test").digest("hex").slice(0, 16)}-`;
 const cachedOlder = `${cachePrefix}${"1".repeat(64)}`;
 const cachedNewer = `${cachePrefix}${"2".repeat(64)}`;

@@ -72,7 +72,7 @@ vi.mock("../appearance/appearance", () => ({
 vi.mock("../native/native", () => ({ native: {}, useThemedStyles: () => ({}) }));
 
 // The Board entry is a fork addition; its flag has its own tests.
-vi.mock("./nurlings-board/enabled", () => ({ useNurlingsBoardEnabled: () => false }));
+vi.mock("../nurlings-board/enabled", () => ({ useNurlingsBoardEnabled: () => false }));
 let root: Root;
 let container: HTMLDivElement;
 const toggleActivityMode = vi.fn();

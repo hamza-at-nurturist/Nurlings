@@ -25,42 +25,42 @@ a long list of security and reliability fixes.
 
 ### Areas that moved upstream and how the fork follows
 
-| Area                    | Upstream change                                                                                                   | Resolution                                                                                                                                                                  |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Source layout           | Adapters, core, contracts, db, api, web and mobile files moved into topic folders; `rpc.ts` and `domain.ts` split | Take upstream's layout. Fork files (`ticket-*`, `nurlings-board`, brand and avatar files) follow their imports; the ticket RPCs, plugin links and tool definitions are ported. |
-| Test and CI workflows   | PR checks run on Depot through a shared `test-suites.yml`                                                         | `ci.yml` calls the same suites on GitHub runners for pushes and pull requests; our brand checks run inside them. Upstream-only deploy and OTA jobs stay guarded.            |
-| Translations            | New and changed strings in the shared Lingui catalogs                                                             | Upstream catalogs plus the fork's strings and edits; `intl:extract` is current. The 40 fork board strings now have fr, he, hi, ko, pt-BR and tr translations.               |
-| Prompts                 | New prompt files (run instructions, approval resume)                                                              | Brand name and agent noun applied; the brand guard's server-text list follows the moves and covers the new prompt files.                                                    |
-| Avatars                 | Upstream's mascot body animation in `bot-avatar`                                                                  | Ours kept: the fork's organic and shape avatars and their states. Upstream's mascot-only e2e and unit expectations are not carried.                                          |
-| Mobile app              | Components and lib files moved into folders; inbox header rebuilt                                                 | Layout follows upstream; the Board entry, boot watch and brand splash are re-attached.                                                                                     |
-| Compose images          | Default tag `latest`, updater sidecar, computer image pull policy                                                | Defaults stay on our registry and `edge`; the updater image points at our registry. The scheduled-update profile stays off by default.                                      |
+| Area                  | Upstream change                                                                                                   | Resolution                                                                                                                                                                     |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Source layout         | Adapters, core, contracts, db, api, web and mobile files moved into topic folders; `rpc.ts` and `domain.ts` split | Take upstream's layout. Fork files (`ticket-*`, `nurlings-board`, brand and avatar files) follow their imports; the ticket RPCs, plugin links and tool definitions are ported. |
+| Test and CI workflows | PR checks run on Depot through a shared `test-suites.yml`                                                         | `ci.yml` calls the same suites on GitHub runners for pushes and pull requests; our brand checks run inside them. Upstream-only deploy and OTA jobs stay guarded.               |
+| Translations          | New and changed strings in the shared Lingui catalogs                                                             | Upstream catalogs plus the fork's strings and edits; `intl:extract` is current. The 40 fork board strings now have fr, he, hi, ko, pt-BR and tr translations.                  |
+| Prompts               | New prompt files (run instructions, approval resume)                                                              | Brand name and agent noun applied; the brand guard's server-text list follows the moves and covers the new prompt files.                                                       |
+| Avatars               | Upstream's mascot body animation in `bot-avatar`                                                                  | Ours kept: the fork's organic and shape avatars and their states. Upstream's mascot-only e2e and unit expectations are not carried.                                            |
+| Mobile app            | Components and lib files moved into folders; inbox header rebuilt                                                 | Layout follows upstream; the Board entry, boot watch and brand splash are re-attached.                                                                                         |
+| Compose images        | Default tag `latest`, updater sidecar, computer image pull policy                                                 | Defaults stay on our registry and `edge`; the updater image points at our registry. The scheduled-update profile stays off by default.                                         |
 
 ### Skipped or neutralised
 
-| Item                                     | What we do                                                                                           |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Apple Watch companion                    | Not wired: the plugin and its app extension are removed from `app.json` (sources stay, inert).        |
-| GitHub star prompt                       | Component removed; the fork never showed it.                                                          |
-| Affiliates and partner links             | Not shown; billing and affiliates stay off in our build.                                              |
-| Upstream marketing copy (meeting bots)   | Marketing site pages are not changed beyond what the merge brings; no upstream links ship.            |
-| macOS signing and update feed            | Not in the release matrix.                                                                            |
-| Weekly QA agent (`exploratory-qa.yml`)   | Arrives as a file; it needs secrets this repository does not set, so it stays off.                    |
-| Plugin submit and integration page links | Stay `null`, as in the previous sync.                                                                 |
+| Item                                     | What we do                                                                                     |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Apple Watch companion                    | Not wired: the plugin and its app extension are removed from `app.json` (sources stay, inert). |
+| GitHub star prompt                       | Component removed; the fork never showed it.                                                   |
+| Affiliates and partner links             | Not shown; billing and affiliates stay off in our build.                                       |
+| Upstream marketing copy (meeting bots)   | Marketing site pages are not changed beyond what the merge brings; no upstream links ship.     |
+| macOS signing and update feed            | Not in the release matrix.                                                                     |
+| Weekly QA agent (`exploratory-qa.yml`)   | Arrives as a file; it needs secrets this repository does not set, so it stays off.             |
+| Plugin submit and integration page links | Stay `null`, as in the previous sync.                                                          |
 
 ### Conflict list
 
 About 150 files conflicted, most of them the Lingui catalogs, e2e specs and files that moved.
 
-| File group                                         | Resolution                                                                                      |
-| -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `AGENTS.md`, `README.md`, `CHANGELOG.md`           | Ours.                                                                                           |
-| `.github/workflows/{ci,publish-playwright-report,release-desktop}.yml` | See the table above; the report workflow keeps the storage guard. |
-| `package.json` files, `pnpm-lock.yaml`             | Upstream's versions plus our extras; lockfile regenerated and installs frozen.                  |
-| `packages/i18n/locales/*`                          | Upstream plus fork strings (three-way by message).                                              |
-| e2e specs                                          | Upstream's tests with the `ui()` helper applied to the strings the brand changes.               |
-| Mobile tests                                       | Upstream's imports, `branded()` kept.                                                           |
-| Avatar files (core, ui-web, mobile)                | Ours for the look; upstream's surrounding changes merged.                                       |
-| Board and ticket code                              | Moved with the files; labs gating, dates, mentions, approve and file features kept.             |
+| File group                                                             | Resolution                                                                          |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `AGENTS.md`, `README.md`, `CHANGELOG.md`                               | Ours.                                                                               |
+| `.github/workflows/{ci,publish-playwright-report,release-desktop}.yml` | See the table above; the report workflow keeps the storage guard.                   |
+| `package.json` files, `pnpm-lock.yaml`                                 | Upstream's versions plus our extras; lockfile regenerated and installs frozen.      |
+| `packages/i18n/locales/*`                                              | Upstream plus fork strings (three-way by message).                                  |
+| e2e specs                                                              | Upstream's tests with the `ui()` helper applied to the strings the brand changes.   |
+| Mobile tests                                                           | Upstream's imports, `branded()` kept.                                               |
+| Avatar files (core, ui-web, mobile)                                    | Ours for the look; upstream's surrounding changes merged.                           |
+| Board and ticket code                                                  | Moved with the files; labs gating, dates, mentions, approve and file features kept. |
 
 ## Risks
 

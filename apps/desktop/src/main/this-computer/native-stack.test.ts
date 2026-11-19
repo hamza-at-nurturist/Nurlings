@@ -703,7 +703,7 @@ describe("NativeStackController", () => {
     const state = await new NativeStackController(deps).start();
     expect(state.phase).toBe("failed");
     expect(state.message).toBe(
-      "Rakazo services did not start. Check the output below, then retry.",
+      `${brand.name} services did not start. Check the output below, then retry.`,
     );
     expect(state.output).toContain("Postgres did not answer on 127.0.0.1:40000: read ECONNRESET");
     expect(runs.some((call) => call.args[0]?.endsWith("migrate-database.js"))).toBe(false);

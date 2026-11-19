@@ -70,7 +70,7 @@ describe("web catalog seam", () => {
     await activateUiLocale("en");
     const shown = Object.values(i18n.messages);
     expect(shown).toContainEqual(["Sign in to Nurlings"]);
-    expect(shown).toContainEqual(["Create your Nurlings"]);
+    expect(shown).toContainEqual(["Choose how to use Nurlings"]);
     expect(shown).toContainEqual(["Return to Nurlings"]);
   });
 
@@ -114,6 +114,7 @@ describe("the bot → Nurling rule on the real English catalog", () => {
         "["All bots"]",
         "["Allow cross-space bot communication"]",
         "["Allow microphone access to call a bot."]",
+        "["Another bot"]",
         "["Ask this Bot in chat to set up a routine."]",
         "["Bot actions"]",
         "["Bot email addresses"]",
@@ -134,7 +135,7 @@ describe("the bot → Nurling rule on the real English catalog", () => {
         "["Bots with their own computer"]",
         "["Bots with their own model"]",
         "["Bots"]",
-        "["Cancel new bot"]",
+        "["Bound to bots"]",
         "["Chat with your bot from Slack."]",
         "["Chat with your bots from other apps."]",
         "["Choose a bot shape, color, or upload an image"]",
@@ -143,6 +144,7 @@ describe("the bot → Nurling rule on the real English catalog", () => {
         "["Close bot templates"]",
         "["Computers are available. Reload or open a bot to continue."]",
         "["Connect a model in Settings before running bots."]",
+        "["Connecting shares calendar access with the meeting service. You choose which meetings your bot joins."]",
         "["Conversations, names, memories, searches and bot and Space IDs are sent to store and recall context."]",
         "["Could not archive bot"]",
         "["Could not create bot"]",
@@ -173,7 +175,6 @@ describe("the bot → Nurling rule on the real English catalog", () => {
         "["Filter by bot"]",
         "["Get notified when this Bot finishes or needs input"]",
         "["Go to bot"]",
-        "["Grok Bot"]",
         "["Groups left with fewer than two bots are deleted too, including their messages, files, and pages."]",
         "["Hello ",["name"],", ",["bot"]," here."]",
         "["Hello, ",["bot"]," here."]",
@@ -198,6 +199,7 @@ describe("the bot → Nurling rule on the real English catalog", () => {
         "["No matching bots"]",
         "["Only the bot's creator can see its webhook key."]",
         "["Only the bot's creator can set its webhook key."]",
+        "["Only this bot"]",
         "["Pages this bot builds for you appear here. Ask for a dashboard, tracker or plan to make one."]",
         "["Pages this bot builds for you appear here."]",
         "["Private workspace with its own bots and groups."]",
@@ -212,7 +214,6 @@ describe("the bot → Nurling rule on the real English catalog", () => {
         "["Search bots, actions, and settings"]",
         "["Select a bot"]",
         "["Show bots"]",
-        "["Skills join the library all your bots share."]",
         "["Switch ",["count"]," bots to the space default?"]",
         "["Switch 1 bot to the space default?"]",
         "["Tap + to create a bot"]",
@@ -231,18 +232,20 @@ describe("the bot → Nurling rule on the real English catalog", () => {
         "["The reply looks cut off. Ask the Bot for the rest, then paste both."]",
         "["Their own model is cleared. You can pick one again in each bot."]",
         "["This Space keeps its own vault, so its bots can't use account items."]",
+        "["This Space keeps its own vault. Its bots save and use items there, not here: open the Space's settings, then Vault."]",
         "["This bot can't use this item. Change it in the Vault, or dismiss the request."]",
         "["This bot runs on this computer, not a Linux desktop. Shell and files use your home folder."]",
-        "["This bot"]",
         "["This bot's reply stopped at its key's daily limit. Your own key has its own limits."]",
         "["This bot's reply stopped at its key's monthly limit. Your own key has its own limits."]",
         "["This bot's reply stopped at its key's usage limit. Your own key has its own limits."]",
         "["This bot's reply stopped at its key's weekly limit. Your own key has its own limits."]",
+        "["This computer will stop running bots for your account"]",
         "["This item is blocked for bots. Allow it in the Vault, or dismiss the request."]",
         "["This limits only this Space's bots. Your other Spaces choose for their own."]",
         "["This permanently deletes your account, bots, conversations, memories, files, and saved connections. This cannot be undone."]",
         "["This removes every message and stops current work. The bot, computer, memory, and routines are kept."]",
         "["This server cannot be assigned without a bot."]",
+        "["Tools for your bot."]",
         "["Use in this bot"]",
         "["Used ",["when"]," by ",["bot"]]",
         "["Waiting for this bot’s response."]",
@@ -253,6 +256,7 @@ describe("the bot → Nurling rule on the real English catalog", () => {
         "["Where your bots pay from."]",
         "["Which Bot?"]",
         "["Which LLMs your bots use."]",
+        "["Your bot will be removed from upcoming meetings on this calendar."]",
         "["bot"]",
         "[["bot"]," here. Hi ",["name"],"."]",
         "[["bot"]," here."]",

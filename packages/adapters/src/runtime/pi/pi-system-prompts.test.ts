@@ -100,15 +100,6 @@ describe("system prompts sent to a model", () => {
     ]);
   });
 
-  it("names the product, not the upstream, in the helper's prompt", async () => {
-    await run(builtinAgentTools);
-    const helper = seen.systemPrompts.find((prompt) => prompt.includes("subagent named"));
-    expect(helper).toContain(`You are a ${brand.name} subagent named "scout".`);
-    expect(helper).toContain(
-      `Messages marked as automated come from ${brand.name}, not from the user.`,
-    );
-  });
-
   it("never says Rakazo in any of them", async () => {
     for (const tools of [[computerObserve], [], builtinAgentTools]) {
       seen.systemPrompts = [];

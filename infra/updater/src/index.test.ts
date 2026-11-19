@@ -1,6 +1,7 @@
 import { chmod, lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { brand } from "@nurlings/brand";
 import type { ServerUpdateRun } from "@rakazo/contracts";
 import { deferred } from "@rakazo/core/test-async";
 import { afterEach, describe, expect, it } from "vitest";
@@ -139,7 +140,7 @@ describe("updater HTTP surface", () => {
     fixture.config.autoUpdateIntervalMs = 6 * 3_600_000;
     fixture.config.updateServices = ["api", "worker", "web", "supervisor", "computer"];
     let runningCommit = currentCommit;
-    let computerRef = "ghcr.io/elie222/rakazo/computer:latest";
+    let computerRef = `${brand.registry}/computer:latest`;
     const calls: Array<{ command: string; args: string[] }> = [];
     const run: UpdaterCommandRunner = async (command, args) => {
       calls.push({ command, args });
@@ -162,7 +163,7 @@ describe("updater HTTP surface", () => {
         );
       if (args.includes("up")) {
         runningCommit = targetCommit;
-        computerRef = `ghcr.io/elie222/rakazo/computer:sha-${targetCommit}`;
+        computerRef = `${brand.registry}/computer:sha-${targetCommit}`;
       }
       return ok();
     };

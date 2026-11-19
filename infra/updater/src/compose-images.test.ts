@@ -90,21 +90,21 @@ describe("the images compose file", () => {
     expect(firstPartyImageNames(`${brand.registry}/computer:edge`)).toEqual(["computer"]);
   });
 
-  it("defaults application and computer images to stable releases", () => {
+  it("defaults application and computer images to the edge tag this fork publishes", () => {
     for (const name of appServices) {
-      expect(compose.services[name]?.image).toContain("RAKAZO_IMAGE_TAG:-latest");
+      expect(compose.services[name]?.image).toContain("RAKAZO_IMAGE_TAG:-edge");
     }
-    expect(compose.services.computer?.image).toContain("RAKAZO_COMPUTER_IMAGE_TAG:-latest");
+    expect(compose.services.computer?.image).toContain("RAKAZO_COMPUTER_IMAGE_TAG:-edge");
     const template = readFileSync(path.join(repoRoot, "infra/compose/.env.images.example"), "utf8");
-    expect(template).toContain("RAKAZO_IMAGE_TAG=latest\n");
-    expect(template).toContain("RAKAZO_COMPUTER_IMAGE_TAG=latest\n");
+    expect(template).toContain("RAKAZO_IMAGE_TAG=edge\n");
+    expect(template).toContain("RAKAZO_COMPUTER_IMAGE_TAG=edge\n");
   });
 
   it("keeps the optional scheduled updater private and disabled by default", () => {
     const updater = compose.services.updater;
     expect(updater?.profiles).toEqual(["updater"]);
     expect(updater?.environment?.RAKAZO_COMPUTER_IMAGE).toBe(
-      interpolated("RAKAZO_COMPUTER_IMAGE", "ghcr.io/elie222/rakazo/computer"),
+      interpolated("RAKAZO_COMPUTER_IMAGE", `${brand.registry}/computer`),
     );
     expect(updater?.ports).toBeUndefined();
     expect(updater?.env_file).toBeUndefined();

@@ -59,7 +59,7 @@ vi.mock("../appearance/appearance", () => ({
   resolveMobileAppearance: () => "light",
 }));
 vi.mock("../native/native", () => ({ native: {}, useThemedStyles: () => ({}) }));
-vi.mock("../material-icons", () => ({ materialIcons: {} }));
+vi.mock("../appearance/material-icons", () => ({ materialIcons: {} }));
 vi.mock("./enabled", () => ({ useNurlingsBoardEnabled: () => mocks.enabled.value }));
 
 let root: Root;
@@ -185,10 +185,9 @@ describe("entries open the Nurlings Board", () => {
 /** Upstream's native board and its tests stay untouched; nothing else may point at `/board`. */
 const UPSTREAM_BOARD_FILES = new Set([
   "app/board.tsx",
-  "components/board-list.tsx",
-  "components/board-list.ios.tsx",
-  "lib/board.ts",
-  "lib/board.test.ts",
+  "lib/board/board-list.tsx",
+  "lib/board/board-list.ios.tsx",
+  "lib/board/board-screen.test.tsx",
 ]);
 
 function sources(dir: string): string[] {

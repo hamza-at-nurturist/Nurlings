@@ -17,6 +17,9 @@ const repoRoot = path.resolve(import.meta.dirname, "../../..");
 const workflow = parse(readFileSync(path.join(repoRoot, ".github/workflows/ci.yml"), "utf8")) as {
   jobs: Record<string, Job>;
 };
+const suites = parse(
+  readFileSync(path.join(repoRoot, ".github/workflows/test-suites.yml"), "utf8"),
+) as { jobs: Record<string, Job> };
 const upstreamOnly = "github.repository == 'elie222/rakazo'";
 
 /**
@@ -43,7 +46,7 @@ describe("the fork's CI differences", () => {
   });
 
   it("checks the brand with lint and on the built web app", () => {
-    const run = (job: string) => (workflow.jobs[job]?.steps ?? []).map((step) => step.run ?? "");
+    const run = (job: string) => (suites.jobs[job]?.steps ?? []).map((step) => step.run ?? "");
     expect(run("static-checks")).toContain("pnpm brand:check");
     expect(run("build")).toContain("pnpm brand:check --built");
   });

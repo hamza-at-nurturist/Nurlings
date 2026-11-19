@@ -1340,7 +1340,7 @@ msgstr "워크스페이스 추가"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Added"
-msgstr ""
+msgstr "추가됨"
 
 #: apps/mobile/app/(settings)/integrations.tsx
 #: apps/mobile/app/(settings)/plugin.tsx
@@ -1471,7 +1471,7 @@ msgstr "전체 기간"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Allow"
-msgstr ""
+msgstr "허용"
 
 #: apps/mobile/lib/settings/ai-consent.ts
 #: apps/web/src/components/call/VoiceConsentDialog.tsx
@@ -2067,7 +2067,7 @@ msgstr "결제 주기"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Block"
-msgstr ""
+msgstr "차단"
 
 #: apps/web/src/components/settings/ApprovalRulesSettings.tsx
 msgid "Block"
@@ -2133,7 +2133,7 @@ msgstr "Bot"
 #: apps/web/src/pages/shell/chat/message-view.tsx
 #: apps/web/src/pages/space/SpaceSearch.tsx
 msgid "Bot"
-msgstr ""
+msgstr "봇"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -2686,7 +2686,7 @@ msgstr "참여 옵션을 선택하면 대화 기록이 이 스페이스와 공�
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Chosen bots"
-msgstr ""
+msgstr "선택한 봇"
 
 #: apps/mobile/components/vault/vault-item-editor.tsx
 msgid "Chosen bots"
@@ -3838,7 +3838,7 @@ msgstr "봇을 불러오지 못했습니다"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Could not load bots. Reload to try again."
-msgstr ""
+msgstr "봇을 불러오지 못했습니다. 새로고침하여 다시 시도하세요."
 
 #: apps/web/src/pages/integrations/IntegrationSetup.tsx
 msgid "Could not load bots. Reload to try again."
@@ -5761,7 +5761,7 @@ msgstr "외부 대화"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Extra high"
-msgstr ""
+msgstr "매우 높음"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -6242,7 +6242,7 @@ msgstr "대화 기록 숨기기"
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 #: apps/web/src/pages/space/ticket-priority.ts
 msgid "High"
-msgstr ""
+msgstr "높음"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -6361,7 +6361,7 @@ msgstr "이미지"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Image input is not configured for this model."
-msgstr ""
+msgstr "이 모델에는 이미지 입력이 설정되어 있지 않습니다."
 
 #: apps/mobile/lib/api/user-error.ts
 #: apps/web/src/lib/query/user-error.ts
@@ -7003,7 +7003,7 @@ msgstr "키가 포함된 것 같습니다"
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 #: apps/web/src/pages/space/ticket-priority.ts
 msgid "Low"
-msgstr ""
+msgstr "낮음"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7101,7 +7101,7 @@ msgstr "마케팅"
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Max"
-msgstr ""
+msgstr "최대"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7145,7 +7145,7 @@ msgstr "MCP 서버"
 #: apps/mobile/lib/models/thinking-level.ts
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 msgid "Medium"
-msgstr ""
+msgstr "보통"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7251,7 +7251,7 @@ msgstr "언급: {mentions}"
 #: apps/web/src/pages/shell/composer/composer.tsx
 #: apps/web/src/pages/space/SpaceSearch.tsx
 msgid "Message"
-msgstr ""
+msgstr "메시지"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -7313,7 +7313,7 @@ msgstr "마이크를 사용할 수 없습니다."
 
 #: apps/mobile/lib/models/thinking-level.ts
 msgid "Minimal"
-msgstr ""
+msgstr "최소"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/models/model-catalog.ts
@@ -7825,7 +7825,7 @@ msgstr "인증 없음"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "No bots"
-msgstr ""
+msgstr "봇 없음"
 
 #: apps/web/src/components/integrations/agent-access.tsx
 msgid "No bots"
@@ -10597,7 +10597,7 @@ msgstr "관련 없는 기억 건너뛰기"
 #. js-lingui-explicit-id
 #: packages/i18n/src/meeting.ts
 msgid "Skipped"
-msgstr ""
+msgstr "건너뜀"
 
 #: apps/mobile/components/cards/ComputerCard.tsx
 #: apps/web/src/components/computers/ComputerCard.tsx
@@ -10672,7 +10672,7 @@ msgstr "시작하는 중 문제가 발생했습니다. 잠시 후 다시 시도�
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Something went wrong. Try again."
-msgstr ""
+msgstr "문제가 발생했습니다. 다시 시도하세요."
 
 #: apps/mobile/app/(settings)/approval-rule-add.tsx
 #: apps/mobile/app/(settings)/approvals.tsx
@@ -11532,7 +11532,7 @@ msgstr "이 Mac"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "This model cannot read images. Choose a model that supports images."
-msgstr ""
+msgstr "이 모델은 이미지를 읽을 수 없습니다. 이미지를 지원하는 모델을 선택하세요."
 
 #: apps/mobile/lib/api/user-error.ts
 #: apps/web/src/lib/query/user-error.ts

@@ -84,12 +84,16 @@ describe("the string scanner", () => {
 });
 
 describe("desktop sources", () => {
-  const sources = readdirSync(import.meta.dirname).filter(
-    (name) => name.endsWith(".ts") && !name.endsWith(".test.ts"),
+  const sources = readdirSync(import.meta.dirname, { recursive: true, encoding: "utf8" }).filter(
+    // The language catalogs are loaded through `t()`, which rebrands them, so they are not scanned.
+    (name) =>
+      name.endsWith(".ts") &&
+      !name.endsWith(".test.ts") &&
+      !name.startsWith(path.join("main", "locales")),
   );
 
   it("scans the real sources and finds the strings it guards", () => {
-    expect(sources).toContain("main.ts");
+    expect(sources).toContain(path.join("main", "main.ts"));
     const literals = sources.flatMap((name) =>
       stringLiterals(readFileSync(path.join(import.meta.dirname, name), "utf8")),
     );
