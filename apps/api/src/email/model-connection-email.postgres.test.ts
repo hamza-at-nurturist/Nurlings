@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type { BackgroundJob, BackgroundJobPayloads } from "@rakazo/adapter-kit";
 import {
   BillingEmulator,
@@ -130,7 +131,7 @@ dbTests("model connection email", () => {
 
     const [message, ...extra] = sentTo(id);
     expect(extra).toHaveLength(0);
-    expect(message!.subject).toBe("Connect a model to start using Rakazo");
+    expect(message!.subject).toBe(`Connect a model to start using ${brand.name}`);
     expect(message!.text).toContain(`${WEB_ORIGIN}/sign-in?next=%2Fonboarding%2Fmodel`);
     expect(message!.text).toContain("ChatGPT or Claude subscription, or paste an API key");
     expect(message!.headers).toEqual({
@@ -284,7 +285,7 @@ dbTests("model connection email", () => {
     await send(importJob);
     const [message, ...extra] = sentTo(id);
     expect(extra).toHaveLength(0);
-    expect(message!.subject).toBe("Bring your old assistant to Rakazo");
+    expect(message!.subject).toBe(`Bring your old assistant to ${brand.name}`);
     expect(message!.text).toContain(`${WEB_ORIGIN}/sign-in?next=%2Fapp%3Fimport`);
   });
 
