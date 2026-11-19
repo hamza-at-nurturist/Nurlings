@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { brand } from "@nurlings/brand";
 import type {
   BackgroundJob,
   BackgroundJobPayloads,
@@ -455,7 +456,7 @@ export class MeetingService {
       sessionId: row.id,
       meetingUrl: row.meetingUrl,
       platform: MeetingPlatformSchema.parse(row.platform),
-      botName: `${bot.name.slice(0, 88)} · Rakazo`,
+      botName: `${bot.name.slice(0, 88)} · ${brand.name}`,
       expiresAt: row.expiresAt,
     };
     const { count } = await prisma.meetingSession.updateMany({

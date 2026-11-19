@@ -155,6 +155,11 @@ const SERVER_TEXT_FILES = [
   "packages/adapters/src/approvals/auto-review.prompt.ts",
   "packages/adapters/src/tasks/background-helpers.prompt.ts",
   "packages/adapters/src/runs/assembly/run-instructions.prompt.ts",
+  "apps/api/src/meetings/media/meeting-page.ts",
+  "apps/api/src/meetings/calendar/calendar-routes.ts",
+  "packages/adapters/src/meetings/meeting-service.ts",
+  "packages/adapters/src/meetings/calendar/calendar-service.ts",
+  "packages/adapters/src/meetings/calendar/calendar-authorization.ts",
   "packages/adapters/src/runs/assembly/approval-continuation.prompt.ts",
 ];
 /**

@@ -19,7 +19,7 @@
 set -euo pipefail
 
 # The workspace packages apps/www depends on, directly or through each other.
-WWW_PACKAGES="contracts core ui-tokens ui-web"
+WWW_PACKAGES="brand contracts core ui-tokens ui-web"
 
 files="$(git diff --no-renames --name-only HEAD^1 HEAD)"
 web=false

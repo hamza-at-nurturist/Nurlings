@@ -378,7 +378,7 @@ test("an app that is also a chat app here leads to messaging settings", async ({
   const dialog = page.getByRole("dialog", { name: "Integrations", exact: true });
   const hint = dialog.getByTestId("chat-app-hint");
   await expect(hint).toHaveCount(1);
-  await expect(hint).toHaveText("Tools for your bot.Chat from Chatty");
+  await expect(hint).toHaveText(ui("Tools for your bot.Chat from Chatty"));
   await captureScreenshot(page, testInfo, "integrations-chat-app-hint");
   await hint.getByRole("button", { name: "Chat from Chatty", exact: true }).click();
   await expect(dialog).toBeHidden();

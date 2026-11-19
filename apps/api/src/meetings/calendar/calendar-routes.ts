@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type { MeetingCalendarService } from "@rakazo/adapters";
 import type { Actor, MeetingCalendarOAuthError } from "@rakazo/contracts";
 import {
@@ -109,7 +110,7 @@ export function mountMeetingCalendarHttp(
     const target = await service.authorization.launchDesktop(state);
     return target
       ? c.redirect(target, 303)
-      : c.text("Return to Rakazo and start calendar sign-in again.", 400);
+      : c.text(`Return to ${brand.name} and start calendar sign-in again.`, 400);
   });
 
   app.get(MEETING_CALENDAR_CALLBACK_PATH, async (c) => {
@@ -146,7 +147,10 @@ export function mountMeetingCalendarHttp(
     if (!code || failure) return c.text("Calendar authorization did not complete.", 400);
     const actor = await sessionActor(c.req.raw);
     if (!actor)
-      return c.text("Open Rakazo in this browser and sign in, then connect your calendar.", 401);
+      return c.text(
+        `Open ${brand.name} in this browser and sign in, then connect your calendar.`,
+        401,
+      );
     try {
       const botId = await service.authorization.completeFromBrowser(actor.userId, state, code);
       return c.redirect(

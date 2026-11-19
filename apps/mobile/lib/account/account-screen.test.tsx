@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { brand } from "@nurlings/brand";
 import type { AccountSecurity } from "@rakazo/contracts";
 import { deferred, flush } from "@rakazo/core/test-async";
 import { notifyManager } from "@tanstack/react-query";
@@ -504,14 +505,14 @@ it("puts the bot style back and releases it when the save fails", async () => {
   const { saving } = holdPreferenceSave();
   await act(async () => botStyleButton(screen, "Original").click());
   // A second choice while the first is saving is not sent.
-  await act(async () => botStyleButton(screen, "Rakazo").click());
+  await act(async () => botStyleButton(screen, brand.name).click());
   expect(
     vi.mocked(rpc).mock.calls.filter(([method]) => method === "preferences/update"),
   ).toHaveLength(1);
   await act(async () => saving.reject(new Error("offline")));
   await act(flush);
-  expect(Alert.alert).toHaveBeenCalledWith("Couldn't update bot style");
-  expect(botStyleButton(screen, "Rakazo").getAttribute("aria-pressed")).toBe("true");
+  expect(Alert.alert).toHaveBeenCalledWith(branded("Couldn't update bot style"));
+  expect(botStyleButton(screen, brand.name).getAttribute("aria-pressed")).toBe("true");
   expect(
     screen
       .querySelector(branded('[aria-label="Bot style"][data-disabled]'))

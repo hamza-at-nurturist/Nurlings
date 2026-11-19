@@ -1,4 +1,5 @@
 import { createHash, createHmac, randomUUID } from "node:crypto";
+import { brand } from "@nurlings/brand";
 import type { BackgroundJob } from "@rakazo/adapter-kit";
 import {
   MeetingCalendarConnectRejected,
@@ -225,7 +226,7 @@ export class CalendarAuthorization {
             ) {
               throw new ClientError(
                 "SERVICE_UNAVAILABLE",
-                "Calendar sign-in could not be confirmed. Check the connection in Rakazo.",
+                `Calendar sign-in could not be confirmed. Check the connection in ${brand.name}.`,
                 undefined,
                 { cause: error },
               );

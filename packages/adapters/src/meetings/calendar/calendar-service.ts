@@ -1,4 +1,5 @@
 import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { brand } from "@nurlings/brand";
 import type {
   JobPublisher,
   MeetingCalendarEvent,
@@ -446,7 +447,7 @@ export class MeetingCalendarService {
                 sessionId,
                 meetingUrl: link.url,
                 platform: link.platform,
-                botName: `${bot.name.slice(0, 88)} · Rakazo`,
+                botName: `${bot.name.slice(0, 88)} · ${brand.name}`,
                 expiresAt,
               });
               if ((await selectedCalendarRule(prisma, connectionId, event))?.botId !== bot.id) {
