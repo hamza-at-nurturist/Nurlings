@@ -12,6 +12,6 @@
 
 ## 3. After merge
 
-- [ ] 3.1 Watch Web E2E on following pull requests for a recurrence. Verify: no failed
+- [x] 3.1 Watch Web E2E on following pull requests for a recurrence. Verify: no failed
   `avatar-states` run in the Actions list.
-- [ ] 3.2 Close issue 96 and archive the change with `--skip-specs` (a test fix has no spec delta).
+- [x] 3.2 Close issue 96 and archive the change with `--skip-specs` (a test fix has no spec delta).

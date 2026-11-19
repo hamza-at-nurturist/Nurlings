@@ -12,6 +12,6 @@
 
 ## 3. After merge
 
-- [ ] 3.1 Watch `main` for a recurrence of this failure over the next merges. Verify: no failed
+- [x] 3.1 Watch `main` for a recurrence of this failure over the next merges. Verify: no failed
   `auth-lifecycle` shard in the Actions run list.
-- [ ] 3.2 Archive the change with `--skip-specs` (a test fix has no spec delta).
+- [x] 3.2 Archive the change with `--skip-specs` (a test fix has no spec delta).

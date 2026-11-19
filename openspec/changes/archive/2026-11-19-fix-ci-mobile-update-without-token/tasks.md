@@ -15,6 +15,6 @@
 
 ## 3. After merge
 
-- [ ] 3.1 Confirm the merge's own `ci` run on `main` ends green with the notice (this change edits
+- [x] 3.1 Confirm the merge's own `ci` run on `main` ends green with the notice (this change edits
   `ci.yml`, so the job runs its token check). Verify: the Actions run.
-- [ ] 3.2 Archive the change.
+- [x] 3.2 Archive the change.
