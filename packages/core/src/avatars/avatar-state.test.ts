@@ -1,7 +1,5 @@
 import { BUILTIN_TOOL_NAMES } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
-import { AVATAR_DIZZY_MS, createShakeDetector } from "./avatar-shake.js";
-import { AVATAR_TOOL_CATEGORY, avatarToolCategory, avatarToolFromPayload } from "./avatar-tool.js";
 import type { AvatarState } from "./avatar-life.js";
 import {
   AVATAR_DONE_MS,
@@ -18,6 +16,8 @@ import {
   avatarSwapTo,
   avatarWorking,
 } from "./avatar-life.js";
+import { AVATAR_DIZZY_MS, createShakeDetector } from "./avatar-shake.js";
+import { AVATAR_TOOL_CATEGORY, avatarToolCategory, avatarToolFromPayload } from "./avatar-tool.js";
 
 describe("avatarState", () => {
   const cases: [string, Parameters<typeof avatarState>[0], AvatarState][] = [
