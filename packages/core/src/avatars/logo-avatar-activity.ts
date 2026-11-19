@@ -1,7 +1,7 @@
 import { hasThinkingActivityMarker, parseBotAvatarValue } from "@rakazo/contracts";
-import type { AvatarTool } from "../avatar-tool.js";
-import { avatarToolFromPayload } from "../avatar-tool.js";
 import { isBackgroundRunTrigger, isRunWaitingOnUser, isRunWorking } from "../runs/run-state.js";
+import type { AvatarTool } from "./avatar-tool.js";
+import { avatarToolFromPayload } from "./avatar-tool.js";
 
 /** Minimal public stream fields used by web and native activity projections. */
 export interface LogoAvatarEvent {

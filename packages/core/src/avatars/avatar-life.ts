@@ -1,4 +1,3 @@
-import type { AvatarTool } from "../avatar-tool.js";
 import { isRunWaitingOnUser, isRunWorking } from "../runs/run-state.js";
 import type { AvatarClipName, AvatarKey, AvatarPose } from "./avatar-clips.js";
 import {
@@ -10,6 +9,7 @@ import {
   avatarEase,
   avatarTrackValue,
 } from "./avatar-clips.js";
+import type { AvatarTool } from "./avatar-tool.js";
 
 /**
  * Life for bot avatars, played flat on our shapes. A resting avatar is a still picture;

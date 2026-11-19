@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import sharp from "sharp";
 import type { Brand } from "./schema.js";
 
 /**
@@ -126,7 +125,13 @@ interface Pixels {
   channels: number;
 }
 
+/** The image library loads only when the artwork is checked. */
+async function loadSharp() {
+  return (await import("sharp")).default;
+}
+
 async function pixels(file: string): Promise<Pixels> {
+  const sharp = await loadSharp();
   const { data, info } = await sharp(file)
     .ensureAlpha()
     .raw()
@@ -188,6 +193,7 @@ export async function iconPixelProblems(
   brandDir: string,
   brand: Brand,
 ): Promise<string[]> {
+  const sharp = await loadSharp();
   const problems: string[] = [];
   const brandFile = (relative: string) => path.join(brandDir, relative);
   const repoFile = (relative: string) => path.join(repoRoot, relative);

@@ -105,9 +105,9 @@
       "default": "./src/primitives/query.ts"
     },
     "./avatar-state-react": {
-      "types": "./src/avatar-state-react.ts",
-      "development": "./src/avatar-state-react.ts",
-      "default": "./src/avatar-state-react.ts"
+      "types": "./src/avatars/avatar-state-react.ts",
+      "development": "./src/avatars/avatar-state-react.ts",
+      "default": "./src/avatars/avatar-state-react.ts"
     },
     "./node/prompt-source-version": {
       "types": "./src/node/prompt-source-version.ts",

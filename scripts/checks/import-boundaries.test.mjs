@@ -12,10 +12,14 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..")
 const ALLOWLIST_FILE = "scripts/checks/import-boundaries.allowlist.json";
 const SOURCE_FILE = /\.(?:[cm]?[jt]sx?|astro)$/;
 const SCOPE = "@rakazo/";
+// The fork's brand package sits in its own scope and is declared like any workspace package.
+const FORK_SCOPE = "@nurlings/";
+const inScope = (name) => name.startsWith(SCOPE) || name.startsWith(FORK_SCOPE);
 
 const LEAF_PACKAGES = ["packages/contracts", "packages/logging", "packages/ui-tokens"];
 const CORE = "packages/core";
-const CORE_MAY_IMPORT = ["packages/contracts", "packages/ui-tokens"];
+// The brand package is plain data and has no dependencies, so core may read it.
+const CORE_MAY_IMPORT = ["packages/brand", "packages/contracts", "packages/ui-tokens"];
 const SERVER_PACKAGES = [
   "packages/adapter-kit",
   "packages/adapters",
@@ -169,7 +173,7 @@ function extractSpecifiers(source) {
 
 /** The npm package a bare specifier names, or undefined for paths, builtins and workspace code. */
 function externalPackage(specifier) {
-  if (/^[./]/.test(specifier) || specifier.startsWith("node:") || specifier.startsWith(SCOPE)) {
+  if (/^[./]/.test(specifier) || specifier.startsWith("node:") || inScope(specifier)) {
     return undefined;
   }
   const name = specifier.split("/", specifier.startsWith("@") ? 2 : 1).join("/");
@@ -206,8 +210,7 @@ function findEagerImports(sources) {
 }
 
 function describeWorkspace(dir, manifest) {
-  const names = (...groups) =>
-    groups.flatMap((group) => Object.keys(group ?? {})).filter((name) => name.startsWith(SCOPE));
+  const names = (...groups) => groups.flatMap((group) => Object.keys(group ?? {})).filter(inScope);
   return {
     dir,
     name: manifest.name,

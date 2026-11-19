@@ -64,14 +64,18 @@ test("Kubernetes computers use the published Compose image repository", () => {
   )
     .match(/:-([^}]+)\}:\$\{RAKAZO_COMPUTER_IMAGE_TAG:-([^}]+)\}/)
     .slice(1);
-  assert.equal(
-    // Source/main deployments retain their development channel; published installs use stable.
+  // The fork derives the default from the brand registry, so the repository is that registry's.
+  assert.match(
     capture(
       "packages/adapters/src/providers/computer/kubernetes/kubernetes-sandbox.ts",
-      /DEFAULT_COMPUTER_IMAGE = "([^"]+)";/,
-    ).split(":")[0],
-    image,
+      /DEFAULT_COMPUTER_IMAGE = (`\$\{brand\.registry\}\/computer:[^`]+`);/,
+    ),
+    /^`\$\{brand\.registry\}\/computer:/,
   );
+  const { registry } = JSON.parse(
+    readFileSync(path.join(root, "packages/brand/brand.json"), "utf8"),
+  );
+  assert.equal(image, `${registry}/computer`);
 });
 
 test("table column widths are capped at the cell's own max-width", () => {

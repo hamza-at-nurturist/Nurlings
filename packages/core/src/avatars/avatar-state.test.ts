@@ -2,7 +2,7 @@ import { BUILTIN_TOOL_NAMES } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
 import { AVATAR_DIZZY_MS, createShakeDetector } from "./avatar-shake.js";
 import { AVATAR_TOOL_CATEGORY, avatarToolCategory, avatarToolFromPayload } from "./avatar-tool.js";
-import type { AvatarState } from "./avatars/avatar-life.js";
+import type { AvatarState } from "./avatar-life.js";
 import {
   AVATAR_DONE_MS,
   AVATAR_LONG_RUN_MS,
@@ -17,7 +17,7 @@ import {
   avatarSwapStart,
   avatarSwapTo,
   avatarWorking,
-} from "./avatars/avatar-life.js";
+} from "./avatar-life.js";
 
 describe("avatarState", () => {
   const cases: [string, Parameters<typeof avatarState>[0], AvatarState][] = [

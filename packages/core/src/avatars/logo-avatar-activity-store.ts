@@ -1,6 +1,6 @@
 import type { Run } from "@rakazo/contracts";
-import type { AvatarTool } from "../avatar-tool.js";
 import { isBackgroundRunTrigger, isRunWaitingOnUser, isRunWorking } from "../runs/run-state.js";
+import type { AvatarTool } from "./avatar-tool.js";
 import type {
   LogoAvatarActivity,
   LogoAvatarEvent,

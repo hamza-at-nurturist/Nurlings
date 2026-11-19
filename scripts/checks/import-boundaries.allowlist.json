@@ -20,7 +20,12 @@
     "apps/api/src/threads/thread-lock-budget.postgres.test.ts -> ../../../../packages/adapters/src/runs/assembly/run-messages.js",
     "apps/api/src/threads/upload-limit.postgres.test.ts -> ../../../../packages/testkit/src/discard-bot-intro.js",
     "apps/api/src/threads/upload-limit.postgres.test.ts -> ../../../../packages/testkit/src/index.js",
+    "apps/api/src/ticket-approve.postgres.test.ts -> ../../../packages/testkit/src/index.js",
+    "apps/api/src/ticket-dates.postgres.test.ts -> ../../../packages/testkit/src/index.js",
+    "apps/api/src/ticket-mentions.postgres.test.ts -> ../../../packages/testkit/src/index.js",
+    "apps/api/src/ticket-uploads.postgres.test.ts -> ../../../packages/testkit/src/index.js",
     "apps/api/src/webhooks/webhook.test.ts -> ../../../../packages/adapters/src/secrets/secret-store-fake.js",
+    "apps/desktop/scripts/copy-static.mjs -> ../../../packages/brand/brand.json",
     "apps/web/e2e/account/social-sign-in.spec.ts -> ../../../../packages/auth/src/social-presentation",
     "apps/web/e2e/account/social-sign-in.spec.ts -> ../../../../packages/contracts/src/account/auth",
     "apps/web/e2e/bots/logo-avatar-motion-conformance.spec.ts -> ../../../../packages/core/src/avatars/logo-avatar-activity",
@@ -88,5 +93,6 @@
     "packages/adapters/src/providers/memory/supermemory/supermemory-memory-provider.test.ts -> ../serenity/serenity-memory-provider.js",
     "packages/adapters/src/providers/voice/openai-compatible/openai-compatible-voice.ts -> ../openai/openai-voice.js",
     "packages/adapters/src/providers/web/keyless-http/keyless-http-web.test.ts -> ../fake/fake-web.js"
-  ]
+  ],
+  "runtime": ["apps/web/src/brand-html.ts -> ../server/pwa-plugin.js"]
 }

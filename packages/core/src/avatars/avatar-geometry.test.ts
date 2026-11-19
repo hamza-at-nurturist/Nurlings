@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { avatarGlossPath, avatarPropAnchors, svgPathBounds } from "./avatar-geometry.js";
-import { organicAvatarPath } from "./avatars/avatar-shape.js";
-import { organicBotAvatarFrame } from "./avatars/bot-avatar-shapes.js";
+import { organicAvatarPath } from "./avatar-shape.js";
+import { organicBotAvatarFrame } from "./bot-avatar-shapes.js";
 
 it("bounds a path by every coordinate pair", () => {
   expect(svgPathBounds("M-10 -20 C5 5 30 40 12.5 8Z")).toEqual({

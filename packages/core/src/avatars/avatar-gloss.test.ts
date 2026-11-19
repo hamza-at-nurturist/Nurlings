@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { avatarGlossPath, svgPathPoints } from "./avatar-geometry.js";
-import { organicAvatarPath } from "./avatars/avatar-shape.js";
-import { organicBotAvatarFrame } from "./avatars/bot-avatar-shapes.js";
+import { organicAvatarPath } from "./avatar-shape.js";
+import { organicBotAvatarFrame } from "./bot-avatar-shapes.js";
 
 type Point = readonly [number, number];
 const samplePath = (d: string) => svgPathPoints(d);
