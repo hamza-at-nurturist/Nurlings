@@ -131,7 +131,7 @@ test("imports an OpenClaw folder and another assistant's document as new bots", 
   const panel = await openImport(page);
   // One step at a time: only where the agent comes from, with no Back on the first step.
   await expect(panel.getByRole("button")).toHaveCount(5);
-  for (const name of ["OpenClaw", "Hermes", ui("Grok Bot"), "Another assistant"]) {
+  for (const name of ["OpenClaw", "Hermes", "Grok Bot", "Another assistant"]) {
     await expect(origin(panel, name)).toBeVisible();
   }
   await captureScreenshot(page, testInfo, "agent-import-choose");
@@ -414,7 +414,7 @@ test("imports a Grok Bot export as a new bot", async ({ page }, testInfo) => {
   await page.waitForURL(/\/app\/[^/]+$/);
 
   const panel = await openImport(page);
-  await origin(panel, ui("Grok Bot")).click();
+  await origin(panel, "Grok Bot").click();
   const grok = panel.getByTestId("agent-import-grok");
   await grok
     .getByRole("textbox", { name: "Paste the reply" })
