@@ -12,10 +12,10 @@ import type {
 import { activityRows, resolveMentionTargets } from "@rakazo/core/nurlings-board";
 import { BotAvatar } from "@rakazo/ui-web";
 import { Fragment, useEffect, useRef } from "react";
-import { formatRelativeTime } from "../../../lib/relative-time";
-import { useTicketStatusLabels } from "../../../lib/ticket-status";
-import { TimeSeparator } from "../../../pages/shell/chat-context";
-import { FALLBACK_BOT_COLOR } from "../../../pages/shell/chat-shared";
+import { formatRelativeTime } from "../../../lib/locale/relative-time";
+import { TimeSeparator } from "../../../pages/shell/chat/chat-context";
+import { FALLBACK_BOT_COLOR } from "../../../pages/shell/chat/chat-shared";
+import { useTicketStatusLabels } from "../../../pages/space/ticket-status";
 import { Shimmer } from "../../ai/primitives";
 import { MentionText } from "./MentionText";
 import { TicketFileCard } from "./TicketFileCard";

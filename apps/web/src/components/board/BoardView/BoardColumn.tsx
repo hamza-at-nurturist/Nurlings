@@ -3,7 +3,7 @@ import type { TicketStatus } from "@rakazo/contracts";
 import { Badge, cn } from "@rakazo/ui-web";
 import type { DragEvent, ReactNode } from "react";
 import { useState } from "react";
-import { useTicketStatusLabels } from "../../../lib/ticket-status";
+import { useTicketStatusLabels } from "../../../pages/space/ticket-status";
 import { STATUS_DOT } from "../TicketModal/Properties";
 import { CARD_DRAG_TYPE } from "./BoardCard";
 

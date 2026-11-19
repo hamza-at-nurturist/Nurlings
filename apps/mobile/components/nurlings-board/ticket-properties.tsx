@@ -8,11 +8,11 @@ import { typeScale } from "@rakazo/ui-tokens";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { dateLocaleForUi, useUiLocale } from "../../lib/i18n";
-import { useMobileTokens, useResolvedAppearance } from "../../lib/native";
+import { dateLocaleForUi, useUiLocale } from "../../lib/i18n/i18n";
+import { useMobileTokens, useResolvedAppearance } from "../../lib/native/native";
 import { pickerStart } from "../../lib/nurlings-board/date-input";
 import { priorityLabels, relativeDayLabels, statusLabels } from "../../lib/nurlings-board/labels";
-import { NativeSymbol } from "../native-symbol";
+import { NativeSymbol } from "../native/native-symbol";
 import { DatePickerSheet } from "./date-picker-sheet";
 import { OwnerMark, StatusDot } from "./shared";
 

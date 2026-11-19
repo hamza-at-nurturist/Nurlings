@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { useMobileTokens } from "../lib/native";
+import { useMobileTokens } from "../lib/native/native";
 import type { AvatarPipState } from "../lib/organic-avatar-view";
 
 /** The pip's diameter for an avatar `size` points wide; small avatars keep it legible. */

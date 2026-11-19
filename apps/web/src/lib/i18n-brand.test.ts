@@ -4,10 +4,10 @@ import { createCompiledCatalog, getCatalogForFile, getCatalogs } from "@lingui/c
 import { getConfig } from "@lingui/conf";
 import { brand, brandMessages, brandText } from "@nurlings/brand";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { activateUiLocale, i18n, setCatalogLoadersForTests } from "./i18n";
-import { UI_LOCALES } from "./ui-locale";
+import { activateUiLocale, i18n, setCatalogLoadersForTests } from "./locale/i18n";
+import { UI_LOCALES } from "./locale/ui-locale";
 
-vi.mock("./apply-ui-direction", () => ({ applyUiDirection: vi.fn() }));
+vi.mock("./locale/apply-ui-direction", () => ({ applyUiDirection: vi.fn() }));
 
 type Compiled = Record<string, unknown>;
 

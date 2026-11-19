@@ -1,3 +1,4 @@
+// biome-ignore-all lint/suspicious/noExplicitAny: fixtures deliberately pass malformed values.
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";

@@ -2,8 +2,8 @@ import { useLingui } from "@lingui/react/macro";
 import type { Bot } from "@rakazo/contracts";
 import { fontWeight, typeScale } from "@rakazo/ui-tokens";
 import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
-import { useMobileTokens } from "../../lib/native";
-import { BotAvatar } from "../bot-avatar";
+import { useMobileTokens } from "../../lib/native/native";
+import { BotAvatar } from "../bots/bot-avatar";
 
 /** All, then one avatar per Nurling; choosing one shows only its tickets. */
 export function NurlingFilter({

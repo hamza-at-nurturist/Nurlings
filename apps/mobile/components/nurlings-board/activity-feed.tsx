@@ -13,11 +13,11 @@ import { fontWeight, typeScale } from "@rakazo/ui-tokens";
 import { useEffect, useRef } from "react";
 import type { ScrollViewInstance } from "react-native";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { dateLocaleForUi, useUiLocale } from "../../lib/i18n";
-import { useMobileTokens, useResolvedAppearance } from "../../lib/native";
+import { dateLocaleForUi, useUiLocale } from "../../lib/i18n/i18n";
+import { useMobileTokens, useResolvedAppearance } from "../../lib/native/native";
 import { statusLabels } from "../../lib/nurlings-board/labels";
-import { BotAvatar } from "../bot-avatar";
-import { TimeSeparator } from "../time-separator";
+import { BotAvatar } from "../bots/bot-avatar";
+import { TimeSeparator } from "../thread/time-separator";
 import { FileRow, ImageThumb } from "./ticket-files";
 
 /** The feed: comments as cards, everything else as a quiet line, newest at the bottom. */

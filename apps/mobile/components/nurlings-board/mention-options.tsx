@@ -2,8 +2,8 @@ import { useLingui } from "@lingui/react/macro";
 import type { Bot } from "@rakazo/contracts";
 import { typeScale } from "@rakazo/ui-tokens";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useMobileTokens } from "../../lib/native";
-import { MentionOptionIcon } from "../thread-composer";
+import { useMobileTokens } from "../../lib/native/native";
+import { MentionOptionIcon } from "../composer/thread-composer";
 
 /** The Nurlings an `@` offers, in the look of the chat composer's list. */
 export function MentionOptions({

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, openBotPanelTab, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, openBotPanel, signup } from "./helpers/helpers";
 
 test("the bot panel expands over the chat and collapses with Escape", async ({
   page,
@@ -7,7 +7,7 @@ test("the bot panel expands over the chat and collapses with Escape", async ({
   await page.setViewportSize({ width: 1400, height: 900 });
   await signup(page, `bot-panel-expand-${Date.now()}@rakazo.test`, "password12", "Panel Sample");
   await completeOnboarding(page);
-  await openBotPanelTab(page, "Advanced");
+  await openBotPanel(page);
 
   const panel = page.getByTestId("side-panel");
   const sidebar = page.getByTestId("bots-sidebar");

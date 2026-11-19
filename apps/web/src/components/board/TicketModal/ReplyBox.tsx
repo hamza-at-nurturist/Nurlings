@@ -4,8 +4,8 @@ import { ATTACHMENT_ALLOWED_MIME_TYPES, TICKET_COMMENT_MAX_LENGTH } from "@rakaz
 import { Button, Textarea } from "@rakazo/ui-web";
 import { ArrowUp, Paperclip, Plus, X } from "lucide-react";
 import { useId, useRef, useState } from "react";
-import { rpc } from "../../../lib/rpc";
-import { errorText } from "../../../lib/user-error";
+import { rpc } from "../../../lib/query/rpc";
+import { errorText } from "../../../lib/query/user-error";
 import { MentionChip } from "./MentionChip";
 import { MentionPicker } from "./MentionPicker";
 import { useMentionInput } from "./use-mention-input";

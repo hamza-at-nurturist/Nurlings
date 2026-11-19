@@ -1,8 +1,8 @@
 import type { Artifact, TicketComment, TicketEvent, TicketRun } from "@rakazo/contracts";
 import { WORKING_RUN_STATUSES } from "@rakazo/core";
 import { useCallback, useEffect, useState } from "react";
-import { rpc } from "../../../lib/rpc";
-import { errorText } from "../../../lib/user-error";
+import { rpc } from "../../../lib/query/rpc";
+import { errorText } from "../../../lib/query/user-error";
 
 const POLL_MS = 4_000;
 

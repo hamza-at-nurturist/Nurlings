@@ -19,7 +19,7 @@ import {
   toTicketDto,
   toTicketEventDto,
 } from "@rakazo/db";
-import { resolveSendAttachments } from "../artifacts.js";
+import { resolveSendAttachments } from "../content/artifacts.js";
 import type { RouterContext } from "./context.js";
 import { HEARTBEAT, withHeartbeats } from "./shared.js";
 

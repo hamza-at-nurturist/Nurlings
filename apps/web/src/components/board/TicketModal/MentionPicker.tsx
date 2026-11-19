@@ -1,5 +1,5 @@
 import type { Bot } from "@rakazo/contracts";
-import { MentionOptionIcon } from "../../../pages/shell/composer-mentions";
+import { MentionOptionIcon } from "../../../pages/shell/composer/composer-mentions";
 
 type Props = {
   id: string;

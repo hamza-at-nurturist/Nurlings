@@ -10,8 +10,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@rakazo/ui-web";
-import { useTicketPriorityLabels } from "../../../lib/ticket-priority";
-import { useTicketStatusLabels } from "../../../lib/ticket-status";
+import { useTicketPriorityLabels } from "../../../pages/space/ticket-priority";
+import { useTicketStatusLabels } from "../../../pages/space/ticket-status";
 import { CHIP } from "./chip";
 import { DatePicker } from "./DatePicker";
 

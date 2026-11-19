@@ -340,6 +340,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
+    // biome-ignore lint/plugin: a drop shadow is black in both appearances.
     shadowColor: "#000000",
     shadowOpacity: 0.28,
     shadowRadius: 14,

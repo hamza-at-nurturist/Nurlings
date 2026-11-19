@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 import { useEffect } from "react";
-import { decodeArtifactBase64 } from "./artifact-open";
-import { rpc } from "./rpc";
+import { decodeArtifactBase64 } from "./pages/artifact-open";
+import { rpc } from "./query/rpc";
 
 /** Reads the latest version of a JSON artifact by name; null when it is missing or unreadable. */
 export type ArtifactDataLoader = (name: string) => Promise<unknown>;

@@ -1,6 +1,6 @@
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { Modal, Platform, Pressable, StyleSheet, View } from "react-native";
-import { useMobileTokens, useResolvedAppearance } from "../../lib/native";
+import { useMobileTokens, useResolvedAppearance } from "../../lib/native/native";
 import { pickedDateInput } from "../../lib/nurlings-board/date-input";
 
 /**

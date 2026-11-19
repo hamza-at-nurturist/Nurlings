@@ -4,8 +4,8 @@ import type { Bot } from "@rakazo/contracts";
 import { TICKET_DESCRIPTION_MAX_LENGTH } from "@rakazo/contracts";
 import { quickAddTicket } from "@rakazo/core/nurlings-board";
 import { useState } from "react";
-import { rpc } from "../../lib/api";
-import { errorText } from "../../lib/user-error";
+import { rpc } from "../../lib/api/api";
+import { errorText } from "../../lib/api/user-error";
 import { ComposerBar } from "./composer-bar";
 
 /** One line tells a Nurling what to do; `@` picks which one. No @ leaves it to Chief. */

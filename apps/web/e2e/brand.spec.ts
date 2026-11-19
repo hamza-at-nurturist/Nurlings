@@ -9,7 +9,7 @@ import {
   openUserSettings,
   signup,
   ui,
-} from "./helpers";
+} from "./helpers/helpers";
 
 const UPSTREAM_NAME = /rakazo/i;
 

@@ -8,7 +8,7 @@ vi.mock("expo-secure-store", () => ({
   setItemAsync: vi.fn(),
   deleteItemAsync: vi.fn(),
 }));
-vi.mock("./ui-direction", () => ({ applyMobileUiDirection: vi.fn() }));
+vi.mock("./i18n/ui-direction", () => ({ applyMobileUiDirection: vi.fn() }));
 
 /** Looks a message up the way the compiled macro does, in the freshly imported catalogs. */
 async function translator() {
@@ -22,7 +22,7 @@ describe("mobile catalog rebranding", () => {
   });
 
   it("shows the configured product and bot names from the upstream catalogs", async () => {
-    const { activateUiLocale } = await import("./i18n");
+    const { activateUiLocale } = await import("./i18n/i18n");
     activateUiLocale("en");
     const t = await translator();
     expect(brand.name).toBe("Nurlings");
@@ -31,7 +31,7 @@ describe("mobile catalog rebranding", () => {
   });
 
   it("keeps rebranding in a translated locale", async () => {
-    const { activateUiLocale } = await import("./i18n");
+    const { activateUiLocale } = await import("./i18n/i18n");
     activateUiLocale("de");
     const t = await translator();
     expect(t("Sign in to Rakazo")).toContain(brand.name);

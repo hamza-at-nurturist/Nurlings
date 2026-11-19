@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { brand, brandText } from "@nurlings/brand";
 import { INVITED_TRIAL_WEEKS } from "@rakazo/contracts";
 import { describe, expect, it } from "vitest";
+import { agentImportEmail } from "./agent-import-email.js";
 import {
   accountDeletionEmail,
   CATALOGS,
@@ -14,6 +15,11 @@ import {
   verificationEmail,
 } from "./email.js";
 import { homeDeletionEmail } from "./home-deletion-email.js";
+import { modelConnectionEmail } from "./model-connection-email.js";
+import {
+  organizationInvitationEmail,
+  spaceInvitationEmail,
+} from "./organization-invitation-email.js";
 import {
   integrationClaimConfirmEmail,
   pluginSubmissionAdminEmail,
@@ -65,6 +71,13 @@ it("shares the layout across account, product and marketplace emails", async () 
     homeDeletionEmail(user, new Date(), "plan-ended", url),
     homeDeletionEmail(user, new Date(), "unused", url),
     referralEmail(user, url, url),
+    modelConnectionEmail(user, { webOrigin: url, unsubscribeUrl: url }),
+    agentImportEmail(user, { webOrigin: url, unsubscribeUrl: url }),
+    organizationInvitationEmail(user.email, {
+      organizationName: "Acme",
+      inviterName: "Sam",
+      url,
+    }),
     pluginSubmissionReceivedEmail(user.email),
     integrationClaimConfirmEmail(user.email, url),
     pluginSubmissionAdminEmail(
@@ -240,6 +253,17 @@ describe("email languages", () => {
     expect(english.text).not.toContain("runs on");
   });
 
+  it("names a Space invitation's Space, never an organization, in every language", async () => {
+    const invitation = { spaceName: "Clients", inviterName: "Ana", url: "https://example.test/i" };
+    const english = await spaceInvitationEmail("guest@example.test", invitation);
+    expect(english.subject).toBe(`Ana invited you to Clients on ${brand.name}`);
+    expect(english.text).toContain("This invitation expires in 7 days.");
+    expect(english.text).not.toContain("Sign in with this email address");
+    const turkish = await spaceInvitationEmail("guest@example.test", invitation, "tr");
+    expect(turkish.subject).toBe(`Ana sizi ${brand.name}'da Clients alanına davet etti`);
+    expect(turkish.text).not.toContain("kuruluş");
+  });
+
   it.each(Object.entries(CATALOGS))(
     "translates every email string into %s with its placeholders",
     (_locale, catalog) => {
@@ -273,6 +297,16 @@ describe("email branding", () => {
       accountDeletionEmail(user.email, "123456", locale),
       identityCodeEmail(user.email, "123456", locale),
       welcomeEmail(user, url, locale),
+      modelConnectionEmail(
+        { name: "Ana", email: user.email },
+        { webOrigin: "https://app.example.test", unsubscribeUrl: url },
+        locale,
+      ),
+      agentImportEmail(
+        { name: "Ana", email: user.email },
+        { webOrigin: "https://app.example.test", unsubscribeUrl: url },
+        locale,
+      ),
       referralEmail(user, url, url, locale),
       pluginSubmissionReceivedEmail(user.email, locale),
       pluginSubmissionReviewedEmail(
@@ -286,4 +320,47 @@ describe("email branding", () => {
       expect(message.html).not.toMatch(/Rakazo/);
     }
   });
+});
+
+it("asks for one thing in the model connection email: the connect step", async () => {
+  const unsubscribeUrl = "https://app.example.test/unsubscribe?token=fake-token";
+  const message = await modelConnectionEmail(
+    { name: "Ana", email: "user@example.test" },
+    { webOrigin: "https://app.example.test", unsubscribeUrl },
+  );
+  expect(message.subject).toBe(`Connect a model to start using ${brand.name}`);
+  expect(message.text).toContain("Hi Ana,");
+  expect(message.text).toContain(
+    `Your ${brand.name} plan has started, but your bots can't reply until a model is connected.`,
+  );
+  expect(message.text).toContain(
+    "Sign in with your ChatGPT or Claude subscription, or paste an API key.",
+  );
+  const links = [...message.html!.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
+  expect(links).toEqual([
+    "https://app.example.test/sign-in?next=%2Fonboarding%2Fmodel",
+    unsubscribeUrl,
+  ]);
+  expect(message.headers?.["List-Unsubscribe"]).toBe(`<${unsubscribeUrl}>`);
+  const german = await modelConnectionEmail(
+    { name: "Ana", email: "user@example.test" },
+    { webOrigin: "https://app.example.test", unsubscribeUrl },
+    "de",
+  );
+  expect(german.subject).toBe(`Verbinde ein Modell, um mit ${brand.name} loszulegen`);
+  expect(german.text).toContain("Abo von ChatGPT oder Claude");
+});
+
+it("asks for one thing in the agent import email: opening the import", async () => {
+  const unsubscribeUrl = "https://app.example.test/unsubscribe?token=fake-token";
+  const message = await agentImportEmail(
+    { name: "Ana", email: "user@example.test" },
+    { webOrigin: "https://app.example.test", unsubscribeUrl },
+  );
+  expect(message.subject).toBe(`Bring your old assistant to ${brand.name}`);
+  expect(message.text).toContain("Hi Ana,");
+  expect(message.text).toContain("Already set up an assistant in Grok Bot, Hermes, or OpenClaw?");
+  const links = [...message.html!.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
+  expect(links).toEqual(["https://app.example.test/sign-in?next=%2Fapp%3Fimport", unsubscribeUrl]);
+  expect(message.headers?.["List-Unsubscribe"]).toBe(`<${unsubscribeUrl}>`);
 });

@@ -2,7 +2,7 @@ import { useLingui } from "@lingui/react/macro";
 import type { Bot } from "@rakazo/contracts";
 import type { ActivityItem, Viewer } from "@rakazo/core/nurlings-board";
 import { ChevronRight } from "lucide-react";
-import { formatRelativeTime } from "../../../lib/relative-time";
+import { formatRelativeTime } from "../../../lib/locale/relative-time";
 
 type Props = {
   items: ActivityItem[];

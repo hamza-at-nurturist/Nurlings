@@ -3,11 +3,11 @@ import type { Bot, TicketListItem, TicketStatus } from "@rakazo/contracts";
 import { ticketCard } from "@rakazo/core/nurlings-board";
 import { fontWeight, typeScale } from "@rakazo/ui-tokens";
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
-import { dateLocaleForUi, useUiLocale } from "../../lib/i18n";
-import { useMobileTokens } from "../../lib/native";
+import { withAlpha } from "../../lib/appearance/ripple";
+import { dateLocaleForUi, useUiLocale } from "../../lib/i18n/i18n";
+import { useMobileTokens } from "../../lib/native/native";
 import type { CardMenuAction } from "../../lib/nurlings-board/card-menu";
 import { relativeDayLabels, statusLabels } from "../../lib/nurlings-board/labels";
-import { withAlpha } from "../../lib/ripple";
 import { BoardCard } from "./board-card";
 import { ColumnHighlight, useColumnScroll } from "./board-drag";
 import { Pill, StatusDot } from "./shared";
@@ -80,6 +80,7 @@ export function BoardColumn({
         </Text>
         {yourTurn ? (
           <View style={styles.turn}>
+            {/* biome-ignore lint/plugin: dark text on the amber pill in both appearances. */}
             <Pill background={tokens.warning} foreground="#000000">
               {t`Your turn`}
             </Pill>

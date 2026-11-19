@@ -3,8 +3,8 @@ import { I18nProvider } from "@lingui/react";
 import { BRAND_BLOB_SHAPE_INDEX, DEFAULT_BOT_AVATAR_COLOR } from "@rakazo/core";
 import { BotAvatar } from "@rakazo/ui-web";
 import { createRoot } from "react-dom/client";
-import { bootstrapI18n, i18n } from "../../src/lib/i18n";
-import { BotLookPicker } from "../../src/pages/shell/avatar-studio-popover";
+import { bootstrapI18n, i18n } from "../../src/lib/locale/i18n";
+import { BotLookPicker } from "../../src/pages/shell/bots/avatar-studio-popover";
 
 const chief = `${DEFAULT_BOT_AVATAR_COLOR}::shape_${BRAND_BLOB_SHAPE_INDEX}`;
 const sizes = [36, 42, 54, 200];

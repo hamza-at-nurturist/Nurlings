@@ -3,8 +3,8 @@ import { isAttachmentAudioMimeType } from "@rakazo/contracts";
 import { formatFileSize } from "@rakazo/core";
 import { shortFileType } from "@rakazo/core/nurlings-board";
 import { useState } from "react";
-import { downloadArtifact } from "../../../lib/artifact-open";
-import { ArtifactFileCard } from "../../ArtifactFileCard";
+import { downloadArtifact } from "../../../lib/pages/artifact-open";
+import { ArtifactFileCard } from "../../messages/ArtifactFileCard";
 
 /** The types `ArtifactFileCard` previews; it shows every other type as its MIME type. */
 const PREVIEWED_BY_SHARED_CARD = new Set([

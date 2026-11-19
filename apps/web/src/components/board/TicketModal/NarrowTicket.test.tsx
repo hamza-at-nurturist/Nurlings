@@ -18,12 +18,12 @@ const api = vi.hoisted(() => ({
     runs: vi.fn(),
   },
 }));
-vi.mock("../../../lib/rpc", () => ({ rpc: api }));
+vi.mock("../../../lib/query/rpc", () => ({ rpc: api }));
 vi.mock("../../../lib/bootstrap", () => ({ getMaxUploadSizeBytes: () => undefined }));
-vi.mock("../../../lib/auth", () => ({
+vi.mock("../../../lib/auth/auth", () => ({
   authClient: { useSession: () => ({ data: { user: { id: "user-1", name: "Ada" } } }) },
 }));
-vi.mock("../../../lib/relative-time", () => ({ formatRelativeTime: () => "5m ago" }));
+vi.mock("../../../lib/locale/relative-time", () => ({ formatRelativeTime: () => "5m ago" }));
 vi.mock("@lingui/react/macro", () => {
   const t = (parts: TemplateStringsArray, ...values: unknown[]) =>
     parts.reduce((text, part, index) => text + part + String(values[index] ?? ""), "");
@@ -32,10 +32,10 @@ vi.mock("@lingui/react/macro", () => {
 vi.mock("@rakazo/chat-ui/web", () => ({
   ChatMarkdown: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }));
-vi.mock("../../ArtifactFileCard", () => ({
+vi.mock("../../messages/ArtifactFileCard", () => ({
   ArtifactFileCard: (props: { name: string }) => <div data-testid="file-card">{props.name}</div>,
 }));
-vi.mock("../../../pages/shell/chat-shared", () => ({ FALLBACK_BOT_COLOR: "#111111" }));
+vi.mock("../../../pages/shell/chat/chat-shared", () => ({ FALLBACK_BOT_COLOR: "#111111" }));
 
 import type { Artifact, Bot, Ticket, TicketComment } from "@rakazo/contracts";
 import { ACTIVITY_SEEN_KEY } from "./activity-seen";

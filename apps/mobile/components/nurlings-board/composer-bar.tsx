@@ -4,7 +4,7 @@ import { typeScale } from "@rakazo/ui-tokens";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
-import { useMobileTokens } from "../../lib/native";
+import { useMobileTokens } from "../../lib/native/native";
 import type { MentionInputState } from "../../lib/nurlings-board/mention-input";
 import {
   emptyMentionInput,
@@ -14,7 +14,7 @@ import {
   pickerOptions,
   typeText,
 } from "../../lib/nurlings-board/mention-input";
-import { NativeSymbol } from "../native-symbol";
+import { NativeSymbol } from "../native/native-symbol";
 import { MentionOptions } from "./mention-options";
 
 export type ComposerSend = { text: string; mentions: Bot[]; picked: Bot[] };

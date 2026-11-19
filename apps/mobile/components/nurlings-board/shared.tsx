@@ -3,9 +3,9 @@ import type { Bot, TicketStatus } from "@rakazo/contracts";
 import { fontWeight, typeScale } from "@rakazo/ui-tokens";
 import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import type { mobileTokens } from "../../lib/appearance";
+import type { mobileTokens } from "../../lib/appearance/appearance";
 import type { CardMenuEntry } from "../../lib/nurlings-board/card-menu";
-import { BotAvatar } from "../bot-avatar";
+import { BotAvatar } from "../bots/bot-avatar";
 
 type Tokens = ReturnType<typeof mobileTokens>;
 
