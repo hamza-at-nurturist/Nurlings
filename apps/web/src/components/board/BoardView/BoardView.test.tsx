@@ -12,8 +12,8 @@ const api = vi.hoisted(() => ({
   me: vi.fn(async () => ({ timezone: "UTC" })),
   tickets: { list: vi.fn(), create: vi.fn(), move: vi.fn(), approve: vi.fn() },
 }));
-vi.mock("../../../lib/rpc", () => ({ rpc: api }));
-vi.mock("../../../pages/WindowChrome", () => ({ WindowChrome: () => null }));
+vi.mock("../../../lib/query/rpc", () => ({ rpc: api }));
+vi.mock("../../WindowChrome", () => ({ WindowChrome: () => null }));
 vi.mock("../TicketModal/TicketModal", () => ({
   TicketModal: (props: { ticket: { id: string } }) => (
     <div data-testid="ticket-modal" data-ticket={props.ticket.id} />

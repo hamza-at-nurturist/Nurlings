@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from "react";
-import { rpc, subscribeApiBase } from "../api";
+import { rpc, subscribeApiBase } from "../api/api";
 
 import { createBoardEnabledStore } from "./enabled-store";
 

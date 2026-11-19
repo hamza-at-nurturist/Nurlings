@@ -6,12 +6,12 @@ import { attachmentMaxBytes, TICKET_COMMENT_MAX_LENGTH } from "@rakazo/contracts
 import { typeScale } from "@rakazo/ui-tokens";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { rpc } from "../../lib/api";
-import { useMobileTokens, useResolvedAppearance } from "../../lib/native";
-import type { PickedAttachment } from "../../lib/pick-attachments";
-import { pickDocuments, pickFromLibrary, takePhoto } from "../../lib/pick-attachments";
-import { errorText } from "../../lib/user-error";
-import { NativeSymbol } from "../native-symbol";
+import { rpc } from "../../lib/api/api";
+import { errorText } from "../../lib/api/user-error";
+import type { PickedAttachment } from "../../lib/composer/pick-attachments";
+import { pickDocuments, pickFromLibrary, takePhoto } from "../../lib/composer/pick-attachments";
+import { useMobileTokens, useResolvedAppearance } from "../../lib/native/native";
+import { NativeSymbol } from "../native/native-symbol";
 import { ComposerBar } from "./composer-bar";
 
 const UPLOAD_TIMEOUT_MS = 120_000;

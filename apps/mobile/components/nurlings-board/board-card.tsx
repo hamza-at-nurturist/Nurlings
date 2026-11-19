@@ -6,7 +6,7 @@ import { useRef } from "react";
 import type { ViewInstance } from "react-native";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useResolvedAppearance } from "../../lib/native";
+import { useResolvedAppearance } from "../../lib/native/native";
 import type { CardMenuAction } from "../../lib/nurlings-board/card-menu";
 import { cardMenu, parseCardMenuAction } from "../../lib/nurlings-board/card-menu";
 import { statusLabels } from "../../lib/nurlings-board/labels";

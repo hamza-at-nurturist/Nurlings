@@ -3,7 +3,7 @@ import { TICKET_IMAGE_MIME_TYPES } from "@rakazo/core/nurlings-board";
 import { Button, Dialog, DialogClose, DialogContent, DialogTitle } from "@rakazo/ui-web";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useArtifactImage } from "../../../lib/use-artifact-image";
+import { useArtifactImage } from "../../../lib/pages/use-artifact-image";
 
 /** Image types a browser shows inline, so they get a thumbnail instead of a file card. */
 export const THUMBNAIL_MIME_TYPES = new Set(TICKET_IMAGE_MIME_TYPES);

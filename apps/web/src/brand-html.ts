@@ -3,7 +3,7 @@ import path from "node:path";
 import brandData from "@nurlings/brand/brand.json" with { type: "json" };
 import { parseBrand } from "@nurlings/brand/schema";
 import type { Plugin } from "vite";
-import { webManifest } from "./pwa/plugin.js";
+import { webManifest } from "../server/pwa-plugin.js";
 
 /**
  * Brands the document title, home-screen title and web manifest at build and dev time, so

@@ -1,3 +1,4 @@
+// biome-ignore-all lint/suspicious/noExplicitAny: fixtures deliberately pass malformed values.
 import { describe, expect, it } from "vitest";
 import data from "../brand.json" with { type: "json" };
 import { BrandConfigError, brand, parseBrand } from "./index.js";

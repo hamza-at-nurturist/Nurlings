@@ -96,13 +96,13 @@ vi.mock("@expo/ui/community/menu", () => ({
       }),
     ),
 }));
-vi.mock("../native", () => ({
+vi.mock("../native/native", () => ({
   useMobileTokens: () => colors,
   useResolvedAppearance: () => "dark",
 }));
-vi.mock("../i18n", () => ({ dateLocaleForUi: () => "en-US", useUiLocale: () => "en" }));
-vi.mock("../../components/bot-avatar", () => ({ BotAvatar: () => null }));
-vi.mock("../../components/native-symbol", () => ({ NativeSymbol: () => null }));
+vi.mock("../i18n/i18n", () => ({ dateLocaleForUi: () => "en-US", useUiLocale: () => "en" }));
+vi.mock("../../components/bots/bot-avatar", () => ({ BotAvatar: () => null }));
+vi.mock("../../components/native/native-symbol", () => ({ NativeSymbol: () => null }));
 vi.mock("../../components/nurlings-board/board-drag", () => ({
   LONG_PRESS_MS: 350,
   useBoardDrag: () => null,
@@ -117,7 +117,7 @@ vi.mock("react-native-gesture-handler", () => {
     GestureDetector: (props: { children?: ReactNode }) => props.children,
   };
 });
-vi.mock("../ripple", () => ({ withAlpha: (color: string) => color }));
+vi.mock("../appearance/ripple", () => ({ withAlpha: (color: string) => color }));
 
 import { BoardColumn } from "../../components/nurlings-board/board-column";
 

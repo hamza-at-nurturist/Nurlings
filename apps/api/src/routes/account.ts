@@ -5,19 +5,30 @@ import {
   hasHostedModelCredits,
   isAutoReviewCheckerConfigured,
   loadUserIncomingCalls,
+  meetingCalendarScope,
   PushSessionEndedError,
   settleCallRequest,
+  validateCreditOfferingChoice,
 } from "@rakazo/adapters";
-import type { ActionApprovalRule, Actor, Me, SettingsScope } from "@rakazo/contracts";
+import type {
+  ActionApprovalRule,
+  Actor,
+  Me,
+  SettingsScope,
+  SpaceChangeKind,
+} from "@rakazo/contracts";
 import { parseLabs } from "@rakazo/contracts";
 import {
+  abortableDelay,
   approvalModeFromPreference,
   approvalPreferenceFromMode,
+  ClientError,
   callRequestClientNonce,
 } from "@rakazo/core";
 import { urlSite } from "@rakazo/core/egress";
 import {
-  auditLogOrganization,
+  auditLogAccess,
+  auditLogScope,
   commitBotUpdate,
   DEFAULT_AUTO_REVIEW,
   findAutoReviewPreference,
@@ -40,16 +51,15 @@ import {
   voicePreferenceTarget,
   withTransactionRetry,
 } from "@rakazo/db";
-import { getLogger } from "@rakazo/logging";
-import { createAccessGrant, listAccessGrants, revokeAccessGrant } from "../access-grants.js";
-import { requireAdmin } from "../admins.js";
-import { aiConsentStatus, allowAiConsent } from "../ai-consent.js";
-import type { BillingService } from "../billing.js";
-import { firstModelConnectAnalytics } from "../model-connect-analytics.js";
-import type { RouterDeps } from "../router.js";
+import { bestEffort, getLogger } from "@rakazo/logging";
+import { aiConsentStatus, allowAiConsent } from "../account/ai-consent.js";
+import { createAccessGrant, listAccessGrants, revokeAccessGrant } from "../auth/access-grants.js";
+import { requireAdmin } from "../auth/admins.js";
+import type { BillingService } from "../billing/billing.js";
 import {
   accountVoiceCatalog,
   disconnectVoiceCredential,
+  effectiveVoiceStatus,
   loadDefaultVoiceCredential,
   loadVoiceCredential,
   persistVoiceCredential,
@@ -62,12 +72,20 @@ import {
   voiceCredentialServer,
   voiceProviderFor,
   withVoiceConnection,
-} from "../voice.js";
+} from "../calls/voice.js";
+import {
+  recordCreditsChoice,
+  recordSignInStep,
+  startModelConnect,
+} from "../models/model-connect-analytics.js";
+import type { RouterDeps } from "../router.js";
 import type { RouterContext } from "./context.js";
 import { HEARTBEAT, meDto, mergeStreams, withHeartbeats } from "./shared.js";
 
 const ROSTER_CHANGED = Symbol("roster changed");
-const COMPUTER_UPDATES_CHANGED = Symbol("computer updates changed");
+const ORGANIZATIONS_CHANGED = Symbol("organizations changed");
+
+const SIGNAL_FAILURE_HOLD_MS = 30_000;
 
 export function accountRoutes(ctx: RouterContext) {
   const { deps, os, authed } = ctx;
@@ -101,23 +119,33 @@ export function accountRoutes(ctx: RouterContext) {
         );
         return { ok: true as const };
       }),
+      modelSignInStep: authed.analytics.modelSignInStep.handler(async ({ context, input }) => {
+        const signIn = await bestEffort(
+          "model sign-in step",
+          deps.oauthLogins.pendingSignIn(input.loginId, context.actor),
+        );
+        if (signIn) recordSignInStep(deps.analytics, signIn, input.step);
+        return { ok: true as const };
+      }),
     },
     health: os.health.handler(async () => ({ ok: true as const, version: "0.1.0" })),
     me: authed.me.handler(async ({ context }): Promise<Me> => meDto(deps, context.actor)),
     billing: {
       selectFunding: authed.billing.selectFunding.handler(async ({ context, input }) => {
         const billing = requireBilling(deps);
-        if (input.funding === "credits") {
-          const record = await firstModelConnectAnalytics(deps, context.actor, "credits");
-          record(undefined, { name: "model_connect_started" });
-        }
-        return billing.selectFunding(
+        const started =
+          input.funding === "credits"
+            ? await startModelConnect(deps, context.actor, "credits", undefined, input.surface)
+            : undefined;
+        const selected = await billing.selectFunding(
           context.actor,
           input.funding,
           input.client,
           input.interval,
           input.tier,
         );
+        if (started) await recordCreditsChoice(deps, context.actor, started);
+        return selected;
       }),
       purchaseCredits: authed.billing.purchaseCredits.handler(async ({ context, input }) =>
         requireBilling(deps).purchaseCredits(context.actor, input),
@@ -131,6 +159,9 @@ export function accountRoutes(ctx: RouterContext) {
         if (input?.referralCode) await billing.claimReferral(context.actor, input.referralCode);
         return billing.status(context.actor);
       }),
+      computerUsage: authed.billing.computerUsage.handler(async ({ context }) =>
+        requireBilling(deps).computerUsage(context.actor),
+      ),
       refresh: authed.billing.refresh.handler(async ({ context }) => {
         const billing = requireBilling(deps);
         await billing.syncForActor(context.actor);
@@ -274,10 +305,10 @@ export function accountRoutes(ctx: RouterContext) {
     },
     audit: {
       events: authed.audit.events.handler(async ({ context, input }) => {
-        const organizationId = await auditLogOrganization(deps.prisma, context.actor);
-        if (!organizationId) throw new ORPCError("FORBIDDEN");
+        const access = await auditLogAccess(deps.prisma, context.actor);
+        if (!access) throw new ORPCError("FORBIDDEN");
         return runAsSystem("read the organization's audit log", () =>
-          listAuditEvents(deps.prisma, organizationId, input),
+          listAuditEvents(deps.prisma, access.organizationId, auditLogScope(access, input)),
         );
       }),
     },
@@ -358,39 +389,71 @@ export function accountRoutes(ctx: RouterContext) {
     },
     notifications: {
       subscribe: authed.notifications.subscribe.handler(async function* ({ context }) {
-        const { followChatAlerts, followRosterChanges, followComputerUpdateChanges } = deps.events;
+        const {
+          followChatAlerts,
+          followOrganizationChanges,
+          followRosterChanges,
+          followSpaceChanges,
+        } = deps.events;
         if (!followChatAlerts) throw new ORPCError("NOT_FOUND");
         const { spaceId, userId } = context.actor;
         const rosterChanges = async function* (
           signal: AbortSignal,
         ): AsyncGenerator<typeof ROSTER_CHANGED> {
           if (!followRosterChanges) return;
-          // Chat alerts keep flowing if roster signals fail; the client falls back to polling.
+          // The app re-reads the roster only on these signals, so a failure ends the stream the
+          // same way Space changes do below.
           try {
             for await (const _ of followRosterChanges(userId, signal)) yield ROSTER_CHANGED;
-          } catch {}
+          } catch (error) {
+            await abortableDelay(SIGNAL_FAILURE_HOLD_MS, signal);
+            throw error;
+          }
         };
-        const computerUpdateChanges = async function* (
+        const spaceChanges = async function* (
           signal: AbortSignal,
-        ): AsyncGenerator<typeof COMPUTER_UPDATES_CHANGED> {
-          if (!followComputerUpdateChanges) return;
-          // As with roster signals, the app keeps polling computer updates if these fail.
+          calendar = false,
+        ): AsyncGenerator<{ spaceChange: SpaceChangeKind }> {
+          if (!followSpaceChanges || (calendar && !deps.meetingCalendar)) return;
+          const scope = calendar ? meetingCalendarScope(spaceId, userId) : spaceId;
+          // The app re-reads what these cover only on signals, so a failure ends the stream and
+          // the app reconnects and re-reads. Alerts keep flowing for a while first, so a lasting
+          // failure costs one reconnect every half minute rather than a tight loop.
           try {
-            for await (const _ of followComputerUpdateChanges(spaceId, signal))
-              yield COMPUTER_UPDATES_CHANGED;
-          } catch {}
+            for await (const spaceChange of followSpaceChanges(scope, signal)) {
+              if ((spaceChange === "meetingCalendar") === calendar) yield { spaceChange };
+            }
+          } catch (error) {
+            await abortableDelay(SIGNAL_FAILURE_HOLD_MS, signal);
+            throw error;
+          }
+        };
+        const organizationChanges = async function* (
+          signal: AbortSignal,
+        ): AsyncGenerator<typeof ORGANIZATIONS_CHANGED> {
+          if (!followOrganizationChanges) return;
+          try {
+            for await (const _ of followOrganizationChanges(userId, signal))
+              yield ORGANIZATIONS_CHANGED;
+          } catch (error) {
+            await abortableDelay(SIGNAL_FAILURE_HOLD_MS, signal);
+            throw error;
+          }
         };
         const frames = withHeartbeats(context, (signal) =>
           mergeStreams(
             followChatAlerts(userId, spaceId, signal),
             rosterChanges(signal),
-            computerUpdateChanges(signal),
+            spaceChanges(signal),
+            spaceChanges(signal, true),
+            organizationChanges(signal),
           ),
         );
         for await (const next of frames) {
           if (next === HEARTBEAT) yield { type: "heartbeat" as const };
           else if (next === ROSTER_CHANGED) yield { type: "roster" as const };
-          else if (next === COMPUTER_UPDATES_CHANGED) yield { type: "computerUpdates" as const };
+          else if (next === ORGANIZATIONS_CHANGED) yield { type: "organizations" as const };
+          else if ("spaceChange" in next) yield { type: next.spaceChange };
           else if (next.spaceId === spaceId) yield { type: "alert" as const, alert: next };
         }
       }),
@@ -446,7 +509,8 @@ export function accountRoutes(ctx: RouterContext) {
           try {
             await deps.pushTokens.saveDevice?.(context.actor.userId, input, context.sessionId);
           } catch (error) {
-            if (error instanceof PushSessionEndedError) throw new ORPCError("UNAUTHORIZED");
+            if (error instanceof PushSessionEndedError)
+              throw new ClientError("UNAUTHORIZED", "Unauthorized");
             throw error;
           }
           return { ok: true as const };
@@ -463,7 +527,8 @@ export function accountRoutes(ctx: RouterContext) {
             input.presentation,
           );
         } catch (error) {
-          if (error instanceof PushSessionEndedError) throw new ORPCError("UNAUTHORIZED");
+          if (error instanceof PushSessionEndedError)
+            throw new ClientError("UNAUTHORIZED", "Unauthorized");
           throw error;
         }
         return { ok: true as const };
@@ -509,8 +574,7 @@ export function accountRoutes(ctx: RouterContext) {
         accountVoiceCatalog(deps, context.actor),
       ),
       status: authed.voice.status.handler(async ({ context, input }) => {
-        const cred = await findDefaultVoiceCredential(deps.prisma, context.actor, input?.scope);
-        return toVoiceStatus(cred);
+        return effectiveVoiceStatus(deps, context.actor, input?.scope);
       }),
       credentials: authed.voice.credentials.handler(async ({ context, input }) => {
         const target = await voicePreferenceTarget(deps.prisma, context.actor, input?.scope);
@@ -542,6 +606,8 @@ export function accountRoutes(ctx: RouterContext) {
           voiceId: input.voiceId,
           speechModel: input.speechModel,
           baseUrl: input.baseUrl,
+          sttBaseUrl: input.sttBaseUrl,
+          sttApiKey: input.sttApiKey,
           ttsModel: input.ttsModel,
           sttModel: input.sttModel,
           scope: input.scope,
@@ -627,7 +693,7 @@ async function loadAutoReviewSettings(deps: RouterDeps, actor: Actor, scope?: Se
       deps.prisma,
       actor,
       "approval",
-      { env: process.env },
+      { env: process.env, includedApproval: deps.billing?.modelCreditsEnabled === true },
       scope === "account" ? "account" : undefined,
     ),
     findAutoReviewPreference(deps.prisma, actor, scope),
@@ -642,7 +708,12 @@ async function loadAutoReviewSettings(deps: RouterDeps, actor: Actor, scope?: Se
     ...(deploymentChecker || !role.primary ? [] : [role.primary]),
     ...role.backups,
   ];
-  const environmentAvailable = isAutoReviewCheckerConfigured({ env: process.env });
+  const environmentAvailable = isAutoReviewCheckerConfigured({
+    env: process.env,
+    checker: deploymentChecker
+      ? { provider: deploymentChecker.provider, model: deploymentChecker.modelId }
+      : undefined,
+  });
   if (memberChoices.length === 0) {
     // The deployment's checker runs on its own configuration or on the member's key for it.
     const requiredUserProvider =
@@ -666,6 +737,22 @@ async function loadAutoReviewSettings(deps: RouterDeps, actor: Actor, scope?: Se
   );
   const checkerAvailable =
     connections.some(Boolean) ||
+    (
+      await Promise.all(
+        memberChoices.map((choice) =>
+          choice.creditOfferingId
+            ? validateCreditOfferingChoice(
+                deps.prisma,
+                deps.secrets,
+                actor,
+                choice.provider,
+                choice.modelId,
+                choice.creditOfferingId,
+              )
+            : false,
+        ),
+      )
+    ).some(Boolean) ||
     (deploymentChecker !== null && environmentAvailable) ||
     (
       await Promise.all(

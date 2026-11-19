@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot } from "./helpers";
+import { captureScreenshot } from "./helpers/helpers";
 
 test("Chief wears the brand blob as an organic avatar, idle and working, in both themes", async ({
   page,

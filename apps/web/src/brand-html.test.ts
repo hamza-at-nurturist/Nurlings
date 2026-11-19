@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { brand } from "@nurlings/brand";
 import { describe, expect, it } from "vitest";
+import { webManifest } from "../server/pwa-plugin";
 import { brandIndexHtml, brandManifest, brandPlugin, isAppIndexHtml } from "./brand-html";
-import { webManifest } from "./pwa/plugin";
 
 const read = (relative: string) =>
   readFileSync(fileURLToPath(new URL(relative, import.meta.url)), "utf8");

@@ -7,7 +7,7 @@ import type {
   TicketRun,
   TicketStatus,
 } from "@rakazo/contracts";
-import { needsTimeSeparator } from "../time-separators.js";
+import { needsTimeSeparator } from "../messages/time-separators.js";
 
 export type ActivityItem =
   | { kind: "event"; id: string; at: string; event: TicketEvent }

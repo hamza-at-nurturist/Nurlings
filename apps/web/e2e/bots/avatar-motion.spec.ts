@@ -1,0 +1,132 @@
+import { expect, test } from "@playwright/test";
+import { captureScreenshot } from "../helpers/helpers";
+
+test("photo working avatars show a visible ring while idle avatars stay plain", async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/e2e/fixtures/avatar-motion.html");
+
+  const working = page.locator(".avatar-working");
+  await expect(working).toBeVisible();
+  await expect(working).toHaveAttribute("data-working", "true");
+  const picture = working.locator(".rakazo-bot-avatar-picture");
+  const ring = working.locator(".rakazo-bot-avatar-ring");
+  await expect(picture).toBeVisible();
+  await expect(ring).toBeVisible();
+
+  const overflow = await working.evaluate((el) => getComputedStyle(el).overflowX);
+  const pictureOverflow = await picture.evaluate((el) => getComputedStyle(el).overflowX);
+  const ringAnimation = await ring.evaluate((el: SVGElement) => getComputedStyle(el).animationName);
+  const ringColor = await ring.locator("circle").evaluate((el) => getComputedStyle(el).stroke);
+  const pictureAnimation = await picture.evaluate((el) => getComputedStyle(el).animationName);
+  const workingColor = await page.evaluate(() => {
+    const probe = document.createElement("span");
+    probe.style.color = "var(--status-working)";
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  });
+  expect(overflow).not.toBe("hidden");
+  expect(pictureOverflow).toBe("hidden");
+  expect(ringAnimation).toBe("rakazo-avatar-spin");
+  expect(ringColor).toBe(workingColor);
+  expect(pictureAnimation).toBe("rakazo-avatar-breathe");
+  const firstPictureTransform = await picture.evaluate((el) => getComputedStyle(el).transform);
+  await page.waitForTimeout(300);
+  const secondPictureTransform = await picture.evaluate((el) => getComputedStyle(el).transform);
+  expect(secondPictureTransform).not.toBe(firstPictureTransform);
+
+  const idle = page.locator(".avatar-idle");
+  await expect(idle).toHaveAttribute("data-working", "false");
+  await expect(idle.locator(".rakazo-bot-avatar-ring")).toHaveCount(0);
+  await expect(idle.locator(".rakazo-bot-avatar-picture")).toHaveCSS("animation-name", "none");
+  // Shape avatars draw their state in the body, so an idle one has no ring to pause.
+  await expect(page.locator(".avatar-shape-idle .rakazo-bot-avatar-ring")).toHaveCount(0);
+  await captureScreenshot(page, testInfo, "avatar-photo-working-and-idle");
+});
+
+test("photo avatar animations stay still when reduced motion is enabled", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/e2e/fixtures/avatar-motion.html");
+
+  const avatar = page.locator(".avatar-working");
+  await expect(avatar).toBeVisible();
+  await expect(avatar).toHaveAttribute("data-working", "true");
+
+  const ring = avatar.locator(".rakazo-bot-avatar-ring");
+  const picture = avatar.locator(".rakazo-bot-avatar-picture");
+  await expect(ring).toBeVisible();
+  const snapshot = () =>
+    Promise.all([
+      ring.evaluate((el: SVGElement) => ({
+        animationName: getComputedStyle(el).animationName,
+        transform: getComputedStyle(el).transform,
+      })),
+      picture.evaluate((el) => ({
+        animationName: getComputedStyle(el).animationName,
+        transform: getComputedStyle(el).transform,
+      })),
+    ]);
+  const first = await snapshot();
+  await page.waitForTimeout(300);
+  const second = await snapshot();
+
+  expect(first[0]?.animationName).toBe("none");
+  expect(first[1]?.animationName).toBe("none");
+  expect(second).toEqual(first);
+});
+
+test("organic avatars show their state and stop moving while offscreen or hidden", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/e2e/fixtures/avatar-motion.html");
+  const avatar = page.locator(".avatar-organic");
+  await expect(avatar).toBeVisible();
+  const motion = () =>
+    avatar.evaluate((svg: SVGSVGElement) => ({
+      clockPaused: svg.animationsPaused(),
+      states: [
+        ...new Set(
+          [...svg.querySelectorAll("*")].flatMap((element) =>
+            element
+              .getAnimations()
+              .filter((track) => track instanceof CSSAnimation)
+              .map((track) => track.playState),
+          ),
+        ),
+      ],
+    }));
+  await expect(avatar).toHaveAttribute("data-state", "idle");
+  expect(await motion()).toEqual({ clockPaused: false, states: ["running"] });
+
+  await avatar.evaluate((svg) => svg.parentElement!.querySelector("button")!.click());
+  await expect(avatar).toHaveAttribute("data-state", "working");
+  await expect(avatar).toHaveAttribute("data-look", "orbit");
+  await expect(avatar).toHaveAttribute("data-working", "true");
+  await expect(avatar.locator(".rakazo-av-orbit")).toHaveCSS("animation-name", "rakazo-av-spin");
+
+  await avatar.evaluate((svg) => {
+    svg.closest<HTMLElement>(".avatar-example")!.style.marginTop = "2200px";
+  });
+  await expect(avatar).toHaveAttribute("data-paused", "true");
+  expect(await motion()).toEqual({ clockPaused: true, states: ["paused"] });
+  await avatar.evaluate((svg) => {
+    svg.closest<HTMLElement>(".avatar-example")!.style.marginTop = "0";
+  });
+  await expect(avatar).toHaveAttribute("data-paused", "false");
+
+  const setHidden = (hidden: boolean) =>
+    page.evaluate((value) => {
+      Object.defineProperty(document, "hidden", { configurable: true, get: () => value });
+      document.dispatchEvent(new Event("visibilitychange"));
+    }, hidden);
+  await setHidden(true);
+  await expect(avatar).toHaveAttribute("data-paused", "true");
+  expect(await motion()).toEqual({ clockPaused: true, states: ["paused"] });
+  await setHidden(false);
+  await expect(avatar).toHaveAttribute("data-paused", "false");
+  expect((await motion()).clockPaused).toBe(false);
+});

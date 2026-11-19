@@ -7,9 +7,9 @@ import {
   readFileAsBase64,
   revokePendingAttachmentPreviews,
   usePendingAttachmentPreviewCleanup,
-} from "../../../lib/pending-attachments";
-import { canPrepareImage, prepareImage } from "../../../lib/prepare-image";
-import { rpc } from "../../../lib/rpc";
+} from "../../../lib/composer/pending-attachments";
+import { canPrepareImage, prepareImage } from "../../../lib/composer/prepare-image";
+import { rpc } from "../../../lib/query/rpc";
 
 export type StagedFile = { id: string; file: File; previewUrl?: string };
 

@@ -3,8 +3,8 @@ import type { TicketCard } from "@rakazo/core/nurlings-board";
 import { fontWeight, typeScale } from "@rakazo/ui-tokens";
 import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useMobileTokens } from "../../lib/native";
-import { NativeSymbol } from "../native-symbol";
+import { useMobileTokens } from "../../lib/native/native";
+import { NativeSymbol } from "../native/native-symbol";
 import { OwnerMark, Pill } from "./shared";
 
 /** What a card looks like. The list renders it with the ⋯ menu; the drag overlay renders a copy. */

@@ -6,8 +6,8 @@ import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AvatarPip } from "../components/avatar-pip";
-import { BotAvatar } from "../components/bot-avatar";
-import { mobileLogoAvatarActivity } from "./logo-avatar-activity";
+import { BotAvatar } from "../components/bots/bot-avatar";
+import { mobileLogoAvatarActivity } from "./bots/logo-avatar-activity";
 
 const control = vi.hoisted(() => ({ reduced: false }));
 
@@ -86,8 +86,8 @@ vi.mock("react-native-svg", () => {
     Stop: element("stop"),
   };
 });
-vi.mock("../components/native-symbol", () => ({ NativeSymbol: () => null }));
-vi.mock("./native", () => ({
+vi.mock("../components/native/native-symbol", () => ({ NativeSymbol: () => null }));
+vi.mock("./native/native", () => ({
   useMobileTokens: () => ({
     background: "#FFF",
     foreground: "#141414",
@@ -98,7 +98,7 @@ vi.mock("./native", () => ({
     workingDot: "#3FA266",
   }),
 }));
-vi.mock("./i18n", () => ({ useI18n: () => ({ t: (text: string) => text }) }));
+vi.mock("./i18n/i18n", () => ({ useI18n: () => ({ t: (text: string) => text }) }));
 
 const COLOR = "#2A92FE";
 

@@ -11,8 +11,8 @@ import {
 } from "@rakazo/ui-web/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
-import { rpc } from "../../../lib/rpc";
-import { errorText } from "../../../lib/user-error";
+import { rpc } from "../../../lib/query/rpc";
+import { errorText } from "../../../lib/query/user-error";
 
 /** Deletes a ticket for good. Only people see this; Nurlings have no way to delete tickets. */
 export function DeleteTicket({

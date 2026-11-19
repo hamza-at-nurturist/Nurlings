@@ -364,6 +364,7 @@ export function BrandSplash({ ready }: { ready: boolean }) {
               cy={WHITE_RING_SPEC.cy}
               r={WHITE_RING_SPEC.r}
               fill="none"
+              // biome-ignore lint/plugin: the splash draws the brand artwork in fixed white.
               stroke="#FFFFFF"
               strokeWidth={WHITE_RING_SPEC.width}
             />

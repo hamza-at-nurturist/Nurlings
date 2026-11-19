@@ -1,7 +1,7 @@
 import type { Bot } from "@rakazo/contracts";
 import { ACTIVE_RUN_STATUSES } from "@rakazo/core";
 import { useEffect, useState } from "react";
-import { rpc } from "../../../lib/rpc";
+import { rpc } from "../../../lib/query/rpc";
 
 const POLL_MS = 4_000;
 

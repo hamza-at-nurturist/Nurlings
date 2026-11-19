@@ -7,9 +7,12 @@ import { act, createElement } from "react";
 import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { InboxHeader } from "../../components/inbox-header";
-import { notificationOpenTarget, notificationOpenTargetFromLink } from "../notification-open";
-import { useHomeHeader } from "../use-home-header";
+import { InboxHeader } from "../../components/inbox/inbox-header";
+import { useInboxHeader } from "../inbox/use-inbox-header";
+import {
+  notificationOpenTarget,
+  notificationOpenTargetFromLink,
+} from "../notifications/notification-open";
 import { nurlingsBoardPath } from "./links";
 import { ticketNotificationRoute } from "./notification";
 import { NURLINGS_BOARD_PATH, NURLINGS_TICKET_PATH } from "./routes";
@@ -50,13 +53,13 @@ vi.mock("expo-router", () => {
   return { useRouter: () => router, useNavigation: () => navigation };
 });
 vi.mock("react-native-safe-area-context", () => ({ useSafeAreaInsets: () => ({ top: 0 }) }));
-vi.mock("../../components/native-symbol", () => ({ NativeSymbol: () => null }));
-vi.mock("../appearance", () => ({
+vi.mock("../../components/native/native-symbol", () => ({ NativeSymbol: () => null }));
+vi.mock("../appearance/appearance", () => ({
   mobileTokens: () => ({}),
   resolveMobileAppearance: () => "light",
 }));
-vi.mock("../native", () => ({ native: {}, useThemedStyles: () => ({}) }));
-vi.mock("../material-icons", () => ({ materialIcons: {} }));
+vi.mock("../native/native", () => ({ native: {}, useThemedStyles: () => ({}) }));
+vi.mock("../appearance/material-icons", () => ({ materialIcons: {} }));
 vi.mock("./enabled", () => ({ useNurlingsBoardEnabled: () => mocks.enabled.value }));
 
 let root: Root;
@@ -79,7 +82,7 @@ afterEach(() => {
 });
 
 function HeaderHost() {
-  useHomeHeader({
+  useInboxHeader({
     nativeHeader: true,
     ready: true,
     hasSession: true,
@@ -182,10 +185,9 @@ describe("entries open the Nurlings Board", () => {
 /** Upstream's native board and its tests stay untouched; nothing else may point at `/board`. */
 const UPSTREAM_BOARD_FILES = new Set([
   "app/board.tsx",
-  "components/board-list.tsx",
-  "components/board-list.ios.tsx",
-  "lib/board.ts",
-  "lib/board.test.ts",
+  "lib/board/board-list.tsx",
+  "lib/board/board-list.ios.tsx",
+  "lib/board/board-screen.test.tsx",
 ]);
 
 function sources(dir: string): string[] {

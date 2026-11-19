@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { ensureBoard } from "./board.js";
-import type { PrismaClient } from "./client.js";
+import { ensureBoard } from "./artifacts/board.js";
+import type { PrismaClient } from "./database/client.js";
 
 describe("ensureBoard", () => {
   it("creates a board with the brand ticket prefix", async () => {

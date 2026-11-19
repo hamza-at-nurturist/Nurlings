@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@rakazo/ui-web";
 import { Ellipsis, Paperclip } from "lucide-react";
-import { useTicketStatusLabels } from "../../../lib/ticket-status";
+import { useTicketStatusLabels } from "../../../pages/space/ticket-status";
 import { Shimmer } from "../../ai/primitives";
 import { CardDates } from "../TicketModal/CardDates";
 import { useRelativeDayLabels } from "../TicketModal/DatePicker";

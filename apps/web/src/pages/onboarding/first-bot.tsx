@@ -1,7 +1,7 @@
 import { Trans } from "@lingui/react/macro";
 import { BRAND_BLOB_SHAPE_INDEX, DEFAULT_BOT_AVATAR_COLOR } from "@rakazo/core";
 import { Button } from "@rakazo/ui-web";
-import { rpc } from "../../lib/rpc";
+import { rpc } from "../../lib/query/rpc";
 
 const FIRST_BOT_NAME = "Chief";
 /** Chief wears the brand blob in the default avatar colour. */

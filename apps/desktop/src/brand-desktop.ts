@@ -1,7 +1,7 @@
 import { brand } from "@nurlings/brand";
 import type { DesktopSetup } from "@rakazo/contracts";
 import type { AboutPanelOptionsOptions } from "electron";
-import { normalizeServerUrl, RAKAZO_CLOUD_URL } from "./setup-config.js";
+import { normalizeServerUrl, RAKAZO_CLOUD_URL } from "./main/setup/setup-config.js";
 
 /**
  * A profile whose saved server is the upstream's hosted service must not reconnect to it. It is

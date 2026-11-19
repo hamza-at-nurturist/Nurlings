@@ -1,0 +1,9 @@
+{
+  "apps/web/src/components/board/TicketModal/DatePicker.tsx": 6,
+  "apps/web/src/components/board/TicketModal/NarrowTicket.tsx": 2,
+  "apps/web/src/components/board/TicketModal/ReplyBox.tsx": 2,
+  "apps/web/src/components/board/TicketModal/TicketImage.tsx": 1,
+  "apps/web/src/components/call/CallCard.tsx": 2,
+  "apps/web/src/components/call/IncomingCall.tsx": 2,
+  "packages/ui-web/src/components/ui/calendar.tsx": 1
+}

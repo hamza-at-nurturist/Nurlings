@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { selectedSpaceId } from "../api";
-import { threadSpaceRequest, threadSpaceSwitchResult } from "../notification-open";
-import { selectSpaceAcrossOrganizations } from "../organizations";
+import { selectedSpaceId } from "../api/api";
+import { threadSpaceRequest, threadSpaceSwitchResult } from "../notifications/notification-open";
+import { selectSpaceAcrossOrganizations } from "../spaces/organizations";
 
 /**
  * Moves the app into the space a notification belongs to before its ticket loads, with the same

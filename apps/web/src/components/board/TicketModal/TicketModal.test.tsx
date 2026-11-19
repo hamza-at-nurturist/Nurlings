@@ -21,14 +21,14 @@ const api = vi.hoisted(() => ({
 const session = vi.hoisted(() => ({
   data: { user: { id: "user-1", name: "Ada", image: null as string | null } },
 }));
-vi.mock("../../../lib/rpc", () => ({ rpc: api }));
+vi.mock("../../../lib/query/rpc", () => ({ rpc: api }));
 vi.mock("../../../lib/bootstrap", () => ({ getMaxUploadSizeBytes: () => undefined }));
-vi.mock("../../../lib/prepare-image", () => ({
+vi.mock("../../../lib/composer/prepare-image", () => ({
   canPrepareImage: () => false,
   prepareImage: async (file: File) => file,
 }));
-vi.mock("../../../lib/auth", () => ({ authClient: { useSession: () => session } }));
-vi.mock("../../../lib/relative-time", () => ({ formatRelativeTime: () => "5m ago" }));
+vi.mock("../../../lib/auth/auth", () => ({ authClient: { useSession: () => session } }));
+vi.mock("../../../lib/locale/relative-time", () => ({ formatRelativeTime: () => "5m ago" }));
 vi.mock("@lingui/react/macro", () => {
   const t = (parts: TemplateStringsArray, ...values: unknown[]) =>
     parts.reduce((text, part, index) => text + part + String(values[index] ?? ""), "");
@@ -37,7 +37,7 @@ vi.mock("@lingui/react/macro", () => {
 vi.mock("@rakazo/chat-ui/web", () => ({
   ChatMarkdown: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }));
-vi.mock("../../ArtifactFileCard", () => ({
+vi.mock("../../messages/ArtifactFileCard", () => ({
   ArtifactFileCard: (props: { name: string; meta?: string; target: { botId: string } }) => (
     <div data-testid="file-card" data-bot={props.target.botId}>
       {props.name}
@@ -45,7 +45,7 @@ vi.mock("../../ArtifactFileCard", () => ({
     </div>
   ),
 }));
-vi.mock("../../../pages/shell/chat-shared", () => ({ FALLBACK_BOT_COLOR: "#111111" }));
+vi.mock("../../../pages/shell/chat/chat-shared", () => ({ FALLBACK_BOT_COLOR: "#111111" }));
 vi.mock("@rakazo/ui-web", () => {
   const Container = ({ children }: { children?: ReactNode }) => <div>{children}</div>;
   const Choose = createContext<(value: string) => void>(() => {});

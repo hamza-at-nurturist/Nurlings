@@ -1,4 +1,4 @@
-import { attachmentExtensionForMimeType } from "../attachments.js";
+import { attachmentExtensionForMimeType } from "../messages/attachments.js";
 
 /** The image types a ticket shows as thumbnails and opens in the viewer. */
 export const TICKET_IMAGE_MIME_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];

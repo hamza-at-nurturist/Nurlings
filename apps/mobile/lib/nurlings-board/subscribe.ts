@@ -1,4 +1,4 @@
-import { captureApiRequestContext } from "../api";
+import { captureApiRequestContext } from "../api/api";
 import { readEventData } from "./event-stream";
 
 /** Opens `boards.subscribe`; `onOpen` runs once the server accepted it, then each event. */

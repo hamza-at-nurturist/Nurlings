@@ -5,8 +5,8 @@ import { typeScale } from "@rakazo/ui-tokens";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { imageArtifactUri, openMobileArtifact } from "../../lib/artifact-open";
-import { useMobileTokens } from "../../lib/native";
+import { imageArtifactUri, openMobileArtifact } from "../../lib/artifacts/artifact-open";
+import { useMobileTokens } from "../../lib/native/native";
 
 type TicketFile = Pick<Artifact, "id" | "name" | "mimeType" | "size"> & { botId: string };
 

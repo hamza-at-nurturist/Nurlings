@@ -95,7 +95,7 @@ describe("avatar colors", () => {
       "organic-avatar-props.tsx",
       "organic-avatar.css",
       "avatar-pointer.ts",
-      "../../core/src/avatar-state-react.ts",
+      "../../core/src/avatars/avatar-state-react.ts",
     ]) {
       const text = readFileSync(new URL(file, import.meta.url), "utf8");
       expect(text.match(/#[0-9a-fA-F]{3,8}\b/g) ?? [], file).toEqual([]);

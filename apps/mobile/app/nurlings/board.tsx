@@ -8,14 +8,15 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "reac
 import { Text, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { glassHeaderOptions } from "../../components/glass-title";
+import { glassHeaderOptions } from "../../components/native/glass-title";
 import { BoardPages } from "../../components/nurlings-board/board-pages";
 import { NurlingFilter } from "../../components/nurlings-board/nurling-filter";
 import { QuickAdd } from "../../components/nurlings-board/quick-add";
-import { rpc } from "../../lib/api";
-import { useFloatingHeaderInset, useHeaderHeightIfAny } from "../../lib/floating-header";
-import { useMobileTokens } from "../../lib/native";
-import { iosAtLeast } from "../../lib/native-controls";
+import { rpc } from "../../lib/api/api";
+import { errorText } from "../../lib/api/user-error";
+import { useFloatingHeaderInset, useHeaderHeightIfAny } from "../../lib/layout/floating-header";
+import { useMobileTokens } from "../../lib/native/native";
+import { iosAtLeast } from "../../lib/native/native-controls";
 import type { CardMenuAction } from "../../lib/nurlings-board/card-menu";
 import { useNurlingsBoardEnabled } from "../../lib/nurlings-board/enabled";
 import {
@@ -25,7 +26,6 @@ import {
   useRevisions,
 } from "../../lib/nurlings-board/live";
 import { NURLINGS_TICKET_PATH } from "../../lib/nurlings-board/routes";
-import { errorText } from "../../lib/user-error";
 
 /** The Board: a Nurling filter, six paged columns of live cards, and quick-add. */
 export default function BoardScreen() {

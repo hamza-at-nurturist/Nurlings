@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 import { brandSetupHtml, brandSetupScript, brandSetupStyles, SETUP_LOGO } from "./brand-setup.js";
 
 const read = (file: string) => readFileSync(path.resolve(import.meta.dirname, file), "utf8");
-const html = read("setup.html");
-const script = read("setup.js");
+const html = read("setup-renderer/setup.html");
+const script = read("setup-renderer/setup.js");
 
 describe("brandSetupHtml", () => {
   it("starts from upstream's markup, which names the upstream product and its hosted cloud", () => {

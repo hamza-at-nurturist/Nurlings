@@ -1,5 +1,5 @@
 import type { Bot, TicketMention } from "@rakazo/contracts";
-import { botHexColor } from "../bot-avatar-colors.js";
+import { botHexColor } from "../avatars/bot-avatar-colors.js";
 import type { Viewer } from "./types.js";
 
 /** A Nurling or user a comment called in, with what the reader knows about them now. */

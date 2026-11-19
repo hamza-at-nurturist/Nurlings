@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, openUserSettings, signup } from "./helpers";
+import { captureScreenshot, completeOnboarding, openUserSettings, signup } from "./helpers/helpers";
 
 test("a ticket opens as a two-tab sheet on a phone", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1440, height: 900 });

@@ -2,8 +2,8 @@ import type { BoardEvent, Bot } from "@rakazo/contracts";
 import type { Viewer } from "@rakazo/core/nurlings-board";
 import { useIsFocused } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { rpc } from "../api";
-import { useAppForeground } from "../app-foreground";
+import { rpc } from "../api/api";
+import { useAppForeground } from "../platform/app-foreground";
 import { keepBoardSubscribed } from "./event-stream";
 import { subscribeBoard } from "./subscribe";
 

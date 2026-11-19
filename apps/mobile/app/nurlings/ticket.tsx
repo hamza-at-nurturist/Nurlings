@@ -17,19 +17,20 @@ import {
 } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { glassHeaderOptions } from "../../components/glass-title";
-import { NativeActionButton } from "../../components/native-action-button";
-import { NativeSegmentedControl } from "../../components/native-segmented-control";
+import { glassHeaderOptions } from "../../components/native/glass-title";
+import { NativeActionButton } from "../../components/native/native-action-button";
+import { NativeSegmentedControl } from "../../components/native/native-segmented-control";
 import { ActivityFeed } from "../../components/nurlings-board/activity-feed";
 import { ReplyComposer } from "../../components/nurlings-board/reply-composer";
 import { TicketFiles } from "../../components/nurlings-board/ticket-files";
 import type { PropertiesPatch } from "../../components/nurlings-board/ticket-properties";
 import { TicketProperties } from "../../components/nurlings-board/ticket-properties";
-import { rpc } from "../../lib/api";
-import { useFloatingHeaderInset, useHeaderHeightIfAny } from "../../lib/floating-header";
-import { dateLocaleForUi, useUiLocale } from "../../lib/i18n";
-import { useMobileTokens } from "../../lib/native";
-import { iosAtLeast } from "../../lib/native-controls";
+import { rpc } from "../../lib/api/api";
+import { errorText } from "../../lib/api/user-error";
+import { dateLocaleForUi, useUiLocale } from "../../lib/i18n/i18n";
+import { useFloatingHeaderInset, useHeaderHeightIfAny } from "../../lib/layout/floating-header";
+import { useMobileTokens } from "../../lib/native/native";
+import { iosAtLeast } from "../../lib/native/native-controls";
 import { useNurlingsBoardEnabled } from "../../lib/nurlings-board/enabled";
 import {
   useBoardBots,
@@ -39,7 +40,6 @@ import {
 } from "../../lib/nurlings-board/live";
 import { useTicketSpace } from "../../lib/nurlings-board/space";
 import { useTicketActivity } from "../../lib/nurlings-board/ticket-activity";
-import { errorText } from "../../lib/user-error";
 
 type Segment = "ticket" | "activity";
 
