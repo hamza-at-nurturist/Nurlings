@@ -1,13 +1,21 @@
 ## ADDED Requirements
 
-### Requirement: Avatars are glint or flat
+### Requirement: Account settings offer glint or flat
 
 The bot style control in account settings on web, desktop and mobile SHALL offer two options,
-Glint and Flat, in place of Original and Nurlings. Glint SHALL be the default and SHALL draw avatars
-as they were drawn before this change. Flat SHALL draw every avatar without its effects: no
-catchlights or gloss on organic bodies, and no shading, shadows, eye glint or eye sheen on the logo
-avatar. The choice SHALL apply to every avatar the person sees, whether or not the bot has a picked
-shape, and SHALL NOT change a body, colour, state, prop or motion.
+Glint and Flat, in place of Original and Nurlings. Glint SHALL be the default.
+
+#### Scenario: Opening the control
+
+- **WHEN** a person opens the bot style control for the first time
+- **THEN** it shows Glint and Flat with Glint selected
+
+### Requirement: Flat avatars draw without effects
+
+Glint SHALL draw avatars as they were drawn before this change. Flat SHALL draw every avatar without
+its effects: no catchlights or gloss on organic bodies, and no shading, shadows, eye glint or eye
+sheen on the logo avatar. The choice SHALL apply to every avatar the person sees, with or without a
+picked shape, and SHALL NOT change a body, colour, state, prop or motion.
 
 #### Scenario: Choosing flat on web
 
