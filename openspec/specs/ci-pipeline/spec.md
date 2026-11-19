@@ -118,3 +118,36 @@ brand guard SHALL run with lint and again on the built web app.
 
 - **WHEN** a commit is pushed to the fork's `main`
 - **THEN** the mobile update, production deploy, server image and weekly dependency jobs do not run, and the brand checks do
+
+### Requirement: Mobile updates are skipped, not failed, without an Expo token
+
+The job that publishes a compatible mobile update from `main` SHALL succeed with a notice when the
+`EXPO_TOKEN` secret is not set, and SHALL NOT run any step that needs Expo in that case. When the
+secret is set, it SHALL publish as before.
+
+#### Scenario: No token
+
+- **WHEN** a merge to `main` changes mobile-safe code and `EXPO_TOKEN` is not set
+- **THEN** the job ends green with a notice, no Expo step runs, and the `ci` run does not fail
+
+#### Scenario: Token set
+
+- **WHEN** a merge to `main` changes mobile-safe code and `EXPO_TOKEN` is set
+- **THEN** the job installs, verifies and publishes the update as before
+
+### Requirement: The shared test suites run on GitHub's runners here
+
+The lint, typecheck, unit and production-build suites SHALL run from `.github/workflows/test-suites.yml`
+on GitHub's runners for both pull requests and pushes to `main`, and the Nurlings brand guard and
+the built-app brand check SHALL run inside them. The Depot copy of the suites SHALL stay identical
+to that file.
+
+#### Scenario: Pull request
+
+- **WHEN** a pull request is opened or updated
+- **THEN** the suites run on GitHub's runners through `ci.yml`, including `pnpm brand:check`
+
+#### Scenario: Depot copy drifts
+
+- **WHEN** `.depot/workflows/test-suites.yml` differs from `.github/workflows/test-suites.yml`
+- **THEN** the repository's kept-in-step check fails

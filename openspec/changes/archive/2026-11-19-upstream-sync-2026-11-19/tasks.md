@@ -27,8 +27,8 @@
 - [x] 3.4 All migrations apply to an empty Postgres.
 - [x] 3.5 `pnpm brand:check` passes, and `pnpm brand:check --built` passes after a web build.
 - [x] 3.6 `openspec validate upstream-sync-2026-11-19 --strict` passes.
-- [ ] 3.7 Open the PR; CI is green on the head commit.
+- [x] 3.7 Open the PR; CI is green on the head commit.
 
 ## 4. After merge
 
-- [ ] 4.1 Archive the change in a separate `chore/` PR.
+- [x] 4.1 Archive the change in a separate `chore/` PR.

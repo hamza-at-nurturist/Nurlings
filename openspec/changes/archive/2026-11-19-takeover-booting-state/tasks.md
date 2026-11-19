@@ -18,6 +18,6 @@
 
 ## 3. After merge
 
-- [ ] 3.1 Watch `main` for a recurrence of the stuck "Booting live desktop…" failure. Verify: no
+- [x] 3.1 Watch `main` for a recurrence of the stuck "Booting live desktop…" failure. Verify: no
   failed golden takeover shard over the next merges.
-- [ ] 3.2 Archive the change.
+- [x] 3.2 Archive the change.
