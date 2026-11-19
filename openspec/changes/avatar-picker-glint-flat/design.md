@@ -1,37 +1,39 @@
 # Design
 
-## Storage: a new account column
+## Storage: a new account column, not `botAvatarSet`
 
-`users.botAvatarEffects TEXT[] NOT NULL DEFAULT '{shadow,glint,flare}'`. The list is the effects
-that are on, so a new effect later needs no migration and unknown ids are ignored. Options
-rejected: packing effects into `botAvatarSet` (older clients and the restyle logic read it as a set
-name), a suffix on a bot's colour string (the previous API validator is anchored and rejects it),
-and `labs` (feature flags, wrong meaning). The API returns it on `me` and takes it on
-`preferences/update`; an old client never sends it and ignores it.
+`users.botAvatarFinish TEXT NOT NULL DEFAULT 'glint'`, values `glint` or `flat`.
 
-## Decision for the maintainer: Original users and the switches
+Reusing `botAvatarSet` was considered and rejected:
 
-Today Original and Nurlings are different art, not different effect levels, so "map Original onto
-switches" cannot be exact. Options:
+- Its values are art sets (`organic`, `rakazo`). Flat is not a set, so it would need a third value
+  that older clients map to nothing.
+- Saving it restyles every unpinned bot's `avatarSet` and the previous release reads it that way,
+  so a new value would repaint bots during a deploy overlap.
+- Keeping it alone would mean offering `rakazo` again, which is the hidden logo set.
 
-The set is already ignored for any bot with a picked shape, so most accounts see no difference
-between the two today. **Not decided yet: the maintainer has not confirmed an option.**
+A separate column leaves `botAvatarSet` untouched, so existing choices render as before and nothing
+is migrated. It is additive with a default: the previous release ignores it and draws glint, and
+every existing row reads as glint. The API returns it on `me` and takes it on `preferences/update`;
+it does not touch bots, so unlike the set it needs no restyle step.
 
-1. **Keep the set, hide the choice (recommended).** Stored sets keep rendering. Glint applies to
-   both looks (catchlight and gloss on Original, eye glint on Nurlings). Shadow and Eye flare apply
-   to the Nurlings look, so they show only when the account is on it. Original users keep their
-   look and can turn glint off, but have no way back to Nurlings from this screen.
-2. **Retire Original.** Everyone moves to the Nurlings look with all effects on, and Original users
-   turn effects off to get close to their plain look. This changes their avatars on upgrade and
-   the organic bodies stay only for bots pinned to them.
-3. **Keep a set row** beside the three switches. Nothing is lost, but it keeps the control the
-   maintainer asked to replace.
+## What each finish draws
 
-I recommend 1. Say which you want before implementation.
+One helper in `packages/core` answers "which effects does this finish draw", so web and mobile do
+not each decide. Glint draws all of them. Flat draws none:
 
-## Rendering
+- organic: catchlights and gloss arc;
+- logo avatar: flank shade, hand contact shadows, eye glint, eye sheen (the eye's flat fill
+  replaces the gradient).
 
-Each avatar reads the account's effects through one core helper. Web sets data attributes the
-stylesheet uses to hide layers; mobile skips the matching SVG nodes. States, motion, props and
-pips are unchanged. Bots from other accounts in shared spaces draw with the viewer's effects, since
-the setting is about what you see.
+Web hides layers through a data attribute the stylesheets read, and mobile skips the matching SVG
+nodes. States, motion, props, pips and the body outline are unchanged.
+
+## Whose finish draws
+
+The viewer's, for every avatar they see, including bots of other people in a shared space, since the
+setting is about what you see.
+
+## Non-goals
+
+No per-bot finish, no new bodies or sets, and no offer of the `rakazo` set.

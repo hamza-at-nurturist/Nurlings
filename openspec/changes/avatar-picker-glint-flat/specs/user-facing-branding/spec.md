@@ -1,42 +1,42 @@
 ## ADDED Requirements
 
-### Requirement: Avatar effects are switches
+### Requirement: Avatars are glint or flat
 
-The account settings on web, desktop and mobile SHALL offer three switches, Shadow, Glint and Eye
-flare, in place of the Original and Nurlings choice. All three on SHALL be the default and SHALL
-draw avatars as they were drawn before this change. Each switch SHALL apply to every avatar the
-person sees, and turning all three off SHALL draw the flat look. Mobile SHALL use native switches
-and web SHALL use the shared switch component.
+The bot style control in account settings on web, desktop and mobile SHALL offer two options,
+Glint and Flat, in place of Original and Nurlings. Glint SHALL be the default and SHALL draw avatars
+as they were drawn before this change. Flat SHALL draw every avatar without its effects: no
+catchlights or gloss on organic bodies, and no shading, shadows, eye glint or eye sheen on the logo
+avatar. The choice SHALL apply to every avatar the person sees, whether or not the bot has a picked
+shape, and SHALL NOT change a body, colour, state, prop or motion.
 
-#### Scenario: Turning an effect off on web
+#### Scenario: Choosing flat on web
 
-- **WHEN** a person turns Glint off in account settings
-- **THEN** avatars in the sidebar, chat, inbox and bot panel draw without glint and still do after
-  a reload
+- **WHEN** a person chooses Flat in account settings
+- **THEN** avatars in the sidebar, chat, inbox and bot panel draw without effects, including bots
+  with a picked shape, and still do after a reload
 
-#### Scenario: Turning an effect off on mobile
+#### Scenario: Choosing flat on mobile
 
-- **WHEN** a person turns Shadow off on Settings, General
-- **THEN** avatars draw without shadow and shading, and the setting syncs to web
+- **WHEN** a person chooses Flat on Settings, General
+- **THEN** avatars draw without effects and the choice syncs to web
 
-#### Scenario: All effects off
+#### Scenario: Choosing glint again
 
-- **WHEN** all three switches are off
-- **THEN** avatars draw the body and eyes with no shading, glint or flare, and keep their
-  states, props and motion
+- **WHEN** a person who chose Flat chooses Glint
+- **THEN** avatars draw with their effects as before
 
 ### Requirement: Existing avatar choices survive
 
-The previous Original or Nurlings choice and every pinned bot SHALL keep rendering as stored. An
-account with no saved effects SHALL have all effects on. A previous-release client or server SHALL
-ignore the effects without error.
+An account with no saved choice SHALL be on Glint. Stored account and per-bot icon sets and pins
+SHALL keep rendering as they do, and settings SHALL NOT offer the `rakazo` set. A previous-release
+client or server SHALL ignore the choice without error.
 
 #### Scenario: Account from before the change
 
 - **WHEN** an account saved before this change is shown
-- **THEN** its avatars draw exactly as before and all switches are on
+- **THEN** its avatars draw exactly as before and Glint is selected
 
-#### Scenario: Unknown effect value
+#### Scenario: Unknown saved value
 
-- **WHEN** the saved effects contain an id this release does not know
-- **THEN** it is ignored and the known effects apply
+- **WHEN** the saved value is one this release does not know
+- **THEN** it is treated as Glint
