@@ -1,54 +1,42 @@
 ## ADDED Requirements
 
-### Requirement: A bot's avatar is glint or flat
+### Requirement: Avatar effects are switches
 
-Every bot SHALL have an avatar finish, glint or flat. Glint draws the eye catchlights and the gloss
-arc and is the default. Flat draws the body and eyes only. The finish SHALL apply to every organic
-body in every colour and SHALL NOT change the body, colour, state, props or motion. The picker
-SHALL offer the two finishes as preview tiles with accessible names and no visible text.
+The account settings on web, desktop and mobile SHALL offer three switches, Shadow, Glint and Eye
+flare, in place of the Original and Nurlings choice. All three on SHALL be the default and SHALL
+draw avatars as they were drawn before this change. Each switch SHALL apply to every avatar the
+person sees, and turning all three off SHALL draw the flat look. Mobile SHALL use native switches
+and web SHALL use the shared switch component.
 
-#### Scenario: Picking flat on web
+#### Scenario: Turning an effect off on web
 
-- **WHEN** a person opens the Avatar Studio, chooses the flat tile and closes it
-- **THEN** the bot's avatar draws no catchlights or gloss everywhere it appears, and still does
-  after a reload
+- **WHEN** a person turns Glint off in account settings
+- **THEN** avatars in the sidebar, chat, inbox and bot panel draw without glint and still do after
+  a reload
 
-#### Scenario: Picking a finish when creating a bot
+#### Scenario: Turning an effect off on mobile
 
-- **WHEN** a person chooses flat in the create-bot dialog
-- **THEN** the preview is flat and the created bot is flat
+- **WHEN** a person turns Shadow off on Settings, General
+- **THEN** avatars draw without shadow and shading, and the setting syncs to web
 
-#### Scenario: Picking flat on mobile
+#### Scenario: All effects off
 
-- **WHEN** a person chooses the flat tile in the mobile bot look picker
-- **THEN** the bot's avatar draws without catchlights or gloss
+- **WHEN** all three switches are off
+- **THEN** avatars draw the body and eyes with no shading, glint or flare, and keep their
+  states, props and motion
 
-#### Scenario: Changing shape or colour keeps the finish
+### Requirement: Existing avatar choices survive
 
-- **WHEN** a flat bot gets a different shape or colour
-- **THEN** it stays flat
+The previous Original or Nurlings choice and every pinned bot SHALL keep rendering as stored. An
+account with no saved effects SHALL have all effects on. A previous-release client or server SHALL
+ignore the effects without error.
 
-#### Scenario: Accessible names
+#### Scenario: Account from before the change
 
-- **WHEN** a screen reader reaches the two tiles
-- **THEN** they are named Glint and Flat and the chosen one is announced as pressed
+- **WHEN** an account saved before this change is shown
+- **THEN** its avatars draw exactly as before and all switches are on
 
-### Requirement: Existing bots stay glint
+#### Scenario: Unknown effect value
 
-A bot with no stored finish SHALL draw glint, so no existing avatar changes. Glint and flat SHALL
-NOT be icon sets, and the set tabs SHALL stay hidden while only one set is selectable.
-
-#### Scenario: Bot from before the change
-
-- **WHEN** a bot created before the finish existed is shown
-- **THEN** it draws exactly as it did before
-
-#### Scenario: Previous release reads a flat bot
-
-- **WHEN** a client or server from the previous release reads a flat bot
-- **THEN** it ignores the finish and draws glint without error
-
-#### Scenario: Set tabs
-
-- **WHEN** a person opens a picker
-- **THEN** no icon-set tabs appear and the 14 bodies are listed as before
+- **WHEN** the saved effects contain an id this release does not know
+- **THEN** it is ignored and the known effects apply

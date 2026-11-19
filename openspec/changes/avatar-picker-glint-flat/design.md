@@ -1,32 +1,34 @@
 # Design
 
-## Where the finish is stored
+## Storage: a new account column
 
-**Decision:** a new `avatarFinish` column on bots (`TEXT NOT NULL DEFAULT 'glint'`), not a
-suffix on the colour string.
+`users.botAvatarEffects TEXT[] NOT NULL DEFAULT '{shadow,glint,flare}'`. The list is the effects
+that are on, so a new effect later needs no migration and unknown ids are ignored. Options
+rejected: packing effects into `botAvatarSet` (older clients and the restyle logic read it as a set
+name), a suffix on a bot's colour string (the previous API validator is anchored and rejects it),
+and `labs` (feature flags, wrong meaning). The API returns it on `me` and takes it on
+`preferences/update`; an old client never sends it and ignores it.
 
-Options considered:
+## Decision for the maintainer: Original users and the switches
 
-1. **Suffix on `bots.color`** (for example `#hex::shape_3::flat`). No schema change, but the
-   value check is anchored (`^#hex::shape_\d+$`), so the previous release's API rejects it during
-   the deploy overlap, and older mobile builds parse `3::flat` as shape 0 or the whole value as
-   unknown. Rejected.
-2. **A new shape-index range** for flat bodies. Older builds read the index modulo 22 and would
-   draw a different body. Rejected.
-3. **Column.** Old code ignores it and draws glint, which is a safe degrade. Adding a column with a
-   default is allowed in a same-release migration. Same shape as `avatarSet`. Chosen.
+Today Original and Nurlings are different art, not different effect levels, so "map Original onto
+switches" cannot be exact. Options:
 
-The finish is independent of the body and colour, so changing the shape or colour keeps it, and
-Default and Reset in the picker restore the body only. "Reset" on the web studio also resets the
-finish to glint.
+1. **Keep the set, hide the choice (recommended).** Stored sets keep rendering. Glint applies to
+   both looks (catchlight and gloss on Original, eye glint on Nurlings). Shadow and Eye flare apply
+   to the Nurlings look, so they show only when the account is on it. Original users keep their
+   look and can turn glint off, but have no way back to Nurlings from this screen.
+2. **Retire Original.** Everyone moves to the Nurlings look with all effects on, and Original users
+   turn effects off to get close to their plain look. This changes their avatars on upgrade and
+   the organic bodies stay only for bots pinned to them.
+3. **Keep a set row** beside the three switches. Nothing is lost, but it keeps the control the
+   maintainer asked to replace.
 
-## Where it draws
+I recommend 1. Say which you want before implementation.
 
-One boolean decision at the renderer: web sets `data-glint` from the finish, and the existing
-`data-glint="false"` rule is extended to hide the catchlights too; mobile skips the catchlight
-circles and the gloss path. States, props, pips and motion are unchanged. Chief's ink tone and the
-light-body tone only matter for glint.
+## Rendering
 
-## Non-goals
-
-No new bodies, no new sets, no tabs, and no change to the 14 shapes or the hidden `rakazo` set.
+Each avatar reads the account's effects through one core helper. Web sets data attributes the
+stylesheet uses to hide layers; mobile skips the matching SVG nodes. States, motion, props and
+pips are unchanged. Bots from other accounts in shared spaces draw with the viewer's effects, since
+the setting is about what you see.
