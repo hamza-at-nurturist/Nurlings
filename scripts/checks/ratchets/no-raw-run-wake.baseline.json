@@ -1,4 +1,5 @@
 {
   "packages/adapters/src/runs/assembly/run-routines.ts": 1,
-  "packages/adapters/src/runs/wakeups/job-reconciler.ts": 1
+  "packages/adapters/src/runs/wakeups/job-reconciler.ts": 1,
+  "packages/adapters/src/tasks/ticket-mentions.ts": 1
 }

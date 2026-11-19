@@ -11,6 +11,7 @@
   "apps/api/src/integrations/plugin-submissions.ts": 1,
   "apps/api/src/messaging/messaging-inbound.ts": 1,
   "apps/api/src/messaging/messaging-runtime.ts": 1,
+  "apps/api/src/routes/boards.ts": 1,
   "apps/api/src/routes/computer.ts": 2,
   "apps/api/src/routes/connections.ts": 1,
   "apps/api/src/routes/shared.ts": 4,
