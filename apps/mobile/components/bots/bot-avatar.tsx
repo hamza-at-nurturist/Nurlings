@@ -65,6 +65,7 @@ import { mobileBotAvatarPresentation } from "../../lib/bots/bot-avatar";
 import { mobileLogoAvatarActivity } from "../../lib/bots/logo-avatar-activity";
 import { useMobileTokens } from "../../lib/native/native";
 import { dullBody, lidCap, organicAvatarView, TOOL_GAZE } from "../../lib/organic-avatar-view";
+import { useAvatarFinish } from "../../lib/preferences/avatar-finish";
 import { AvatarPip } from "../avatar-pip";
 import {
   OrbitDot,
@@ -502,7 +503,8 @@ function PillEyes({
   life: AvatarLife;
   /** The width of the box the eyes are drawn in. */
   units: number;
-  catchlight: string;
+  /** The eye shine's colour; none draws no shine. */
+  catchlight: string | undefined;
 }) {
   const eyeProps = (cx: number, cy: number) => () => {
     "worklet";
@@ -546,8 +548,12 @@ function PillEyes({
         fill={botEyeColor}
         transform={`rotate(${eyes.tiltDeg} ${eyes.right.cx} ${eyes.right.cy})`}
       />
-      <AnimatedCircle animatedProps={leftCatch} r={radius} fill={catchlight} />
-      <AnimatedCircle animatedProps={rightCatch} r={radius} fill={catchlight} />
+      {catchlight ? (
+        <>
+          <AnimatedCircle animatedProps={leftCatch} r={radius} fill={catchlight} />
+          <AnimatedCircle animatedProps={rightCatch} r={radius} fill={catchlight} />
+        </>
+      ) : null}
     </>
   );
 }
@@ -609,6 +615,8 @@ function OrganicAvatar({
 }) {
   const tokens = useMobileTokens();
   const glint = glintColors(glintTone, tokens);
+  // Flat draws the body and eyes alone: no depth shading, rim, gloss or eye catchlights.
+  const flat = useAvatarFinish() === "flat";
   // A clip and a gradient of this avatar's own, so two avatars on one screen never share them.
   const depthId = useId().replace(/[^a-zA-Z0-9]/g, "");
   return (
@@ -636,39 +644,43 @@ function OrganicAvatar({
           </LinearGradient>
         </Defs>
         <Path d={path} fill={color} />
-        <G clipPath={`url(#${depthId}clip)`}>
-          <Path d={path} fill={`url(#${depthId}shade)`} />
-          <Path
-            d={path}
-            transform={`translate(0 ${AVATAR_DEPTH.rimShift})`}
-            fill="none"
-            stroke={AVATAR_ILLUSTRATION.white}
-            strokeOpacity={AVATAR_DEPTH.rimOpacity}
-            strokeWidth={AVATAR_DEPTH.rimWidth}
-          />
-          <Path
-            d={path}
-            transform={`translate(0 ${-AVATAR_DEPTH.baseShift})`}
-            fill="none"
-            stroke={AVATAR_ILLUSTRATION.shadow}
-            strokeOpacity={AVATAR_DEPTH.baseOpacity}
-            strokeWidth={AVATAR_DEPTH.baseWidth}
-          />
-        </G>
-        <Path
-          d={gloss}
-          fill="none"
-          stroke={glint.gloss}
-          strokeWidth="4.5"
-          strokeLinecap="round"
-          opacity={glint.opacity}
-        />
+        {flat ? null : (
+          <>
+            <G clipPath={`url(#${depthId}clip)`}>
+              <Path d={path} fill={`url(#${depthId}shade)`} />
+              <Path
+                d={path}
+                transform={`translate(0 ${AVATAR_DEPTH.rimShift})`}
+                fill="none"
+                stroke={AVATAR_ILLUSTRATION.white}
+                strokeOpacity={AVATAR_DEPTH.rimOpacity}
+                strokeWidth={AVATAR_DEPTH.rimWidth}
+              />
+              <Path
+                d={path}
+                transform={`translate(0 ${-AVATAR_DEPTH.baseShift})`}
+                fill="none"
+                stroke={AVATAR_ILLUSTRATION.shadow}
+                strokeOpacity={AVATAR_DEPTH.baseOpacity}
+                strokeWidth={AVATAR_DEPTH.baseWidth}
+              />
+            </G>
+            <Path
+              d={gloss}
+              fill="none"
+              stroke={glint.gloss}
+              strokeWidth="4.5"
+              strokeLinecap="round"
+              opacity={glint.opacity}
+            />
+          </>
+        )}
         <G transform={frame ? undefined : `rotate(${(seed % 9) - 4})`}>
           <PillEyes
             eyes={frame?.eyes ?? ORGANIC_EYES}
             life={life}
             units={120}
-            catchlight={glint.catchlight}
+            catchlight={flat ? undefined : glint.catchlight}
           />
           {blush ? <Blush life={life} units={120} /> : null}
         </G>

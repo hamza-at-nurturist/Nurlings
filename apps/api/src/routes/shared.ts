@@ -15,6 +15,7 @@ import {
   canonicalPiProviderId,
   LAB_FEATURES,
   modelCreditsUsd,
+  resolveBotAvatarFinish,
   resolveBotAvatarSet,
   resolveLabs,
 } from "@rakazo/contracts";
@@ -40,6 +41,7 @@ export async function meDto(deps: RouterDeps, actor: Actor): Promise<Me> {
         timezone: true,
         locale: true,
         botAvatarSet: true,
+        botAvatarFinish: true,
         labs: true,
         signupSurvey: { select: { userId: true } },
       },
@@ -91,6 +93,7 @@ export async function meDto(deps: RouterDeps, actor: Actor): Promise<Me> {
       }),
     avatarStyle: "organic",
     botAvatarSet: resolveBotAvatarSet(user.botAvatarSet),
+    botAvatarFinish: resolveBotAvatarFinish(user.botAvatarFinish),
     timezone: user.timezone ?? null,
     locale: user.locale ?? null,
     billingEnabled: Boolean(deps.billing),

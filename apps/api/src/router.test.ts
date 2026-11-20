@@ -369,6 +369,48 @@ describe("account preferences", () => {
     );
   });
 
+  it("saves the avatar finish without restyling any bot, and reads glint when none is saved", async () => {
+    const { update, botFindMany, actor, handler } = preferencesDeps("organic");
+
+    const response = await handle(
+      handler,
+      new Request("http://127.0.0.1/rpc/preferences/update", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ json: { botAvatarFinish: "flat" } }),
+      }),
+      { prefix: "/rpc", context: { actor } },
+    );
+
+    expect(response.status).toBe(200);
+    expect(update).toHaveBeenCalledWith({
+      where: { id: "user-1" },
+      data: { botAvatarFinish: "flat" },
+    });
+    expect(botFindMany).not.toHaveBeenCalled();
+    // The stored account has no finish yet (an old row), so it reads as glint.
+    await expect(response.json()).resolves.toEqual({
+      json: expect.objectContaining({ botAvatarFinish: "glint" }),
+    });
+  });
+
+  it("rejects an avatar finish other than glint or flat", async () => {
+    const { update, actor, handler } = preferencesDeps("organic");
+
+    const response = await handle(
+      handler,
+      new Request("http://127.0.0.1/rpc/preferences/update", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ json: { botAvatarFinish: "matte" } }),
+      }),
+      { prefix: "/rpc", context: { actor } },
+    );
+
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it("rejects avatar styles outside robot|organic", async () => {
     const { update, actor, handler } = preferencesDeps("robot");
 

@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { BotSchema, BotSectionSchema } from "../bots/bot.js";
-import { BotAvatarSetSchema } from "../bots/bot-avatar.js";
+import { BotAvatarFinishSchema, BotAvatarSetSchema } from "../bots/bot-avatar.js";
 import { NavLinkSchema } from "../clients/nav-links.js";
 import { Id } from "../ids.js";
 import { LabFeatureSchema } from "../labs.js";
@@ -48,6 +48,8 @@ export const MeSchema = z.object({
   avatarStyle: AvatarStyleSchema,
   /** The icon set new and unpinned bots wear. Absent from servers that predate it. */
   botAvatarSet: BotAvatarSetSchema.optional(),
+  /** How this account draws avatars. Absent from servers that predate it: glint. */
+  botAvatarFinish: BotAvatarFinishSchema.optional(),
   /**
    * The user's IANA timezone, or null when unset (bots then see UTC only).
    * Absent from servers that predate it.

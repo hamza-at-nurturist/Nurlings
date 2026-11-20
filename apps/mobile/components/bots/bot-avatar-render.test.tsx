@@ -19,6 +19,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AvatarScreenFocus } from "../../lib/bots/avatar-life";
 import { mobileLogoAvatarActivity } from "../../lib/bots/logo-avatar-activity";
+import { setAvatarFinish } from "../../lib/preferences/avatar-finish";
 import type { BotAvatarProps } from "./bot-avatar";
 import { BotAvatar } from "./bot-avatar";
 
@@ -189,6 +190,7 @@ describe("BotAvatar", () => {
   let container: HTMLDivElement | undefined;
 
   afterEach(() => {
+    act(() => setAvatarFinish(undefined));
     act(() => root?.unmount());
     container?.remove();
     root = undefined;
@@ -329,6 +331,62 @@ describe("BotAvatar", () => {
     expect(bodies(view)).toEqual([organicBotAvatarFrame(index)?.path]);
     expect(view.querySelectorAll("ellipse")).toHaveLength(0);
     expect(view.querySelectorAll("rect")).toHaveLength(2);
+  });
+
+  describe("finish", () => {
+    const fills = (view: HTMLElement) =>
+      Array.from(view.querySelectorAll("path"), (path) => path.dataset.fill ?? "");
+    const catchlights = (view: HTMLElement) => view.querySelectorAll("circle").length;
+
+    it.each(["#3EC5A8", "#8B5CF6::shape_3", `#8B5CF6::shape_${BRAND_BLOB_SHAPE_INDEX}`])(
+      "draws %s with catchlights, depth shading and gloss on glint",
+      (color) => {
+        const view = render(color);
+        expect(catchlights(view)).toBe(2);
+        expect(fills(view).some((fill) => fill.includes("shade)"))).toBe(true);
+      },
+    );
+
+    it.each(["#3EC5A8", "#8B5CF6::shape_3", `#8B5CF6::shape_${BRAND_BLOB_SHAPE_INDEX}`])(
+      "strips the catchlights, depth shading and gloss from %s on flat",
+      (color) => {
+        const glint = render(color);
+        const glintPaths = glint.querySelectorAll("path").length;
+        const glintBodies = bodies(glint);
+        act(() => root?.unmount());
+        container?.remove();
+        act(() => setAvatarFinish("flat"));
+        const view = render(color);
+        expect(catchlights(view)).toBe(0);
+        expect(fills(view).some((fill) => fill.includes("shade)"))).toBe(false);
+        // The body and both eyes are still drawn; the shading layers and the gloss are the extra paths.
+        expect(view.querySelectorAll("rect")).toHaveLength(2);
+        expect(view.querySelectorAll("path").length).toBeLessThan(glintPaths);
+        expect(bodies(view)).toEqual(glintBodies);
+      },
+    );
+
+    it("strips the body shade, contact shadows and hand shading from the logo avatar on flat", () => {
+      const glint = render("#3EC5A8", "rakazo");
+      expect(fills(glint).some((fill) => fill.startsWith("url(#shade-"))).toBe(true);
+      expect(fills(glint).some((fill) => fill.includes("contact-"))).toBe(true);
+      act(() => root?.unmount());
+      container?.remove();
+      act(() => setAvatarFinish("flat"));
+      const view = render("#3EC5A8", "rakazo");
+      expect(fills(view).some((fill) => fill.startsWith("url(#shade-"))).toBe(false);
+      expect(fills(view).some((fill) => fill.includes("contact-"))).toBe(false);
+      expect(
+        fills(view).some(
+          (fill) =>
+            fill.includes("hand-light-") ||
+            fill.includes("left-light-") ||
+            fill.includes("right-light-"),
+        ),
+      ).toBe(false);
+      expect(bodies(view)).toContain(LOGO_BODY_PATH);
+      expect(view.querySelectorAll("ellipse")).toHaveLength(2);
+    });
   });
 
   it("draws the explicitly selected Rakazo set as paths and gradients without a raster image", () => {

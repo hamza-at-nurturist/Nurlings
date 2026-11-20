@@ -10,6 +10,7 @@ import {
 import { botEyeColor, tokens } from "@rakazo/ui-tokens";
 import type { CSSProperties } from "react";
 import { memo, useId, useMemo } from "react";
+import { useAvatarFinish } from "./avatar-finish.js";
 import { useAvatarMotionVisibility } from "./hooks/use-avatar-motion-visibility.js";
 import { useLogoAvatarLayers } from "./hooks/use-logo-avatar-layers.js";
 import { cn } from "./lib/utils.js";
@@ -36,6 +37,7 @@ export const LogoAvatar = memo(function LogoAvatar({
   motion?: boolean;
   className?: string;
 }) {
+  const flat = useAvatarFinish() === "flat";
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const parsed = useMemo(
     () => (avatarValue ? parseBotAvatarValue(avatarValue) : null),
@@ -91,11 +93,13 @@ export const LogoAvatar = memo(function LogoAvatar({
         <clipPath id={`logo-plate-${id}`}>
           <rect width="100" height="100" rx="23" />
         </clipPath>
-        <linearGradient id={`logo-eye-${id}`} x2="0.8" y2="1">
-          <stop stopColor={eyeInk} stopOpacity="0.8" />
-          <stop offset="0.35" stopColor={eyeInk} />
-          <stop offset="1" stopColor={eyeInk} />
-        </linearGradient>
+        {flat ? null : (
+          <linearGradient id={`logo-eye-${id}`} x2="0.8" y2="1">
+            <stop stopColor={eyeInk} stopOpacity="0.8" />
+            <stop offset="0.35" stopColor={eyeInk} />
+            <stop offset="1" stopColor={eyeInk} />
+          </linearGradient>
+        )}
       </defs>
       <g clipPath={`url(#logo-plate-${id})`}>
         <rect className="logo-avatar-plate" width="100" height="100" rx="23" />
@@ -124,6 +128,7 @@ export const LogoAvatar = memo(function LogoAvatar({
                   id={`${id}-${layer.key}`}
                   color={traits.color}
                   originalOrange={traits.originalOrange}
+                  flat={flat}
                 />
                 <g className="logo-avatar-gaze">
                   <g className="logo-avatar-scan">
@@ -142,15 +147,17 @@ export const LogoAvatar = memo(function LogoAvatar({
                             cy={eyes.cy}
                             rx={eyes.width / 2}
                             ry={eyes.height / 2}
-                            fill={`url(#logo-eye-${id})`}
+                            fill={flat ? eyeInk : `url(#logo-eye-${id})`}
                           />
-                          <ellipse
-                            className="logo-avatar-glint"
-                            cx={x - 1.2}
-                            cy={eyes.cy - 3.6}
-                            rx="1.4"
-                            ry="2.2"
-                          />
+                          {flat ? null : (
+                            <ellipse
+                              className="logo-avatar-glint"
+                              cx={x - 1.2}
+                              cy={eyes.cy - 3.6}
+                              rx="1.4"
+                              ry="2.2"
+                            />
+                          )}
                         </g>
                       </g>
                     ))}

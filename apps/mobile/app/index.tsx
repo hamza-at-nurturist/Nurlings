@@ -100,6 +100,7 @@ import { iosAtLeast } from "../lib/native/native-controls";
 import { forgetAppBadge, syncInboxAppBadge, unreadChatCount } from "../lib/notifications/app-badge";
 import { registerPushToken } from "../lib/notifications/push";
 import { loadActivityMode, saveActivityMode } from "../lib/preferences/activity-mode";
+import { setAvatarFinish } from "../lib/preferences/avatar-finish";
 import { usePublishSearchInbox } from "../lib/search/use-publish-search-inbox";
 import {
   organizationSwitchActions,
@@ -202,6 +203,10 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
   const [spaceBusy, setSpaceBusy] = useState(false);
   const [spaceRecoveryId, setSpaceRecoveryId] = useState<string | null>(null);
   const userId = me?.userId;
+  const botAvatarFinish = me?.botAvatarFinish;
+  useEffect(() => {
+    if (botAvatarFinish) setAvatarFinish(botAvatarFinish);
+  }, [botAvatarFinish]);
   const { collapsed, toggleCollapsed, loaded: collapsedLoaded } = useCollapsedSections(userId);
   // Collapsed sections and the view load before the inbox first renders, so neither jumps on launch.
   const ready = sessionLoaded && collapsedLoaded && activityModeLoaded;

@@ -1,6 +1,6 @@
 import { oc } from "@orpc/contract";
 import * as z from "zod";
-import { BotAvatarSetSchema } from "../bots/bot-avatar.js";
+import { BotAvatarFinishSchema, BotAvatarSetSchema } from "../bots/bot-avatar.js";
 import { Id } from "../ids.js";
 import { LabFeatureSchema } from "../labs.js";
 import { botId } from "../rpc/inputs.js";
@@ -46,6 +46,8 @@ export const accountRpc = {
             avatarStyle: AvatarStyleSchema.optional(),
             /** Restyles every bot not pinned to another set, and is what new bots get. */
             botAvatarSet: BotAvatarSetSchema.optional(),
+            /** How every avatar this account sees is drawn. */
+            botAvatarFinish: BotAvatarFinishSchema.optional(),
             timezone: TimeZoneSchema.nullable().optional(),
             /** The language the app runs in, so emails can be written in it. */
             locale: AppLocaleSchema.optional(),
@@ -56,6 +58,7 @@ export const accountRpc = {
             (input) =>
               input.avatarStyle !== undefined ||
               input.botAvatarSet !== undefined ||
+              input.botAvatarFinish !== undefined ||
               input.timezone !== undefined ||
               input.locale !== undefined ||
               input.labs !== undefined,
