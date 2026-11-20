@@ -1,4 +1,5 @@
 export { AppMarkStack } from "./app-mark-stack.js";
+export { AvatarFinishProvider, useAvatarFinish } from "./avatar-finish.js";
 export {
   BOT_COLORS,
   BOT_MASCOT_SHAPES,

@@ -1,4 +1,5 @@
 import { useLingui } from "@lingui/react/macro";
+import type { BotAvatarFinish } from "@rakazo/contracts";
 import { APP_LOCALE_LABELS } from "@rakazo/core";
 import * as Notifications from "expo-notifications";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -14,7 +15,6 @@ import {
   useStackedSettings,
 } from "../../components/settings/settings-group";
 import { currentApiBase, selectedSpaceId } from "../../lib/api/api";
-import type { MobileMe } from "../../lib/api/mobile-types";
 import { loadSessionToken } from "../../lib/api/session";
 import { errorText } from "../../lib/api/user-error";
 import {
@@ -46,6 +46,7 @@ import {
   setLiveNotificationSettings,
 } from "../../lib/notifications/live-notifications";
 import { registerPushToken } from "../../lib/notifications/push";
+import { setAvatarFinish } from "../../lib/preferences/avatar-finish";
 import {
   getCachedRemoteImagesEnabled,
   setRemoteImagesPreference,
@@ -76,9 +77,11 @@ export default function General() {
   const me = useScreenQuery(meRead).data;
   const botStyle = useSave({
     target: ACCOUNT_SETTINGS,
-    save: async (botAvatarSet: NonNullable<MobileMe["botAvatarSet"]>, send) => {
+    save: async (botAvatarFinish: BotAvatarFinish, send) => {
       // The answer is the account as saved, so the picker keeps it if the read after it fails.
-      queryClient.setQueryData(meRead.queryKey, await send("preferences/update", { botAvatarSet }));
+      const saved = await send("preferences/update", { botAvatarFinish });
+      queryClient.setQueryData(meRead.queryKey, saved);
+      setAvatarFinish(saved.botAvatarFinish);
     },
     stale: [meRead.queryKey],
     onFailed: () => Alert.alert(t`Couldn't update bot style`),
@@ -198,8 +201,8 @@ export default function General() {
     notificationQueue.current.update(next);
   }
 
-  function updateBotStyle(botAvatarSet: MobileMe["botAvatarSet"] | "") {
-    if (me && botAvatarSet) botStyle.run(botAvatarSet);
+  function updateBotStyle(botAvatarFinish: BotAvatarFinish | "") {
+    if (me && botAvatarFinish) botStyle.run(botAvatarFinish);
   }
 
   return (
@@ -231,10 +234,10 @@ export default function General() {
               disabled={botStyle.pending}
               onChange={updateBotStyle}
               options={[
-                { value: "organic", label: t`Original` },
-                { value: "rakazo", label: t`Rakazo` },
+                { value: "glint", label: t`Glint` },
+                { value: "flat", label: t`Flat` },
               ]}
-              value={(botStyle.pending ? botStyle.input : me.botAvatarSet) ?? ""}
+              value={(botStyle.pending ? botStyle.input : me.botAvatarFinish) ?? "glint"}
             />
           </View>
         ) : null}

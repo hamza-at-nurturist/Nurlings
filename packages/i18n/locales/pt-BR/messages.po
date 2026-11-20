@@ -5911,6 +5911,11 @@ msgstr "Concluído."
 msgid "Finishing MCP connection…"
 msgstr "Finalizando conexão MCP…"
 
+#: apps/mobile/app/(settings)/general.tsx
+#: apps/web/src/pages/settings/AccountSettingsOverlay.tsx
+msgid "Flat"
+msgstr "Plano"
+
 #: apps/web/src/pages/shell/keyboard-shortcuts-dialog.tsx
 msgid "Focus message"
 msgstr "Ir para a mensagem"
@@ -6053,6 +6058,11 @@ msgstr "Evento do Git"
 #: apps/web/src/components/spaces/InviteDialog.tsx
 msgid "Give a friend {weeks} weeks free"
 msgstr "Dê {weeks} semanas grátis a um amigo"
+
+#: apps/mobile/app/(settings)/general.tsx
+#: apps/web/src/pages/settings/AccountSettingsOverlay.tsx
+msgid "Glint"
+msgstr "Brilho"
 
 #: apps/web/src/pages/NotFound.tsx
 msgid "Go home"
@@ -8421,9 +8431,7 @@ msgstr "Opções da organização"
 msgid "Organization settings"
 msgstr "Configurações da organização"
 
-#: apps/mobile/app/(settings)/general.tsx
 #: apps/mobile/app/bot-settings.tsx
-#: apps/web/src/pages/settings/AccountSettingsOverlay.tsx
 #: apps/web/src/pages/shell/bots/avatar-studio-popover.tsx
 msgid "Original"
 msgstr "Original"
@@ -8942,9 +8950,7 @@ msgid "Quote selection"
 msgstr "Citar seleção"
 
 #: apps/mobile/app/(settings)/ai-data-sharing.tsx
-#: apps/mobile/app/(settings)/general.tsx
 #: apps/mobile/app/bot-settings.tsx
-#: apps/web/src/pages/settings/AccountSettingsOverlay.tsx
 #: apps/web/src/pages/shell/bots/avatar-studio-popover.tsx
 msgid "Rakazo"
 msgstr "Rakazo"

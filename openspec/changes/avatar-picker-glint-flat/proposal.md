@@ -23,8 +23,8 @@ Flat, the same avatars without the effects.
   as a segmented control on Settings, General; web as a toggle group (`bot-style-select`) in the
   account settings overlay. The web e2e `bot-style-setting.spec.ts` is skipped because it clicks
   Rakazo, which a Nurlings build hides.
-- **Organic bodies** (Original, and every shaped bot) draw eye catchlights and a gloss arc, with no
-  body shading.
+- **Organic bodies** (Original, and every shaped bot) draw eye catchlights, a gloss arc and a soft
+  depth shade with rim and base lines.
 - **The logo avatar** (`rakazo`, drawn only for bots with no shape) draws a lit body with hands:
   flank shading, hand contact shadows, a white rim light, gradient eyes (the eye sheen) and a small
   glint on each eye.
@@ -36,10 +36,14 @@ Flat, the same avatars without the effects.
   Glint is the default for everyone.
 - **Glint is the look as drawn today.** Flat turns the effects off in whichever look an avatar
   uses:
-  - Organic bodies: no catchlights and no gloss arc.
-  - Logo avatar: no shading and shadows (flank shade, hand contact shadows), no eye glint and no eye
-    sheen. The body, hands and eyes still draw, and the rim and crown lights stay since they are
-    outline, not effects.
+  - Organic bodies: no catchlights, no gloss arc and no depth shading (the soft bottom shade, rim
+    and base lines).
+  - Logo avatar: no shading and shadows (flank shade, hand shading, hand contact shadows), no eye
+    glint and no eye sheen (the web eyes become a flat fill; mobile already draws flat eyes). The
+    body, hands and eyes still draw, and the rim and crown lights stay since they are outline, not
+    effects.
+  - Notification portraits and the Android live icon are already flat silhouettes, so they need no
+    change.
   - The effects are not user-facing switches. They are what the two options turn on or off.
 - **Applies to every avatar** (bot panel, chat, inbox, sidebar, calls), shaped or not, so the
   control finally does something for every bot.

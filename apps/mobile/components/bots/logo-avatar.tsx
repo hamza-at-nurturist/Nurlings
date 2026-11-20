@@ -39,6 +39,7 @@ import Svg, {
 import { useAvatarOnScreen, usePoke } from "../../lib/bots/avatar-life";
 import { useLogoAvatarClock } from "../../lib/bots/logo-avatar-clock";
 import { useMobileTokens } from "../../lib/native/native";
+import { useAvatarFinish } from "../../lib/preferences/avatar-finish";
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 const AnimatedEllipse = Animated.createAnimatedComponent(Ellipse);
@@ -63,6 +64,7 @@ export function LogoAvatar({
 }) {
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const tokens = useMobileTokens();
+  const flat = useAvatarFinish() === "flat";
   const traits = useMemo(
     () => logoAvatarTraits(identity || color || "default", color),
     [identity, color],
@@ -304,7 +306,7 @@ export function LogoAvatar({
         <AnimatedG animatedProps={body}>
           <G transform={`translate(0 ${LOGO_AVATAR_BODY_Y})`}>
             <Path d={LOGO_BODY_PATH} fill={`url(#fill-${id})`} />
-            <Path d={LOGO_BODY_PATH} fill={`url(#shade-${id})`} />
+            {flat ? null : <Path d={LOGO_BODY_PATH} fill={`url(#shade-${id})`} />}
             <Path d={LOGO_BODY_PATH} fill={`url(#light-${id})`} />
             <G clipPath={`url(#body-${id})`}>
               <Path
@@ -317,12 +319,20 @@ export function LogoAvatar({
                 <Path d={LOGO_BODY_PATH} fill={`url(#rim-right-${id})`} />
               </G>
 
-              <Path d={LOGO_BODY_PATH} fill={`url(#left-contact-${id})`} />
-              <Path d={LOGO_BODY_PATH} fill={`url(#right-contact-${id})`} />
-              <Path d={LOGO_LEFT_HAND_PATH} fill={`url(#left-${id})`} />
-              <Path d={LOGO_RIGHT_HAND_PATH} fill={`url(#right-${id})`} />
-              <Path d={LOGO_LEFT_HAND_PATH} fill={`url(#left-light-${id})`} />
-              <Path d={LOGO_RIGHT_HAND_PATH} fill={`url(#right-light-${id})`} />
+              {flat ? null : (
+                <>
+                  <Path d={LOGO_BODY_PATH} fill={`url(#left-contact-${id})`} />
+                  <Path d={LOGO_BODY_PATH} fill={`url(#right-contact-${id})`} />
+                </>
+              )}
+              <Path d={LOGO_LEFT_HAND_PATH} fill={flat ? paint.base : `url(#left-${id})`} />
+              <Path d={LOGO_RIGHT_HAND_PATH} fill={flat ? paint.base : `url(#right-${id})`} />
+              {flat ? null : (
+                <>
+                  <Path d={LOGO_LEFT_HAND_PATH} fill={`url(#left-light-${id})`} />
+                  <Path d={LOGO_RIGHT_HAND_PATH} fill={`url(#right-light-${id})`} />
+                </>
+              )}
             </G>
           </G>
           <AnimatedEllipse animatedProps={leftEye} rx={eyes.width / 2} fill={eyeInk} />

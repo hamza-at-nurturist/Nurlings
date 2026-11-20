@@ -6,35 +6,49 @@ import {
   signup,
 } from "../helpers/helpers";
 
-// Upstream's Rakazo icon set is not offered in a Nurlings build (see SELECTABLE_BOT_AVATAR_SETS).
-test.skip(true, "The Rakazo icon set is hidden in this build");
-
-test("bot style stays available when bootstrap omits the saved preference", async ({
+test("bot style switches every avatar between Glint and Flat and keeps the choice", async ({
   page,
 }, testInfo) => {
-  await page.route("**/rpc/bootstrap", async (route) => {
-    const response = await route.fetch();
-    const body = await response.json();
-    delete body.json.me.botAvatarSet;
-    await route.fulfill({ response, json: body });
-  });
   await signup(page, `bot-style-${Date.now()}@rakazo.test`, "password12", "Tester");
   await completeOnboarding(page);
+  await page.goto("/app");
+  await page.waitForURL(/\/app\/[^/]+$/);
+
+  // Avatars start in the full look, with their eye shine and gloss.
+  const avatars = page.locator("svg.rakazo-organic-avatar");
+  await expect(avatars.first()).toBeVisible();
+  await expect(avatars.first()).toHaveAttribute("data-glint", "true");
+  await expect(page.locator('svg.rakazo-organic-avatar[data-glint="false"]')).toHaveCount(0);
+
   const settings = await openUserSettings(page);
   const picker = settings.getByTestId("bot-style-select");
-  const original = picker.getByRole("button", { name: "Original", exact: true });
-  const rakazo = picker.getByRole("button", { name: "Rakazo", exact: true });
-  await expect(original).toBeVisible();
-  await expect(original).toHaveAttribute("aria-pressed", "false");
-  await rakazo.click();
-  await expect(rakazo).toHaveAttribute("aria-pressed", "true");
-  await original.click();
-  await expect(original).toHaveAttribute("aria-pressed", "true");
-  await captureScreenshot(page, testInfo, "bot-style-original");
-  await page.unroute("**/rpc/bootstrap");
+  const glint = picker.getByRole("button", { name: "Glint", exact: true });
+  const flat = picker.getByRole("button", { name: "Flat", exact: true });
+  // The old Original and Rakazo choices are gone; Glint is the default.
+  await expect(picker.getByRole("button")).toHaveCount(2);
+  await expect(glint).toHaveAttribute("aria-pressed", "true");
+  await expect(flat).toHaveAttribute("aria-pressed", "false");
+  await captureScreenshot(page, testInfo, "bot-style-glint");
+
+  await flat.click();
+  await expect(flat).toHaveAttribute("aria-pressed", "true");
+  // Every avatar on the page loses its gloss and eye shine.
+  await expect(page.locator('svg.rakazo-organic-avatar[data-glint="true"]')).toHaveCount(0);
+  await expect(avatars.first()).toHaveAttribute("data-glint", "false");
+  await expect(page.locator("svg.rakazo-organic-avatar .rakazo-av-gloss")).toHaveCount(0);
+  await captureScreenshot(page, testInfo, "bot-style-flat");
+
+  // The choice belongs to the account, so it survives a reload.
   await page.reload();
-  await openUserSettings(page);
+  const reopened = await openUserSettings(page);
   await expect(
-    page.getByTestId("bot-style-select").getByRole("button", { name: "Original", exact: true }),
+    reopened.getByTestId("bot-style-select").getByRole("button", { name: "Flat", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
+  await expect(avatars.first()).toHaveAttribute("data-glint", "false");
+
+  await reopened
+    .getByTestId("bot-style-select")
+    .getByRole("button", { name: "Glint", exact: true })
+    .click();
+  await expect(avatars.first()).toHaveAttribute("data-glint", "true");
 });

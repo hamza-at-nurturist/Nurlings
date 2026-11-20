@@ -469,29 +469,31 @@ function botStyleButton(screen: HTMLElement, label: string) {
   return Array.from(picker.querySelectorAll("button")).find((node) => node.textContent === label)!;
 }
 
-it("saves an Original choice even when the saved style is absent", async () => {
+it("starts on Glint and saves a Flat choice even when the saved style is absent", async () => {
   const { screen } = await renderAccount(General);
-  const original = () => botStyleButton(screen, "Original");
-  expect(original().getAttribute("aria-pressed")).toBe("false");
+  const flat = () => botStyleButton(screen, "Flat");
+  expect(botStyleButton(screen, "Glint").getAttribute("aria-pressed")).toBe("true");
+  expect(flat().getAttribute("aria-pressed")).toBe("false");
+  expect(screen.textContent).not.toMatch(/Original|Rakazo/);
   const { saving, reads } = holdPreferenceSave();
   const before = reads();
-  await act(async () => original().click());
+  await act(async () => flat().click());
   expect(rpc).toHaveBeenCalledWith(
     "preferences/update",
-    { botAvatarSet: "organic" },
+    { botAvatarFinish: "flat" },
     expect.anything(),
   );
-  expect(original().getAttribute("aria-pressed")).toBe("true");
+  expect(flat().getAttribute("aria-pressed")).toBe("true");
   expect(
     screen
       .querySelector(branded('[aria-label="Bot style"][data-disabled]'))
       ?.getAttribute("data-disabled"),
   ).toBe("true");
-  account.me = { ...account.me, botAvatarSet: "organic" };
-  await act(async () => saving.resolve({}));
+  account.me = { ...account.me, botAvatarFinish: "flat" };
+  await act(async () => saving.resolve({ botAvatarFinish: "flat" }));
   await act(flush);
   expect(reads()).toBe(before + 1);
-  expect(original().getAttribute("aria-pressed")).toBe("true");
+  expect(flat().getAttribute("aria-pressed")).toBe("true");
   expect(
     screen
       .querySelector(branded('[aria-label="Bot style"][data-disabled]'))
@@ -500,19 +502,19 @@ it("saves an Original choice even when the saved style is absent", async () => {
 });
 
 it("puts the bot style back and releases it when the save fails", async () => {
-  account.me = { ...account.me, botAvatarSet: "rakazo" };
+  account.me = { ...account.me, botAvatarFinish: "flat" };
   const { screen } = await renderAccount(General);
   const { saving } = holdPreferenceSave();
-  await act(async () => botStyleButton(screen, "Original").click());
+  await act(async () => botStyleButton(screen, "Glint").click());
   // A second choice while the first is saving is not sent.
-  await act(async () => botStyleButton(screen, brand.name).click());
+  await act(async () => botStyleButton(screen, "Flat").click());
   expect(
     vi.mocked(rpc).mock.calls.filter(([method]) => method === "preferences/update"),
   ).toHaveLength(1);
   await act(async () => saving.reject(new Error("offline")));
   await act(flush);
   expect(Alert.alert).toHaveBeenCalledWith(branded("Couldn't update bot style"));
-  expect(botStyleButton(screen, brand.name).getAttribute("aria-pressed")).toBe("true");
+  expect(botStyleButton(screen, "Flat").getAttribute("aria-pressed")).toBe("true");
   expect(
     screen
       .querySelector(branded('[aria-label="Bot style"][data-disabled]'))

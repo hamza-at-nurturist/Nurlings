@@ -597,7 +597,7 @@ it("closes the name editor before refresh finishes and ignores a refresh failure
   }
 });
 
-it("keeps bot style available without a saved value and saves an explicit Original choice", async () => {
+it("keeps bot style on Glint without a saved value and saves Flat", async () => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   const onChange = vi.fn(async () => {});
   const container = document.createElement("div");
@@ -605,16 +605,19 @@ it("keeps bot style available without a saved value and saves an explicit Origin
   const root = createRoot(container);
   try {
     await act(async () => {
-      root.render(<GeneralSettingsPanels name="Tester" onBotAvatarSetChange={onChange} />);
+      root.render(<GeneralSettingsPanels name="Tester" onBotAvatarFinishChange={onChange} />);
     });
     const picker = container.querySelector('[data-testid="bot-style-select"]');
     expect(picker).not.toBeNull();
-    const original = Array.from(picker!.querySelectorAll("button")).find(
-      (button) => button.textContent === "Original",
-    )!;
-    expect(original.getAttribute("aria-pressed")).toBe("false");
-    await act(async () => original.click());
-    expect(onChange).toHaveBeenCalledWith("organic");
+    const choice = (label: string) =>
+      Array.from(picker!.querySelectorAll("button")).find(
+        (button) => button.textContent === label,
+      )!;
+    expect(choice("Glint").getAttribute("aria-pressed")).toBe("true");
+    expect(choice("Flat").getAttribute("aria-pressed")).toBe("false");
+    expect(picker!.textContent).not.toMatch(/Original|Rakazo|Nurlings/);
+    await act(async () => choice("Flat").click());
+    expect(onChange).toHaveBeenCalledWith("flat");
   } finally {
     await act(async () => root.unmount());
     container.remove();

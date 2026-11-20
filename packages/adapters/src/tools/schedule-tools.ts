@@ -408,6 +408,7 @@ export async function changeUserTimezone(
   other?: {
     locale?: string;
     botAvatarSet?: string;
+    botAvatarFinish?: string;
     labs?: string[];
     marketingEmailOptOutAt?: Date | null;
   },

@@ -1,6 +1,6 @@
 import { useLingui } from "@lingui/react/macro";
 import { useTimeout } from "@rakazo/chat-ui/hooks";
-import type { BotAvatarSet, LabFeature, SpaceMemoryConfig } from "@rakazo/contracts";
+import type { BotAvatarFinish, LabFeature, SpaceMemoryConfig } from "@rakazo/contracts";
 import {
   Button,
   Dialog,
@@ -58,8 +58,8 @@ export function SettingsOverlay({
   onNameSaved,
   timezone,
   onTimezoneChange,
-  botAvatarSet,
-  onBotAvatarSetChange,
+  botAvatarFinish,
+  onBotAvatarFinishChange,
   onAccountImported,
   onImportAgent,
   labs,
@@ -92,8 +92,8 @@ export function SettingsOverlay({
   onNameSaved?: () => Promise<void>;
   timezone: string | null;
   onTimezoneChange: (timezone: string, client: RpcClient) => Promise<void>;
-  botAvatarSet?: BotAvatarSet;
-  onBotAvatarSetChange?: (set: BotAvatarSet) => Promise<void>;
+  botAvatarFinish?: BotAvatarFinish;
+  onBotAvatarFinishChange?: (finish: BotAvatarFinish) => Promise<void>;
   onAccountImported?: () => Promise<void>;
   onImportAgent?: () => void;
   labs: readonly LabFeature[];
@@ -397,8 +397,8 @@ export function SettingsOverlay({
                         onNameSaved={onNameSaved}
                         timezone={timezone}
                         onTimezoneChange={onTimezoneChange}
-                        botAvatarSet={botAvatarSet}
-                        onBotAvatarSetChange={onBotAvatarSetChange}
+                        botAvatarFinish={botAvatarFinish}
+                        onBotAvatarFinishChange={onBotAvatarFinishChange}
                         onAccountImported={onAccountImported}
                         onImportAgent={onImportAgent}
                       />

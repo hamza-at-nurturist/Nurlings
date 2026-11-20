@@ -12,10 +12,13 @@ export const LogoAvatarBody = memo(function LogoAvatarBody({
   id,
   color,
   originalOrange,
+  flat = false,
 }: {
   id: string;
   color: string;
   originalOrange: boolean;
+  /** No body shade, hand shading or contact shadows; the rim and crown lights stay. */
+  flat?: boolean;
 }) {
   const paint = logoAvatarPaint(color, originalOrange);
   return (
@@ -185,7 +188,7 @@ export const LogoAvatarBody = memo(function LogoAvatarBody({
         ))}
       </defs>
       <path d={LOGO_BODY_PATH} fill={`url(#body-fill-${id})`} />
-      <path d={LOGO_BODY_PATH} fill={`url(#body-shade-${id})`} />
+      {flat ? null : <path d={LOGO_BODY_PATH} fill={`url(#body-shade-${id})`} />}
       <path d={LOGO_BODY_PATH} fill={`url(#body-light-${id})`} />
       <g clipPath={`url(#body-clip-${id})`}>
         <path
@@ -197,12 +200,20 @@ export const LogoAvatarBody = memo(function LogoAvatarBody({
           <path d={LOGO_BODY_PATH} fill={`url(#rim-left-${id})`} />
           <path d={LOGO_BODY_PATH} fill={`url(#rim-right-${id})`} />
         </g>
-        <path d={LOGO_BODY_PATH} fill={`url(#hand-left-shadow-${id})`} />
-        <path d={LOGO_BODY_PATH} fill={`url(#hand-right-shadow-${id})`} />
-        <path d={LOGO_LEFT_HAND_PATH} fill={`url(#hand-left-${id})`} />
-        <path d={LOGO_RIGHT_HAND_PATH} fill={`url(#hand-right-${id})`} />
-        <path d={LOGO_LEFT_HAND_PATH} fill={`url(#hand-left-light-${id})`} />
-        <path d={LOGO_RIGHT_HAND_PATH} fill={`url(#hand-right-light-${id})`} />
+        {flat ? null : (
+          <>
+            <path d={LOGO_BODY_PATH} fill={`url(#hand-left-shadow-${id})`} />
+            <path d={LOGO_BODY_PATH} fill={`url(#hand-right-shadow-${id})`} />
+          </>
+        )}
+        <path d={LOGO_LEFT_HAND_PATH} fill={flat ? paint.base : `url(#hand-left-${id})`} />
+        <path d={LOGO_RIGHT_HAND_PATH} fill={flat ? paint.base : `url(#hand-right-${id})`} />
+        {flat ? null : (
+          <>
+            <path d={LOGO_LEFT_HAND_PATH} fill={`url(#hand-left-light-${id})`} />
+            <path d={LOGO_RIGHT_HAND_PATH} fill={`url(#hand-right-light-${id})`} />
+          </>
+        )}
       </g>
     </g>
   );

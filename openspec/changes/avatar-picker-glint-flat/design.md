@@ -22,9 +22,9 @@ it does not touch bots, so unlike the set it needs no restyle step.
 One helper in `packages/core` answers "which effects does this finish draw", so web and mobile do
 not each decide. Glint draws all of them. Flat draws none:
 
-- organic: catchlights and gloss arc;
-- logo avatar: flank shade, hand contact shadows, eye glint, eye sheen (the eye's flat fill
-  replaces the gradient).
+- organic: catchlights, gloss arc and the depth shade with its rim and base lines;
+- logo avatar: flank shade, hand shading, hand contact shadows, eye glint and eye sheen (the web
+  eye's flat fill replaces the gradient; mobile eyes are already a flat fill).
 
 Web hides layers through a data attribute the stylesheets read, and mobile skips the matching SVG
 nodes. States, motion, props, pips and the body outline are unchanged.

@@ -6,7 +6,7 @@ import type {
   ThreadMessage,
   VoiceStatus,
 } from "@rakazo/contracts";
-import { DEFAULT_NEW_BOT_AVATAR_SET, hasLab } from "@rakazo/contracts";
+import { DEFAULT_NEW_BOT_AVATAR_SET, hasLab, resolveBotAvatarFinish } from "@rakazo/contracts";
 import {
   activeThreadRuns,
   answerableAskMessageIds,
@@ -24,7 +24,7 @@ import {
   workingRoutineName,
 } from "@rakazo/core";
 import type { GroupAvatarMember } from "@rakazo/ui-web";
-import { Button } from "@rakazo/ui-web";
+import { AvatarFinishProvider, Button } from "@rakazo/ui-web";
 import { useIsMobile } from "@rakazo/ui-web/hooks/use-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -1531,12 +1531,14 @@ function SpaceShell() {
 
   // Empty chrome until the first bot list lands would flash "Select a bot" before the chat.
   return (
-    <SpaceRpcProvider spaceId={shellSpaceId}>
-      {initialBotsLoaded || initialLoadFailed ? (
-        <PagesProvider value={pages}>{shell}</PagesProvider>
-      ) : (
-        <PageLoading />
-      )}
-    </SpaceRpcProvider>
+    <AvatarFinishProvider value={resolveBotAvatarFinish(bootstrapMe?.botAvatarFinish)}>
+      <SpaceRpcProvider spaceId={shellSpaceId}>
+        {initialBotsLoaded || initialLoadFailed ? (
+          <PagesProvider value={pages}>{shell}</PagesProvider>
+        ) : (
+          <PageLoading />
+        )}
+      </SpaceRpcProvider>
+    </AvatarFinishProvider>
   );
 }

@@ -2,12 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
   AgentImportCreateInput,
   BOT_AVATAR_VALUE_MAX_LENGTH,
+  BotAvatarFinishSchema,
   BotAvatarValueSchema,
   CreateBotInput,
+  DEFAULT_BOT_AVATAR_FINISH,
   DEFAULT_NEW_BOT_AVATAR_SET,
   ExportManifestSchema,
   isBotAvatarValue,
   parseBotAvatarValue,
+  resolveBotAvatarFinish,
   resolveBotAvatarSet,
   UpdateBotInput,
 } from "../index.js";
@@ -119,5 +122,22 @@ describe("per-bot avatar sets", () => {
       expect(imported.avatarSet).toBe("rakazo");
       expect(imported.color).toBe(color);
     }
+  });
+});
+
+describe("account avatar finish", () => {
+  it("is glint when missing or unknown, so older accounts keep their look", () => {
+    expect(DEFAULT_BOT_AVATAR_FINISH).toBe("glint");
+    expect(resolveBotAvatarFinish()).toBe("glint");
+    expect(resolveBotAvatarFinish(null)).toBe("glint");
+    expect(resolveBotAvatarFinish("matte")).toBe("glint");
+    expect(resolveBotAvatarFinish("glint")).toBe("glint");
+    expect(resolveBotAvatarFinish("flat")).toBe("flat");
+  });
+
+  it("accepts only glint and flat when saved", () => {
+    expect(BotAvatarFinishSchema.safeParse("flat").success).toBe(true);
+    expect(BotAvatarFinishSchema.safeParse("glint").success).toBe(true);
+    expect(BotAvatarFinishSchema.safeParse("matte").success).toBe(false);
   });
 });

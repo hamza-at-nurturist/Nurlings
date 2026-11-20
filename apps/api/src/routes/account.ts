@@ -211,6 +211,7 @@ export function accountRoutes(ctx: RouterContext) {
       update: authed.preferences.update.handler(async ({ context, input }): Promise<Me> => {
         const userId = context.actor.userId;
         const botAvatarSet = input.botAvatarSet;
+        const botAvatarFinish = input.botAvatarFinish;
         // A feature the deployment turns on is not the account's choice, so it is not saved with it.
         const deploymentLabs = deps.env?.deploymentLabs ?? [];
         const labs =
@@ -224,6 +225,7 @@ export function accountRoutes(ctx: RouterContext) {
           await changeUserTimezone(deps, userId, input.timezone, {
             ...(input.locale === undefined ? {} : { locale: input.locale }),
             ...(botAvatarSet === undefined ? {} : { botAvatarSet }),
+            ...(botAvatarFinish === undefined ? {} : { botAvatarFinish }),
             ...(labs === undefined ? {} : { labs }),
           });
         } else {
@@ -233,6 +235,7 @@ export function accountRoutes(ctx: RouterContext) {
             data: {
               ...(input.locale === undefined ? {} : { locale: input.locale }),
               ...(botAvatarSet === undefined ? {} : { botAvatarSet }),
+              ...(botAvatarFinish === undefined ? {} : { botAvatarFinish }),
               ...(labs === undefined ? {} : { labs }),
             },
           });

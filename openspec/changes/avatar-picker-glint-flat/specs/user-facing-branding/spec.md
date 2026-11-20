@@ -13,8 +13,8 @@ Glint and Flat, in place of Original and Nurlings. Glint SHALL be the default.
 ### Requirement: Flat avatars draw without effects
 
 Glint SHALL draw avatars as they were drawn before this change. Flat SHALL draw every avatar without
-its effects: no catchlights or gloss on organic bodies, and no shading, shadows, eye glint or eye
-sheen on the logo avatar. The choice SHALL apply to every avatar the person sees, with or without a
+its effects: no catchlights, gloss or depth shading on organic bodies, and no shading, shadows, eye glint or
+eye sheen on the logo avatar. The choice SHALL apply to every avatar the person sees, with or without a
 picked shape, and SHALL NOT change a body, colour, state, prop or motion.
 
 #### Scenario: Choosing flat on web

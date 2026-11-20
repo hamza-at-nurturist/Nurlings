@@ -1,5 +1,5 @@
 import { Trans, useLingui } from "@lingui/react/macro";
-import type { AccountSecurity, BotAvatarSet, SignInProvider } from "@rakazo/contracts";
+import type { AccountSecurity, BotAvatarFinish, SignInProvider } from "@rakazo/contracts";
 import {
   APP_LOCALE_LABELS,
   accountDisplay,
@@ -64,8 +64,8 @@ export type SettingsGeneralProps = {
   timezone?: string | null;
   onTimezoneChange?: (timezone: string, client: RpcClient) => Promise<void>;
   /** The icon set new and unpinned bots wear; absent from servers that predate it. */
-  botAvatarSet?: BotAvatarSet;
-  onBotAvatarSetChange?: (set: BotAvatarSet) => Promise<void>;
+  botAvatarFinish?: BotAvatarFinish;
+  onBotAvatarFinishChange?: (finish: BotAvatarFinish) => Promise<void>;
   onAccountImported?: () => Promise<void>;
   onImportAgent?: () => void;
 };
@@ -76,8 +76,8 @@ export function GeneralSettingsPanels({
   onNameSaved,
   timezone = null,
   onTimezoneChange,
-  botAvatarSet,
-  onBotAvatarSetChange,
+  botAvatarFinish,
+  onBotAvatarFinishChange,
   onAccountImported,
   onImportAgent,
 }: SettingsGeneralProps) {
@@ -293,7 +293,7 @@ export function GeneralSettingsPanels({
             />
           }
         />
-        {onBotAvatarSetChange ? (
+        {onBotAvatarFinishChange ? (
           <SettingsRow
             label={
               <span id={botStyleLabelId}>
@@ -305,11 +305,11 @@ export function GeneralSettingsPanels({
                 <ToggleGroup
                   aria-labelledby={botStyleLabelId}
                   data-testid="bot-style-select"
-                  value={botAvatarSet ? [botAvatarSet] : []}
+                  value={[botAvatarFinish ?? "glint"]}
                   onValueChange={([next]) => {
-                    if (!next || next === botAvatarSet) return;
+                    if (!next || next === (botAvatarFinish ?? "glint")) return;
                     setBotStyleError(null);
-                    onBotAvatarSetChange(next as BotAvatarSet).catch(() =>
+                    onBotAvatarFinishChange(next as BotAvatarFinish).catch(() =>
                       setBotStyleError(t`Couldn't update bot style`),
                     );
                   }}
@@ -317,16 +317,16 @@ export function GeneralSettingsPanels({
                   className="grid min-w-0 grid-cols-2 rounded-lg bg-muted p-1"
                 >
                   <ToggleGroupItem
-                    value="organic"
+                    value="glint"
                     className="text-body-sm aria-pressed:bg-background aria-pressed:shadow-sm"
                   >
-                    <Trans>Original</Trans>
+                    <Trans>Glint</Trans>
                   </ToggleGroupItem>
                   <ToggleGroupItem
-                    value="rakazo"
+                    value="flat"
                     className="text-body-sm aria-pressed:bg-background aria-pressed:shadow-sm"
                   >
-                    <Trans>Rakazo</Trans>
+                    <Trans>Flat</Trans>
                   </ToggleGroupItem>
                 </ToggleGroup>
                 {botStyleError ? (
