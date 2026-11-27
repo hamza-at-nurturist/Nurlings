@@ -5911,6 +5911,11 @@ msgstr "완료되었습니다."
 msgid "Finishing MCP connection…"
 msgstr "MCP 연결을 마무리하는 중…"
 
+#: apps/mobile/app/(settings)/general.tsx
+#: apps/web/src/pages/settings/AccountSettingsOverlay.tsx
+msgid "Flat"
+msgstr "플랫"
+
 #: apps/web/src/pages/shell/keyboard-shortcuts-dialog.tsx
 msgid "Focus message"
 msgstr "메시지 입력란으로 이동"
@@ -6053,6 +6058,11 @@ msgstr "Git 이벤트"
 #: apps/web/src/components/spaces/InviteDialog.tsx
 msgid "Give a friend {weeks} weeks free"
 msgstr "친구에게 {weeks}주 무료 선물하기"
+
+#: apps/mobile/app/(settings)/general.tsx
+#: apps/web/src/pages/settings/AccountSettingsOverlay.tsx
+msgid "Glint"
+msgstr "광택"
 
 #: apps/web/src/pages/NotFound.tsx
 msgid "Go home"
@@ -8421,9 +8431,7 @@ msgstr "조직 옵션"
 msgid "Organization settings"
 msgstr "조직 설정"
 
-#: apps/mobile/app/(settings)/general.tsx
 #: apps/mobile/app/bot-settings.tsx
-#: apps/web/src/pages/settings/AccountSettingsOverlay.tsx
 #: apps/web/src/pages/shell/bots/avatar-studio-popover.tsx
 msgid "Original"
 msgstr "원본"
@@ -8942,9 +8950,7 @@ msgid "Quote selection"
 msgstr "선택 영역 인용"
 
 #: apps/mobile/app/(settings)/ai-data-sharing.tsx
-#: apps/mobile/app/(settings)/general.tsx
 #: apps/mobile/app/bot-settings.tsx
-#: apps/web/src/pages/settings/AccountSettingsOverlay.tsx
 #: apps/web/src/pages/shell/bots/avatar-studio-popover.tsx
 msgid "Rakazo"
 msgstr "Rakazo"

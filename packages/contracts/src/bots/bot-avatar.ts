@@ -15,6 +15,18 @@ export function resolveBotAvatarSet(value?: string | null): BotAvatarSet {
   return value === "rakazo" ? "rakazo" : "organic";
 }
 
+/**
+ * How the account draws every avatar it sees: "glint" is the full look, "flat" the same avatars
+ * without shading, shadows, gloss or eye shine. Missing or unknown values are glint.
+ */
+export const BotAvatarFinishSchema = z.enum(["glint", "flat"]);
+export type BotAvatarFinish = z.infer<typeof BotAvatarFinishSchema>;
+export const DEFAULT_BOT_AVATAR_FINISH: BotAvatarFinish = "glint";
+
+export function resolveBotAvatarFinish(value?: string | null): BotAvatarFinish {
+  return value === "flat" ? "flat" : "glint";
+}
+
 export interface BotColorDef {
   id: string;
   name: string;

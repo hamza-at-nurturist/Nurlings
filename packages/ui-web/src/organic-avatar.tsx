@@ -17,6 +17,7 @@ import { tokens } from "@rakazo/ui-tokens";
 import { AVATAR_DEPTH, AVATAR_ILLUSTRATION as ink } from "@rakazo/ui-tokens/avatar-illustration";
 import type { CSSProperties } from "react";
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useAvatarFinish } from "./avatar-finish.js";
 import { registerAvatarPointer } from "./avatar-pointer.js";
 import { useAvatarMotionVisibility } from "./hooks/use-avatar-motion-visibility.js";
 import { cn } from "./lib/utils.js";
@@ -102,6 +103,8 @@ export function OrganicAvatar({
   className,
   ...source
 }: OrganicAvatarProps) {
+  // Flat draws the body and eyes alone: no depth shading, rim, gloss or eye catchlights.
+  const flat = useAvatarFinish() === "flat";
   const reducedMotion = useSyncExternalStore(
     subscribeToReducedMotion,
     reducedMotionSnapshot,
@@ -187,7 +190,7 @@ export function OrganicAvatar({
       data-swapping={swapping}
       data-jelly={jelly === 0 ? undefined : jelly % 2 ? "a" : "b"}
       onPointerDown={() => setJelly((count) => count + 1)}
-      data-glint="true"
+      data-glint={flat ? "false" : "true"}
       data-glint-tone={frame?.glint ?? (isLightAvatarColor(color) ? "light" : undefined)}
       data-paused={!visible}
       data-shape-family={seed % 10}
@@ -257,26 +260,30 @@ export function OrganicAvatar({
                 </linearGradient>
               </defs>
               <path className="rakazo-av-fill" d={body} />
-              <g clipPath={`url(#${depthId}-clip)`}>
-                <path d={body} fill={`url(#${depthId}-shade)`} />
-                <path
-                  d={body}
-                  transform={`translate(0 ${AVATAR_DEPTH.rimShift})`}
-                  fill="none"
-                  stroke={ink.white}
-                  strokeOpacity={AVATAR_DEPTH.rimOpacity}
-                  strokeWidth={AVATAR_DEPTH.rimWidth}
-                />
-                <path
-                  d={body}
-                  transform={`translate(0 ${-AVATAR_DEPTH.baseShift})`}
-                  fill="none"
-                  stroke={ink.shadow}
-                  strokeOpacity={AVATAR_DEPTH.baseOpacity}
-                  strokeWidth={AVATAR_DEPTH.baseWidth}
-                />
-              </g>
-              <path className="rakazo-av-gloss" d={gloss} />
+              {flat ? null : (
+                <>
+                  <g clipPath={`url(#${depthId}-clip)`}>
+                    <path d={body} fill={`url(#${depthId}-shade)`} />
+                    <path
+                      d={body}
+                      transform={`translate(0 ${AVATAR_DEPTH.rimShift})`}
+                      fill="none"
+                      stroke={ink.white}
+                      strokeOpacity={AVATAR_DEPTH.rimOpacity}
+                      strokeWidth={AVATAR_DEPTH.rimWidth}
+                    />
+                    <path
+                      d={body}
+                      transform={`translate(0 ${-AVATAR_DEPTH.baseShift})`}
+                      fill="none"
+                      stroke={ink.shadow}
+                      strokeOpacity={AVATAR_DEPTH.baseOpacity}
+                      strokeWidth={AVATAR_DEPTH.baseWidth}
+                    />
+                  </g>
+                  <path className="rakazo-av-gloss" d={gloss} />
+                </>
+              )}
             </g>
             <g className="rakazo-av-gaze">
               <g transform={eyeRotation}>

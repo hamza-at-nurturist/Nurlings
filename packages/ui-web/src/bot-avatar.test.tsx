@@ -1,3 +1,4 @@
+import type { BotAvatarFinish } from "@rakazo/contracts";
 import {
   ACTIVE_RUN_STATUSES,
   avatarIdentitySeed,
@@ -6,8 +7,10 @@ import {
   organicBotAvatarFrame,
   PICKABLE_ORGANIC_SHAPE_INDEXES,
 } from "@rakazo/core";
+import type { ReactNode } from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { AvatarFinishProvider } from "./avatar-finish.js";
 import {
   BOT_COLORS,
   BotAvatar,
@@ -272,5 +275,54 @@ describe("BotAvatar", () => {
     const retired = render("#8B5CF6::shape_3", "chief", "running");
     expect(retired).toContain("rakazo-organic-avatar");
     expect(retired).not.toContain("rakazo-bot-avatar-ring");
+  });
+});
+
+describe("avatar finish", () => {
+  const draw = (finish: BotAvatarFinish | undefined, node: ReactNode) =>
+    renderToString(
+      finish ? <AvatarFinishProvider value={finish}>{node}</AvatarFinishProvider> : node,
+    );
+
+  it("draws glint with no provider, exactly as with an explicit glint", () => {
+    for (const color of ["#8B5CF6", "#8B5CF6::shape_3", "#8B5CF6::shape_8"]) {
+      const bare = draw(undefined, <BotAvatar color={color} identity="atlas" />);
+      expect(bare).toContain('data-glint="true"');
+      expect(bare).toContain("rakazo-av-gloss");
+      expect(bare).toContain("rakazo-av-catch");
+      expect(draw("glint", <BotAvatar color={color} identity="atlas" />)).toBe(bare);
+    }
+  });
+
+  it("strips the gloss, catchlights and depth shading from organic bodies when flat", () => {
+    // A plain colour, a hashed family shape and the brand blob all lose the effects.
+    for (const color of ["#8B5CF6", "#8B5CF6::shape_3", "#8B5CF6::shape_8"]) {
+      const flat = draw("flat", <BotAvatar color={color} identity="atlas" />);
+      expect(flat).toContain('data-glint="false"');
+      expect(flat).not.toContain("rakazo-av-gloss");
+      expect(flat).not.toContain("-shade)");
+      // The body and the eyes are still drawn.
+      expect(flat).toContain("rakazo-av-fill");
+      expect(flat.match(/<rect/g)).toHaveLength(2);
+    }
+  });
+
+  it("strips the shading, shadows, eye sheen and glint from the logo avatar when flat", () => {
+    const logo = <BotAvatar color="#8B5CF6" identity="atlas" avatarSet="rakazo" />;
+    const glint = draw("glint", logo);
+    expect(glint).toContain("logo-avatar-glint");
+    expect(glint).toContain('fill="url(#body-shade-');
+    expect(glint).toContain('fill="url(#hand-left-shadow-');
+    expect(glint).toContain('fill="url(#logo-eye-');
+    const flat = draw("flat", logo);
+    expect(flat).not.toContain("logo-avatar-glint");
+    // Only the paths that paint with them are gone; the shared lighting definitions are not drawn.
+    expect(flat).not.toContain('fill="url(#body-shade-');
+    expect(flat).not.toContain('fill="url(#hand-left-shadow-');
+    expect(flat).not.toContain('fill="url(#hand-left-light-');
+    expect(flat).not.toContain('fill="url(#logo-eye-');
+    // The body, hands and eyes still draw.
+    expect(flat).toContain("logo-avatar-body");
+    expect(flat.match(/<ellipse/g)).toHaveLength(2);
   });
 });
