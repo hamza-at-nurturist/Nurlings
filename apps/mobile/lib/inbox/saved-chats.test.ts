@@ -330,7 +330,7 @@ it("uses translated labels for legacy offline message metadata", () => {
     ];
     writeSavedThread(scope, "bot:bot-a", snapshot);
     expect(readSavedThread(scope, "bot:bot-a")?.messages[0]?.blocks[0]).toMatchObject({
-      fromBotName: brand.bot.singular,
+      fromBotName: "Бот",
       text: "Keep __TestTok1__ literal",
     });
   } finally {
