@@ -32,6 +32,7 @@ import {
   auditLogAccess,
   auditLogScope,
   commitBotUpdate,
+  DEFAULT_AUTO_REVIEW,
   deploymentModelChangesScope,
   findAutoReviewPreference,
   findDefaultVoiceCredential,
@@ -89,7 +90,8 @@ const ROSTER_CHANGED = Symbol("roster changed");
 const ORGANIZATIONS_CHANGED = Symbol("organizations changed");
 
 const SIGNAL_FAILURE_HOLD_MS = 30_000;
-const defaultAutoReviewPreference = { enabled: true, skipApprovals: false };
+// The fork asks first: running actions without asking starts off.
+const defaultAutoReviewPreference = DEFAULT_AUTO_REVIEW;
 
 export function accountRoutes(ctx: RouterContext) {
   const { deps, os, authed } = ctx;
