@@ -1,4 +1,5 @@
-import { brand } from "@nurlings/brand";
+// @vitest-environment node
+// A branded catalog loaded by another test in the same worker would change the expected source text.
 import type { RakazoDesktopSpeechEvent } from "@rakazo/contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DesktopSpeechRecognition } from "./desktop-speech.js";
@@ -149,7 +150,7 @@ describe("Dictation on the desktop app", () => {
     await dictation.listen({ mode: "hold", transcribe: false, onFinal: () => undefined });
     desktop.emit({ session: desktop.session(), type: "error", error: "not-allowed" });
     expect(dictation.state.error).toBe(
-      `Allow ${brand.name} to use Speech Recognition and the microphone in System Settings.`,
+      "Allow Rakazo to use Speech Recognition and the microphone in System Settings.",
     );
   });
 });
