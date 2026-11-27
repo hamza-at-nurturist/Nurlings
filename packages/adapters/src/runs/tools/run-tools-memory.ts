@@ -32,7 +32,7 @@ export function historyMyChatsAllowed(
 
 /** The ref of the ticket this run is working on, such as NUR-12, or undefined outside ticket runs. */
 async function runTicketRef(ctx: RunContext): Promise<string | undefined> {
-  const { ticketId } = ctx.task;
+  const ticketId = ctx.task?.ticketId;
   if (!ticketId) return undefined;
   const ticket = await ctx.deps.prisma.ticket.findFirst({
     where: { id: ticketId, spaceId: ctx.run.spaceId },

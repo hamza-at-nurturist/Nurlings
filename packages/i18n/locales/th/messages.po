@@ -1806,7 +1806,6 @@ msgstr "API URL"
 #: apps/mobile/app/(settings)/_layout.tsx
 #: apps/mobile/app/(settings)/app-icon.tsx
 #: apps/mobile/app/(settings)/general.tsx
-#: apps/web/src/pages/settings/AppIconPicker.tsx
 msgid "App icon"
 msgstr "ไอคอนแอป"
 
@@ -4893,7 +4892,6 @@ msgid "Could not verify computer setup ({failureMessage}). Fix the connection, t
 msgstr "ตรวจสอบการตั้งค่าคอมพิวเตอร์ไม่สำเร็จ ({failureMessage}) แก้ไขการเชื่อมต่อแล้วตรวจสอบอีกครั้ง"
 
 #: apps/mobile/app/(settings)/app-icon.tsx
-#: apps/web/src/pages/settings/AppIconPicker.tsx
 msgid "Couldn't change the app icon"
 msgstr "เปลี่ยนไอคอนแอปไม่สำเร็จ"
 
@@ -8682,7 +8680,6 @@ msgstr "ไม่อยู่ในแคตตาล็อกปลั๊กอ
 
 #: apps/mobile/components/cards/McpApprovalCard.tsx
 #: apps/mobile/lib/auth/passkey.ts
-#: apps/mobile/lib/billing/self-hosted-support.ts
 #: apps/mobile/lib/composer/composer-dictation.ts
 #: apps/mobile/lib/settings/ai-consent.ts
 #: apps/mobile/lib/thread/thread-voice.ts
@@ -9569,10 +9566,6 @@ msgstr "ก่อนหน้านี้: {value}"
 msgid "Priority"
 msgstr "ลำดับความสำคัญ"
 
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Priority support for $100 / month"
-msgstr "การสนับสนุนแบบเร่งด่วน $100 / เดือน"
-
 #: apps/mobile/app/paywall.tsx
 msgid "Privacy"
 msgstr "ความเป็นส่วนตัว"
@@ -9710,10 +9703,6 @@ msgstr "Rakazo"
 #: apps/web/src/pages/onboarding/use-onboarding-model.ts
 msgid "Rakazo credits"
 msgstr "เครดิต Rakazo"
-
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Rakazo is free to self-host. If you'd like to support it, subscribers can email support@rakazo.com for help."
-msgstr "Rakazo โฮสต์เองได้ฟรี หากคุณต้องการสนับสนุน ผู้สมัครสมาชิกสามารถส่งอีเมลไปที่ support@rakazo.com เพื่อขอความช่วยเหลือได้"
 
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 msgid "rakazo-shared and IDs starting with bot- are reserved for Rakazo."
@@ -12050,15 +12039,6 @@ msgstr "วันอาทิตย์"
 #: packages/i18n/src/app-icon.ts
 msgid "Sunglasses"
 msgstr "แว่นกันแดด"
-
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Support for $25 / month"
-msgstr "การสนับสนุน $25 / เดือน"
-
-#: apps/mobile/app/(settings)/account.tsx
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Support Rakazo"
-msgstr "สนับสนุน Rakazo"
 
 #: apps/mobile/app/(settings)/model-settings.tsx
 #: apps/web/src/pages/model-settings/model-settings-panel.tsx

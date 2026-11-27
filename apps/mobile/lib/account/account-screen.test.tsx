@@ -648,12 +648,12 @@ it("offers a store update beside the version only when one is available", async 
 
 it("offers rating the app only on store builds", async () => {
   const view = await renderAccount();
-  expect(view.button("Rate Rakazo")).toBeUndefined();
+  expect(view.button(branded("Rate Rakazo"))).toBeUndefined();
   act(() => root?.unmount());
 
   storeReview.url = "https://apps.apple.com/app/rakazo/id6801531099?action=write-review";
   const rateable = await renderAccount();
-  await rateable.press("Rate Rakazo");
+  await rateable.press(branded("Rate Rakazo"));
   expect(storeReview.open).toHaveBeenCalled();
 });
 

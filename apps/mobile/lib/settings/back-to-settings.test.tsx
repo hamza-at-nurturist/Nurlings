@@ -97,8 +97,8 @@ it("leaves Settings closed when the destination was opened elsewhere", async () 
 
 it("pushes above Settings on Android", () => {
   page.platform.OS = "android";
-  openFromSettings({ push: page.push }, { pathname: "/board" }, "/account");
-  expect(page.push).toHaveBeenCalledExactlyOnceWith({ pathname: "/board" });
+  openFromSettings({ push: page.push }, { pathname: "/nurlings/board" }, "/account");
+  expect(page.push).toHaveBeenCalledExactlyOnceWith({ pathname: "/nurlings/board" });
 });
 
 it("opens Spaces once Account is mounted and clears the return marker", async () => {

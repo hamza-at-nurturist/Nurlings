@@ -1812,7 +1812,6 @@ msgstr "API URL"
 #: apps/mobile/app/(settings)/_layout.tsx
 #: apps/mobile/app/(settings)/app-icon.tsx
 #: apps/mobile/app/(settings)/general.tsx
-#: apps/web/src/pages/settings/AppIconPicker.tsx
 msgid "App icon"
 msgstr "App icon"
 
@@ -4899,7 +4898,6 @@ msgid "Could not verify computer setup ({failureMessage}). Fix the connection, t
 msgstr "Could not verify computer setup ({failureMessage}). Fix the connection, then check again."
 
 #: apps/mobile/app/(settings)/app-icon.tsx
-#: apps/web/src/pages/settings/AppIconPicker.tsx
 msgid "Couldn't change the app icon"
 msgstr "Couldn't change the app icon"
 
@@ -8688,7 +8686,6 @@ msgstr "Not in the plugin catalog"
 
 #: apps/mobile/components/cards/McpApprovalCard.tsx
 #: apps/mobile/lib/auth/passkey.ts
-#: apps/mobile/lib/billing/self-hosted-support.ts
 #: apps/mobile/lib/composer/composer-dictation.ts
 #: apps/mobile/lib/settings/ai-consent.ts
 #: apps/mobile/lib/thread/thread-voice.ts
@@ -9575,10 +9572,6 @@ msgstr "Previously: {value}"
 msgid "Priority"
 msgstr "Priority"
 
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Priority support for $100 / month"
-msgstr "Priority support for $100 / month"
-
 #: apps/mobile/app/paywall.tsx
 msgid "Privacy"
 msgstr "Privacy"
@@ -9716,10 +9709,6 @@ msgstr "Rakazo"
 #: apps/web/src/pages/onboarding/use-onboarding-model.ts
 msgid "Rakazo credits"
 msgstr "Rakazo credits"
-
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Rakazo is free to self-host. If you'd like to support it, subscribers can email support@rakazo.com for help."
-msgstr "Rakazo is free to self-host. If you'd like to support it, subscribers can email support@rakazo.com for help."
 
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 msgid "rakazo-shared and IDs starting with bot- are reserved for Rakazo."
@@ -12056,15 +12045,6 @@ msgstr "Sunday"
 #: packages/i18n/src/app-icon.ts
 msgid "Sunglasses"
 msgstr "Sunglasses"
-
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Support for $25 / month"
-msgstr "Support for $25 / month"
-
-#: apps/mobile/app/(settings)/account.tsx
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Support Rakazo"
-msgstr "Support Rakazo"
 
 #: apps/mobile/app/(settings)/model-settings.tsx
 #: apps/web/src/pages/model-settings/model-settings-panel.tsx

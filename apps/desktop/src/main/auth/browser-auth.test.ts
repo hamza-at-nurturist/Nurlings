@@ -1,5 +1,6 @@
 import { get } from "node:http";
 import { createServer, Server } from "node:net";
+import { brand } from "@nurlings/brand";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { openBrowserAuth } from "./browser-auth.js";
 
@@ -74,7 +75,7 @@ describe("system browser authentication", () => {
     await openBrowserAuth(authorization.href, options);
     const response = await fetch(`${callback}?error=access_denied&state=test-state`);
     expect(response.status).toBe(200);
-    expect(await response.text()).toBe("You can close this tab and return to Rakazo.");
+    expect(await response.text()).toBe(`You can close this tab and return to ${brand.name}.`);
     expect(options.onCallback).not.toHaveBeenCalled();
     expect(options.onClose).toHaveBeenCalledOnce();
     await expect(fetch(`${callback}?code=x&state=test-state`)).rejects.toThrow();

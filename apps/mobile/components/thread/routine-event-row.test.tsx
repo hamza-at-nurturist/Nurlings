@@ -7,6 +7,7 @@ import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { resetI18nForTests } from "../../lib/i18n/i18n";
+import { branded } from "../../lib/test-brand";
 import { WebhookKeyButton } from "./routine-event-row";
 
 const state = vi.hoisted(() => ({
@@ -123,7 +124,9 @@ it("tells another member only the creator can see the key", async () => {
   state.rpc.mockRejectedValue(Object.assign(new Error("Forbidden"), { code: "FORBIDDEN" }));
   await press();
   await vi.waitFor(() => expect(state.alert).toHaveBeenCalled());
-  expect(state.alert).toHaveBeenCalledWith("Only the bot's creator can see its webhook key.");
+  expect(state.alert).toHaveBeenCalledWith(
+    branded("Only the bot's creator can see its webhook key."),
+  );
 });
 
 it("never shows a key that arrives after the person left the chat", async () => {

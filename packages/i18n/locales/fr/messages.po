@@ -1389,7 +1389,7 @@ msgstr "Ajouter un espace de travail"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Added"
-msgstr ""
+msgstr "Ajouté"
 
 #: apps/mobile/app/(settings)/integrations.tsx
 #: apps/mobile/app/(settings)/plugin.tsx
@@ -1531,7 +1531,7 @@ msgstr "Toute la période"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Allow"
-msgstr ""
+msgstr "Autoriser"
 
 #: apps/mobile/app/(settings)/messaging.tsx
 #: apps/mobile/components/integrations/tool-permissions.tsx
@@ -1812,7 +1812,6 @@ msgstr "URL de l'API"
 #: apps/mobile/app/(settings)/_layout.tsx
 #: apps/mobile/app/(settings)/app-icon.tsx
 #: apps/mobile/app/(settings)/general.tsx
-#: apps/web/src/pages/settings/AppIconPicker.tsx
 msgid "App icon"
 msgstr "Icône de l'app"
 
@@ -2201,7 +2200,7 @@ msgstr "Période de facturation"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Block"
-msgstr ""
+msgstr "Bloquer"
 
 #: apps/mobile/components/integrations/tool-permissions.tsx
 #: apps/web/src/components/settings/ApprovalRulesSettings.tsx
@@ -2274,7 +2273,7 @@ msgstr "bot"
 #: packages/i18n/src/identity-display.ts
 #: packages/i18n/src/search.ts
 msgid "Bot"
-msgstr ""
+msgstr "Bot"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -2883,7 +2882,7 @@ msgstr "Choisir une option de participation partage les transcriptions avec cet 
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Chosen bots"
-msgstr ""
+msgstr "Bots choisis"
 
 #: apps/mobile/app/(settings)/mcp-server.tsx
 #: apps/mobile/components/vault/vault-item-editor.tsx
@@ -3394,7 +3393,7 @@ msgstr "Connectez votre propre clé API dans Modèles ou choisissez les crédits
 #. js-lingui-explicit-id
 #: packages/i18n/src/plugin-catalog.ts
 msgid "Connected"
-msgstr ""
+msgstr "Connecté"
 
 #: apps/mobile/app/(settings)/bot-template.tsx
 #: apps/mobile/app/(settings)/computers.tsx
@@ -4127,7 +4126,7 @@ msgstr "Impossible de charger les bots"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "Could not load bots. Reload to try again."
-msgstr ""
+msgstr "Impossible de charger les bots. Rechargez pour réessayer."
 
 #: apps/web/src/pages/integrations/IntegrationSetup.tsx
 msgid "Could not load bots. Reload to try again."
@@ -4899,7 +4898,6 @@ msgid "Could not verify computer setup ({failureMessage}). Fix the connection, t
 msgstr "Impossible de vérifier la configuration des ordinateurs ({failureMessage}). Rétablissez la connexion, puis vérifiez à nouveau."
 
 #: apps/mobile/app/(settings)/app-icon.tsx
-#: apps/web/src/pages/settings/AppIconPicker.tsx
 msgid "Couldn't change the app icon"
 msgstr "Impossible de modifier l'icône de l'app"
 
@@ -5179,7 +5177,7 @@ msgstr "Sombre"
 #. js-lingui-explicit-id
 #: packages/i18n/src/plugin-catalog.ts
 msgid "Data"
-msgstr ""
+msgstr "Données"
 
 #: apps/web/src/pages/settings/AccountSettingsOverlay.tsx
 msgid "Data"
@@ -6808,7 +6806,7 @@ msgstr "Image"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Image input is not configured for this model."
-msgstr ""
+msgstr "La saisie d’images n’est pas configurée pour ce modèle."
 
 #: packages/i18n/src/user-error.ts
 msgid "Image input is not configured for this model."
@@ -7775,7 +7773,7 @@ msgstr "Mentionne : {mentions}"
 #: apps/web/src/pages/shell/composer/composer.tsx
 #: packages/i18n/src/search.ts
 msgid "Message"
-msgstr ""
+msgstr "Message"
 
 #. js-lingui-explicit-id
 #: apps/web/src/lib/platform/browser-notifications.ts
@@ -8159,7 +8157,7 @@ msgstr "Nécessite une adresse e-mail"
 #. js-lingui-explicit-id
 #: packages/i18n/src/plugin-catalog.ts
 msgid "Needs an OAuth client ID"
-msgstr ""
+msgstr "Nécessite un ID client OAuth"
 
 #: apps/web/src/components/integrations/McpServerHealthLine.tsx
 #: packages/i18n/src/user-error.ts
@@ -8181,7 +8179,7 @@ msgstr "Nécessite une saisie"
 #. js-lingui-explicit-id
 #: packages/i18n/src/plugin-catalog.ts
 msgid "Needs sign-in"
-msgstr ""
+msgstr "Connexion requise"
 
 #: apps/mobile/components/cards/AppConnectCard.tsx
 #: apps/mobile/components/integrations/integration-detail.tsx
@@ -8429,7 +8427,7 @@ msgstr "Aucune authentification"
 #. js-lingui-explicit-id
 #: packages/i18n/src/vault.ts
 msgid "No bots"
-msgstr ""
+msgstr "Aucun bot"
 
 #: apps/web/src/components/integrations/agent-access.tsx
 msgid "No bots"
@@ -8688,7 +8686,6 @@ msgstr "Pas dans le catalogue de plugins"
 
 #: apps/mobile/components/cards/McpApprovalCard.tsx
 #: apps/mobile/lib/auth/passkey.ts
-#: apps/mobile/lib/billing/self-hosted-support.ts
 #: apps/mobile/lib/composer/composer-dictation.ts
 #: apps/mobile/lib/settings/ai-consent.ts
 #: apps/mobile/lib/thread/thread-voice.ts
@@ -8742,7 +8739,7 @@ msgstr "Non utilisé par Rakazo"
 #. js-lingui-explicit-id
 #: packages/i18n/src/plugin-catalog.ts
 msgid "Not working"
-msgstr ""
+msgstr "Ne fonctionne pas"
 
 #: apps/web/src/components/integrations/McpServerHealthLine.tsx
 msgid "Not working"
@@ -9575,10 +9572,6 @@ msgstr "Auparavant : {value}"
 msgid "Priority"
 msgstr "Priorité"
 
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Priority support for $100 / month"
-msgstr "Support prioritaire pour 100 $ / mois"
-
 #: apps/mobile/app/paywall.tsx
 msgid "Privacy"
 msgstr "Confidentialité"
@@ -9716,10 +9709,6 @@ msgstr "Rakazo"
 #: apps/web/src/pages/onboarding/use-onboarding-model.ts
 msgid "Rakazo credits"
 msgstr "Crédits Rakazo"
-
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Rakazo is free to self-host. If you'd like to support it, subscribers can email support@rakazo.com for help."
-msgstr "Rakazo est gratuit en auto-hébergement. Si vous souhaitez le soutenir, les abonnés peuvent écrire à support@rakazo.com pour obtenir de l’aide."
 
 #: apps/web/src/components/models/ProviderSettingsForm.tsx
 msgid "rakazo-shared and IDs starting with bot- are reserved for Rakazo."
@@ -11635,7 +11624,7 @@ msgstr "Ignorer les souvenirs sans rapport"
 #. js-lingui-explicit-id
 #: packages/i18n/src/meeting.ts
 msgid "Skipped"
-msgstr ""
+msgstr "Ignoré"
 
 #: apps/mobile/components/cards/ComputerCard.tsx
 #: apps/web/src/components/computers/ComputerCard.tsx
@@ -11710,7 +11699,7 @@ msgstr "Un problème est survenu au démarrage. Réessayez dans un instant."
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "Something went wrong. Try again."
-msgstr ""
+msgstr "Un problème est survenu. Réessayez."
 
 #: apps/mobile/app/(settings)/approval-rule-add.tsx
 #: apps/mobile/app/(settings)/approvals.tsx
@@ -12056,15 +12045,6 @@ msgstr "dimanche"
 #: packages/i18n/src/app-icon.ts
 msgid "Sunglasses"
 msgstr "Lunettes de soleil"
-
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Support for $25 / month"
-msgstr "Support pour 25 $ / mois"
-
-#: apps/mobile/app/(settings)/account.tsx
-#: apps/mobile/lib/billing/self-hosted-support.ts
-msgid "Support Rakazo"
-msgstr "Soutenir Rakazo"
 
 #: apps/mobile/app/(settings)/model-settings.tsx
 #: apps/web/src/pages/model-settings/model-settings-panel.tsx
@@ -12598,7 +12578,7 @@ msgstr "ce Mac"
 #. js-lingui-explicit-id
 #: packages/i18n/src/run-error.ts
 msgid "This model cannot read images. Choose a model that supports images."
-msgstr ""
+msgstr "Ce modèle ne peut pas lire les images. Choisissez un modèle qui les prend en charge."
 
 #: packages/i18n/src/user-error.ts
 msgid "This model cannot read images. Choose a model that supports images."

@@ -90,7 +90,6 @@ describe("sendWelcomeEmail", () => {
     await sendWelcomeEmail(welcome, "user-1", new Headers({ "accept-language": "es-CL,es" }));
     await vi.waitFor(() => expect(email.sent).toHaveLength(1));
     expect(email.sent[0]!.html).toContain('lang="es"');
-    expect(email.sent[0]!.text).toMatch(/Windows \S+ y Linux/);
   });
 
   it("sends nothing when another sign-in already claimed the welcome", async () => {

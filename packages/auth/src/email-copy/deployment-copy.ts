@@ -38,7 +38,7 @@ function logReport({ email, off, problems }: EmailCopyReport): void {
 export function emailCopyReader(
   dir: string | undefined,
   report: (report: EmailCopyReport) => void = logReport,
-  /** Wording used when no folder is configured. */
+  /** Wording used for an email the folder has no file for, or when there is no folder. */
   defaults: Partial<Record<EmailCopyId, CopyByLocale>> = {},
 ) {
   const loaded = new Map<EmailCopyId, CopyByLocale | null>();
@@ -47,7 +47,8 @@ export function emailCopyReader(
     if (cached !== undefined) return cached;
     const file = dir ? join(dir, `${id}.json`) : undefined;
     let copy: CopyByLocale | null = null;
-    if (!dir && defaults[id]) copy = defaults[id] ?? null;
+    // No folder, or no file for this email in it: the built-in wording.
+    if (defaults[id] && (!file || !existsSync(file))) copy = defaults[id] ?? null;
     else if (!file || !existsSync(file))
       report({ email: id, off: "missing", problems: [file ? `no ${file}` : "no EMAIL_COPY_DIR"] });
     else {

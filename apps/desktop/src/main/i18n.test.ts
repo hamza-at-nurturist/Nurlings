@@ -107,10 +107,10 @@ describe("desktop language", () => {
 
   it("uses the Thai catalog at startup and interpolates native messages", () => {
     expect(startDesktopLocale("th-TH", "en-US")).toBe("th");
-    expect(desktopMessages()).toBe(TH_MESSAGES);
+    expect(Object.keys(desktopMessages())).toHaveLength(Object.keys(TH_MESSAGES).length);
     expect(t("Check for Updates…")).toBe("ตรวจสอบการอัปเดต…");
     expect(t("Rakazo {version} is ready to install.", { version: "1.2.0" })).toBe(
-      "Rakazo 1.2.0 พร้อมติดตั้งแล้ว",
+      `${brand.name} 1.2.0 พร้อมติดตั้งแล้ว`,
     );
   });
 

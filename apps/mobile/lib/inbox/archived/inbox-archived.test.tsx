@@ -434,7 +434,10 @@ describe("bot profile menu actions", () => {
     mocks.rpc.mockRejectedValueOnce(new Error("offline"));
     act(() => action("Duplicate").onPress());
     await flush();
-    expect(mocks.alert).toHaveBeenCalledExactlyOnceWith("Could not duplicate bot", "failure");
+    expect(mocks.alert).toHaveBeenCalledExactlyOnceWith(
+      branded("Could not duplicate bot"),
+      "failure",
+    );
     expect(mocks.router.dismissAll).not.toHaveBeenCalled();
   });
 

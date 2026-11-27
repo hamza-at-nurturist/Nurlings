@@ -1,10 +1,7 @@
-import { brand } from "@nurlings/brand";
 import { Trans, useLingui } from "@lingui/react/macro";
+import { brand } from "@nurlings/brand";
 import type { BillingStatus, ByokInterval } from "@rakazo/contracts";
-import {
-  DEFAULT_MONTHLY_CREDIT_AMOUNT,
-  ModelCreditAmountSchema,
-} from "@rakazo/contracts";
+import { DEFAULT_MONTHLY_CREDIT_AMOUNT, ModelCreditAmountSchema } from "@rakazo/contracts";
 import { formatBillingAmount, formatMonthlyPrice } from "@rakazo/i18n/billing";
 import { bestEffort } from "@rakazo/logging/best-effort";
 import { Button, Card, CardContent, CardFooter, CardHeader } from "@rakazo/ui-web";

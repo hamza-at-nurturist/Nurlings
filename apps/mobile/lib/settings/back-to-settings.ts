@@ -5,7 +5,7 @@ import { Platform } from "react-native";
 import { openFromSettingsSheet } from "./settings-sheet";
 
 type SettingsDestination =
-  | { pathname: "/artifacts" | "/board"; params?: never }
+  | { pathname: "/artifacts" | "/nurlings/board"; params?: never }
   | { pathname: "/space-members"; params: { spaceId: string } };
 
 type SettingsPage = "/account" | "/spaces";

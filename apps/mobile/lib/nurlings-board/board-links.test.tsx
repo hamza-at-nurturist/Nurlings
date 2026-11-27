@@ -60,6 +60,10 @@ vi.mock("../appearance/appearance", () => ({
 }));
 vi.mock("../native/native", () => ({ native: {}, useThemedStyles: () => ({}) }));
 vi.mock("../appearance/material-icons", () => ({ materialIcons: {} }));
+vi.mock("../layout/split-view", () => ({
+  setInboxHidden: vi.fn(),
+  useSplitView: () => ({ foldActive: false }),
+}));
 vi.mock("./enabled", () => ({ useNurlingsBoardEnabled: () => mocks.enabled.value }));
 
 let root: Root;

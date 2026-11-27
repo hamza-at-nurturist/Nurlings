@@ -1131,7 +1131,7 @@ describe("provider connection screen", () => {
     mocks.openURL.mockClear();
     mocks.openURL.mockRejectedValueOnce(new Error("Browser unavailable"));
     await act(async () => buttonWithText("2. Get a sign-in code")!.click());
-    expect(container.textContent).toContain("paste this code when asked. Then return to Rakazo.");
+    expect(container.textContent).toContain("paste this code when asked. Then return to Nurlings.");
 
     await act(async () => buttonWithText("Copy code and open")!.click());
     expect(mocks.copyCode).toHaveBeenCalledOnce();

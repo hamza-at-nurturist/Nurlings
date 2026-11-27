@@ -89,7 +89,7 @@ export default function Account() {
       disabled={signingOut}
       leading={icon(glyph)}
       onPress={() => {
-        if (href === "/artifacts" || href === "/board") {
+        if (href === "/artifacts" || href === "/nurlings/board") {
           openFromSettings(router, { pathname: href }, "/account");
         } else if (typeof href === "string" && isSettingsLink(href)) {
           router.push(href);

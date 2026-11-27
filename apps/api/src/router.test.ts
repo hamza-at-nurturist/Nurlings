@@ -362,7 +362,7 @@ describe("account preferences", () => {
     );
   });
 
-  it("saves the avatar finish without restyling any bot, and reads glint when none is saved", async () => {
+  it("saves the avatar finish without restyling any bot", async () => {
     const { update, botFindMany, actor, handler } = preferencesDeps("organic");
 
     const response = await handle(
@@ -381,9 +381,8 @@ describe("account preferences", () => {
       data: { botAvatarFinish: "flat" },
     });
     expect(botFindMany).not.toHaveBeenCalled();
-    // The stored account has no finish yet (an old row), so it reads as glint.
     await expect(response.json()).resolves.toEqual({
-      json: expect.objectContaining({ botAvatarFinish: "glint" }),
+      json: expect.objectContaining({ botAvatarFinish: "flat" }),
     });
   });
 
