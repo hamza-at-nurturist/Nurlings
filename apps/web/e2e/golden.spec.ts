@@ -419,7 +419,8 @@ test("sign-in, spawn, and stop work in the shell", async ({ page }, testInfo) =>
     if (
       (pathname === "/rpc/notifications/subscribe" ||
         pathname === "/rpc/notifications/subscribeCalls" ||
-        pathname === "/rpc/me") &&
+        pathname === "/rpc/me" ||
+        pathname === "/rpc/agentSkills/list") &&
       request.failure()?.errorText === "net::ERR_ABORTED"
     )
       return;
