@@ -40,7 +40,7 @@ test(
           }),
         );
       }
-      const settings = await openUserSettings(page);
+      const settings = await openUserSettings(page, "computer");
       const computers = settings.getByTestId("computer-devices");
       await expect(computers.getByText(ui("Bound to bots"), { exact: true })).toHaveCount(1);
       await expect(computers.getByText("Laptop").locator("..")).toHaveText(

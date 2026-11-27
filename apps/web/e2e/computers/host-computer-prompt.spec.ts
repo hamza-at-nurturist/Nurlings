@@ -159,7 +159,7 @@ test("a failed host choice does not show on the next opening", async ({ page }, 
     await route.fulfill({ response, json: body });
   });
   await page.reload();
-  const dialog = page.getByRole("dialog", { name: "Where should bots run?" });
+  const dialog = page.getByRole("dialog", { name: ui("Where should bots run?") });
   // The listener is registered as the shell mounts, so retry the event until the dialog opens.
   const openFromMenu = () =>
     expect(async () => {
