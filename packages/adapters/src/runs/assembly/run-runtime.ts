@@ -1,8 +1,11 @@
 import { hostname } from "node:os";
 import type {
+  AgentRuntime,
   ArtifactStore,
   BackgroundJobPayloads,
   ConnectorProvider,
+  JobPublisher,
+  JobQueueOrder,
   ManagedConnectorProvider,
   MessagingSurface,
   SecretStore,
@@ -10,6 +13,7 @@ import type {
 } from "@rakazo/adapter-kit";
 import type { LabFeature } from "@rakazo/contracts";
 import {
+  attachmentCountFromEnv,
   availableChatApps,
   messagingProviderName,
   phoneCallSettings,
@@ -20,6 +24,7 @@ import type { PrismaClient, ThreadEvents } from "@rakazo/db";
 import {
   chatHistoryRetentionDays,
   createChatHistoryPruner,
+  createRetentionPruner,
   createSecurityEventPruner,
   securityEventRetentionDays,
 } from "@rakazo/db";
@@ -45,7 +50,9 @@ import {
   resolveDeploymentModel,
 } from "../../models/deployment-model.js";
 import { ExpoPushProvider } from "../../notifications/expo-push.js";
+import { createPageRevisions } from "../../pages/page-revision.js";
 import { reconcilePurchases } from "../../payments/purchase-poll.js";
+import { pruneExpiredNativeCalendarRequests } from "../../personal-calendar/native-calendar.js";
 import { T3CodeConnections } from "../../providers/cloud-agent/t3code/t3code-connections.js";
 import type { ComposioProvider } from "../../providers/integration/composio/composio-connector.js";
 import {
@@ -58,10 +65,13 @@ import {
   PipedreamConnector,
   pipedreamConfigFromEnv,
 } from "../../providers/integration/pipedream/pipedream-connector.js";
+import { deleteStrandedEndedRoutines } from "../../routines/routine-end.js";
 import { createStrategicInitiativeReconciler } from "../../routines/strategic-initiative.js";
 import { localModelsApiKey } from "../../runtime/pi/models/pi-local-provider-id.js";
 import type { SecretCleanupDeps } from "../../secrets/secret-cleanup.js";
+import { webOriginFromEnv } from "../../server/server-foundation.js";
 import { workspaceSaveLimits } from "../../storage/workspace-save-policy.js";
+import { taskCallbackRootKey } from "../../tasks/task-callbacks.js";
 import { enqueueDueTicketDates } from "../../tasks/ticket-dates.js";
 import { createWebProvider } from "../../web/web-provider-factory.js";
 import { auditLogConfig, createAuditLogReconciler } from "../../webhooks/audit-forwarding.js";
@@ -95,10 +105,13 @@ export interface RunRuntimeEnv extends PipedreamEnvironmentValues {
   phoneCallRingSeconds: number;
   phoneCallCooldownMinutes: number;
   maxUploadSizeBytes: number;
+  maxAttachmentsPerMessage: number;
   /** What one computer save may copy; read once from `WORKSPACE_SAVE_MAX_GB`. */
   workspaceSaveLimits: WorkspaceExportLimits;
   /** Only names a bot's address to it; the API receives the mail. */
   inboundEmailDomain: string | undefined;
+  /** The web app's origin; an ask sent to a chat app links to the bot's chat there. */
+  webOrigin: string;
 }
 
 /** The worker's reading of the run runtime settings, values and defaults as the worker has them. */
@@ -130,8 +143,10 @@ export function runRuntimeEnvFromProcess(source: NodeJS.ProcessEnv): RunRuntimeE
     deploymentLabs: deploymentLabsFromEnv(source),
     ...phoneCallSettings(source),
     maxUploadSizeBytes: uploadSizeFromEnv(source),
+    maxAttachmentsPerMessage: attachmentCountFromEnv(source),
     workspaceSaveLimits: workspaceSaveLimits(source),
     inboundEmailDomain: source.INBOUND_EMAIL_DOMAIN?.trim().toLowerCase() || undefined,
+    webOrigin: webOriginFromEnv(source),
   };
 }
 
@@ -229,6 +244,7 @@ type SetByRunRuntime =
   | "phoneCallCooldownMinutes"
   | "inboundEmailDomain"
   | "maxUploadSizeBytes"
+  | "maxAttachmentsPerMessage"
   | "messaging"
   | "messagingDelivery";
 
@@ -237,7 +253,10 @@ export function createRunRuntime(
   env: RunRuntimeEnv,
   connectors: ConnectorRuntime,
   deps: Omit<ExecutorDeps, SetByRunRuntime> & {
+    /** Also keeps one sender's direct-message settles in order. */
+    jobs: JobPublisher & JobQueueOrder;
     artifacts: ArtifactStore;
+    pageRevisionRuntime: AgentRuntime;
     messaging?: MessagingSurface;
     /** Whether a connected workspace still has its bot installed. */
     isMessagingInstallationActive?: (installationId: string) => Promise<boolean>;
@@ -253,6 +272,7 @@ export function createRunRuntime(
     lifecycleEmail,
     meetingWork,
     meetingCalendarSync,
+    pageRevisionRuntime,
     ...executorDeps
   } = deps;
   const runtime = cliModelRuntime(env, deps.runtime, deps);
@@ -263,6 +283,7 @@ export function createRunRuntime(
         events: deps.events,
         jobs: deps.jobs,
         artifacts: deps.artifacts,
+        webOrigin: env.webOrigin,
       })
     : undefined;
   const teamChat = messaging
@@ -292,6 +313,7 @@ export function createRunRuntime(
     ...executorDeps,
     runtime,
     maxUploadSizeBytes: env.maxUploadSizeBytes,
+    maxAttachmentsPerMessage: env.maxAttachmentsPerMessage,
     connector: connectors.stack.connector,
     connectors: connectors.stack.connector,
     userCloudAgents: connectors.userCloudAgents,
@@ -325,7 +347,15 @@ export function createRunRuntime(
     messagingDelivery,
     web: executorDeps.web ?? createWebProvider(),
   });
+  const pageRevisions = createPageRevisions({
+    prisma: deps.prisma,
+    events: deps.events,
+    jobs: deps.jobs,
+    runtime: cliModelRuntime(env, pageRevisionRuntime, deps),
+    resolveModel: executor.resolveModel,
+  });
   const jobHandlers = createBackgroundJobHandlers({
+    pageRevisionWork: pageRevisions.work,
     executor,
     prisma: deps.prisma,
     sandbox: deps.sandbox,
@@ -353,8 +383,9 @@ export function createRunRuntime(
     lifecycleEmail,
     meetingWork,
     meetingCalendarSync,
+    taskCallbackRootKey: taskCallbackRootKey(env.encryptionKey),
   });
-  return { runtime, executor, jobHandlers, messagingDelivery, teamChat };
+  return { runtime, executor, jobHandlers, messagingDelivery, teamChat, pageRevisions };
 }
 
 type JobReconcilerDeps = Parameters<typeof createJobReconciler>[0];
@@ -419,7 +450,13 @@ export function createRunReconciler(
     reconcileAuditLog: createAuditLogReconciler(prisma, auditLogConfig()),
     reconcileChatHistoryRetention:
       chatHistoryDays === null ? undefined : createChatHistoryPruner(prisma, chatHistoryDays),
+    reconcileNativeCalendarRetention: createRetentionPruner(
+      "native_calendar_requests",
+      (now) => pruneExpiredNativeCalendarRequests(prisma, now),
+      { intervalMs: 60_000 },
+    ),
     reconcileIdleComputers: createIdleComputerSweeper({ prisma, jobs }),
     reconcileTicketDates: () => enqueueDueTicketDates({ prisma, jobs }),
+    reconcileEndedRoutines: () => deleteStrandedEndedRoutines({ prisma, events: deps.events }),
   });
 }

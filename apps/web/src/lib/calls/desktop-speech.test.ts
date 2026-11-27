@@ -1,3 +1,5 @@
+// @vitest-environment node
+// A branded catalog loaded by another test in the same worker would change the expected source text.
 import type { RakazoDesktopSpeechEvent } from "@rakazo/contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DesktopSpeechRecognition } from "./desktop-speech.js";

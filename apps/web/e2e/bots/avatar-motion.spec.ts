@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { avatarIdentitySeed, avatarPhaseMs } from "@rakazo/core";
 import { captureScreenshot } from "../helpers/helpers";
 
 test("photo working avatars show a visible ring while idle avatars stay plain", async ({

@@ -14,6 +14,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../../lib/query/rpc", () => {
   const rpc = {
+    // No earlier versions of the computer's files to restore.
+    computer: { homeVersions: vi.fn(async () => []) },
     bots: {
       get: vi.fn(),
       update: vi.fn(),
@@ -285,7 +287,7 @@ beforeEach(() => {
   onSave.mockReset().mockResolvedValue(undefined);
   onExport.mockReset().mockResolvedValue(undefined);
   vi.mocked(rpc.bots.update).mockReset();
-  vi.mocked(rpc.bots.get).mockReset();
+  vi.mocked(rpc.bots.get).mockReset().mockResolvedValue(bot());
   container = document.createElement("div");
   document.body.append(container);
   root = createRoot(container);
@@ -347,6 +349,31 @@ describe("BotSettings model choices", () => {
     expect(document.querySelector('[data-testid="bot-email"]')?.textContent).toContain(
       "scout@bots.test",
     );
+  });
+
+  it.each([
+    ["oauth", "Example Abonnement"],
+    ["api_key", "Example"],
+  ])("names the serving %s connection in bot settings", async (authKind, name) => {
+    i18n.load("de", { "Example subscription": "Example Abonnement" });
+    i18n.activate("de");
+    vi.mocked(rpc.models.credentials).mockResolvedValueOnce([
+      { id: "connection", provider: "example", label: "Example", authKind, hasKey: true },
+    ] as never);
+    vi.mocked(rpc.models.list).mockResolvedValueOnce([
+      {
+        provider: "example",
+        providerName: "Example",
+        subscriptionName: "Example subscription",
+        auth: "both",
+        id: "model",
+        label: "Model",
+        billing: "",
+      },
+    ] as never);
+    await render();
+    const option = (await openModelPicker()).find((row) => row.dataset.value === "example::model");
+    expect(option?.getAttribute("aria-label")).toBe(`Model (${name})`);
   });
 
   it("submits DeepSeek API ids and does not offer a display label", async () => {
@@ -427,7 +454,6 @@ describe("BotSettings thinking options", () => {
     const checked = (await openModelPicker()).find((option) => option.dataset.checked === "true");
     expect(checked?.dataset.value).toBe("openai-compatible::beta");
     expect((await openOptions(thinkingField())).map((option) => option.textContent)).toEqual([
-      "Default (Medium)",
       "Minimal",
       "Low",
       "Medium",
@@ -665,12 +691,6 @@ describe("instruction settings refresh", () => {
     vi.mocked(rpc.bots.update).mockRejectedValueOnce(
       new ORPCError("CONFLICT", { message: "Instructions changed" }),
     );
-    vi.mocked(rpc.bots.get)
-      .mockRejectedValueOnce(new Error("offline"))
-      .mockResolvedValueOnce({
-        ...initial,
-        instructions: "Newer saved instructions",
-      });
     await act(async () => {
       root.render(instructions(initial));
     });
@@ -687,6 +707,12 @@ describe("instruction settings refresh", () => {
       descriptionField().dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
     });
     expect(rpc.bots.update).toHaveBeenCalledTimes(1);
+    vi.mocked(rpc.bots.get)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce({
+        ...initial,
+        instructions: "Newer saved instructions",
+      });
     await act(async () => {
       reload.click();
     });

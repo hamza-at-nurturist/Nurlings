@@ -11,6 +11,7 @@ import {
   carriedBotModelPin,
   carriedRoutineModelPin,
   normalizeWorkspacePath,
+  ObjectStorageUnavailableError,
   resolveBotWorkspacePath,
 } from "@rakazo/adapters";
 import type {
@@ -42,6 +43,7 @@ import {
   SpaceLimitError,
 } from "@rakazo/db";
 import { bestEffort, getLogger } from "@rakazo/logging";
+import { markExpectedFailure } from "@rakazo/logging/hono";
 import { pageViewerCode } from "@rakazo/page-kit/compile";
 import { checkPageSource } from "@rakazo/page-kit/validate";
 import type { Hono } from "hono";
@@ -51,7 +53,6 @@ import { deleteSpaceWithContent } from "../spaces/space-deletion.js";
 import { inflateEntry, parseZipArchive, readExact, ZipFormatError } from "./account-zip-reader.js";
 
 export const ACCOUNT_IMPORT_LIMITS = {
-  /** The uploaded zip as sent. */
   bodyBytes: 4 * 1024 ** 3,
   /** Everything the zip inflates to, so a bomb stops early. */
   unpackedBytes: 16 * 1024 ** 3,
@@ -69,7 +70,6 @@ const MESSAGE_BATCH_SIZE = 500;
 /** Prefix of the private spool files, exposed so tests can assert cleanup. */
 export const SPOOL_PREFIX = "rakazo-account-import-archive-";
 
-/** Slice size for streaming a spilled entry back to its sink. */
 const READ_SPILL_BYTES = 16 * 1024;
 
 export class AccountImportError extends Error {
@@ -791,6 +791,7 @@ class AccountImporter implements ArchiveSink {
             messageProvider: record.messageProvider,
             ...carriedRoutineModelPin(record),
             watch: jsonValue(record.watch),
+            endsAt: record.endsAt ? new Date(record.endsAt) : null,
             createdAt: new Date(record.createdAt),
           },
         });
@@ -1191,6 +1192,11 @@ export function mountAccountImportRoute(
     } catch (error) {
       if (error instanceof AccountImportError)
         return c.json({ error: error.message }, error.status);
+      // The store already logged its outage as a warning; the person can try again.
+      if (error instanceof ObjectStorageUnavailableError) {
+        markExpectedFailure();
+        return c.json({ error: error.message }, 503);
+      }
       getLogger().error("account import failed", error);
       return c.json({ error: "The import failed." }, 500);
     }

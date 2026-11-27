@@ -10,6 +10,7 @@ import type {
   UnreferencedMachine,
   UnreferencedMachineRecords,
 } from "@rakazo/adapter-kit";
+import { SandboxUnavailableError } from "@rakazo/adapter-kit";
 import { COMPUTER_CACHE_ENV } from "@rakazo/core/node/desktop-runtime";
 import { getLogger } from "@rakazo/logging";
 import { Agent, request as httpRequest } from "undici";
@@ -385,9 +386,11 @@ export class IncusSandboxProvider extends ImageComputerSandbox {
         return;
       }
       if (Date.now() >= deadline) {
-        throw new Error(
-          `Incus instance ${name} did not become ready within ${this.readyTimeoutMs} ms`,
-        );
+        throw new SandboxUnavailableError({
+          cause: new Error(
+            `Incus instance ${name} did not become ready within ${this.readyTimeoutMs} ms`,
+          ),
+        });
       }
       await sleep(500, undefined, { signal });
     }

@@ -1,6 +1,7 @@
 import { brand } from "@nurlings/brand";
 import { EmailEmulator } from "@rakazo/adapters";
-import { describe, expect, it, vi } from "vitest";
+import { writeEmailCopyDir } from "@rakazo/auth/test-email-copy";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { marketingEmailRoutes, sendWelcomeEmail, unsubscribeUrl } from "./marketing-email.js";
 
 const secret = "test-auth-secret-at-least-32-characters";
@@ -47,6 +48,11 @@ describe("marketing email unsubscribe", () => {
 });
 
 describe("sendWelcomeEmail", () => {
+  const copyDir = writeEmailCopyDir({ welcome: true });
+  beforeEach(() => {
+    vi.stubEnv("EMAIL_COPY_DIR", copyDir);
+  });
+
   function deps(claimed: boolean) {
     const email = new EmailEmulator();
     const createMany = vi.fn(async () => ({ count: claimed ? 1 : 0 }));
@@ -69,7 +75,7 @@ describe("sendWelcomeEmail", () => {
     const url = unsubscribeUrl(origin, secret, "user-1");
     expect(email.sent[0]).toMatchObject({
       to: "new@example.test",
-      subject: `Welcome to ${brand.name}`,
+      subject: "Test subject",
       headers: {
         "List-Unsubscribe": `<${url}>`,
         "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
@@ -83,9 +89,7 @@ describe("sendWelcomeEmail", () => {
     const { email, deps: welcome } = deps(true);
     await sendWelcomeEmail(welcome, "user-1", new Headers({ "accept-language": "es-CL,es" }));
     await vi.waitFor(() => expect(email.sent).toHaveLength(1));
-    expect(email.sent[0]!.subject).toBe(`Te damos la bienvenida a ${brand.name}`);
-    // No download links to the upstream's site; store links come from the brand.
-    expect(email.sent[0]!.text).not.toContain("rakazo.com");
+    expect(email.sent[0]!.html).toContain('lang="es"');
   });
 
   it("sends nothing when another sign-in already claimed the welcome", async () => {

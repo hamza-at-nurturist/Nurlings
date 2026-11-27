@@ -2,10 +2,12 @@ import type {
   AgentHomeStore,
   AgentRuntime,
   ArtifactStore,
+  BackgroundJobAttempt,
   BackgroundJobExecution,
   BackgroundJobHandlers,
   BackgroundJobPayloads,
   JobPublisher,
+  JobQueueOrder,
   MediaGenerationProvider,
   PaymentWalletProvider,
   SandboxProvider,
@@ -52,6 +54,7 @@ import {
 } from "../../memory/conversation-memory.js";
 import { retryConversationMemoryPurge } from "../../memory/conversation-memory-cleanup.js";
 import type { MemoryProviderResolver } from "../../memory/memory-provider-factory.js";
+import { settleInboundMessage } from "../../messaging/intake/settle-inbound.js";
 import type { MessagingDelivery } from "../../messaging/messaging-delivery.js";
 import type { TeamChat } from "../../messaging/team-chat/team-chat.js";
 import type { ExpoPushProvider } from "../../notifications/expo-push.js";
@@ -59,6 +62,7 @@ import { pollPurchase } from "../../payments/purchase-poll.js";
 import { compactHistory } from "../../runtime/context/history-compaction.js";
 import { expireRunSecrets } from "../../secrets/run-secrets-expiry.js";
 import { retrySecretCleanup } from "../../secrets/secret-cleanup.js";
+import { deliverTaskCallback } from "../../tasks/task-callbacks.js";
 import { runTicketDates } from "../../tasks/ticket-dates.js";
 import type { createRunExecutor } from "../executor/executor.js";
 
@@ -102,7 +106,7 @@ export function createBackgroundJobHandlers(deps: {
   sandbox: SandboxProvider;
   home: AgentHomeStore;
   artifacts: ArtifactStore;
-  jobs: JobPublisher;
+  jobs: JobPublisher & JobQueueOrder;
   events: ThreadEvents;
   workerId: string;
   runtime: AgentRuntime;
@@ -122,8 +126,11 @@ export function createBackgroundJobHandlers(deps: {
   maxUploadSizeBytes?: number;
   /** Sends a lifecycle mail; absent where account mail is not configured, and the job is dropped. */
   meetingCalendarSync?: (job: BackgroundJobPayloads["meeting.calendar-sync"]) => Promise<void>;
+  pageRevisionWork?: (requestId: string, attempt?: BackgroundJobAttempt) => Promise<void>;
   meetingWork?: (job: BackgroundJobPayloads["meeting.work"]) => Promise<unknown>;
   lifecycleEmail?: (job: BackgroundJobPayloads["email.lifecycle"]) => Promise<void>;
+  /** Derives each task callback's signing secret; see `taskCallbackRootKey`. Absent sends none. */
+  taskCallbackRootKey?: string;
 }): BackgroundJobHandlers {
   const delivery = deps.messagingDelivery;
   const cleanupDeps = { prisma: deps.prisma, secrets: deps.secretStore };
@@ -135,6 +142,8 @@ export function createBackgroundJobHandlers(deps: {
     deps.prisma.computer.findUnique({ where: { id: computerId }, select: OWNER });
   const thread = ({ threadId }: { threadId: string }) =>
     deps.prisma.thread.findUnique({ where: { id: threadId }, select: OWNER });
+  const taskCallback = ({ taskId }: { taskId: string }) =>
+    deps.prisma.taskCallback.findUnique({ where: { taskId }, select: OWNER });
   const skill = ({ skillId }: { skillId: string }) =>
     deps.prisma.taughtSkill.findUnique({ where: { id: skillId }, select: OWNER });
   const cloudAgent = ({ agentId }: { agentId: string }) =>
@@ -149,6 +158,8 @@ export function createBackgroundJobHandlers(deps: {
   };
   const purchase = ({ purchaseId }: { purchaseId: string }) =>
     deps.prisma.purchase.findUnique({ where: { id: purchaseId }, select: OWNER });
+  const messagingIdentity = ({ identityId }: { identityId: string }) =>
+    deps.prisma.messagingIdentity.findUnique({ where: { id: identityId }, select: OWNER });
   const mediaJob = async ({ jobId }: { jobId: string }) =>
     (
       await deps.prisma.externalEffect.findUnique({
@@ -165,6 +176,9 @@ export function createBackgroundJobHandlers(deps: {
     )?.computer ?? null;
 
   return {
+    "page.revise": async ({ requestId }, _execution, attempt) => {
+      await deps.pageRevisionWork?.(requestId, attempt);
+    },
     "run.continue": asOwner(run, async (payload, execution, { spaceId }) => {
       try {
         if (execution)
@@ -186,6 +200,11 @@ export function createBackgroundJobHandlers(deps: {
     "messaging.reply": async ({ runId }) => {
       await delivery?.deliverRun(runId);
     },
+    "messaging.inbound_settle": asOwner(messagingIdentity, async (payload) => {
+      // Fail rather than finish, so the queue keeps the job for a process that can reply.
+      if (!delivery) throw new Error("inbound message settling has no messaging delivery");
+      await settleInboundMessage({ ...deps, delivery }, payload);
+    }),
     "secret.cleanup": async (cleanup) => {
       await retrySecretCleanup(cleanupDeps, cleanup);
     },
@@ -200,6 +219,21 @@ export function createBackgroundJobHandlers(deps: {
         );
       },
     ),
+    "connection.hosted-sign-in-cleanup": async (payload) => {
+      const connectors = deps.connectors;
+      if (!connectors) throw new Error("connection cleanup has no connector registry");
+      await runAsSystem("remove a cancelled hosted sign-in", () =>
+        retryConnectionCleanup({ prisma: deps.prisma, connectors, jobs: deps.jobs }, payload),
+      );
+    },
+    "connection.organization-cleanup": async (payload) => {
+      const connectors = deps.connectors;
+      if (!connectors) throw new Error("connection cleanup has no connector registry");
+      // The admin or Space that started this authorization can be gone by the time it is retried.
+      await runAsSystem("remove an unused organization authorization", () =>
+        retryConnectionCleanup({ prisma: deps.prisma, connectors, jobs: deps.jobs }, payload),
+      );
+    },
     // The machine belongs to no Space: nothing stores it.
     "computer.machine-cleanup": async (machine, _execution, attempt) => {
       await retryMachineCleanup(deps, machine, attempt);
@@ -255,6 +289,13 @@ export function createBackgroundJobHandlers(deps: {
     }),
     "computer.update": asOwner(updatedComputer, async ({ updateId }) => {
       await performComputerUpdate(deps, updateId);
+    }),
+    "task.callback": asOwner(taskCallback, async ({ taskId }) => {
+      if (!deps.taskCallbackRootKey) return;
+      await deliverTaskCallback(
+        { prisma: deps.prisma, jobs: deps.jobs, rootKey: deps.taskCallbackRootKey },
+        taskId,
+      );
     }),
     "computer.sleep": asOwner(computer, async (payload) => {
       await sleepComputerIfIdle(deps, payload.computerId);

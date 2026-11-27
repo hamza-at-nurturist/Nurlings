@@ -2,6 +2,7 @@ import { t } from "@lingui/core/macro";
 import { useLingui } from "@lingui/react/macro";
 import type { SpaceBot, SpaceGroup } from "@rakazo/contracts";
 import { accountDisplay, chatSnoozed } from "@rakazo/core";
+import { bestEffort } from "@rakazo/logging/best-effort";
 import type { Href } from "expo-router";
 import {
   Redirect,
@@ -29,14 +30,17 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BotOrganizeModal } from "../components/inbox/bot-organize-modal";
 import { ActivitySection } from "../components/inbox/inbox-activity";
 import { InboxErrorState } from "../components/inbox/inbox-error-state";
+import { InboxFooter } from "../components/inbox/inbox-footer";
 import { InboxHeader } from "../components/inbox/inbox-header";
 import {
   InboxListFooter,
+  InboxNewBot,
   SWIPE_ROWS,
   useInboxRenderItem,
 } from "../components/inbox/inbox-render-item";
 import { CompactRowsContext, SelectedChatContext } from "../components/inbox/inbox-rows";
 import { createInboxStyles } from "../components/inbox/inbox-styles";
+import { INBOX_TOOLBAR_ROOM, InboxToolbar } from "../components/inbox/inbox-toolbar";
 import { NativeInboxList } from "../components/inbox/native-inbox-list";
 import { OrganizationTitleMenu } from "../components/inbox/organization-menu";
 import { PickChatPane } from "../components/inbox/pick-chat-pane";
@@ -99,6 +103,7 @@ import { native, useThemedStyles } from "../lib/native/native";
 import { iosAtLeast } from "../lib/native/native-controls";
 import { forgetAppBadge, syncInboxAppBadge, unreadChatCount } from "../lib/notifications/app-badge";
 import { registerPushToken } from "../lib/notifications/push";
+import { askForReviewIfDue } from "../lib/platform/store-review";
 import { loadActivityMode, saveActivityMode } from "../lib/preferences/activity-mode";
 import { setAvatarFinish } from "../lib/preferences/avatar-finish";
 import { usePublishSearchInbox } from "../lib/search/use-publish-search-inbox";
@@ -190,6 +195,7 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
     badgeLoad,
     inboxRequestId,
     inboxLoaded,
+    creatingFirstBot,
     loadBots,
     refreshBots,
   } = useInbox(spaceActionRef);
@@ -223,7 +229,14 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
     useCallback(() => {
       if (!userId) return;
       let active = true;
-      void offerPasskeyOnce(userId, () => active);
+      // One prompt per visit: the passkey offer, then the store rating.
+      void bestEffort(
+        "inbox prompts",
+        (async () => {
+          if (await offerPasskeyOnce(userId, () => active)) return;
+          await askForReviewIfDue(() => active);
+        })(),
+      );
       return () => {
         active = false;
       };
@@ -380,7 +393,7 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
         undefined,
         snoozeNow,
       );
-    // Android pins sit above the list; iOS keeps rows with native swipe and context menus.
+    // Pins sit above the list as tiles, as on desktop.
     const otherSpaces = shownSpaces.filter((space) => space.id !== me?.spaceId);
     const pinned: PinnedChat[] = [
       ...[...visible, ...otherSpaces.flatMap((space) => space.bots)]
@@ -393,13 +406,11 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
     // A snoozed pin waits under Snoozed rather than in the tiles.
     const sidebarSpaces = inboxSpaces.map((space) => ({
       ...space,
-      bots: space.bots.filter((bot) => SWIPE_ROWS || !bot.pinned || chatSnoozed(bot, snoozeNow)),
-      groups: space.groups.filter(
-        (group) => SWIPE_ROWS || !group.pinned || chatSnoozed(group, snoozeNow),
-      ),
+      bots: space.bots.filter((bot) => !bot.pinned || chatSnoozed(bot, snoozeNow)),
+      groups: space.groups.filter((group) => !group.pinned || chatSnoozed(group, snoozeNow)),
     }));
     const items: InboxItem[] = spaceInboxItems(sidebarSpaces, collapsed, me?.spaceId, snoozeNow);
-    return !SWIPE_ROWS && pinned.length > 0 ? [{ type: "pinned", chats: pinned }, ...items] : items;
+    return pinned.length > 0 ? [{ type: "pinned", chats: pinned }, ...items] : items;
   }, [
     inboxSpaces,
     collapsed,
@@ -453,6 +464,7 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
   // Liquid Glass uses the native bar: glass bar items and a native menu.
   // The list beside a chat and the share picker have no navigation bar of their own.
   const nativeHeader = iosAtLeast(26) && !embedded && !onShareSelect;
+  const showToolbar = nativeHeader && ready && hasSession;
   const topBarInset = useTopBarInset();
   const listRef = useRef<FlatList<InboxItem>>(null);
   const jumpSignals = useSyncExternalStore(
@@ -666,7 +678,6 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
     nativeHeader,
     ready,
     hasSession,
-    initials,
     activityMode,
     toggleActivityMode,
     runCreateAction,
@@ -828,12 +839,16 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
         onRetry={() => void refreshBots()}
         onSignIn={() => void signInAgain()}
       />
-    ) : activityView ? undefined : (
-      <Text style={styles.empty}>{me && !onShareSelect ? t`Tap + to create a bot` : null}</Text>
+    ) : activityView || !me || onShareSelect || creatingFirstBot ? undefined : (
+      <InboxNewBot onPress={() => newBot()} />
     );
   const listFooter = activityView ? undefined : (
     <InboxListFooter
-      createHint={!onShareSelect && !showLoadFailure && inboxNeedsCreateHint(listData)}
+      onNewBot={
+        !onShareSelect && !showLoadFailure && !creatingFirstBot && inboxNeedsCreateHint(listData)
+          ? () => newBot()
+          : undefined
+      }
       archivedCount={onShareSelect ? 0 : archivedCount}
     />
   );
@@ -843,6 +858,7 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
 
   return (
     <View style={styles.screen}>
+      {showToolbar ? <InboxToolbar /> : null}
       {nativeHeader || onShareSelect ? null : (
         <InboxHeader
           embedded={embedded}
@@ -882,6 +898,7 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
                   onRefresh={refreshInbox}
                   signals={jumpSignals}
                   showJumpPills={!onShareSelect && !refreshing && !inboxHasNoChats(rows)}
+                  bottomBar={showToolbar ? INBOX_TOOLBAR_ROOM : 0}
                 />
               ) : (
                 <FlatList<InboxItem>
@@ -926,6 +943,8 @@ function Home({ embedded, onSelectSpace, onShareSelect }: InboxPaneProps & { emb
           </View>
         </CompactRowsContext.Provider>
       </SelectedChatContext.Provider>
+      {/* Keep Settings available even if the account details haven't loaded. */}
+      {embedded && !onShareSelect ? <InboxFooter columnInsets={columnInsets} /> : null}
       {organizeChat && organizeTarget ? (
         <BotOrganizeModal
           bot={organizeChat}

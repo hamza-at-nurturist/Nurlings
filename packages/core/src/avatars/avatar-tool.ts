@@ -19,7 +19,6 @@ export const AVATAR_TOOL_CATEGORY = {
   scratchpad_list: "write",
   remember: "write",
   save_memory: "write",
-  save_shared_memory: "write",
   skill_create: "write",
   skill_update: "write",
   ticket_comment: "write",

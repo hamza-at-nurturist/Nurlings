@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { brand, brandText } from "@nurlings/brand";
 import { INVITED_TRIAL_WEEKS } from "@rakazo/contracts";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { agentImportEmail } from "./agent-import-email.js";
 import {
   accountDeletionEmail,
@@ -14,6 +14,7 @@ import {
   signInCodeEmail,
   verificationEmail,
 } from "./email.js";
+import { writeEmailCopyDir } from "./email-copy/email-copy.test-support.js";
 import { homeDeletionEmail } from "./home-deletion-email.js";
 import { modelConnectionEmail } from "./model-connection-email.js";
 import {
@@ -28,6 +29,16 @@ import {
 } from "./plugin-submission-email.js";
 import { referralEmail } from "./referral-email.js";
 import { welcomeEmail } from "./welcome-email.js";
+
+const copyDir = writeEmailCopyDir({
+  welcome: true,
+  referral: true,
+  "model-connection": true,
+  "agent-import": true,
+});
+beforeEach(() => {
+  vi.stubEnv("EMAIL_COPY_DIR", copyDir);
+});
 
 describe("account email templates", () => {
   const url = "https://app.example.test/verify?token=fake-token&callbackURL=%2Fsign-in";
@@ -248,9 +259,9 @@ describe("email languages", () => {
       "Hola, Ana:",
     );
     const english = await welcomeEmail(user, "https://example.test/u");
-    expect(english.subject).toBe(`Welcome to ${brand.name}`);
+    expect(english.subject).toBe("Test subject");
     expect(english.text).toContain("Hi Ana,");
-    expect(english.text).not.toContain("runs on");
+    expect(english.text).toContain("Test apps");
   });
 
   it("names a Space invitation's Space, never an organization, in every language", async () => {
@@ -328,17 +339,9 @@ it("asks for one thing in the model connection email: the connect step", async (
     { name: "Ana", email: "user@example.test" },
     { webOrigin: "https://app.example.test", unsubscribeUrl },
   );
-  expect(message.subject).toBe(`Connect a model to start using ${brand.name}`);
+  expect(message.subject).toBe("Test subject");
   expect(message.text).toContain("Hi Ana,");
-  expect(message.text).toContain(
-    brandText(
-      "Your Rakazo plan has started, but your bots can't reply until a model is connected.",
-      brand,
-    ),
-  );
-  expect(message.text).toContain(
-    "Sign in with your ChatGPT or Claude subscription, or paste an API key.",
-  );
+  expect(message.text).toContain("Test connect ChatGPT or Claude");
   const links = [...message.html!.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
   expect(links).toEqual([
     "https://app.example.test/sign-in?next=%2Fonboarding%2Fmodel",
@@ -350,8 +353,8 @@ it("asks for one thing in the model connection email: the connect step", async (
     { webOrigin: "https://app.example.test", unsubscribeUrl },
     "de",
   );
-  expect(german.subject).toBe(`Verbinde ein Modell, um mit ${brand.name} loszulegen`);
-  expect(german.text).toContain("Abo von ChatGPT oder Claude");
+  expect(german.text).toContain("Hallo Ana,");
+  expect(german.text).toContain("Test connect ChatGPT oder Claude");
 });
 
 it("asks for one thing in the agent import email: opening the import", async () => {
@@ -360,9 +363,9 @@ it("asks for one thing in the agent import email: opening the import", async () 
     { name: "Ana", email: "user@example.test" },
     { webOrigin: "https://app.example.test", unsubscribeUrl },
   );
-  expect(message.subject).toBe(`Bring your old assistant to ${brand.name}`);
+  expect(message.subject).toBe("Test subject");
   expect(message.text).toContain("Hi Ana,");
-  expect(message.text).toContain("Already set up an assistant in Grok Bot, Hermes, or OpenClaw?");
+  expect(message.text).toContain("Test intro Grok Bot, Hermes, or OpenClaw");
   const links = [...message.html!.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
   expect(links).toEqual(["https://app.example.test/sign-in?next=%2Fapp%3Fimport", unsubscribeUrl]);
   expect(message.headers?.["List-Unsubscribe"]).toBe(`<${unsubscribeUrl}>`);

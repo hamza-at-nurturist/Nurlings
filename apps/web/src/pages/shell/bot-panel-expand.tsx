@@ -22,10 +22,12 @@ export function BotPanelExpand() {
       if (event.key !== "Escape" || event.defaultPrevented) return;
       if (event.isComposing || event.keyCode === 229) return;
       if (event.target instanceof Element && event.target.closest(OWNS_ESCAPE)) return;
+      // Collapsing is this Escape's whole job, so the side panel's own Escape (close) skips it.
+      event.preventDefault();
       setExpanded(false);
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [expanded]);
 
   const Icon = expanded ? Minimize2 : Maximize2;

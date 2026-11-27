@@ -79,6 +79,10 @@ vi.mock("../../components/vault/login-fields-editor", () => ({
       }),
     ),
 }));
+vi.mock(
+  "../../components/native/sheet-bar",
+  () => import("../../components/native/sheet-bar.test-support"),
+);
 vi.mock("../../components/native/native-action-button", () => ({
   NativeActionButton: ({
     label,

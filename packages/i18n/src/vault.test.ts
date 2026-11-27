@@ -1,3 +1,5 @@
+// @vitest-environment node
+// A web or mobile test in the same worker may have loaded a branded English catalog; these read the source text.
 import { i18n } from "@lingui/core";
 import { afterEach, expect, it } from "vitest";
 import {
@@ -14,6 +16,9 @@ import {
 // The server's fixed refusals, as the contracts send them.
 const BLOCKED = "This item is blocked for bots. Allow it in the Vault, or dismiss the request.";
 const UNCHOSEN = "This bot can't use this item. Change it in the Vault, or dismiss the request.";
+// A full vault's server text is short, because bots read it too; the card says what to remove.
+const FULL = "Credential limit reached";
+const FULL_TEXT = "Your Vault is full. Remove items you no longer need, then try again.";
 
 afterEach(() => {
   i18n.activate("en");
@@ -23,6 +28,7 @@ it("says why a secret answer was refused, and nothing an error could echo", () =
   i18n.activate("en");
   expect(secretAnswerErrorText(new Error(BLOCKED), "Could not send answer")).toBe(BLOCKED);
   expect(secretAnswerErrorText(new Error(UNCHOSEN), "Could not send answer")).toBe(UNCHOSEN);
+  expect(secretAnswerErrorText(new Error(FULL), "Could not send answer")).toBe(FULL_TEXT);
   expect(
     secretAnswerErrorText(new Error("Rejected saved-password-1"), "Could not send answer"),
   ).toBe("Could not send answer");

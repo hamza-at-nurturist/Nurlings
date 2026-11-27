@@ -16,8 +16,8 @@ test("a ticket opens as a two-tab sheet on a phone", async ({ page }, testInfo) 
   await expect(settings.getByTestId("lab-board-toggle")).toBeChecked();
   await settings.getByRole("button", { name: "Close user settings" }).click();
   await expect(settings).toBeHidden();
-  await page.getByTestId("user-menu-trigger").click();
-  await page.getByRole("button", { name: "Board", exact: true }).click();
+  // From md up the rail opens the Board.
+  await page.getByTestId("app-rail").getByRole("link", { name: "Board" }).click();
   await expect(page).toHaveURL(/\/app\/board$/);
   const quickAdd = page.getByRole("textbox", { name: "Tell a Nurling what to do…" });
   await quickAdd.fill(title);

@@ -60,6 +60,10 @@ vi.mock("../appearance/appearance", () => ({
 }));
 vi.mock("../native/native", () => ({ native: {}, useThemedStyles: () => ({}) }));
 vi.mock("../appearance/material-icons", () => ({ materialIcons: {} }));
+vi.mock("../layout/split-view", () => ({
+  setInboxHidden: vi.fn(),
+  useSplitView: () => ({ foldActive: false }),
+}));
 vi.mock("./enabled", () => ({ useNurlingsBoardEnabled: () => mocks.enabled.value }));
 
 let root: Root;
@@ -86,7 +90,6 @@ function HeaderHost() {
     nativeHeader: true,
     ready: true,
     hasSession: true,
-    initials: "A",
     activityMode: false,
     toggleActivityMode: vi.fn(),
     runCreateAction: vi.fn(),
