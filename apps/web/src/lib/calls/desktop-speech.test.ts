@@ -1,3 +1,4 @@
+import { brand } from "@nurlings/brand";
 import type { RakazoDesktopSpeechEvent } from "@rakazo/contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DesktopSpeechRecognition } from "./desktop-speech.js";
@@ -148,7 +149,7 @@ describe("Dictation on the desktop app", () => {
     await dictation.listen({ mode: "hold", transcribe: false, onFinal: () => undefined });
     desktop.emit({ session: desktop.session(), type: "error", error: "not-allowed" });
     expect(dictation.state.error).toBe(
-      "Allow Rakazo to use Speech Recognition and the microphone in System Settings.",
+      `Allow ${brand.name} to use Speech Recognition and the microphone in System Settings.`,
     );
   });
 });
