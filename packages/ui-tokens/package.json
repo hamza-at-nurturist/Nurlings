@@ -9,10 +9,11 @@
     "./avatar-illustration": "./src/avatar-illustration.ts"
   },
   "scripts": {
-    "check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p scripts/tsconfig.json",
+    "check": "tsrs --noEmit -p tsconfig.json && tsrs --noEmit -p scripts/tsconfig.json",
     "test": "vitest run --root ../.. packages/ui-tokens/src",
     "generate": "tsx src/generate-css.ts",
-    "export:brand": "pnpm --filter @nurlings/brand export:assets"
+    "export:brand": "pnpm --filter @nurlings/brand export:assets",
+    "export:app-icons": "node scripts/export-app-icons.ts"
   },
   "devDependencies": {
     "sharp": "0.35.5",

@@ -4,6 +4,7 @@ import type {
   ArtifactStore,
   BackgroundJob,
   JobPublisher,
+  JobQueueOrder,
   SandboxProvider,
 } from "@rakazo/adapter-kit";
 import { memoryRetainTurnJob, SandboxUnresponsiveError } from "@rakazo/adapter-kit";
@@ -153,7 +154,7 @@ describe("createBackgroundJobHandlers", () => {
   it("compacts the requested thread with the runtime, job publisher, and model key it was given", async () => {
     const prisma = { thread: owned() } as unknown as PrismaClient;
     const runtime = {} as unknown as AgentRuntime;
-    const jobs = {} as unknown as JobPublisher;
+    const jobs = {} as unknown as JobPublisher & JobQueueOrder;
     const secretStore = {} as unknown as EncryptedSecretStore;
     const memoryProviders = { resolve: vi.fn(async () => null) };
     const resolveModel = vi.fn();
@@ -208,7 +209,7 @@ describe("createBackgroundJobHandlers", () => {
         sandbox: {} as unknown as SandboxProvider,
         home: {} as unknown as AgentHomeStore,
         artifacts: {} as unknown as ArtifactStore,
-        jobs: {} as unknown as JobPublisher,
+        jobs: {} as unknown as JobPublisher & JobQueueOrder,
         events: {} as unknown as ThreadEvents,
         workerId: "worker-fixture",
         runtime,
@@ -235,7 +236,7 @@ describe("createBackgroundJobHandlers", () => {
       sandbox: {} as unknown as SandboxProvider,
       home: {} as unknown as AgentHomeStore,
       artifacts: {} as unknown as ArtifactStore,
-      jobs: {} as unknown as JobPublisher,
+      jobs: {} as unknown as JobPublisher & JobQueueOrder,
       events: {} as unknown as ThreadEvents,
       workerId: "worker-1",
       runtime: {} as unknown as AgentRuntime,
@@ -275,7 +276,7 @@ describe("createBackgroundJobHandlers", () => {
       sandbox: {} as unknown as SandboxProvider,
       home: {} as unknown as AgentHomeStore,
       artifacts: {} as unknown as ArtifactStore,
-      jobs: { enqueue } as unknown as JobPublisher,
+      jobs: { enqueue } as unknown as JobPublisher & JobQueueOrder,
       events: {} as unknown as ThreadEvents,
       workerId: "worker-1",
       runtime: {} as unknown as AgentRuntime,
@@ -299,6 +300,7 @@ describe("createBackgroundJobHandlers", () => {
   it("resolves the deployment model when no user credential is configured", async () => {
     const prisma = {
       userModelPreference: { findFirst: vi.fn(async () => null) },
+      spaceMember: { findUnique: vi.fn(async () => null) },
       spaceSettingOverride: { findUnique: vi.fn(async () => null) },
       userModelRoleChoice: { findMany: vi.fn(async () => []) },
       userModelCredential: { findFirst: vi.fn(async () => null) },
@@ -319,12 +321,14 @@ describe("createBackgroundJobHandlers", () => {
       baseUrl: undefined,
       thinkingLevel: null,
       oauth: undefined,
+      billing: "deployment",
     });
   });
 
   it("preserves a configured local model when resolving background compaction", async () => {
     const prisma = {
       userModelPreference: { findFirst: vi.fn(async () => null) },
+      spaceMember: { findUnique: vi.fn(async () => null) },
       spaceSettingOverride: { findUnique: vi.fn(async () => null) },
       userModelRoleChoice: { findMany: vi.fn(async () => []) },
       userModelCredential: { findFirst: vi.fn(async () => null) },
@@ -348,6 +352,7 @@ describe("createBackgroundJobHandlers", () => {
       baseUrl: undefined,
       thinkingLevel: null,
       oauth: undefined,
+      billing: "deployment",
     });
   });
 });
@@ -416,7 +421,7 @@ describe("memory.retain-turn", () => {
       sandbox: {} as unknown as SandboxProvider,
       home: {} as unknown as AgentHomeStore,
       artifacts: {} as unknown as ArtifactStore,
-      jobs: jobs as unknown as JobPublisher,
+      jobs: jobs as unknown as JobPublisher & JobQueueOrder,
       events: {} as unknown as ThreadEvents,
       workerId: "worker-1",
       runtime: {} as unknown as AgentRuntime,

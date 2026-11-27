@@ -1,11 +1,13 @@
 import { useLingui } from "@lingui/react/macro";
-import type { BotAvatarFinish } from "@rakazo/contracts";
+import type { AccountChatPreferencesPatch, BotAvatarFinish } from "@rakazo/contracts";
 import { APP_LOCALE_LABELS } from "@rakazo/core";
+import { appIconLabel } from "@rakazo/i18n/app-icon";
 import * as Notifications from "expo-notifications";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useIsFocused, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Alert, AppState, Platform, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { supportsComposerHardwareEnter } from "../../components/composer/composer-keyboard";
 import { NativeSegmentedControl } from "../../components/native/native-segmented-control";
 import {
   SettingsGroup,
@@ -15,12 +17,18 @@ import {
   useStackedSettings,
 } from "../../components/settings/settings-group";
 import { currentApiBase, selectedSpaceId } from "../../lib/api/api";
+import { useLiveStream } from "../../lib/api/roster-signals";
 import { loadSessionToken } from "../../lib/api/session";
 import { errorText } from "../../lib/api/user-error";
+import { appIconRead } from "../../lib/appearance/app-icon";
 import {
   getCachedAppearancePreference,
   setAppearancePreference,
 } from "../../lib/appearance/appearance";
+import {
+  setComposerEnterToSendPreference,
+  useComposerHardwareEnterPreference,
+} from "../../lib/composer/composer-enter-to-send-preference";
 import {
   getCachedComposerModelPicker,
   setComposerModelPicker,
@@ -74,7 +82,8 @@ export default function General() {
   const stacked = useStackedSettings();
   // Read on every visit, so a failed read retries when the page is shown again.
   const meRead = accountRpcQuery("me");
-  const me = useScreenQuery(meRead).data;
+  const { data: me, isLoading: loadingAccount } = useScreenQuery(meRead);
+  useLiveStream(useIsFocused());
   const botStyle = useSave({
     target: ACCOUNT_SETTINGS,
     save: async (botAvatarFinish: BotAvatarFinish, send) => {
@@ -86,8 +95,22 @@ export default function General() {
     stale: [meRead.queryKey],
     onFailed: () => Alert.alert(t`Couldn't update bot style`),
   });
+  const chatSave = useSave({
+    target: ACCOUNT_SETTINGS,
+    save: async (chatPreferences: AccountChatPreferencesPatch, send) => {
+      queryClient.setQueryData(
+        meRead.queryKey,
+        await send("preferences/update", { chatPreferences }),
+      );
+    },
+    stale: [meRead.queryKey],
+    onFailed: () => Alert.alert(t`Could not save`),
+  });
+  const { data: appIcon } = useScreenQuery(appIconRead);
   const appearance = getCachedAppearancePreference();
-  const streamReplies = useSyncExternalStore(
+  const enterToSend = useComposerHardwareEnterPreference();
+  const chatSaveDisabled = loadingAccount || chatSave.pending;
+  const deviceStreamReplies = useSyncExternalStore(
     subscribeResponseStreaming,
     getCachedResponseStreamingEnabled,
     () => false,
@@ -97,7 +120,7 @@ export default function General() {
     getCachedRemoteImagesEnabled,
     () => false,
   );
-  const composerModelPicker = useSyncExternalStore(
+  const deviceModelPicker = useSyncExternalStore(
     subscribeComposerModelPicker,
     getCachedComposerModelPicker,
     () => false,
@@ -201,6 +224,16 @@ export default function General() {
     notificationQueue.current.update(next);
   }
 
+  const soundSwitch =
+    me?.chatPreferences?.notificationSounds === undefined ? null : (
+      <SettingsSwitch
+        label={t`Sound for alerts that need attention`}
+        value={me.chatPreferences.notificationSounds}
+        disabled={chatSaveDisabled}
+        onChange={(notificationSounds) => chatSave.run({ notificationSounds })}
+      />
+    );
+
   function updateBotStyle(botAvatarFinish: BotAvatarFinish | "") {
     if (me && botAvatarFinish) botStyle.run(botAvatarFinish);
   }
@@ -252,6 +285,17 @@ export default function General() {
             title={t`Language`}
             value={APP_LOCALE_LABELS[locale]}
           />
+          {appIcon?.supported ? (
+            <SettingsRow
+              accessibilityRole="button"
+              accessibilityLabel={t`App icon`}
+              accessibilityValue={{ text: appIconLabel(appIcon.icon) }}
+              chevron="right"
+              onPress={() => router.push("/app-icon")}
+              title={t`App icon`}
+              value={appIconLabel(appIcon.icon)}
+            />
+          ) : null}
           <SettingsSwitch label={t`Haptics`} value={hapticsEnabled} onChange={updateHaptics} />
         </SettingsGroup>
 
@@ -297,6 +341,7 @@ export default function General() {
                 void updateNotifications({ ...notifications, needsAttention })
               }
             />
+            {soundSwitch}
             {hasLiveUpdateSettings() ? (
               <SettingsRow
                 accessibilityRole="button"
@@ -311,19 +356,39 @@ export default function General() {
             />
             {notificationError ? <Text style={styles.error}>{notificationError}</Text> : null}
           </SettingsGroup>
+        ) : soundSwitch ? (
+          <SettingsGroup accessibilityLabel={t`Notifications`} label={t`Notifications`}>
+            {soundSwitch}
+          </SettingsGroup>
         ) : null}
 
         <SettingsGroup>
           <SettingsSwitch
             label={t`Stream replies`}
-            value={streamReplies}
-            onChange={(checked) => void setResponseStreamingPreference(checked ? "on" : "off")}
+            value={me?.chatPreferences?.streamReplies ?? deviceStreamReplies}
+            disabled={chatSaveDisabled}
+            onChange={(checked) => {
+              if (me?.chatPreferences) chatSave.run({ streamReplies: checked });
+              else void setResponseStreamingPreference(checked ? "on" : "off");
+            }}
           />
           <SettingsSwitch
             label={t`Model picker in chat`}
-            value={composerModelPicker}
-            onChange={(checked) => void setComposerModelPicker(checked)}
+            value={me?.chatPreferences?.composerModelPicker ?? deviceModelPicker}
+            disabled={chatSaveDisabled}
+            onChange={(checked) => {
+              if (me?.chatPreferences) chatSave.run({ composerModelPicker: checked });
+              else void setComposerModelPicker(checked);
+            }}
           />
+          {supportsComposerHardwareEnter ? (
+            <SettingsSwitch
+              label={t`Send with Enter`}
+              detail={t`Hardware keyboard`}
+              value={enterToSend}
+              onChange={(checked) => void setComposerEnterToSendPreference(checked)}
+            />
+          ) : null}
           <SettingsSwitch
             label={t`Load web images automatically`}
             value={loadRemoteImages}

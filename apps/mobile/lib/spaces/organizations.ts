@@ -1,7 +1,11 @@
 import type { MenuAction } from "@expo/ui/community/menu";
 import { t } from "@lingui/core/macro";
 import type { OrganizationList } from "@rakazo/contracts";
-import { organizationLandingSpaceId, organizationOfSpace } from "@rakazo/core";
+import {
+  activeOrganizationForSpace,
+  organizationLandingSpaceId,
+  organizationOfSpace,
+} from "@rakazo/core";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { selectedSpaceId } from "../api/api";
@@ -61,11 +65,7 @@ export function ensureOrganizations(): Promise<void> {
 
 /** The organization of the selected Space, which the server's answer may not have caught up to. */
 export function activeOrganization(list: OrganizationList | undefined): Organization | undefined {
-  if (!list) return undefined;
-  return (
-    organizationOfSpace(list.organizations, selectedSpaceId()) ??
-    list.organizations.find((organization) => organization.id === list.activeOrganizationId)
-  );
+  return activeOrganizationForSpace(list, selectedSpaceId());
 }
 
 export function refreshOrganizations(): Promise<void> {
@@ -74,11 +74,18 @@ export function refreshOrganizations(): Promise<void> {
   });
 }
 
-/** After the server says organizations may have changed: their list and any members list shown. */
+/**
+ * After the server says organizations may have changed: their list, any members list shown, and
+ * what their plan or computer sizes decide.
+ */
 export function refreshOrganizationReads(): Promise<void> {
   return queryClient.invalidateQueries({
     predicate: ({ queryKey }) =>
-      queryKey.includes("organizations/list") || queryKey.includes("organizations/members/list"),
+      queryKey.includes("organizations/list") ||
+      queryKey.includes("organizations/members/list") ||
+      queryKey.includes("billing/status") ||
+      queryKey.includes("cloudComputers/list") ||
+      queryKey.includes("models/organizationConnections/available"),
   });
 }
 

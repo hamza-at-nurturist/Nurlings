@@ -174,10 +174,13 @@ function RoutineShot() {
     messageProvider: null,
     emailSenders: null,
     active: true,
+    timezone: null,
+    endsOn: "",
     runAtLocal: "",
     modelKey: "",
     thinkingLevel: "",
     inChat: false,
+    useComputer: false,
     watch: null,
   });
   return (
@@ -197,6 +200,8 @@ function RoutineShot() {
         onBack={() => undefined}
         onClose={() => undefined}
         onSave={() => undefined}
+        onSetActive={() => undefined}
+        onCopy={() => undefined}
         onTestRun={() => undefined}
         onDelete={() => undefined}
         onEnsureWebhook={async () => undefined}

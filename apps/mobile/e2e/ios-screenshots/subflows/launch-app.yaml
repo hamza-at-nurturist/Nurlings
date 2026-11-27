@@ -4,13 +4,13 @@ appId: com.nurturistai.nurlings
 - launchApp:
     stopApp: true
 - extendedWaitUntil:
-    visible: "Account|Sign up for Nurlings|Sign in to Nurlings"
+    visible: "Account|Settings|Sign up for Nurlings|Sign in to Nurlings"
     timeout: 40000
 - runFlow:
     when:
-      visible: "Account"
+      visible: "Account|Settings"
     commands:
-      - tapOn: "Account"
+      - tapOn: "Account|Settings"
       - scrollUntilVisible:
           element: "Sign out"
           direction: DOWN

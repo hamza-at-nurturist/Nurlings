@@ -23,6 +23,7 @@ import {
   webServerSettings,
 } from "./server/preview-middleware.js";
 import { rakazoPwa } from "./server/pwa-plugin.js";
+import { dedupeTldtsTrie } from "./server/tldts-trie.js";
 import { brandPlugin } from "./src/brand-html.js";
 
 export default defineConfig(({ command, mode }) => {
@@ -56,6 +57,8 @@ export default defineConfig(({ command, mode }) => {
     },
     define: { "import.meta.env.RAKAZO_BUILD": JSON.stringify(buildId) },
     plugins: [
+      // Rolldown pastes tldts's suffix trie into every charCodeAt call.
+      dedupeTldtsTrie(),
       {
         // The API reads this to name the deployed build, and a tab fetches it to confirm the
         // server already serves a newer build before it reloads.

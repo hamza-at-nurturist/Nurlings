@@ -70,6 +70,10 @@ vi.mock("../appearance/appearance", () => ({
   resolveMobileAppearance: () => "light",
 }));
 vi.mock("../native/native", () => ({ native: {}, useThemedStyles: () => ({}) }));
+vi.mock("../layout/split-view", () => ({
+  setInboxHidden: vi.fn(),
+  useSplitView: () => ({ foldActive: false }),
+}));
 
 // The Board entry is a fork addition; its flag has its own tests.
 vi.mock("../nurlings-board/enabled", () => ({ useNurlingsBoardEnabled: () => false }));

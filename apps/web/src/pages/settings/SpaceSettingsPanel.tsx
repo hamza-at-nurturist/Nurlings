@@ -5,6 +5,7 @@ import { SettingsGroup, SettingsRow } from "../../components/settings/SettingsRo
 import { SpaceMembersSettings } from "../../components/spaces/SpaceMembersSettings";
 import { useSave } from "../../lib/query/query";
 import type { RpcClient } from "../../lib/query/rpc";
+import { errorText } from "../../lib/query/user-error";
 import type { SettingsSpace } from "../shell/create-delete-dialogs";
 import { DeleteSpaceDialog } from "../shell/create-delete-dialogs";
 import { SpaceSettingOverrides } from "./SpaceSettingOverrides";
@@ -15,6 +16,7 @@ import { SpaceSettingOverrides } from "./SpaceSettingOverrides";
  */
 export function SpaceSettingsPanel({
   space,
+  lone = false,
   onRename,
   onDelete,
   onLeft,
@@ -22,6 +24,8 @@ export function SpaceSettingsPanel({
   onBusyChange,
 }: {
   space: SettingsSpace;
+  /** The only Space follows the account, so its overrides show only once one was customized. */
+  lone?: boolean;
   onRename: (name: string, client: RpcClient) => Promise<void>;
   onDelete: () => Promise<void>;
   /** After leaving, with the space the server moved this person to. */
@@ -48,7 +52,6 @@ export function SpaceSettingsPanel({
   function save() {
     const trimmed = draft.trim();
     if (pending) return;
-    // An empty or unchanged name keeps the current one without a request.
     if (!trimmed || trimmed === space.name) {
       setDraft(space.name);
       rename.reset();
@@ -96,14 +99,18 @@ export function SpaceSettingsPanel({
           >
             {rename.error ? (
               <p role="alert" className="pt-2 text-body-sm text-destructive">
-                {rename.error.message.trim() || t`Could not rename space`}
+                {errorText(rename.error, t`Could not rename space`)}
               </p>
             ) : null}
           </SettingsRow>
         </SettingsGroup>
       ) : null}
       <SpaceMembersSettings space={space} onLeft={onLeft} />
-      <SpaceSettingOverrides onClose={onClose} onBusyChange={setOverridesBusy} />
+      <SpaceSettingOverrides
+        hideUntilCustomized={lone}
+        onClose={onClose}
+        onBusyChange={setOverridesBusy}
+      />
       {space.canDelete ? (
         <Button
           variant="destructive"

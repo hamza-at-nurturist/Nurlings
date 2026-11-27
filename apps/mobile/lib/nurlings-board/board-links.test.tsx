@@ -86,7 +86,6 @@ function HeaderHost() {
     nativeHeader: true,
     ready: true,
     hasSession: true,
-    initials: "A",
     activityMode: false,
     toggleActivityMode: vi.fn(),
     runCreateAction: vi.fn(),

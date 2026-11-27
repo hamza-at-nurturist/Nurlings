@@ -1,4 +1,6 @@
 // @vitest-environment jsdom
+
+import type { PageVisibility } from "@rakazo/contracts";
 import type { ReactNode } from "react";
 import { act, createElement, useEffect } from "react";
 import { createRoot } from "react-dom/client";
@@ -10,7 +12,7 @@ type Summary = {
   id: string;
   title: string;
   pinned: boolean;
-  visibility: "private" | "link";
+  visibility: PageVisibility;
   updatedAt: string;
 };
 
@@ -122,7 +124,6 @@ vi.mock("../api/api", () => ({
 }));
 
 const { default: PagesScreen } = await import("../../app/pages");
-const { setPageVisibility } = await import("./pages");
 const { rpc } = await import("../api/api");
 
 const rows = (container: HTMLElement) =>
@@ -149,13 +150,18 @@ it("shows a share change made in the sheet once the sheet is dismissed", async (
   // Share opens the sheet over the list; anyone with the link can view once it is dismissed.
   await act(async () => host.menus.get("Plan")!.press("share"));
   expect(host.pushed.at(-1)).toEqual({ pathname: "/page-share", params: { pageId: "p1" } });
-  await setPageVisibility("p1", "link");
+  await rpc("pages/setVisibility", { pageId: "p1", visibility: "link" });
   await act(async () => host.focus?.());
   expect(rows(container)).toEqual(["Plan | Shared · now"]);
   expect(actions("Plan")).toContain("copy");
 
+  await rpc("pages/setVisibility", { pageId: "p1", visibility: "people" });
+  await act(async () => host.focus?.());
+  expect(rows(container)).toEqual(["Plan | Specific people · now"]);
+  expect(actions("Plan")).not.toContain("copy");
+
   // And private again.
-  await setPageVisibility("p1", "private");
+  await rpc("pages/setVisibility", { pageId: "p1", visibility: "private" });
   await act(async () => host.focus?.());
   expect(rows(container)).toEqual(["Plan | now"]);
   expect(actions("Plan")).not.toContain("copy");

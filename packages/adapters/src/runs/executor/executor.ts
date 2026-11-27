@@ -1,10 +1,11 @@
 import { DEFAULT_CONTEXT_STRATEGY } from "@rakazo/adapter-kit";
 import type { ThreadEvents } from "@rakazo/db";
 import { retryWhileDatabaseUnavailable } from "@rakazo/db";
+import { bestEffort } from "@rakazo/logging";
 import { createBrowserProvider } from "../../browser/browser-provider-factory.js";
 import { createMediaGenerationProvider } from "../../media/media-generation-factory.js";
 import { createPaidServiceProvider } from "../../payments/paid-services-factory.js";
-import { holdRoutineRunForConversation } from "../../routines/routine-conversation.js";
+import { promptTaskCallback } from "../../tasks/task-callbacks.js";
 import { createWebProvider } from "../../web/web-provider-factory.js";
 import { assembleRunTurn } from "../assembly/run-assembly.js";
 import {
@@ -12,6 +13,7 @@ import {
   retryRoutineRun,
   wakeRoutine,
 } from "../assembly/run-routines.js";
+import { holdRunForChat } from "../lifecycle/chat-wait.js";
 import type { RunExecutorServices } from "../lifecycle/run-attempt.js";
 import {
   claimRunAttempt,
@@ -54,6 +56,9 @@ export function createRunExecutor(executorDeps: ExecutorDeps) {
       if (result || (await runEndedForThisWorker(executorDeps.prisma, input))) {
         endRunConnectorState(input.runId);
       }
+      // A caller waiting on this task hears now rather than at its callback's next check.
+      if (result)
+        await bestEffort("prompt task callback", promptTaskCallback(executorDeps, input.taskId));
       return result;
     },
   };
@@ -83,7 +88,7 @@ export function createRunExecutor(executorDeps: ExecutorDeps) {
       if (!run) return;
       const claim = await claimRunAttempt(baseDeps, run, workerId);
       if (!claim) {
-        await holdRoutineRunForConversation(baseDeps, run);
+        await holdRunForChat(baseDeps, run);
         return;
       }
       const hold = holdRun(baseDeps, claim);

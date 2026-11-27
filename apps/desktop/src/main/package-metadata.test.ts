@@ -13,6 +13,7 @@ const packageJson = JSON.parse(raw) as {
     appId?: string;
     publish?: unknown;
     extraMetadata?: { name?: string };
+    protocols?: { name: string; schemes: string[] }[];
     mac?: {
       icon?: string;
       extendInfo?: Record<string, string>;
@@ -62,6 +63,13 @@ describe("desktop package metadata", () => {
     expect(packageJson.build).not.toHaveProperty("publish");
     expect(raw).not.toContain("elie222");
     expect(raw).not.toMatch(/"repo":\s*"rakazo"/);
+  });
+
+  it("registers the rakazo:// protocol scheme for packaged installers", () => {
+    expect(packageJson.build?.protocols).toContainEqual({
+      name: brand.name,
+      schemes: ["rakazo"],
+    });
   });
 
   it("ships the macOS server bundle's address only when a release build wrote one", () => {
