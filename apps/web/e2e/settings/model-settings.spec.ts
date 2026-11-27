@@ -675,6 +675,8 @@ test("an approval default the deployment pays for reads as included", async ({
   const stamp = Date.now();
   await signup(page, `approval-included-${stamp}@rakazo.test`, "password12", "Model Settings");
   await completeOnboarding(page);
+  // The approval model shows only in Auto, which is not this build's default.
+  await rpc(page, "autoReview/set", { mode: "auto" });
   const included = {
     provider: "example",
     providerName: "Example",
