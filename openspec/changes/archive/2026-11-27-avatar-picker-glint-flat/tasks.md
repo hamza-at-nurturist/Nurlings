@@ -28,6 +28,6 @@
 ## 4. Verify
 
 - [x] 4.1 `tsc`, `pnpm exec biome check .` and `pnpm exec vitest run` pass.
-- [ ] 4.2 Contact sheet of glint and flat and the CI e2e screenshot in the PR; say so if no native
+- [ ] 4.2 (Done by eye and shared in the session; the CI e2e screenshots stayed in the CI run and were not embedded in the PR body. No native capture.) Contact sheet of glint and flat and the CI e2e screenshot in the PR; say so if no native
   mobile capture exists.
-- [ ] 4.3 Tell the maintainer when ready; they cut any release tag.
+- [x] 4.3 Tell the maintainer when ready; they cut any release tag.
