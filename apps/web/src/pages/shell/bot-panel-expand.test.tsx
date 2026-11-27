@@ -104,7 +104,7 @@ describe("BotPanelExpand", () => {
     const remove = vi.spyOn(window, "removeEventListener");
     act(() => button().click());
     act(() => button().click());
-    expect(remove).toHaveBeenCalledWith("keydown", expect.any(Function));
+    expect(remove).toHaveBeenCalledWith("keydown", expect.any(Function), true);
     remove.mockRestore();
   });
 });
