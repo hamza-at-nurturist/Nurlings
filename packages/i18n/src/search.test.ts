@@ -1,3 +1,5 @@
+// @vitest-environment node
+// A web or mobile test in the same worker may have loaded a branded English catalog; these read the source text.
 import { expect, it } from "vitest";
 import { searchKindLabel } from "./search.js";
 
