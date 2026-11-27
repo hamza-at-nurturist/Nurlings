@@ -1529,7 +1529,7 @@ test("specific people review a version and lose access when removed", async ({
       modelId: "gpt-6-sol",
     });
     await reviewerActions.click();
-    await reviewer.getByRole("menuitem", { name: "Ask bot to revise" }).click();
+    await reviewer.getByRole("menuitem", { name: ui("Ask bot to revise") }).click();
     const consent = reviewer.getByRole("alertdialog", { name: "Share data with OpenAI?" });
     await expect(consent).toBeVisible();
     await expect(

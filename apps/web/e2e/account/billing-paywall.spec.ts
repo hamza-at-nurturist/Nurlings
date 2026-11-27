@@ -628,7 +628,7 @@ test("move an own-key plan to a bigger tier", async ({ page }, testInfo) => {
   await plan.getByRole("combobox", { name: "Plan" }).click();
   const ultra = page.getByRole("option", { name: /Ultra · \$1,908 \/ year/ });
   await expect(
-    ultra.getByText("2,400 bot computer hours/month at Standard size · Up to Extra large"),
+    ultra.getByText(ui("2,400 bot computer hours/month at Standard size · Up to Extra large")),
   ).toBeVisible();
   await captureScreenshot(page, testInfo, "billing-own-key-tiers-yearly");
 });

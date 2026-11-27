@@ -503,7 +503,7 @@ test("imports every Bot in a Grok Bot export at once", async ({ page }) => {
   await grok.getByRole("checkbox", { name: "Finch" }).uncheck();
   await clickAndWaitForRpc(
     page,
-    grok.getByRole("button", { name: "Import 2 Bots" }),
+    grok.getByRole("button", { name: ui("Import 2 Bots") }),
     "bots/importMany",
   );
   await expect(page.getByPlaceholder("Message Bramble")).toBeVisible();

@@ -6,6 +6,7 @@ import {
   openUserSettings,
   rpc,
   signup,
+  ui,
 } from "../helpers/helpers";
 
 type OrganizationList = {
@@ -164,7 +165,7 @@ test("create, switch, rename and delete an organization", async ({ page }, testI
   await menu.getByRole("button", { name: "Work", exact: true }).click();
   await expect.poll(() => selectedSpace(page)).toBe(work.defaultSpaceId);
   await expect(
-    page.locator("main").getByRole("button", { name: "New bot", exact: true }),
+    page.locator("main").getByRole("button", { name: ui("New bot"), exact: true }),
   ).toBeVisible();
 
   const inWork = async <T>(procedure: string, json: unknown) => {

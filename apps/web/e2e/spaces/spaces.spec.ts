@@ -38,7 +38,7 @@ test("a new space starts empty, is renamed in its settings, and is deleted with 
   await page.waitForURL(/\/app/);
   await expect(sidebar.getByText("Typo space", { exact: true })).toBeVisible();
   await expect(
-    page.locator("main").getByRole("button", { name: "New bot", exact: true }),
+    page.locator("main").getByRole("button", { name: ui("New bot"), exact: true }),
   ).toBeVisible();
   await expect(sidebar.getByRole("button", { name: /^Chief/ })).toHaveCount(1);
   await captureScreenshot(page, testInfo, "new-space-empty");
@@ -191,7 +191,7 @@ test("deleting every bot leaves an empty space instead of a new Chief", async ({
   await rpc(page, "bots/remove", { botId: chief!.id });
   await page.goto("/app");
   await expect(
-    page.locator("main").getByRole("button", { name: "New bot", exact: true }),
+    page.locator("main").getByRole("button", { name: ui("New bot"), exact: true }),
   ).toBeVisible();
   await expect(page).not.toHaveURL(/\/onboarding/);
   // A stale onboarding URL lands in the same empty space.

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { captureScreenshot, completeOnboarding, signup } from "../helpers/helpers";
+import { captureScreenshot, completeOnboarding, signup, ui } from "../helpers/helpers";
 
 test.afterEach(async ({ page }) => {
   // Polling can leave a route.fetch response in use when the assertions finish.
@@ -207,7 +207,7 @@ test("messaging settings show linked chat apps, channels, connections, and team 
   await messagingSettings.getByRole("button", { name: "Options for WhatsApp" }).click();
   await expect(page.getByRole("menuitem", { name: "Unlink", exact: true })).toBeVisible();
   await page.keyboard.press("ArrowDown");
-  await expect(page.getByRole("menuitem", { name: "Change bot", exact: true })).toBeFocused();
+  await expect(page.getByRole("menuitem", { name: ui("Change bot"), exact: true })).toBeFocused();
   await page.keyboard.press("ArrowRight");
   await expect(page.getByRole("menuitem", { name: "Lead", exact: true })).toBeVisible();
   await captureScreenshot(page, testInfo, "messaging-connected-menu");

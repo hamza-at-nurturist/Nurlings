@@ -5,6 +5,7 @@ import {
   openNewSpace,
   rpc,
   signup,
+  ui,
 } from "../helpers/helpers";
 
 test("a new space chooses what it can use, and a skill can be limited to some spaces", async ({
@@ -41,7 +42,7 @@ test("a new space chooses what it can use, and a skill can be limited to some sp
   // Continue switches to the new, empty space. Let that land before leaving it, or its late
   // remount overrides the click below or closes the Skills dialog.
   await expect(
-    page.locator("main").getByRole("button", { name: "New bot", exact: true }),
+    page.locator("main").getByRole("button", { name: ui("New bot"), exact: true }),
   ).toBeVisible();
   const chiefs = page
     .locator("aside")
