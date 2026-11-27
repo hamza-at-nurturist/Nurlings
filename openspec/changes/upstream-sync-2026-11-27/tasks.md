@@ -21,10 +21,10 @@
 
 - [x] 3.1 `tsc` passes in every package and app.
 - [x] 3.2 `pnpm exec biome check .` passes.
-- [ ] 3.3 `pnpm exec vitest run` passes, except tests that also fail on upstream `main` in a sandbox
+- [x] 3.3 `pnpm exec vitest run` passes, except tests that also fail on upstream `main` in a sandbox
   without IPv6 loopback, Docker or Postgres.
 - [x] 3.4 All migrations apply to an empty Postgres.
-- [ ] 3.5 `pnpm brand:check` passes, and `pnpm brand:check --built` passes after a web build.
+- [x] 3.5 `pnpm brand:check` passes, and `pnpm brand:check --built` passes after a web build.
 - [x] 3.6 `openspec validate upstream-sync-2026-11-27 --strict` passes.
 - [ ] 3.7 Open the PR; CI is green on the head commit.
 

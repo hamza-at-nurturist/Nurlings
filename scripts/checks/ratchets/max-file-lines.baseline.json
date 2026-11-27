@@ -2,6 +2,7 @@
   "apps/api/src/account/account-import.ts": 1,
   "apps/api/src/messaging/messaging-inbound.ts": 1,
   "apps/api/src/threads/thread-target.ts": 1,
+  "apps/desktop/src/main/main.ts": 1,
   "apps/desktop/src/main/this-computer/native-stack.ts": 1,
   "apps/mobile/modules/rakazo-notifications/android/src/main/java/com/rakazo/notifications/RakazoNotificationService.kt": 1,
   "apps/web/src/pages/space/Artifacts.tsx": 1,

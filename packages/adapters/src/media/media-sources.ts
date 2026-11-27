@@ -27,7 +27,7 @@ export const mediaSourceSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("connection"),
     connectionId: z.string().min(1),
-    // compat-shim(after v0.15.0): jobs the previous release saves name no model; it made the default.
+    // compat-shim(after v0.5.0): jobs the previous release saves name no model; it made the default.
     model: z.string().min(1).optional(),
   }),
   z.object({ kind: z.literal("hosted") }),
@@ -37,7 +37,7 @@ export type MediaSourceRecord = z.infer<typeof mediaSourceSchema>;
 const HOSTED: MediaSourceRecord = { kind: "hosted" };
 
 const mediaJobRequestSchema = z.object({
-  // compat-shim(after v0.15.0): jobs the previous release saves carry no source; all were hosted.
+  // compat-shim(after v0.5.0): jobs the previous release saves carry no source; all were hosted.
   mediaSource: mediaSourceSchema.optional().transform((source) => source ?? HOSTED),
 });
 

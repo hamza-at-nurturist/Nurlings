@@ -284,7 +284,7 @@ export async function generateMediaFromTool(options: {
                 },
               }
             : {}),
-          // compat-shim(after v0.15.0): a job the previous release saved names no model to record.
+          // compat-shim(after v0.5.0): a job the previous release saved names no model to record.
           ...(options.source.kind === "connection" && options.source.model
             ? {
                 spend: {

@@ -19,12 +19,12 @@
     "release": "pnpm --filter @rakazo/web build && pnpm build && electron-builder --publish never"
   },
   "dependencies": {
-    "@nurlings/brand": "workspace:*",
     "@sentry/electron": "8.3.0",
     "electron-updater": "6.8.12",
     "koffi": "3.3.7"
   },
   "devDependencies": {
+    "@nurlings/brand": "workspace:*",
     "@playwright/test": "1.64.1",
     "@rakazo/adapters": "workspace:*",
     "@rakazo/contracts": "workspace:*",
